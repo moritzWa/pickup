@@ -1,0 +1,19 @@
+{
+    "watch": ["src"],
+    "ext": "ts",
+    "signal": "SIGKILL",
+    "ignore": [
+        "src/**/*.spec.ts",
+        "src/migrations",
+        "node_modules",
+        "src/scripts"
+    ],
+    "events": {
+        "crash": "sh -c 'lsof -i :${PORT:-5000} -t | xargs kill'"
+    },
+    "env": {
+        "__DEV__": "true",
+        "NODE_OPTIONS": "--max-old-space-size=16192"
+    },
+    "delay": "0ms"
+}

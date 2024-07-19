@@ -1,0 +1,48 @@
+{
+    "create_time": "2024-05-15T05:34:42Z",
+    "purchase_units": [
+        {
+            "reference_id": "2ecb64d6-e438-4c18-9983-414c7fe7901a",
+            "amount": { "currency_code": "USD", "value": "5.00" },
+            "payee": {
+                "email_address": "andrew@movement.market",
+                "merchant_id": "M27NETHU3BQHA",
+                "display_data": { "brand_name": "Movement" }
+            }
+        }
+    ],
+    "links": [
+        {
+            "href": "https://api.paypal.com/v2/checkout/orders/8JG61166HG520243T",
+            "rel": "self",
+            "method": "GET"
+        },
+        {
+            "href": "https://api.paypal.com/v2/checkout/orders/8JG61166HG520243T",
+            "rel": "update",
+            "method": "PATCH"
+        },
+        {
+            "href": "https://api.paypal.com/v2/checkout/orders/8JG61166HG520243T/capture",
+            "rel": "capture",
+            "method": "POST"
+        }
+    ],
+    "id": "8JG61166HG520243T",
+    "payment_source": {
+        "venmo": {
+            "email_address": "andrew.j.duca@gmail.com",
+            "account_id": "WY7LCHUP6VXGJ",
+            "name": { "given_name": "Andrew", "surname": "Duca" },
+            "address": { "country_code": "US" }
+        }
+    },
+    "intent": "CAPTURE",
+    "payer": {
+        "name": { "given_name": "Andrew", "surname": "Duca" },
+        "email_address": "andrew.j.duca@gmail.com",
+        "payer_id": "WY7LCHUP6VXGJ",
+        "address": { "country_code": "US" }
+    },
+    "status": "APPROVED"
+}

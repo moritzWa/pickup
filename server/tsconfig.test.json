@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "allowJs": true,
+        "paths": {
+            "src/*": ["./src/*"],
+            "shared/*": ["../shared/*"]
+        }
+    }
+}

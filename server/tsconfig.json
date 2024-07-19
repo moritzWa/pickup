@@ -1,0 +1,45 @@
+{
+    "compilerOptions": {
+        "incremental": true,
+        "target": "es2020",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "lib": ["es2020", "DOM", "esnext.asynciterable"],
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "preserveConstEnums": true,
+        "noImplicitAny": false,
+        "skipLibCheck": true,
+        "outDir": "./build",
+        "rootDir": "./src",
+        "allowJs": true,
+        "sourceRoot": "./src",
+        "baseUrl": "./",
+        "noImplicitThis": false,
+        "strict": true,
+        "typeRoots": ["node_modules/@types"],
+        "allowSyntheticDefaultImports": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "resolveJsonModule": true,
+        "paths": {
+            "src/*": ["./src/*"],
+            "shared/*": ["../shared/*"]
+        }
+    },
+    "filesGlob": ["./src/**/*.ts", "./src/**/*.json", "./src/**/*.pdf"],
+    "include": ["src/**/*", "src/**/*.json", "src/**/*.pdf", "../shared"],
+    // Note: just ignore solana processors for now. might just remove them but for now
+    // keeping them in the code even tho the TS does not compile all the way
+    "exclude": [
+        "node_modules",
+        "build",
+        "data",
+        "src/shared/_archived/integrations/providers/chains/solana/processors",
+        "src/__tests__/config/jest.config.js",
+        ".eslintrc.cjs"
+    ],
+    "ts-node": {
+        "swc": true
+    }
+}
