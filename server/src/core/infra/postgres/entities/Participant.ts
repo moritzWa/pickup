@@ -11,65 +11,51 @@ import {
     Unique,
 } from "typeorm";
 import { User } from "./User";
-import { Maybe } from "src/core/logic";
+import { Course } from "./Course";
+
+export enum ParticipantStatus {
+    Active = "active",
+    Inactive = "inactive",
+}
 
 @Entity({
-    name: "notifications",
+    name: "participants",
 })
-export class Notification {
+export class Participant {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
     @Column({
-        nullable: true,
-        type: "text",
-        name: "icon_image_url",
+        nullable: false,
+        name: "status",
+        enum: ParticipantStatus,
+        enumName: "participant_status_enum",
     })
-    iconImageUrl!: Maybe<string>;
+    status!: ParticipantStatus;
 
     @Column({
         nullable: false,
-        type: "text",
-        name: "title",
+        name: "course_id",
+        type: "uuid",
     })
-    title!: string;
-
-    @Column({
-        nullable: false,
-        type: "text",
-        name: "subtitle",
-    })
-    subtitle!: string;
-
-    @Column({
-        nullable: false,
-        type: "boolean",
-        name: "has_read",
-    })
-    hasRead!: boolean;
-
-    @Column({
-        default: false,
-        type: "boolean",
-        name: "has_sent",
-    })
-    hasSent!: boolean;
-
-    @Column({
-        nullable: true,
-        name: "idempotency",
-        type: "text",
-        unique: true,
-    })
-    idempotency!: Maybe<string>;
+    @Index("participants_course_id_idx")
+    courseId!: string;
 
     @Column({
         nullable: false,
         name: "user_id",
         type: "uuid",
     })
-    @Index("notifications_user_id_idx")
+    @Index("participants_user_id_idx")
     userId!: string;
+
+    @ManyToOne(() => Course, (t) => t.id, {
+        nullable: false,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "course_id" })
+    course!: Course;
 
     @ManyToOne(() => User, (t) => t.id, {
         nullable: false,

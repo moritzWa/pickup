@@ -11,64 +11,27 @@ import {
     Unique,
 } from "typeorm";
 import { User } from "./User";
-import { Maybe } from "src/core/logic";
 
 @Entity({
-    name: "notifications",
+    name: "characters",
 })
-export class Notification {
+export class Character {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
     @Column({
-        nullable: true,
-        type: "text",
-        name: "icon_image_url",
-    })
-    iconImageUrl!: Maybe<string>;
-
-    @Column({
         nullable: false,
+        name: "context",
         type: "text",
-        name: "title",
     })
-    title!: string;
-
-    @Column({
-        nullable: false,
-        type: "text",
-        name: "subtitle",
-    })
-    subtitle!: string;
-
-    @Column({
-        nullable: false,
-        type: "boolean",
-        name: "has_read",
-    })
-    hasRead!: boolean;
-
-    @Column({
-        default: false,
-        type: "boolean",
-        name: "has_sent",
-    })
-    hasSent!: boolean;
-
-    @Column({
-        nullable: true,
-        name: "idempotency",
-        type: "text",
-        unique: true,
-    })
-    idempotency!: Maybe<string>;
+    context!: string;
 
     @Column({
         nullable: false,
         name: "user_id",
         type: "uuid",
     })
-    @Index("notifications_user_id_idx")
+    @Index("messages_user_id_idx")
     userId!: string;
 
     @ManyToOne(() => User, (t) => t.id, {
