@@ -12,10 +12,8 @@ import {
     throwIfError,
     throwIfErrorAndDatadog,
 } from "src/core/surfaces/graphql/common";
-import { magic } from "src/utils/magic";
 import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
 import { createFullUser } from "../../services/createFullUser";
-import { ProfileService } from "src/modules/profile/services";
 import { loops } from "src/utils/loops";
 
 export const CreateUserResponse = objectType({
@@ -37,12 +35,7 @@ export const createUser = mutationField("createUser", {
     resolve: async (_parent, args, ctx, _info) => {
         const { didToken, name, referralCode, username } = args;
 
-        const didValidationResponse = await magic.auth.validateDid(didToken);
-        throwIfError(didValidationResponse);
-
-        const magicUserResponse = await magic.users.fromDid(didToken);
-        throwIfError(magicUserResponse);
-        const magicUser = magicUserResponse.value;
+        const magicUser = {} as any;
         const email = magicUser.email;
 
         if (!email) throw new ApolloError("Missing email", "403");

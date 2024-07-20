@@ -18,13 +18,6 @@ import {
     throwIfError,
     throwIfErrorAndDatadog,
 } from "src/core/surfaces/graphql/common";
-import { AnalyticsService, EventName } from "src/shared/analyticsService";
-import { loops } from "src/utils/loops";
-import { Datadog } from "src/utils";
-import { magic } from "src/utils/magic";
-import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
-import { createFullUser } from "../../services/createFullUser";
-import { ProfileService } from "src/modules/profile/services";
 import { twilio } from "src/utils/twilio";
 import { config } from "src/config";
 import { pgUserRepo } from "../../infra/postgres";

@@ -20,14 +20,6 @@ export const UserAuthProviderEnum = enumType({
     members: UserAuthProvider,
 });
 
-export const UserWallet = objectType({
-    name: "UserWallet",
-    definition: (t) => {
-        t.field("provider", { type: nonNull("AccountProviderEnum") });
-        t.nonNull.string("publicKey");
-    },
-});
-
 export const User = objectType({
     name: "User",
     definition(t) {
@@ -57,9 +49,6 @@ export const User = objectType({
         t.nonNull.string("username", {
             resolve: (u) => u.username || "",
         });
-        t.nonNull.field("swapPrivacyDefault", {
-            type: nonNull("SwapPrivacyEnum"),
-        });
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
         t.nonNull.boolean("isSuperuser");
@@ -75,10 +64,6 @@ export const User = objectType({
             type: nullable("String"),
             resolve: (u) =>
                 _getIntercomUseHash(config.intercom.iosSecretKey, u.id),
-        });
-        t.field("wallets", {
-            type: nullable(list(nonNull("UserWallet"))),
-            resolve: (u) => u.wallets,
         });
         t.nullable.string("biometricPublicKey");
     },

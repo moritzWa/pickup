@@ -7,13 +7,10 @@ import { ApolloError, ContextFunction } from "apollo-server-core";
 import { ExpressContext } from "apollo-server-express";
 import { UserAuthProvider } from "src/core/infra/postgres/entities/User";
 import { StatusCodes } from "http-status-codes";
-import { magic } from "src/utils/magic";
 import { MagicUserMetadata } from "@magic-sdk/admin";
 import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
 import { IncomingHttpHeaders } from "http";
 import { isString } from "lodash";
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { TokenPermissionService } from "src/modules/tokens/services/tokenPermissionService";
 import { throwIfError } from "./common";
 
 export type Context = {
@@ -221,30 +218,6 @@ export const throwIfNotAdmin = (ctx: Context) => {
     }
 
     if (!authedUser.isSuperuser) {
-        throw new ApolloError("Forbidden.", StatusCodes.FORBIDDEN.toString());
-    }
-};
-
-export const throwIfNotTokenAdmin = async (ctx: Context, tokenId: string) => {
-    const authedUser = ctx.authedUser;
-    const user = ctx.me;
-
-    if (!user || !authedUser) {
-        throw new ApolloError(
-            "Not logged in.",
-            StatusCodes.UNAUTHORIZED.toString()
-        );
-    }
-
-    if (authedUser.isSuperuser) return;
-
-    const hasPermissionResp = await TokenPermissionService.hasPermission(
-        authedUser,
-        tokenId
-    );
-    throwIfError(hasPermissionResp);
-    const hasPermission = hasPermissionResp.value;
-    if (!hasPermission) {
         throw new ApolloError("Forbidden.", StatusCodes.FORBIDDEN.toString());
     }
 };

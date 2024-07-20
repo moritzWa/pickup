@@ -9,7 +9,6 @@ import {
 } from "nexus";
 import { config } from "src/config";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
-import { ReferralService } from "src/modules/referral/services/referralService";
 
 export const GetMobileUpdateResponse = objectType({
     name: "GetMobileUpdateResponse",

@@ -5,7 +5,7 @@ import { UnexpectedError, failure, success } from "src/core/logic";
 
 export const buildInngestClient = () => {
     return new Inngest({
-        id: "movement-workers",
+        id: "learning-workers",
         schemas: new EventSchemas().fromRecord<InngestEvents>(),
         eventKey: config.inngest.eventKey,
         baseUrl: config.inngest.baseUrl,
@@ -14,7 +14,7 @@ export const buildInngestClient = () => {
 
 export const buildCronsInngestClient = () => {
     return new Inngest({
-        id: "awaken-crons",
+        id: "learning-crons",
         schemas: new EventSchemas().fromRecord<CronInngestEvents>(),
         eventKey: config.inngest.eventKey,
         baseUrl: config.inngest.baseUrl,

@@ -14,15 +14,8 @@ import {
     failure,
     success,
 } from "src/core/logic";
-import { searcher } from "jito-ts";
-import * as bs58 from "bs58";
-import { Bundle } from "jito-ts/dist/sdk/block-engine/types";
-import { connection } from "./helius/constants";
-import { isError } from "jito-ts/dist/sdk/block-engine/utils";
 import { config } from "src/config";
-import { helius } from "./helius";
 import { Datadog, logHistogram } from "./datadog";
-import { BundleResult } from "jito-ts/dist/gen/block-engine/bundle";
 import { sleep } from "radash";
 
 const ACCOUNT_ID = "2ea6fca5d1f5e1bc003c354fda273ccb";

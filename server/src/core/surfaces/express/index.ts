@@ -9,18 +9,14 @@ import { config } from "src/config";
 import { omit } from "lodash/fp";
 import { initSentry } from "src/utils/sentry";
 import * as Sentry from "@sentry/node";
-import { dataSource } from "src/core/infra/postgres";
-import { enforceAuth, setAuthContext } from "../graphql/context";
 import { serve } from "inngest/express";
 import { cronInngestFunctions, inngestFunctions } from "src/jobs/inngest";
 import { inngest, cronsInngest } from "src/jobs/inngest/clients";
-import { handlePaypalWebhook } from "src/modules/transfers/express/handlePaypalWebhook";
 import { RedisStore } from "rate-limit-redis";
 import RedisClient from "ioredis";
 import helmet from "helmet";
 
 import { rateLimit } from "express-rate-limit";
-import { getTokenBuyPages } from "src/modules/tokens/express/getTokenBuyPages";
 
 const port = normalizePort(config.port);
 const app = express();
@@ -115,10 +111,6 @@ const startServer = async () => {
 
     app.use(Sentry.Handlers.requestHandler());
     app.use(Sentry.Handlers.tracingHandler());
-
-    // webhooks before the encoding middleware
-    app.post("/v1/webhooks/paypal", express.json(), handlePaypalWebhook);
-    app.get("/v1/buy-pages", express.json(), getTokenBuyPages);
 
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());

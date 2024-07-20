@@ -26,12 +26,8 @@ import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
 import { AnalyticsService, EventName } from "src/shared/analyticsService";
 import { Datadog } from "src/utils";
 import { UserNotificationService } from "./userNotificationService";
-import { ReferralService } from "src/modules/referral/services";
 import { config } from "src/config";
-import { ProfileService } from "src/modules/profile/services";
 import { DEFAULT_SWAP_PRIVACY } from "src/core/infra/postgres/entities";
-import { DEFAULT_REFERRAL_AMOUNT_USDC } from "src/core/infra/postgres/entities/Referrals/Referral";
-import BigNumber from "bignumber.js";
 
 const BLACK_LISTED = [];
 
@@ -59,16 +55,15 @@ export const createFullUser = async (
     }
 
     // check username
-    const username =
-        ProfileService.sanitizeUsername(_username) ||
-        ProfileService.generateUsername().username; // mobile app doesn't pass it in ATM
-    const usernameCheck = await ProfileService.checkValidUsername(
-        username,
-        null
-    );
-    if (usernameCheck.isFailure()) {
-        return failure(usernameCheck.error);
-    }
+    const username = _username;
+
+    // const usernameCheck = await ProfileService.checkValidUsername(
+    //     username,
+    //     null
+    // );
+    // if (usernameCheck.isFailure()) {
+    //     return failure(usernameCheck.error);
+    // }
 
     // create user
     const userResponse = await UserService.create({
@@ -91,11 +86,11 @@ export const createFullUser = async (
         initialDepositTokenSymbol: null,
         initialDepositAmount: null,
         referralRewardType: ReferralRewardType.FlatAmount,
-        referralRewardAmount: DEFAULT_REFERRAL_AMOUNT_USDC,
+        referralRewardAmount: 0,
         initialDepositTransactionHash: null,
         isInitialDepositSuccessful: false,
         name: name || "",
-        username,
+        username: "",
         usernameSynced: false,
         description: "",
         email: magicUser.email,
@@ -126,8 +121,7 @@ export const createFullUser = async (
         hasMobile: true,
         hasPushNotificationsEnabled: false,
         biometricPublicKey: null,
-        referralCode:
-            username?.toLowerCase() ?? ReferralService.getReferralCode(),
+        referralCode: username?.toLowerCase() || "",
         availableCreditCents: 0,
     });
 
@@ -143,10 +137,10 @@ export const createFullUser = async (
     const token = tokenResponse.value;
 
     // claim a code if there is one to give the user free packs from community or friends codes
-    await ReferralService.attemptToApplyReferralCode(
-        user,
-        referredByCode || null
-    );
+    // await ReferralService.attemptToApplyReferralCode(
+    //     user,
+    //     referredByCode || null
+    // );
 
     await UserService.logToSlack(user, null);
 
@@ -163,13 +157,6 @@ export const createFullUser = async (
     });
 
     await UserNotificationService.sendWelcomeEmail(user);
-
-    // follow founders - note that this code only runs in prod so we wanna be extra careful
-    try {
-        await ProfileService.followFounders(user);
-    } catch (e) {
-        console.error("Failed to follow founders", e);
-    }
 
     Datadog.increment("users.created.ok");
 

@@ -8,7 +8,6 @@ import {
     stringArg,
 } from "nexus";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
-import { ReferralService } from "src/modules/referral/services/referralService";
 
 export const checkCode = queryField("checkCode", {
     type: nonNull("Boolean"),
@@ -21,11 +20,11 @@ export const checkCode = queryField("checkCode", {
         const user = ctx.me!;
         const { referralCode } = args;
 
-        const isValidCode = await ReferralService.isValidCode(
-            referralCode,
-            user.id
-        );
+        // const isValidCode = await ReferralService.isValidCode(
+        //     referralCode,
+        //     user.id
+        // );
 
-        return isValidCode;
+        return false;
     },
 });

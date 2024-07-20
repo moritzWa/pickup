@@ -8,7 +8,6 @@ import * as crypto from "crypto";
 import { config } from "src/config";
 import { Maybe, success } from "src/core/logic";
 import { isNil } from "lodash";
-import { magic } from "src/utils/magic";
 import { WalletType } from "@magic-sdk/admin";
 import { AccountProvider } from "src/core/infra/postgres/entities";
 import { pgUserRepo } from "../../infra/postgres";
@@ -42,59 +41,6 @@ export const me = queryField("me", {
             return null;
         }
 
-        return _hydrateWallets(user);
+        return user;
     },
 });
-
-const _hydrateWallets = async (user: User): Promise<User> => {
-    const hasSolanaWallet = !!(user.wallets ?? []).find(
-        (u) => u.provider === AccountProvider.Solana
-    );
-
-    const magicUserResponse = await magic.users.byIssuer(user.magicIssuer);
-
-    if (
-        magicUserResponse.isSuccess() &&
-        magicUserResponse.value.email &&
-        magicUserResponse.value.email !== user.email
-    ) {
-        await pgUserRepo.update(user.id, {
-            email: magicUserResponse.value.email,
-        });
-    }
-
-    if (hasSolanaWallet) {
-        return user;
-    }
-
-    // make sure they have sol wallet
-    const walletResponse = await magic.wallets.getPublicAddress(
-        user.magicIssuer,
-        WalletType.SOLANA
-    );
-
-    if (
-        walletResponse.isSuccess() &&
-        walletResponse.value &&
-        walletResponse.value.publicAddress
-    ) {
-        const wallet = walletResponse.value;
-        const newWallets: UserWallet[] = [
-            ...(user.wallets ?? []),
-            {
-                provider: AccountProvider.Solana,
-                publicKey: wallet.publicAddress!,
-            },
-        ];
-
-        const userResponse = await pgUserRepo.update(user.id, {
-            wallets: newWallets,
-        });
-
-        if (userResponse.isSuccess()) {
-            return userResponse.value;
-        }
-    }
-
-    return user;
-};

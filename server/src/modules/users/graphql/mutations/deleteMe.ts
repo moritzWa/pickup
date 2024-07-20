@@ -12,10 +12,8 @@ import {
     throwIfError,
     throwIfErrorAndDatadog,
 } from "src/core/surfaces/graphql/common";
-import { magic } from "src/utils/magic";
 import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
 import { createFullUser } from "../../services/createFullUser";
-import { ProfileService } from "src/modules/profile/services";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { pgUserRepo } from "../../infra/postgres";
 import {

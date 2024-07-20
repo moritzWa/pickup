@@ -8,7 +8,6 @@ import {
 } from "src/core/logic";
 import { DefaultErrors, UnexpectedError } from "src/core/logic/errors";
 import * as Dinero from "dinero.js";
-import { Currency, CurrencyCode } from "src/shared/domain";
 import { isNil } from "lodash/fp";
 import { isUndefined } from "lodash";
 import BigNumber from "bignumber.js";
@@ -18,7 +17,7 @@ import { DateTime } from "luxon";
 import { StatusCodes } from "http-status-codes";
 import * as numbro from "numbro";
 
-export const ZERO = (currency?: Currency) =>
+export const ZERO = (currency?: Dinero.Currency) =>
     Dinero({ amount: 0, currency: currency });
 export const ZERO_BN = new BigNumber(0);
 
@@ -102,7 +101,10 @@ const camelToSnakeCase = (str: string): string =>
     str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
 // cents
-export function D(cents: number, currency: Maybe<Currency>): Dinero.Dinero {
+export function D(
+    cents: number,
+    currency: Maybe<Dinero.Currency>
+): Dinero.Dinero {
     return Dinero({
         amount: Math.round(cents || 0),
         currency: currency || "USD",
@@ -110,17 +112,20 @@ export function D(cents: number, currency: Maybe<Currency>): Dinero.Dinero {
 }
 
 // dollars
-export function DD(dollars: number, currency: Maybe<Currency>): Dinero.Dinero {
+export function DD(
+    dollars: number,
+    currency: Maybe<Dinero.Currency>
+): Dinero.Dinero {
     return Dinero({
         amount: Math.round(dollars * 100),
         currency: currency || "USD",
     });
 }
 
-const centsToDinero = (cents: number, currency: Currency = CurrencyCode.USD) =>
+const centsToDinero = (cents: number, currency: Dinero.Currency = "USD") =>
     Dinero({ amount: cents, currency });
 
-const dollarsToDinero = (dollars: number, currency?: Currency) =>
+const dollarsToDinero = (dollars: number, currency?: Dinero.Currency) =>
     Dinero({ amount: Math.round(dollars * 100), currency });
 
 const capitalize = (str: string) => str.split(" ").map(_word).join(" ");
@@ -308,13 +313,9 @@ export function formatBytes(bytes: number, decimals = 2) {
 }
 
 // FIXME: also change this on the backend
-export const getCurrencySymbol = (currency: CurrencyCode) => {
+export const getCurrencySymbol = (currency: Dinero.Currency) => {
     switch (currency) {
-        case CurrencyCode.USD:
-        // case CurrencyCode.JPY:
-        //     return "¥";
-        // case CurrencyCode.INR:
-        //     return "₹";
+        case "USD":
         default:
             return "$";
     }

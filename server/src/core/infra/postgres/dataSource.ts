@@ -7,50 +7,7 @@ import { SlowQueryLogger } from "src/utils/typeormLogger";
 
 const hasLogging = process.env.TYPEORM_LOGGING === "true";
 
-const ENTITIES = [
-    entities.User,
-    entities.Swap,
-    entities.Quote,
-    entities.Transaction,
-    entities.Transfer,
-    entities.WatchlistAsset,
-    entities.AppWaitlistEntry,
-    entities.SwapEvent,
-    entities.SwapFee,
-    entities.Deposit,
-    entities.Withdrawal,
-    // waitlist groups
-    entities.WaitlistGroup,
-    entities.WaitlistGroupMember,
-    entities.WaitlistReferral,
-    entities.WaitlistUser,
-    entities.BlacklistToken,
-    // referrals
-    entities.Referral,
-    entities.ReferralCommission,
-    entities.ReferralPayout,
-    //
-    entities.Airdrop,
-    entities.AirdropClaim,
-    entities.Relationship,
-    entities.Notification,
-    // feeds
-    entities.FeedPost,
-    entities.FeedLike,
-    entities.FeedComment,
-    entities.FavoriteMemecoin,
-    // tokens
-    entities.Token,
-    entities.CategoryEntry,
-    entities.Category,
-    entities.TokenPermission,
-    // events
-    entities.Event,
-    // competitions
-    entities.Competition,
-    // product hunt votes
-    entities.Vote,
-];
+const ENTITIES = [entities.User, entities.Notification];
 
 function getMigrationDirectory() {
     const directory =

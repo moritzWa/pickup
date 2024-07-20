@@ -1,7 +1,5 @@
 export * from "./createUser";
 export * from "./updateUser";
-export * from "./verifyBiometric";
-export * from "./login";
 export * from "./sendVerification";
 export * from "./verifyPhoneNumber";
 export * from "./textDownloadLink";

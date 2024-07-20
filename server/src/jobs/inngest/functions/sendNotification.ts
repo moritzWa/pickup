@@ -162,4 +162,4 @@ const _recordOk = (tags?: Tags) =>
 
 const _recordErr = trackError("notification_worker.err", 1);
 
-export default sendNotification;
+export  {sendNotification};

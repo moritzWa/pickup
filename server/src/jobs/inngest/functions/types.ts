@@ -41,10 +41,3 @@ export type EmailJobData = {
 };
 
 export type NotificationData = SlackJobData | EmailJobData | OnesignalJobData;
-
-export type AnalyzeSpamAssetData = {
-    providerStr: string;
-    contractAddress: string;
-    exampleTxnHash: string;
-    assetName: string;
-};
