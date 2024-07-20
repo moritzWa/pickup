@@ -2,7 +2,19 @@
   "expo": {
     "name": "learning",
     "slug": "learning",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "scheme": "learning",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.name.learning"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "org.name.learning"
+    }
   },
   "name": "learning"
 }

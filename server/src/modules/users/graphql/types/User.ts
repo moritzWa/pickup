@@ -4,16 +4,10 @@ import { sum } from "radash";
 import {
     User as UserModel,
     UserAuthProvider,
-    UserStatus,
 } from "src/core/infra/postgres/entities/User";
 import * as crypto from "crypto";
 import { Maybe } from "src/core/logic";
 import { config } from "src/config";
-
-export const UserStatusEnum = enumType({
-    name: "UserStatusEnum",
-    members: UserStatus,
-});
 
 export const UserAuthProviderEnum = enumType({
     name: "UserAuthProviderEnum",
@@ -24,7 +18,6 @@ export const User = objectType({
     name: "User",
     definition(t) {
         t.nonNull.string("id");
-        t.field("status", { type: nonNull("UserStatusEnum") });
         t.nullable.string("phoneNumber");
         t.nonNull.boolean("hasVerifiedPhoneNumber");
         t.nonNull.boolean("hasTwoFactorAuth");
@@ -35,10 +28,6 @@ export const User = objectType({
         t.nullable.string("name");
         t.nullable.string("referredByCode");
         t.nullable.string("referredByName");
-        // TODO: deprecate but don't rlly wanna fix the clients atm
-        t.nullable.float("numberMobileUser", {
-            resolve: (u) => u.number,
-        });
         t.nullable.float("number");
         t.nullable.string("avatarImageUrl");
         t.nullable.string("role");
@@ -46,14 +35,9 @@ export const User = objectType({
         t.nullable.string("referralCode");
         t.field("authProvider", { type: nonNull("UserAuthProviderEnum") });
         t.nonNull.string("authProviderId");
-        t.nonNull.string("username", {
-            resolve: (u) => u.username || "",
-        });
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
         t.nonNull.boolean("isSuperuser");
-        t.nonNull.boolean("isAffiliate");
-        t.nullable.boolean("canTradeMobile");
         t.nullable.string("intercomUserHash");
         t.field("intercomUserHash", {
             type: nullable("String"),

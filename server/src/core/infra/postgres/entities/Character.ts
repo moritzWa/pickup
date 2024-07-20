@@ -28,6 +28,20 @@ export class Character {
 
     @Column({
         nullable: false,
+        name: "image_url",
+        type: "text",
+    })
+    imageUrl!: string;
+
+    @Column({
+        nullable: false,
+        name: "name",
+        type: "text",
+    })
+    name!: string;
+
+    @Column({
+        nullable: false,
         name: "user_id",
         type: "uuid",
     })

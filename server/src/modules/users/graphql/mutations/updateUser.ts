@@ -34,10 +34,8 @@ export const updateUser = mutationField("updateUser", {
             hasMobile: args?.hasMobile ?? user.hasMobile,
             hasPushNotificationsEnabled:
                 args?.hasPushNotifications ?? user.hasPushNotificationsEnabled,
-            biometricPublicKey:
-                args?.biometricPublicKey ?? user.biometricPublicKey,
             unreadCount: args?.unreadCount ?? user.unreadCount,
-            avatarImageUrl: args?.avatarImageUrl ?? user.avatarImageUrl,
+            imageUrl: args?.avatarImageUrl ?? user.imageUrl,
         });
 
         throwIfError(newUserResponse);

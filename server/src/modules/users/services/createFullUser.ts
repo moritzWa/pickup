@@ -2,13 +2,9 @@ import { auth } from "firebase-admin";
 import { UserService } from "./userService";
 import { v4 as uuidv4 } from "uuid";
 import {
-    DEFAULT_COMMISSION_PERCENT,
-    DEFAULT_READ_FRIENDS_UNTIL,
-    ReferralRewardType,
     User,
     UserAuthProvider,
     UserRole,
-    UserStatus,
 } from "src/core/infra/postgres/entities/User";
 import { MagicUserMetadata } from "@magic-sdk/admin";
 import {
@@ -26,10 +22,6 @@ import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
 import { AnalyticsService, EventName } from "src/shared/analyticsService";
 import { Datadog } from "src/utils";
 import { UserNotificationService } from "./userNotificationService";
-import { config } from "src/config";
-import { DEFAULT_SWAP_PRIVACY } from "src/core/infra/postgres/entities";
-
-const BLACK_LISTED = [];
 
 export const createFullUser = async (
     fbUser: auth.UserRecord,
@@ -68,48 +60,22 @@ export const createFullUser = async (
     // create user
     const userResponse = await UserService.create({
         id: uuidv4(),
-        commissionPercentage: DEFAULT_COMMISSION_PERCENT, // half a percent commissh
-        canTrade: true,
-        canWithdrawWithoutTokenAccount: true,
         hasTwoFactorAuth: false,
         isInfluencer: false,
-        canWithdraw: true,
-        maxDailyWithdrawals: 3,
-        canTradeMobile: true,
         authProvider: UserAuthProvider.Firebase,
         authProviderId: fbUser.uid,
-        magicIssuer: magicUser.issuer,
         unreadCount: 0,
         hasVerifiedPhoneNumber: false,
-        hasClaimedInitialDeposit: false,
-        initialDepositClaimedAt: null,
-        initialDepositTokenSymbol: null,
-        initialDepositAmount: null,
-        referralRewardType: ReferralRewardType.FlatAmount,
-        referralRewardAmount: 0,
-        initialDepositTransactionHash: null,
-        isInitialDepositSuccessful: false,
         name: name || "",
-        username: "",
-        usernameSynced: false,
         description: "",
         email: magicUser.email,
-        isAffiliate: false,
-        status: UserStatus.User,
         mobileAppVersion: null,
         mobileDeviceId: null,
-        canVenmoDeposit: true,
-        estimatedPortfolioValueCents: null,
-        wallets: null,
         phoneNumber: null,
-        swapPrivacyDefault: DEFAULT_SWAP_PRIVACY,
-        avatarImageUrl: null,
-        readFriendsUntil: DEFAULT_READ_FRIENDS_UNTIL,
+        imageUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         isSuperuser: false,
-        isBanned: false,
-        hasEmailedFeedback: false,
         mobilePlatform: null,
         stripeCustomerId: null,
         // Note: do not fill these out. we will attempt to fill them out below
@@ -120,9 +86,7 @@ export const createFullUser = async (
         role: UserRole.User,
         hasMobile: true,
         hasPushNotificationsEnabled: false,
-        biometricPublicKey: null,
         referralCode: username?.toLowerCase() || "",
-        availableCreditCents: 0,
     });
 
     throwIfErrorAndDatadog(userResponse, {

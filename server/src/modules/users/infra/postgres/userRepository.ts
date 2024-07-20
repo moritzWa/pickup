@@ -125,43 +125,6 @@ export class PostgresUserRepository {
         }
     }
 
-    async findByIssuer(issuer: string): Promise<UserResponse> {
-        try {
-            const user = await this.repo.findOne({
-                where: {
-                    magicIssuer: issuer,
-                },
-            });
-
-            if (!user) {
-                return failure(new NotFoundError("User not found."));
-            }
-
-            return success(user);
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
-    }
-
-    async findByMagicDID(magicDID: string): Promise<UserResponse> {
-        try {
-            const user = await this.repo.findOne({
-                where: {
-                    authProvider: UserAuthProvider.Magic,
-                    authProviderId: magicDID,
-                },
-            });
-
-            if (!user) {
-                return failure(new NotFoundError("User not found."));
-            }
-
-            return success(user);
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
-    }
-
     async findByReferralCode(referralCode: string): Promise<UserResponse> {
         try {
             const user = await this.repo.findOne({

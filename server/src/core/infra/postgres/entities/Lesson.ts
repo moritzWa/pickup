@@ -20,6 +20,11 @@ export enum LessonType {
     RolePlay = "role_play",
 }
 
+export type Role = {
+    type: string; // ex. "student", "teacher
+    context: string;
+};
+
 @Entity({
     name: "lessons",
 })
@@ -57,6 +62,16 @@ export class Lesson {
         type: "text",
     })
     content!: string;
+
+    // roles, jsonb
+    @Column({
+        nullable: false,
+        name: "roles",
+        type: "jsonb",
+        // default empty array
+        default: "[]",
+    })
+    roles!: Role[];
 
     @Column({
         nullable: false,

@@ -1,0 +1,9 @@
+overwrite: true
+schema: "../schema.graphql"
+config:
+  scalars:
+    Date: Date
+generates:
+  ./src/api/generated/types.ts:
+    plugins:
+      - "typescript"

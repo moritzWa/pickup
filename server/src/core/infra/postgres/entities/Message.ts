@@ -9,8 +9,11 @@ import {
     UpdateDateColumn,
     DeleteDateColumn,
     Unique,
+    Relation,
 } from "typeorm";
 import { User } from "./User";
+import { Lesson } from "./Lesson";
+import { Participant } from "./Participant";
 
 @Entity({
     name: "messages",
@@ -19,21 +22,70 @@ export class Message {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
+    // content
     @Column({
         nullable: false,
-        name: "user_id",
+        name: "content",
+        type: "text",
+    })
+    content!: string;
+
+    // audio file
+    @Column({
+        nullable: true,
+        name: "audio_url",
+        type: "text",
+    })
+    audioUrl?: string;
+
+    // from and to participants
+    @Column({
+        nullable: false,
+        name: "from_participant_id",
         type: "uuid",
     })
-    @Index("messages_user_id_idx")
-    userId!: string;
+    @Index("messages_from_participant_id_idx")
+    fromParticipantId!: string;
 
-    @ManyToOne(() => User, (t) => t.id, {
+    @Column({
+        nullable: false,
+        name: "to_participant_id",
+        type: "uuid",
+    })
+    @Index("messages_to_participant_id_idx")
+    toParticipantId!: string;
+
+    @Column({
+        nullable: false,
+        name: "lesson_id",
+        type: "uuid",
+    })
+    @Index("messages_lesson_id_idx")
+    lessonId!: string;
+
+    @ManyToOne(() => Lesson, (t) => t.id, {
         nullable: false,
         eager: false,
         onDelete: "CASCADE",
     })
-    @JoinColumn({ name: "user_id" })
-    user!: User;
+    @JoinColumn({ name: "lesson_id" })
+    lesson!: Lesson;
+
+    @ManyToOne(() => Participant, (t) => t.id, {
+        nullable: false,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "from_participant_id" })
+    fromParticipant!: Relation<Participant>;
+
+    @ManyToOne(() => Participant, (t) => t.id, {
+        nullable: false,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "to_participant_id" })
+    toParticipant!: Relation<Participant>;
 
     @CreateDateColumn({
         name: "created_at",

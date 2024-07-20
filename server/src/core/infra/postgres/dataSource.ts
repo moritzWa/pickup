@@ -7,7 +7,16 @@ import { SlowQueryLogger } from "src/utils/typeormLogger";
 
 const hasLogging = process.env.TYPEORM_LOGGING === "true";
 
-const ENTITIES = [entities.User, entities.Notification];
+const ENTITIES = [
+    entities.User,
+    entities.Notification,
+    entities.Character,
+    entities.Course,
+    entities.Participant,
+    entities.Lesson,
+    entities.Message,
+    entities.Session,
+];
 
 function getMigrationDirectory() {
     const directory =

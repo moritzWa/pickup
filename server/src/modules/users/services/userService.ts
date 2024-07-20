@@ -101,7 +101,6 @@ const logToSlack = async (user: User, clientId: Maybe<string>) => {
                 "New User Joined 🚀\n",
                 `Name: ${user.name || "none"}`,
                 `Email: ${user.email}`,
-                `Username: ${user.username}`,
                 `ID: ${user.id}`,
                 `Link: https://movement.market/email/${user.email || ""}`,
             ]

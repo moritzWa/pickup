@@ -8,10 +8,6 @@ import * as crypto from "crypto";
 import { config } from "src/config";
 import { Maybe, success } from "src/core/logic";
 import { isNil } from "lodash";
-import { WalletType } from "@magic-sdk/admin";
-import { AccountProvider } from "src/core/infra/postgres/entities";
-import { pgUserRepo } from "../../infra/postgres";
-import { User, UserWallet } from "src/core/infra/postgres/entities/User";
 
 export const me = queryField("me", {
     type: nullable("User"),

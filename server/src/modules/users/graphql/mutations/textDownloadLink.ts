@@ -9,12 +9,6 @@ import {
     stringArg,
 } from "nexus";
 import {
-    UserAuthProvider,
-    UserStatus,
-} from "src/core/infra/postgres/entities/User";
-import { UserService } from "../../services";
-import { v4 as uuidv4 } from "uuid";
-import {
     throwIfError,
     throwIfErrorAndDatadog,
 } from "src/core/surfaces/graphql/common";
