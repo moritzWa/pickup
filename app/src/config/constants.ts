@@ -2,10 +2,10 @@ import { Alert, Platform } from "react-native";
 import VersionNumber from "react-native-version-number";
 
 const FIREBASE_DEV_WEB_CLIENT =
-  "153268767980-9h98lf0q1u29m1c7vl29qqm3hgrir561.apps.googleusercontent.com";
+  "85484920800-0v8gfdu63893tl2539sm3sjl674c16qi.apps.googleusercontent.com";
 
 const FIREBASE_PROD_WEB_CLIENT =
-  "443899527078-fhjk7u0iiqn0dkvoe8fp3vtiqr5otfnt.apps.googleusercontent.com";
+  "309044622588-k89nt9103d5i96gdutffev8nkjmrpp12.apps.googleusercontent.com";
 
 const WEB_CLIENT_ID = __DEV__
   ? FIREBASE_DEV_WEB_CLIENT
@@ -16,7 +16,7 @@ const SEGMENT_PROD_KEY = "FAKE_AcDfCneDRg4qHGCqBejNqcUyu4SlDdlt"; // "NCFMzL2Asn
 const SEGMENT_WRITE_KEY = __DEV__ ? SEGMENT_DEV_KEY : SEGMENT_PROD_KEY;
 
 const API_URL = __DEV__
-  ? "http://localhost:8000"
+  ? "http://localhost:8888"
   : "https://api.movement.market";
 
 const ONE_SIGNAL_APP_ID = "42bfa89f-bfc6-472c-ab88-b73491ed37fe";

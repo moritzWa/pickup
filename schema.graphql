@@ -17,7 +17,7 @@ type GetMobileUpdateResponse {
 }
 
 type Mutation {
-  createUser(email: String!, name: String, referralCode: String, username: String): CreateUserResponse!
+  createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
   sendVerification(phoneNumber: String!): String!

@@ -21,7 +21,6 @@ export type BaseUserFields = Pick<
   | "hasMobile"
   | "number"
   | "biometricPublicKey"
-  | "canTradeMobile"
   | "hasVerifiedPhoneNumber"
   | "description"
   | "referralCode"
@@ -47,7 +46,6 @@ export const BaseUserFields = gql`
     number
     hasPushNotificationsEnabled
     biometricPublicKey
-    username
     description
     referralCode
     authProviderId

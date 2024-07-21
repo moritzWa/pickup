@@ -23,9 +23,11 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>learning</string>
+				<string>com.googleusercontent.apps.85484920800-0v8gfdu63893tl2539sm3sjl674c16qi</string>
 			</array>
 		</dict>
 		<dict>
@@ -34,6 +36,14 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>pickup</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.309044622588-k89nt9103d5i96gdutffev8nkjmrpp12</string>
 			</array>
 		</dict>
 	</array>
@@ -48,6 +58,10 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We use the microphone to let you chat with our AI characters.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We use speech recognition to determine if you are speaking / responding to us.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
@@ -68,9 +82,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We use the microphone to let you chat with our AI characters.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>We use speech recognition to determine if you are speaking / responding to us.</string>
 </dict>
 </plist>

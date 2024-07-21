@@ -197,6 +197,7 @@ export interface NexusGenArgTypes {
     createUser: { // args
       email: string; // String!
       name?: string | null; // String
+      password?: string | null; // String
       referralCode?: string | null; // String
       username?: string | null; // String
     }

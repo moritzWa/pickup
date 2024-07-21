@@ -37,26 +37,31 @@ const Signup = () => {
   const [fullName, setFullName] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const { background, text, header } = useTheme();
+
   const [createUser, { loading, error }] = useMutation<
     Pick<Mutation, "createUser">,
     MutationCreateUserArgs
   >(api.users.create);
-  const [createWithEmail] = useMutation<
-    Pick<Mutation, "createUser">,
-    MutationCreateUserArgs
-  >(api.users.create);
+
   const [getMe] = useLazyQuery<Pick<Query, "me">>(api.users.me);
 
-  const _onSignUp = async () => {
+  const _onSignUpEmail = async () => {
     try {
+      if (!email || !email.includes("@")) {
+        return Alert.alert("Error", "Email is required");
+      }
+
+      if (!password) {
+        return Alert.alert("Error", "Password is required");
+      }
+
       const variables: MutationCreateUserArgs = {
         email,
-        password,
         name: fullName,
-        isMobile: true,
+        password,
       };
 
-      const response = await createWithEmail({
+      const response = await createUser({
         variables,
       });
 
@@ -97,10 +102,11 @@ const Signup = () => {
         return navigation.navigate("Main");
       }
 
+      console.log(u.user);
+
       const variables: MutationCreateUserArgs = {
         email: u.user?.email || "",
         name: u.user?.displayName || "",
-        isMobile: true,
       };
 
       await createUser({
@@ -136,6 +142,8 @@ const Signup = () => {
         return navigation.navigate("Main");
       }
 
+      console.log(u.user);
+
       const nameFromApple =
         appleData && appleData.fullName
           ? `${appleData.fullName?.givenName || ""} ${
@@ -146,7 +154,6 @@ const Signup = () => {
       const variables: MutationCreateUserArgs = {
         email: u.user?.email || "",
         name: nameFromApple ? nameFromApple || "" : u.user?.displayName || "",
-        isMobile: true,
       };
 
       await createUser({
@@ -276,7 +283,7 @@ const Signup = () => {
             marginTop: 20,
             marginBottom: 10,
           }}
-          onPress={_onSignUp}
+          onPress={_onSignUpEmail}
         />
 
         <Text style={{ textAlign: "center", color: text, marginVertical: 15 }}>

@@ -9,8 +9,20 @@ const DeleteMe = gql`
 
 const CreateUser = gql`
   ${BaseUserFields}
-  mutation CreateUser($name: String, $didToken: String!) {
-    createUser(name: $name, didToken: $didToken) {
+  mutation CreateUser(
+    $name: String
+    $email: String!
+    $username: String
+    $password: String
+    $referralCode: String
+  ) {
+    createUser(
+      name: $name
+      email: $email
+      username: $username
+      password: $password
+      referralCode: $referralCode
+    ) {
       user {
         ...BaseUserFields
       }
@@ -58,18 +70,6 @@ const GetMe = gql`
   }
 `;
 
-const Login = gql`
-  ${BaseUserFields}
-  mutation Login($didToken: String!) {
-    login(didToken: $didToken) {
-      user {
-        ...BaseUserFields
-      }
-      token
-    }
-  }
-`;
-
 const GetIntercomMobileToken = gql`
   query GetIntercomMobileToken {
     getIntercomMobileToken
@@ -99,7 +99,6 @@ export const api = {
     update: UpdateUser,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
-    login: Login,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,
   },

@@ -89,7 +89,7 @@ const Welcome = () => {
               color: colors.white,
             }}
           >
-            fuck yes
+            pickup
           </Text>
         </View>
 

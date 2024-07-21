@@ -199,8 +199,8 @@ export const MainNavigationStack = () => {
     _syncHasEnabledPush();
   }, [_syncHasEnabledPush]);
 
-  const initialRouteName = "Main";
-  // authStatus === "LOGGED_IN" ? "Main" : "Authentication";
+  const initialRouteName =
+    authStatus === "LOGGED_IN" ? "Main" : "Authentication";
 
   const navTheme = {
     dark: theme.theme === "dark",

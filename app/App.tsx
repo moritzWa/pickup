@@ -82,6 +82,8 @@ function App() {
           const me = await refetchMe();
           if (me) {
             store.dispatch(setUserAuthStateChanged("LOGGED_IN"));
+          } else {
+            store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));
           }
         } else {
           store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));

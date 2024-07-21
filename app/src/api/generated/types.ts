@@ -44,8 +44,9 @@ export type Mutation = {
 
 
 export type MutationCreateUserArgs = {
-  didToken: Scalars['String']['input'];
+  email: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
+  password?: InputMaybe<Scalars['String']['input']>;
   referralCode?: InputMaybe<Scalars['String']['input']>;
   username?: InputMaybe<Scalars['String']['input']>;
 };
@@ -109,7 +110,6 @@ export type User = {
   authProviderId: Scalars['String']['output'];
   avatarImageUrl?: Maybe<Scalars['String']['output']>;
   biometricPublicKey?: Maybe<Scalars['String']['output']>;
-  canTradeMobile?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['Date']['output'];
   description: Scalars['String']['output'];
   email: Scalars['String']['output'];
@@ -120,27 +120,17 @@ export type User = {
   id: Scalars['String']['output'];
   intercomMobileUserHash?: Maybe<Scalars['String']['output']>;
   intercomUserHash?: Maybe<Scalars['String']['output']>;
-  isAffiliate: Scalars['Boolean']['output'];
   isSuperuser: Scalars['Boolean']['output'];
   name?: Maybe<Scalars['String']['output']>;
   number?: Maybe<Scalars['Float']['output']>;
-  numberMobileUser?: Maybe<Scalars['Float']['output']>;
   phoneNumber?: Maybe<Scalars['String']['output']>;
   referralCode?: Maybe<Scalars['String']['output']>;
   referredByCode?: Maybe<Scalars['String']['output']>;
   referredByName?: Maybe<Scalars['String']['output']>;
   role?: Maybe<Scalars['String']['output']>;
-  status: UserStatusEnum;
   updatedAt: Scalars['Date']['output'];
-  username: Scalars['String']['output'];
 };
 
 export enum UserAuthProviderEnum {
-  Firebase = 'Firebase',
-  Magic = 'Magic'
-}
-
-export enum UserStatusEnum {
-  Pending = 'Pending',
-  User = 'User'
+  Firebase = 'Firebase'
 }
