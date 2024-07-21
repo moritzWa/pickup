@@ -11,6 +11,8 @@ import {
 
 import { Text } from "./Text";
 import { useTheme } from "src/hooks/useTheme";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faChevronRight } from "@fortawesome/pro-solid-svg-icons";
 
 type Props = {
   name?: string;
@@ -132,7 +134,7 @@ const Section = ({
             </Text>
           ))}
 
-        {/* {showRightIcon &&
+        {showRightIcon &&
           (rightIcon || (
             <FontAwesomeIcon
               style={{
@@ -143,7 +145,7 @@ const Section = ({
               color={rightIconTintColor || imageTintColor || text}
               icon={faChevronRight}
             />
-          ))} */}
+          ))}
 
         {rightComponent}
       </View>
