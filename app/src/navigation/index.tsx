@@ -29,6 +29,10 @@ import { useTheme } from "src/hooks/useTheme";
 import { View } from "react-native";
 import { useMe } from "src/hooks";
 import { LINKING } from "./linking";
+import Home from "src/views/Main/Home";
+import Lesson from "src/views/Main/Lesson";
+import Courses from "src/views/Main/Courses";
+import Profile from "src/views/Main/Profile";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -130,14 +134,30 @@ const MainTabNavigation = () => {
   return (
     <Tabs.Navigator
       tabBar={(props) => <TabBar {...props} />}
-      initialRouteName="Discovery"
+      initialRouteName="Home"
     >
       <Tabs.Screen
-        name="Portfolio"
+        name="Home"
         options={{
           headerShown: false,
         }}
-        component={Login}
+        component={Home}
+      />
+
+      <Tabs.Screen
+        name="Courses"
+        options={{
+          headerShown: false,
+        }}
+        component={Courses}
+      />
+
+      <Tabs.Screen
+        name="Profile"
+        options={{
+          headerShown: false,
+        }}
+        component={Profile}
       />
     </Tabs.Navigator>
   );
@@ -179,8 +199,8 @@ export const MainNavigationStack = () => {
     _syncHasEnabledPush();
   }, [_syncHasEnabledPush]);
 
-  const initialRouteName =
-    authStatus === "LOGGED_IN" ? "Main" : "Authentication";
+  const initialRouteName = "Main";
+  // authStatus === "LOGGED_IN" ? "Main" : "Authentication";
 
   const navTheme = {
     dark: theme.theme === "dark",
@@ -222,6 +242,14 @@ export const MainNavigationStack = () => {
               headerShown: false,
               gestureEnabled: false,
             }}
+          />
+
+          <Tabs.Screen
+            name="Lesson"
+            options={{
+              headerShown: false,
+            }}
+            component={Lesson}
           />
 
           {/* MODALS */}

@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>org.name.learning</string>
+	<string>com.pickup.www</string>
 	<key>PROJECT_ID</key>
 	<string>learning-dev-ai</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:85484920800:ios:6f61289261d2cfebbc9585</string>
+	<string>1:85484920800:ios:0e903818d39fcaf7bc9585</string>
 </dict>
 </plist>

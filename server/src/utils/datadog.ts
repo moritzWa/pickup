@@ -4,7 +4,7 @@ import { isNil } from "lodash";
 import { config } from "src/config";
 import { Slack, SlackChannel } from "./slack";
 
-const service = process.env.DATADOG_SERVICE || "awaken-trading-server";
+const service = process.env.DATADOG_SERVICE || "pickup-server";
 
 // @ts-ignore
 export const Datadog: StatsD.StatsD = new StatsD({

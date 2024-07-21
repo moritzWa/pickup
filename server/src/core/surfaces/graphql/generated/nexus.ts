@@ -33,8 +33,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
-  UserAuthProviderEnum: "firebase" | "magic"
-  UserStatusEnum: "pending" | "user"
+  UserAuthProviderEnum: "firebase"
 }
 
 export interface NexusGenScalars {
@@ -113,7 +112,6 @@ export interface NexusGenFieldTypes {
     authProviderId: string; // String!
     avatarImageUrl: string | null; // String
     biometricPublicKey: string | null; // String
-    canTradeMobile: boolean | null; // Boolean
     createdAt: NexusGenScalars['Date']; // Date!
     description: string; // String!
     email: string; // String!
@@ -124,19 +122,15 @@ export interface NexusGenFieldTypes {
     id: string; // String!
     intercomMobileUserHash: string | null; // String
     intercomUserHash: string | null; // String
-    isAffiliate: boolean; // Boolean!
     isSuperuser: boolean; // Boolean!
     name: string | null; // String
     number: number | null; // Float
-    numberMobileUser: number | null; // Float
     phoneNumber: string | null; // String
     referralCode: string | null; // String
     referredByCode: string | null; // String
     referredByName: string | null; // String
     role: string | null; // String
-    status: NexusGenEnums['UserStatusEnum']; // UserStatusEnum!
     updatedAt: NexusGenScalars['Date']; // Date!
-    username: string; // String!
   }
 }
 
@@ -176,7 +170,6 @@ export interface NexusGenFieldTypeNames {
     authProviderId: 'String'
     avatarImageUrl: 'String'
     biometricPublicKey: 'String'
-    canTradeMobile: 'Boolean'
     createdAt: 'Date'
     description: 'String'
     email: 'String'
@@ -187,26 +180,22 @@ export interface NexusGenFieldTypeNames {
     id: 'String'
     intercomMobileUserHash: 'String'
     intercomUserHash: 'String'
-    isAffiliate: 'Boolean'
     isSuperuser: 'Boolean'
     name: 'String'
     number: 'Float'
-    numberMobileUser: 'Float'
     phoneNumber: 'String'
     referralCode: 'String'
     referredByCode: 'String'
     referredByName: 'String'
     role: 'String'
-    status: 'UserStatusEnum'
     updatedAt: 'Date'
-    username: 'String'
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
     createUser: { // args
-      didToken: string; // String!
+      email: string; // String!
       name?: string | null; // String
       referralCode?: string | null; // String
       username?: string | null; // String

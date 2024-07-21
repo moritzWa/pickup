@@ -26,7 +26,7 @@ await queryRunner.query(
 
 Start Docker locally
 
-go to deployments/awaken_server and edit docker-compose.yml
+go to deployments/learning and edit docker-compose.yml
 
 add the following to the zookeeper section
 
@@ -101,11 +101,8 @@ npm run migrate:create src/migrations/${filename}
 
 Then add the info for the index in the correct entity file
 
-Then run 
+Then run
 
 ```shell
 npm run migrate:run
 ```
-
-
-

@@ -81,10 +81,6 @@ export const config = {
             "",
     },
     datadog: {
-        // DATADOG_APM_PORT = 8126
-        // DATADOG_APM_HOST = awaken-datadog-agent-production
-        // DATADOG_STATSD_HOST  = awaken-datadog-agent-production
-        // DATADOG_STATSD_PORT = 8125
         enabled: process.env.INITIALIZE_DATADOG === "true",
         env: process.env.DATADOG_ENV || "",
         statsd: {

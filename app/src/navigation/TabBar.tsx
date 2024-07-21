@@ -232,41 +232,20 @@ const _getImage = (
   routeName: string
 ): Maybe<{ image: any; active: any; icon?: any }> => {
   switch (routeName) {
-    case "PortfolioStackNavigator":
-    case "Portfolio":
+    case "Home":
       return {
-        image: PortfolioIcon, // SettingsIcon,
-        active: PortfolioIconFilled, // SettingsIconFilled,
-        // image: HomeIcon,
-        // active: HomeIconFilled,
+        image: HomeIcon,
+        active: HomeIconFilled,
       };
-    case "DiscoveryStackNavigator":
-    case "Discovery":
+    case "Courses":
       return {
-        // image: HomeIcon,
-        // active: HomeIconFilled,
         image: SearchIcon,
         active: SearchIconFilled,
       };
-    case "Transactions":
-      return {
-        image: ClockIcon,
-        active: ClockIconFilled,
-      };
-    case "FriendsFeed":
-      return {
-        image: FriendsIcon,
-        active: FriendsIconFilled,
-      };
-    case "Notifications":
-      return {
-        image: BellIcon,
-        active: BellIconFilled,
-      };
     case "Profile":
       return {
-        image: ProfileIcon, // SettingsIcon,
-        active: ProfileIconFilled, // SettingsIconFilled,
+        image: SettingsIcon,
+        active: SettingsIconFilled,
       };
     default:
       return null;

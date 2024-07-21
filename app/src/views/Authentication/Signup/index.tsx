@@ -18,7 +18,6 @@ import { api } from "src/api";
 import {
   Mutation,
   MutationCreateUserArgs,
-  MutationCreateUserWithEmailArgs,
   Query,
 } from "src/api/generated/types";
 import * as Haptics from "expo-haptics";
@@ -43,14 +42,14 @@ const Signup = () => {
     MutationCreateUserArgs
   >(api.users.create);
   const [createWithEmail] = useMutation<
-    Pick<Mutation, "createUserWithEmail">,
+    Pick<Mutation, "createUser">,
     MutationCreateUserArgs
-  >(api.users.createWithEmail);
+  >(api.users.create);
   const [getMe] = useLazyQuery<Pick<Query, "me">>(api.users.me);
 
   const _onSignUp = async () => {
     try {
-      const variables: MutationCreateUserWithEmailArgs = {
+      const variables: MutationCreateUserArgs = {
         email,
         password,
         name: fullName,
@@ -61,7 +60,7 @@ const Signup = () => {
         variables,
       });
 
-      const token = response.data?.createUserWithEmail?.customToken;
+      const token = response.data?.createUser?.token;
 
       if (!token) return;
 
@@ -95,9 +94,7 @@ const Signup = () => {
 
       // if already has a user -> just go to the home page
       if (me) {
-        return navigation.navigate("Main", {
-          screen: "PortfolioStackNavigator",
-        });
+        return navigation.navigate("Main");
       }
 
       const variables: MutationCreateUserArgs = {
@@ -136,9 +133,7 @@ const Signup = () => {
 
       // if already has a user -> just go to the home page
       if (me) {
-        return navigation.navigate("Main", {
-          screen: "PortfolioStackNavigator",
-        });
+        return navigation.navigate("Main");
       }
 
       const nameFromApple =

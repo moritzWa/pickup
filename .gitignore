@@ -2,3 +2,5 @@
 node_modules/
 server/src/scripts/loadtest/data/loadtest_03-01-2024.json
 server/src/scripts/loadtest/data/**/*.json
+
+keys/**/*

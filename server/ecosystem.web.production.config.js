@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
         {
-            name: "awaken-web-server",
+            name: "pickup-server",
             script: "./build/main.js",
             instances: process.env.NUMBER_OF_WEB_WORKERS || "8",
             exec_mode: "cluster",

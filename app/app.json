@@ -1,20 +1,28 @@
 {
   "expo": {
-    "name": "learning",
-    "slug": "learning",
+    "name": "Pickup",
+    "slug": "pickup",
     "version": "1.0.0",
-    "scheme": "learning",
+    "scheme": "pickup",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.name.learning"
+      "bundleIdentifier": "com.pickup.www"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "org.name.learning"
-    }
+      "package": "om.pickup.www"
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ]
+    ]
   },
-  "name": "learning"
+  "name": "pickup"
 }

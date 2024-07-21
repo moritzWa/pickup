@@ -40,7 +40,7 @@ const dataSourceConfig: DataSourceOptions = {
           }
         : undefined,
     uuidExtension: "uuid-ossp",
-    applicationName: "awaken",
+    applicationName: "pickup",
     entities: ENTITIES,
     migrations: [getMigrationDirectory()],
     subscribers: [join(__dirname, "**", "*.subscriber.{ts,js}")],

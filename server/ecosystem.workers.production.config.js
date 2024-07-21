@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
         {
-            name: "awaken-workers",
+            name: "pickup-workers",
             script: "./build/main.js",
             instances: process.env.NUMBER_OF_INNGEST_WORKERS || "6",
             exec_mode: "cluster",

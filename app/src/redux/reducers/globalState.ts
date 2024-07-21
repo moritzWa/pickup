@@ -10,7 +10,7 @@ const initialState: GlobalState = {
   isGlobalRuleMode: false,
   hasBanner: false,
   showConfetti: false,
-  theme: "dark",
+  theme: "light",
   isIncognito: false,
 };
 

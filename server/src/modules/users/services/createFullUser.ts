@@ -23,13 +23,19 @@ import { AnalyticsService, EventName } from "src/shared/analyticsService";
 import { Datadog } from "src/utils";
 import { UserNotificationService } from "./userNotificationService";
 
-export const createFullUser = async (
-    fbUser: auth.UserRecord,
-    magicUser: MagicUserMetadata,
-    name: string | null,
-    referredByCode: Maybe<string> | undefined,
-    _username: Maybe<string> | undefined
-): Promise<
+type CreateFullUserParams = {
+    fbUser: auth.UserRecord;
+    name: string | null;
+    email: string;
+    referredByCode: Maybe<string> | undefined;
+};
+
+export const createFullUser = async ({
+    email,
+    name,
+    fbUser,
+    referredByCode,
+}: CreateFullUserParams): Promise<
     FailureOrSuccess<
         DefaultErrors,
         {
@@ -38,17 +44,6 @@ export const createFullUser = async (
         }
     >
 > => {
-    if (!magicUser.issuer) {
-        return failure(new Error("Missing issuer"));
-    }
-
-    if (!magicUser.email) {
-        return failure(new Error("Missing email"));
-    }
-
-    // check username
-    const username = _username;
-
     // const usernameCheck = await ProfileService.checkValidUsername(
     //     username,
     //     null
@@ -68,7 +63,7 @@ export const createFullUser = async (
         hasVerifiedPhoneNumber: false,
         name: name || "",
         description: "",
-        email: magicUser.email,
+        email: email,
         mobileAppVersion: null,
         mobileDeviceId: null,
         phoneNumber: null,
@@ -86,7 +81,8 @@ export const createFullUser = async (
         role: UserRole.User,
         hasMobile: true,
         hasPushNotificationsEnabled: false,
-        referralCode: username?.toLowerCase() || "",
+        // random character generated
+        referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
     });
 
     throwIfErrorAndDatadog(userResponse, {
@@ -97,7 +93,9 @@ export const createFullUser = async (
     const { user } = userResponse.value;
 
     const tokenResponse = await FirebaseProvider.signToken(fbUser.uid);
+
     throwIfError(tokenResponse);
+
     const token = tokenResponse.value;
 
     // claim a code if there is one to give the user free packs from community or friends codes

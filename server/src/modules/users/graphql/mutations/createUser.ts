@@ -29,33 +29,26 @@ export const createUser = mutationField("createUser", {
     args: {
         name: nullable(stringArg()),
         username: nullable(stringArg()),
-        didToken: nonNull(stringArg()),
+        email: nonNull(stringArg()),
         referralCode: nullable(stringArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
-        const { didToken, name, referralCode, username } = args;
-
-        const magicUser = {} as any;
-        const email = magicUser.email;
-
-        if (!email) throw new ApolloError("Missing email", "403");
-        if (!magicUser.issuer) throw new ApolloError("Missing issuer", "400");
+        const { email, name, referralCode, username } = args;
 
         // if they are messaging on magic, means the email is verified? what about for non-email auth
         const firebaseUserResponse = await FirebaseProvider.createUser({
             email: email,
-            emailVerified: true,
         });
+
         throwIfError(firebaseUserResponse);
 
         // create user in our database
-        const createUserResp = await createFullUser(
-            firebaseUserResponse.value,
-            magicUser,
-            args.name || null,
-            referralCode,
-            username
-        );
+        const createUserResp = await createFullUser({
+            name: args.name || "",
+            email: args.email,
+            fbUser: firebaseUserResponse.value,
+            referredByCode: referralCode,
+        });
         throwIfError(createUserResp);
         const { user, token } = createUserResp.value;
 

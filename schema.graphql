@@ -17,7 +17,7 @@ type GetMobileUpdateResponse {
 }
 
 type Mutation {
-  createUser(didToken: String!, name: String, referralCode: String, username: String): CreateUserResponse!
+  createUser(email: String!, name: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
   sendVerification(phoneNumber: String!): String!
@@ -48,7 +48,6 @@ type User {
   authProviderId: String!
   avatarImageUrl: String
   biometricPublicKey: String
-  canTradeMobile: Boolean
   createdAt: Date!
   description: String!
   email: String!
@@ -59,27 +58,17 @@ type User {
   id: String!
   intercomMobileUserHash: String
   intercomUserHash: String
-  isAffiliate: Boolean!
   isSuperuser: Boolean!
   name: String
   number: Float
-  numberMobileUser: Float
   phoneNumber: String
   referralCode: String
   referredByCode: String
   referredByName: String
   role: String
-  status: UserStatusEnum!
   updatedAt: Date!
-  username: String!
 }
 
 enum UserAuthProviderEnum {
   Firebase
-  Magic
-}
-
-enum UserStatusEnum {
-  Pending
-  User
 }
