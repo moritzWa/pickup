@@ -15,7 +15,6 @@ export enum OpenAIModel {
 
 const client = new OpenAI({
     apiKey: config.openai.apiKey,
-    project: config.openai.projectId,
 });
 
 const createCompletion = async (): Promise<
