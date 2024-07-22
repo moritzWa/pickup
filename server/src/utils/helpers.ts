@@ -12,7 +12,7 @@ import { isNil } from "lodash/fp";
 import { isUndefined } from "lodash";
 import BigNumber from "bignumber.js";
 import { AxiosInstance } from "axios";
-import axiosRetry, { IAxiosRetryConfig } from "axios-retry";
+import { IAxiosRetryConfig } from "axios-retry";
 import { DateTime } from "luxon";
 import { StatusCodes } from "http-status-codes";
 import * as numbro from "numbro";
@@ -22,39 +22,6 @@ export const ZERO = (currency?: Dinero.Currency) =>
 export const ZERO_BN = new BigNumber(0);
 
 export const DECIMAL_PLACES = 19; // 1 decimals more
-
-export const wrapAxiosWithRetry = (
-    client: AxiosInstance,
-    axiosRetryConfig?: IAxiosRetryConfig
-) =>
-    axiosRetry(client, {
-        retries: 3,
-        retryDelay: (retryNumber: number) => {
-            // console.log(`retry attempt: ${retryNumber}`);
-
-            return axiosRetry.exponentialDelay(retryNumber);
-        },
-        retryCondition: (error) => {
-            const status = error.response?.status;
-            const tooManyRequests =
-                status === StatusCodes.TOO_MANY_REQUESTS ||
-                error.status?.toString() ===
-                    StatusCodes.TOO_MANY_REQUESTS.toString();
-            const error50x = !!status && status >= 500 && status < 600;
-
-            return (
-                axiosRetry.isNetworkOrIdempotentRequestError(error) ||
-                error.code === "ECONNABORTED" ||
-                error.code === "ENOTFOUND" ||
-                tooManyRequests ||
-                error50x
-            );
-        },
-        // this way if we have to retry, the timeout resets to the above 15 seconds
-        // we want this behavior
-        shouldResetTimeout: true,
-        ...axiosRetryConfig,
-    });
 
 export const safelyLogStringSize = (msg: string, chunks: any) => {
     try {
