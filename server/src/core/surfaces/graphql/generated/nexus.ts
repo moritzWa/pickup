@@ -58,6 +58,8 @@ export interface NexusGenObjects {
     userVersion?: string | null; // String
   }
   Lesson: entities.Lesson ;
+  LessonProgress: entities.LessonProgress ;
+  LessonSession: entities.LessonSession ;
   Mutation: {};
   PaymentMethod: { // root type
     last4: string; // String!
@@ -65,7 +67,6 @@ export interface NexusGenObjects {
     source: string; // String!
   }
   Query: {};
-  Session: entities.Session ;
   User: entities.User ;
 }
 
@@ -104,13 +105,23 @@ export interface NexusGenFieldTypes {
     id: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
   }
+  LessonProgress: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // String!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  LessonSession: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // String!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
   Mutation: { // field return type
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
     sendVerification: string; // String!
     startCourse: NexusGenRootTypes['Course']; // Course!
-    startSession: NexusGenRootTypes['Session']; // Session!
+    startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
   }
@@ -124,16 +135,13 @@ export interface NexusGenFieldTypes {
     getCourseLessons: NexusGenRootTypes['Lesson'][]; // [Lesson!]!
     getCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     getIntercomMobileToken: string; // String!
+    getLessonProgress: NexusGenRootTypes['LessonProgress']; // LessonProgress!
+    getLessonSessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
     me: NexusGenRootTypes['User'] | null; // User
     myCourses: NexusGenRootTypes['Course'][]; // [Course!]!
-    mySessions: NexusGenRootTypes['Session'][]; // [Session!]!
-  }
-  Session: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // String!
-    updatedAt: NexusGenScalars['Date']; // Date!
+    mySessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
   }
   User: { // field return type
     authProvider: NexusGenEnums['UserAuthProviderEnum']; // UserAuthProviderEnum!
@@ -187,13 +195,23 @@ export interface NexusGenFieldTypeNames {
     id: 'String'
     updatedAt: 'Date'
   }
+  LessonProgress: { // field return type name
+    createdAt: 'Date'
+    id: 'String'
+    updatedAt: 'Date'
+  }
+  LessonSession: { // field return type name
+    createdAt: 'Date'
+    id: 'String'
+    updatedAt: 'Date'
+  }
   Mutation: { // field return type name
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
     sendVerification: 'String'
     startCourse: 'Course'
-    startSession: 'Session'
+    startLesson: 'LessonSession'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
   }
@@ -207,16 +225,13 @@ export interface NexusGenFieldTypeNames {
     getCourseLessons: 'Lesson'
     getCourses: 'Course'
     getIntercomMobileToken: 'String'
+    getLessonProgress: 'LessonProgress'
+    getLessonSessions: 'LessonSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
     getPaymentMethods: 'PaymentMethod'
     me: 'User'
     myCourses: 'Course'
-    mySessions: 'Session'
-  }
-  Session: { // field return type name
-    createdAt: 'Date'
-    id: 'String'
-    updatedAt: 'Date'
+    mySessions: 'LessonSession'
   }
   User: { // field return type name
     authProvider: 'UserAuthProviderEnum'
@@ -260,8 +275,8 @@ export interface NexusGenArgTypes {
     startCourse: { // args
       courseId: string; // ID!
     }
-    startSession: { // args
-      courseId: string; // String!
+    startLesson: { // args
+      lessonId: string; // String!
     }
     updateUser: { // args
       avatarImageUrl?: string | null; // String
@@ -286,6 +301,12 @@ export interface NexusGenArgTypes {
     }
     getIntercomMobileToken: { // args
       platform?: string | null; // String
+    }
+    getLessonProgress: { // args
+      lessonId: string; // ID!
+    }
+    getLessonSessions: { // args
+      lessonId: string; // ID!
     }
   }
 }

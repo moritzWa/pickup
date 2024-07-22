@@ -8,7 +8,6 @@ import * as schemas from "src/shared/schemas";
 import * as users from "src/modules/users/graphql";
 import * as courses from "src/modules/courses/graphql";
 import * as lessons from "src/modules/lessons/graphql";
-import * as sessions from "src/modules/sessions/graphql";
 
 const types = {
     Date: DateScalar,
@@ -17,7 +16,6 @@ const types = {
     ...users,
     ...courses,
     ...lessons,
-    ...sessions,
 };
 
 export const schema = makeSchema({

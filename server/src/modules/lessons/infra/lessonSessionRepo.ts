@@ -74,6 +74,24 @@ export class PostgresLessonSessionRepository {
         });
     }
 
+    async findForLessonAndUser(
+        { lessonId, userId }: { lessonId: string; userId: string },
+        options?: FindManyOptions<LessonSessionModel>
+    ): Promise<LessonSessionArrayResponse> {
+        return Helpers.trySuccessFail(async () => {
+            const res = await this.repo.find({
+                ...options,
+                where: {
+                    ...options?.where,
+                    lessonId,
+                    userId,
+                },
+            });
+
+            return success(res);
+        });
+    }
+
     async findOne(
         options: FindOneOptions<LessonSessionModel>
     ): Promise<LessonSessionResponse> {
@@ -232,7 +250,7 @@ export class PostgresLessonSessionRepository {
     }
 
     async create(
-        params: Omit<LessonSessionModel, "accounts">,
+        params: Omit<LessonSessionModel, "course" | "lesson" | "user">,
         dbTxn?: EntityManager
     ): Promise<LessonSessionResponse> {
         try {

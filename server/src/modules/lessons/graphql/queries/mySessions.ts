@@ -4,11 +4,11 @@ import {
     throwIfNotAuthenticated,
 } from "src/core/surfaces/graphql/context";
 import { stripe } from "src/utils";
-import { lessonSessionRepo } from "../../infra";
 import { throwIfError } from "src/core/surfaces/graphql/common";
+import { lessonSessionRepo } from "../../infra";
 
 export const mySessions = queryField("mySessions", {
-    type: nonNull(list(nonNull("Session"))),
+    type: nonNull(list(nonNull("LessonSession"))),
     resolve: async (_parent, _args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);
 

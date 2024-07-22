@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 import { Maybe } from "src/core";
-import { User } from "./generated/types";
+import { Course, Lesson, Session, User } from "./generated/types";
 
 export type BaseUserFields = Pick<
   User,
@@ -49,5 +49,39 @@ export const BaseUserFields = gql`
     description
     referralCode
     authProviderId
+  }
+`;
+
+export type BaseCourseFields = Pick<
+  Course,
+  "id" | "imageUrl" | "title" | "backgroundColor" | "textColor" | "subtitle"
+>;
+
+export const BaseCourseFields = gql`
+  fragment BaseCourseFields on Course {
+    id
+    imageUrl
+    title
+    backgroundColor
+    textColor
+    subtitle
+  }
+`;
+
+export type BaseLessonFields = Pick<Lesson, "id" | "createdAt">;
+
+export const BaseLessonFields = gql`
+  fragment BaseLessonFields on Lesson {
+    id
+    createdAt
+  }
+`;
+
+export type BaseSessionFields = Pick<Session, "id" | "createdAt">;
+
+export const BaseSessionFields = gql`
+  fragment BaseSessionFields on Lesson {
+    id
+    createdAt
   }
 `;

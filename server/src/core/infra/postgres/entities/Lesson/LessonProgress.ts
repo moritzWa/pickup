@@ -9,10 +9,12 @@ import {
     UpdateDateColumn,
     DeleteDateColumn,
     Unique,
+    Relation,
 } from "typeorm";
 import { Participant } from "../Participant";
 import { Course } from "../Course";
 import { Lesson } from "./Lesson";
+import { User } from "../User";
 
 @Entity({
     name: "lesson_progress",
@@ -61,13 +63,29 @@ export class LessonProgress {
     @Index("progress_course_id_idx")
     courseId!: string;
 
+    @Column({
+        nullable: false,
+        name: "user_id",
+        type: "uuid",
+    })
+    @Index("sessions_user_id_idx")
+    userId!: string;
+
     @ManyToOne(() => Course, (t) => t.id, {
         nullable: false,
         eager: false,
         onDelete: "CASCADE",
     })
     @JoinColumn({ name: "course_id" })
-    course!: Course;
+    course!: Relation<Course>;
+
+    @ManyToOne(() => User, (t) => t.id, {
+        nullable: false,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "user_id" })
+    user!: Relation<User>;
 
     @CreateDateColumn({
         name: "created_at",
