@@ -16,19 +16,19 @@ export const me = queryField("me", {
 
         if (ctx.me) {
             const user = ctx.me!;
-            analytics.identify({
-                userId: user.id,
-                traits: {
-                    name: user.name,
-                    email: user.email,
-                    id: user.id,
-                    createdAt: user.createdAt,
-                    hasMobile: user.hasMobile,
-                    hasPushNotificationsEnabled:
-                        user.hasPushNotificationsEnabled,
-                    isReferred: !isNil(user.referredByCode),
-                },
-            });
+            // analytics.identify({
+            //     userId: user.id,
+            //     traits: {
+            //         name: user.name,
+            //         email: user.email,
+            //         id: user.id,
+            //         createdAt: user.createdAt,
+            //         hasMobile: user.hasMobile,
+            //         hasPushNotificationsEnabled:
+            //             user.hasPushNotificationsEnabled,
+            //         isReferred: !isNil(user.referredByCode),
+            //     },
+            // });
         }
 
         const user = ctx.me;

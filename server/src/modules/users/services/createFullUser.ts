@@ -106,17 +106,17 @@ export const createFullUser = async ({
 
     await UserService.logToSlack(user, null);
 
-    void AnalyticsService.track({
-        eventName: EventName.UserCreated,
-        userId: user.id,
-        properties: {
-            name: user.name,
-            user_id: user.id,
-            referred_by_code: user.referredByCode || "none",
-            provider: "social_login",
-            is_mobile: user.hasMobile,
-        },
-    });
+    // void AnalyticsService.track({
+    //     eventName: EventName.UserCreated,
+    //     userId: user.id,
+    //     properties: {
+    //         name: user.name,
+    //         user_id: user.id,
+    //         referred_by_code: user.referredByCode || "none",
+    //         provider: "social_login",
+    //         is_mobile: user.hasMobile,
+    //     },
+    // });
 
     await UserNotificationService.sendWelcomeEmail(user);
 
