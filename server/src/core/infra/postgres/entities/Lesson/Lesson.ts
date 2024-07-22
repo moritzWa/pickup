@@ -74,22 +74,6 @@ export class Lesson {
 
     @Column({
         nullable: false,
-        name: "participant_id",
-        type: "uuid",
-    })
-    @Index("lesson_participant_id_idx")
-    participantId!: string;
-
-    @ManyToOne(() => Participant, (t) => t.id, {
-        nullable: false,
-        eager: false,
-        onDelete: "CASCADE",
-    })
-    @JoinColumn({ name: "participant_id" })
-    participant!: Participant;
-
-    @Column({
-        nullable: false,
         name: "course_id",
         type: "uuid",
     })
