@@ -61,7 +61,7 @@ const startInngest = async () => {
     app.use(helmet());
 
     app.get("/", (_req, res) => {
-        return res.status(200).send("Welcome to movement 🏃‍♂️");
+        return res.status(200).send("Welcome to pickup 🚗!");
     });
 
     app.get("/healthz", (_req, res) => {
@@ -121,7 +121,7 @@ const startServer = async () => {
     app.get("/", (_req, res) => {
         console.log("pid", process.pid, "handler start, blocking CPU");
 
-        return res.status(200).send("Welcome to movement 🏃‍♂️");
+        return res.status(200).send("Welcome to pickup 🚗");
     });
 
     app.get("/healthz", (_req, res) => {
