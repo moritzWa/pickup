@@ -77,10 +77,20 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSContactsUsageDescription</key>
+	<string>Used to make it easier to share Pickup with your contact book.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to set a profile picture.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used to determine where you are located.</string>
 </dict>
 </plist>

@@ -6,12 +6,18 @@ import * as GraphQLUpload from "graphql-upload/GraphQLUpload.js";
 // resolvers
 import * as schemas from "src/shared/schemas";
 import * as users from "src/modules/users/graphql";
+import * as courses from "src/modules/courses/graphql";
+import * as lessons from "src/modules/lessons/graphql";
+import * as sessions from "src/modules/sessions/graphql";
 
 const types = {
     Date: DateScalar,
     Upload: GraphQLUpload,
     ...schemas,
     ...users,
+    ...courses,
+    ...lessons,
+    ...sessions,
 };
 
 export const schema = makeSchema({

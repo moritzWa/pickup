@@ -18,6 +18,18 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export type Course = {
+  __typename?: 'Course';
+  backgroundColor: Scalars['String']['output'];
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['String']['output'];
+  imageUrl: Scalars['String']['output'];
+  subtitle: Scalars['String']['output'];
+  textColor: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['Date']['output'];
+};
+
 export type CreateUserResponse = {
   __typename?: 'CreateUserResponse';
   token: Scalars['String']['output'];
@@ -31,13 +43,21 @@ export type GetMobileUpdateResponse = {
   userVersion?: Maybe<Scalars['String']['output']>;
 };
 
+export type Lesson = {
+  __typename?: 'Lesson';
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['String']['output'];
+  updatedAt: Scalars['Date']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
   sendVerification: Scalars['String']['output'];
-  textDownloadLink: Scalars['String']['output'];
+  startCourse: Course;
+  startSession: Session;
   updateUser: User;
   verifyPhoneNumber: User;
 };
@@ -57,8 +77,13 @@ export type MutationSendVerificationArgs = {
 };
 
 
-export type MutationTextDownloadLinkArgs = {
-  phoneNumber: Scalars['String']['input'];
+export type MutationStartCourseArgs = {
+  courseId: Scalars['ID']['input'];
+};
+
+
+export type MutationStartSessionArgs = {
+  courseId: Scalars['String']['input'];
 };
 
 
@@ -88,10 +113,14 @@ export type PaymentMethod = {
 export type Query = {
   __typename?: 'Query';
   checkCode: Scalars['Boolean']['output'];
+  getCourseLessons: Array<Lesson>;
+  getCourses: Array<Course>;
   getIntercomMobileToken: Scalars['String']['output'];
   getMobileUpdate: GetMobileUpdateResponse;
   getPaymentMethods: Array<PaymentMethod>;
   me?: Maybe<User>;
+  myCourses: Array<Course>;
+  mySessions: Array<Session>;
 };
 
 
@@ -100,8 +129,20 @@ export type QueryCheckCodeArgs = {
 };
 
 
+export type QueryGetCourseLessonsArgs = {
+  courseId: Scalars['ID']['input'];
+};
+
+
 export type QueryGetIntercomMobileTokenArgs = {
   platform?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type Session = {
+  __typename?: 'Session';
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['String']['output'];
+  updatedAt: Scalars['Date']['output'];
 };
 
 export type User = {

@@ -239,8 +239,8 @@ const _getImage = (
       };
     case "Courses":
       return {
-        image: SearchIcon,
-        active: SearchIconFilled,
+        image: ClockIcon,
+        active: ClockIconFilled,
       };
     case "Profile":
       return {

@@ -1,3 +1,4 @@
+import { Maybe } from "src/core/logic";
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -6,7 +7,11 @@ import {
     UpdateDateColumn,
     DeleteDateColumn,
     Unique,
+    JoinColumn,
+    ManyToOne,
+    Relation,
 } from "typeorm";
+import { Character } from "./Character";
 
 @Entity({
     name: "courses",
@@ -49,6 +54,21 @@ export class Course {
         type: "text",
     })
     backgroundColor!: string;
+
+    @Column({
+        nullable: true,
+        name: "default_character_id",
+        type: "uuid",
+    })
+    defaultCharacterId!: Maybe<string>;
+
+    @ManyToOne(() => Character, (t) => t.id, {
+        nullable: true,
+        eager: false,
+        onDelete: "SET NULL",
+    })
+    @JoinColumn({ name: "default_character_id" })
+    character!: Relation<Character | null>;
 
     @CreateDateColumn({
         name: "created_at",

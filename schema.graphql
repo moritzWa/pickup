@@ -2,6 +2,17 @@
 ### Do not make changes to this file directly
 
 
+type Course {
+  backgroundColor: String!
+  createdAt: Date!
+  id: String!
+  imageUrl: String!
+  subtitle: String!
+  textColor: String!
+  title: String!
+  updatedAt: Date!
+}
+
 type CreateUserResponse {
   token: String!
   user: User!
@@ -16,11 +27,19 @@ type GetMobileUpdateResponse {
   userVersion: String
 }
 
+type Lesson {
+  createdAt: Date!
+  id: String!
+  updatedAt: Date!
+}
+
 type Mutation {
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
   sendVerification(phoneNumber: String!): String!
+  startCourse(courseId: ID!): Course!
+  startSession(courseId: String!): Session!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
 }
@@ -33,10 +52,20 @@ type PaymentMethod {
 
 type Query {
   checkCode(referralCode: String!): Boolean!
+  getCourseLessons(courseId: ID!): [Lesson!]!
+  getCourses: [Course!]!
   getIntercomMobileToken(platform: String): String!
   getMobileUpdate: GetMobileUpdateResponse!
   getPaymentMethods: [PaymentMethod!]!
   me: User
+  myCourses: [Course!]!
+  mySessions: [Session!]!
+}
+
+type Session {
+  createdAt: Date!
+  id: String!
+  updatedAt: Date!
 }
 
 """The `Upload` scalar type represents a file upload."""

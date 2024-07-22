@@ -250,12 +250,9 @@ export const config = {
     sonarwatch: {
         accessKey: process.env.SONAR_WATCH_ACCESS_KEY || "",
     },
-    defaultOnrampProvider: process.env.DEFAULT_ONRAMP_PROVIDER || "onramper",
-    kado: {
-        apiKey: process.env.KADO_API_KEY || "",
-    },
-    onramper: {
-        apiKey: process.env.ONRAMPER_API_KEY || "",
+    openai: {
+        projectId: process.env.OPENAI_PROJECT_ID || "",
+        apiKey: process.env.OPENAI_API_KEY || "",
     },
     typeorm: {
         explainSlowQueries:

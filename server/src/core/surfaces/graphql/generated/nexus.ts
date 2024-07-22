@@ -47,6 +47,7 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  Course: entities.Course ;
   CreateUserResponse: { // root type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
@@ -56,6 +57,7 @@ export interface NexusGenObjects {
     shouldUpdate: boolean; // Boolean!
     userVersion?: string | null; // String
   }
+  Lesson: entities.Lesson ;
   Mutation: {};
   PaymentMethod: { // root type
     last4: string; // String!
@@ -63,6 +65,7 @@ export interface NexusGenObjects {
     source: string; // String!
   }
   Query: {};
+  Session: entities.Session ;
   User: entities.User ;
 }
 
@@ -77,6 +80,16 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  Course: { // field return type
+    backgroundColor: string; // String!
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // String!
+    imageUrl: string; // String!
+    subtitle: string; // String!
+    textColor: string; // String!
+    title: string; // String!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
   CreateUserResponse: { // field return type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
@@ -86,11 +99,18 @@ export interface NexusGenFieldTypes {
     shouldUpdate: boolean; // Boolean!
     userVersion: string | null; // String
   }
+  Lesson: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // String!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
   Mutation: { // field return type
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
     sendVerification: string; // String!
+    startCourse: NexusGenRootTypes['Course']; // Course!
+    startSession: NexusGenRootTypes['Session']; // Session!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
   }
@@ -101,10 +121,19 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     checkCode: boolean; // Boolean!
+    getCourseLessons: NexusGenRootTypes['Lesson'][]; // [Lesson!]!
+    getCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     getIntercomMobileToken: string; // String!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
     me: NexusGenRootTypes['User'] | null; // User
+    myCourses: NexusGenRootTypes['Course'][]; // [Course!]!
+    mySessions: NexusGenRootTypes['Session'][]; // [Session!]!
+  }
+  Session: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // String!
+    updatedAt: NexusGenScalars['Date']; // Date!
   }
   User: { // field return type
     authProvider: NexusGenEnums['UserAuthProviderEnum']; // UserAuthProviderEnum!
@@ -134,6 +163,16 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  Course: { // field return type name
+    backgroundColor: 'String'
+    createdAt: 'Date'
+    id: 'String'
+    imageUrl: 'String'
+    subtitle: 'String'
+    textColor: 'String'
+    title: 'String'
+    updatedAt: 'Date'
+  }
   CreateUserResponse: { // field return type name
     token: 'String'
     user: 'User'
@@ -143,11 +182,18 @@ export interface NexusGenFieldTypeNames {
     shouldUpdate: 'Boolean'
     userVersion: 'String'
   }
+  Lesson: { // field return type name
+    createdAt: 'Date'
+    id: 'String'
+    updatedAt: 'Date'
+  }
   Mutation: { // field return type name
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
     sendVerification: 'String'
+    startCourse: 'Course'
+    startSession: 'Session'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
   }
@@ -158,10 +204,19 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     checkCode: 'Boolean'
+    getCourseLessons: 'Lesson'
+    getCourses: 'Course'
     getIntercomMobileToken: 'String'
     getMobileUpdate: 'GetMobileUpdateResponse'
     getPaymentMethods: 'PaymentMethod'
     me: 'User'
+    myCourses: 'Course'
+    mySessions: 'Session'
+  }
+  Session: { // field return type name
+    createdAt: 'Date'
+    id: 'String'
+    updatedAt: 'Date'
   }
   User: { // field return type name
     authProvider: 'UserAuthProviderEnum'
@@ -202,6 +257,12 @@ export interface NexusGenArgTypes {
     sendVerification: { // args
       phoneNumber: string; // String!
     }
+    startCourse: { // args
+      courseId: string; // ID!
+    }
+    startSession: { // args
+      courseId: string; // String!
+    }
     updateUser: { // args
       avatarImageUrl?: string | null; // String
       biometricPublicKey?: string | null; // String
@@ -219,6 +280,9 @@ export interface NexusGenArgTypes {
   Query: {
     checkCode: { // args
       referralCode: string; // String!
+    }
+    getCourseLessons: { // args
+      courseId: string; // ID!
     }
     getIntercomMobileToken: { // args
       platform?: string | null; // String
