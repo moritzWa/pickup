@@ -4,7 +4,7 @@ import {
     throwIfNotAuthenticated,
 } from "src/core/surfaces/graphql/context";
 import { stripe } from "src/utils";
-import { sessionRepo } from "../../infra";
+import { lessonSessionRepo } from "../../infra";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 
 export const mySessions = queryField("mySessions", {
@@ -14,7 +14,7 @@ export const mySessions = queryField("mySessions", {
 
         const user = ctx.me!;
 
-        const sessionsResponse = await sessionRepo.findForUser(user.id);
+        const sessionsResponse = await lessonSessionRepo.findForUser(user.id);
 
         throwIfError(sessionsResponse);
 

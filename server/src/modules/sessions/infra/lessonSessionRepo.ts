@@ -10,23 +10,29 @@ import { success, failure, Maybe } from "src/core/logic";
 import { UnexpectedError, NotFoundError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
 import { FailureOrSuccess } from "src/core/logic";
-import { Session as SessionModel } from "src/core/infra/postgres/entities";
+import { LessonSession as LessonSessionModel } from "src/core/infra/postgres/entities";
 import { dataSource } from "src/core/infra/postgres";
 import { Helpers } from "src/utils";
 
-type SessionResponse = FailureOrSuccess<DefaultErrors, SessionModel>;
-type SessionArrayResponse = FailureOrSuccess<DefaultErrors, SessionModel[]>;
+type LessonSessionResponse = FailureOrSuccess<
+    DefaultErrors,
+    LessonSessionModel
+>;
+type LessonSessionArrayResponse = FailureOrSuccess<
+    DefaultErrors,
+    LessonSessionModel[]
+>;
 
-export class PostgresSessionRepository {
-    constructor(private model: typeof SessionModel) {}
+export class PostgresLessonSessionRepository {
+    constructor(private model: typeof LessonSessionModel) {}
 
-    private get repo(): Repository<SessionModel> {
+    private get repo(): Repository<LessonSessionModel> {
         return dataSource.getRepository(this.model);
     }
 
     async find(
-        options: FindManyOptions<SessionModel>
-    ): Promise<SessionArrayResponse> {
+        options: FindManyOptions<LessonSessionModel>
+    ): Promise<LessonSessionArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
             const res = await this.repo.find(query);
@@ -36,8 +42,8 @@ export class PostgresSessionRepository {
 
     async findForCourse(
         courseId: string,
-        options?: FindManyOptions<SessionModel>
-    ): Promise<SessionArrayResponse> {
+        options?: FindManyOptions<LessonSessionModel>
+    ): Promise<LessonSessionArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const res = await this.repo.find({
                 ...options,
@@ -53,8 +59,8 @@ export class PostgresSessionRepository {
 
     async findForUser(
         userId: string,
-        options?: FindManyOptions<SessionModel>
-    ): Promise<SessionArrayResponse> {
+        options?: FindManyOptions<LessonSessionModel>
+    ): Promise<LessonSessionArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const res = await this.repo.find({
                 ...options,
@@ -69,17 +75,20 @@ export class PostgresSessionRepository {
     }
 
     async findOne(
-        options: FindOneOptions<SessionModel>
-    ): Promise<SessionResponse> {
+        options: FindOneOptions<LessonSessionModel>
+    ): Promise<LessonSessionResponse> {
         return Helpers.trySuccessFail(async () => {
             const user = await this.repo.findOne(options);
-            if (!user) return failure(new NotFoundError("Session not found."));
+            if (!user)
+                return failure(new NotFoundError("LessonSession not found."));
             return success(user);
         });
     }
 
     // YOU MUST CHECK BY LOWERCASE IF YOU SEARCH BY USERNAME!
-    async findBySessionname(username: string): Promise<SessionArrayResponse> {
+    async findByLessonSessionname(
+        username: string
+    ): Promise<LessonSessionArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
@@ -91,7 +100,7 @@ export class PostgresSessionRepository {
     }
 
     async count(
-        options: FindManyOptions<SessionModel>
+        options: FindManyOptions<LessonSessionModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
@@ -100,7 +109,7 @@ export class PostgresSessionRepository {
         });
     }
 
-    async findById(userId: string): Promise<SessionResponse> {
+    async findById(userId: string): Promise<LessonSessionResponse> {
         try {
             const user = await this.repo
                 .createQueryBuilder()
@@ -108,7 +117,7 @@ export class PostgresSessionRepository {
                 .getOne();
 
             if (!user) {
-                return failure(new NotFoundError("Session not found."));
+                return failure(new NotFoundError("LessonSession not found."));
             }
 
             return success(user);
@@ -117,7 +126,7 @@ export class PostgresSessionRepository {
         }
     }
 
-    async findByIds(userIds: string[]): Promise<SessionArrayResponse> {
+    async findByIds(userIds: string[]): Promise<LessonSessionArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
@@ -128,14 +137,14 @@ export class PostgresSessionRepository {
         });
     }
 
-    async findByEmail(email: string): Promise<SessionResponse> {
+    async findByEmail(email: string): Promise<LessonSessionResponse> {
         return await Helpers.trySuccessFail(async () => {
             const user = await this.repo
                 .createQueryBuilder()
                 .where("email = :email", { email })
                 .getOne();
             if (!user) {
-                return failure(new NotFoundError("Session not found."));
+                return failure(new NotFoundError("LessonSession not found."));
             }
             return success(user);
         });
@@ -143,9 +152,9 @@ export class PostgresSessionRepository {
 
     async update(
         userId: string,
-        updates: Partial<SessionModel>,
+        updates: Partial<LessonSessionModel>,
         dbTxn?: EntityManager
-    ): Promise<SessionResponse> {
+    ): Promise<LessonSessionResponse> {
         try {
             dbTxn
                 ? await dbTxn.update(this.model, { id: userId }, updates)
@@ -156,7 +165,9 @@ export class PostgresSessionRepository {
                 : await this.repo.findOneBy({ id: userId });
 
             if (!user) {
-                return failure(new NotFoundError("Session does not exist!"));
+                return failure(
+                    new NotFoundError("LessonSession does not exist!")
+                );
             }
 
             return success(user);
@@ -167,7 +178,7 @@ export class PostgresSessionRepository {
 
     async bulkUpdate(
         userIds: string[],
-        updates: Partial<SessionModel>
+        updates: Partial<LessonSessionModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             if (!userIds.length) {
@@ -176,20 +187,22 @@ export class PostgresSessionRepository {
 
             const updateResult = await this.repo
                 .createQueryBuilder()
-                .update(SessionModel)
+                .update(LessonSessionModel)
                 .set(updates)
                 .where("id IN (:...userIds)", { userIds })
                 .execute();
 
             if (!updateResult) {
-                return failure(new NotFoundError("Session update failed."));
+                return failure(
+                    new NotFoundError("LessonSession update failed.")
+                );
             }
 
             return success(updateResult.affected || 0);
         });
     }
 
-    async save(obj: SessionModel): Promise<SessionResponse> {
+    async save(obj: LessonSessionModel): Promise<LessonSessionResponse> {
         try {
             return success(await this.repo.save(obj));
         } catch (err) {
@@ -198,14 +211,16 @@ export class PostgresSessionRepository {
     }
 
     // hard delete
-    async delete(userId: string): Promise<SessionResponse> {
+    async delete(userId: string): Promise<LessonSessionResponse> {
         try {
             const user = await this.repo.findOne({
                 where: { id: userId },
             });
 
             if (!user) {
-                return failure(new NotFoundError("Session does not exist!"));
+                return failure(
+                    new NotFoundError("LessonSession does not exist!")
+                );
             }
 
             await this.repo.delete({ id: userId });
@@ -217,15 +232,15 @@ export class PostgresSessionRepository {
     }
 
     async create(
-        params: Omit<SessionModel, "accounts">,
+        params: Omit<LessonSessionModel, "accounts">,
         dbTxn?: EntityManager
-    ): Promise<SessionResponse> {
+    ): Promise<LessonSessionResponse> {
         try {
-            const newSession = dbTxn
+            const newLessonSession = dbTxn
                 ? await dbTxn.save(this.model, params)
                 : await this.repo.save(params);
 
-            return success(newSession);
+            return success(newLessonSession);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }

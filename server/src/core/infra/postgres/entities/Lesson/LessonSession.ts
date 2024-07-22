@@ -11,24 +11,17 @@ import {
     Unique,
     Relation,
 } from "typeorm";
-import { User } from "./User";
-import { Lesson } from "./Lesson/Lesson";
-import { Participant } from "./Participant";
+import { User } from "../User";
+import { Lesson } from "./Lesson";
+import { Participant } from "../Participant";
+import { Course } from "../Course";
 
 @Entity({
-    name: "messages",
+    name: "lesson_sessions",
 })
-export class Message {
+export class LessonSession {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
-
-    // content
-    @Column({
-        nullable: false,
-        name: "content",
-        type: "text",
-    })
-    content!: string;
 
     // audio file
     @Column({
@@ -36,32 +29,31 @@ export class Message {
         name: "audio_url",
         type: "text",
     })
-    audioUrl?: string;
-
-    // from and to participants
-    @Column({
-        nullable: false,
-        name: "from_participant_id",
-        type: "uuid",
-    })
-    @Index("messages_from_participant_id_idx")
-    fromParticipantId!: string;
-
-    @Column({
-        nullable: false,
-        name: "to_participant_id",
-        type: "uuid",
-    })
-    @Index("messages_to_participant_id_idx")
-    toParticipantId!: string;
+    audioUrl!: string;
 
     @Column({
         nullable: false,
         name: "lesson_id",
         type: "uuid",
     })
-    @Index("messages_lesson_id_idx")
+    @Index("sessions_lesson_id_idx")
     lessonId!: string;
+
+    @Column({
+        nullable: false,
+        name: "course_id",
+        type: "uuid",
+    })
+    @Index("sessions_course_id_idx")
+    courseId!: string;
+
+    @Column({
+        nullable: false,
+        name: "user_id",
+        type: "uuid",
+    })
+    @Index("sessions_user_id_idx")
+    userId!: string;
 
     @ManyToOne(() => Lesson, (t) => t.id, {
         nullable: false,
@@ -69,23 +61,23 @@ export class Message {
         onDelete: "CASCADE",
     })
     @JoinColumn({ name: "lesson_id" })
-    lesson!: Lesson;
+    lesson!: Relation<Lesson>;
 
-    @ManyToOne(() => Participant, (t) => t.id, {
+    @ManyToOne(() => User, (t) => t.id, {
         nullable: false,
         eager: false,
         onDelete: "CASCADE",
     })
-    @JoinColumn({ name: "from_participant_id" })
-    fromParticipant!: Relation<Participant>;
+    @JoinColumn({ name: "user_id" })
+    user!: Relation<User>;
 
-    @ManyToOne(() => Participant, (t) => t.id, {
+    @ManyToOne(() => Course, (t) => t.id, {
         nullable: false,
         eager: false,
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
     })
-    @JoinColumn({ name: "to_participant_id" })
-    toParticipant!: Relation<Participant>;
+    @JoinColumn({ name: "course_id" })
+    course!: Relation<Course>;
 
     @CreateDateColumn({
         name: "created_at",

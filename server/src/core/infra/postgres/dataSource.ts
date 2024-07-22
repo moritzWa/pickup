@@ -15,7 +15,9 @@ const ENTITIES = [
     entities.Participant,
     entities.Lesson,
     entities.Message,
-    entities.Session,
+    entities.Lesson,
+    entities.LessonProgress,
+    entities.LessonSession,
 ];
 
 function getMigrationDirectory() {

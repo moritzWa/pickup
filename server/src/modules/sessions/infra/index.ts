@@ -1,4 +1,6 @@
-import { Session } from "src/core/infra/postgres/entities";
-import { PostgresSessionRepository } from "./sessionRepo";
+import { LessonSession } from "src/core/infra/postgres/entities";
+import { PostgresLessonSessionRepository } from "./lessonSessionRepo";
 
-export const sessionRepo = new PostgresSessionRepository(Session);
+export const lessonSessionRepo = new PostgresLessonSessionRepository(
+    LessonSession
+);

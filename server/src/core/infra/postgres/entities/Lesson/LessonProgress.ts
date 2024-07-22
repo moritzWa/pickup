@@ -9,51 +9,41 @@ import {
     UpdateDateColumn,
     DeleteDateColumn,
     Unique,
-    Relation,
 } from "typeorm";
-import { User } from "./User";
+import { Participant } from "../Participant";
+import { Course } from "../Course";
 import { Lesson } from "./Lesson";
-import { Participant } from "./Participant";
-import { Course } from "./Course";
 
 @Entity({
-    name: "sessions",
+    name: "lesson_progress",
 })
-export class Session {
+export class LessonProgress {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    // audio file
     @Column({
-        nullable: true,
-        name: "audio_url",
-        type: "text",
+        nullable: false,
+        name: "participant_id",
+        type: "uuid",
     })
-    audioUrl!: string;
+    @Index("progress_participant_id_idx")
+    participantId!: string;
+
+    @ManyToOne(() => Participant, (t) => t.id, {
+        nullable: false,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "participant_id" })
+    participant!: Participant;
 
     @Column({
         nullable: false,
         name: "lesson_id",
         type: "uuid",
     })
-    @Index("sessions_lesson_id_idx")
+    @Index("progress_lesson_id_idx")
     lessonId!: string;
-
-    @Column({
-        nullable: false,
-        name: "course_id",
-        type: "uuid",
-    })
-    @Index("sessions_course_id_idx")
-    courseId!: string;
-
-    @Column({
-        nullable: false,
-        name: "user_id",
-        type: "uuid",
-    })
-    @Index("sessions_user_id_idx")
-    userId!: string;
 
     @ManyToOne(() => Lesson, (t) => t.id, {
         nullable: false,
@@ -61,23 +51,23 @@ export class Session {
         onDelete: "CASCADE",
     })
     @JoinColumn({ name: "lesson_id" })
-    lesson!: Relation<Lesson>;
+    lesson!: Lesson;
 
-    @ManyToOne(() => User, (t) => t.id, {
+    @Column({
         nullable: false,
-        eager: false,
-        onDelete: "CASCADE",
+        name: "course_id",
+        type: "uuid",
     })
-    @JoinColumn({ name: "user_id" })
-    user!: Relation<User>;
+    @Index("progress_course_id_idx")
+    courseId!: string;
 
     @ManyToOne(() => Course, (t) => t.id, {
         nullable: false,
         eager: false,
-        onDelete: "SET NULL",
+        onDelete: "CASCADE",
     })
     @JoinColumn({ name: "course_id" })
-    course!: Relation<Course>;
+    course!: Course;
 
     @CreateDateColumn({
         name: "created_at",

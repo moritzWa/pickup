@@ -10,9 +10,8 @@ import {
     DeleteDateColumn,
     Unique,
 } from "typeorm";
-import { User } from "./User";
-import { Participant } from "./Participant";
-import { Course } from "./Course";
+import { Participant } from "../Participant";
+import { Course } from "../Course";
 
 export enum LessonType {
     Game = "game",
