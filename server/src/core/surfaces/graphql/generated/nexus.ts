@@ -91,7 +91,6 @@ export interface NexusGenFieldTypes {
     deleteMe: string; // String!
     getAuthToken: string; // String!
     sendVerification: string; // String!
-    textDownloadLink: string; // String!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
   }
@@ -149,7 +148,6 @@ export interface NexusGenFieldTypeNames {
     deleteMe: 'String'
     getAuthToken: 'String'
     sendVerification: 'String'
-    textDownloadLink: 'String'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
   }
@@ -202,9 +200,6 @@ export interface NexusGenArgTypes {
       username?: string | null; // String
     }
     sendVerification: { // args
-      phoneNumber: string; // String!
-    }
-    textDownloadLink: { // args
       phoneNumber: string; // String!
     }
     updateUser: { // args

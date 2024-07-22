@@ -21,7 +21,6 @@ type Mutation {
   deleteMe: String!
   getAuthToken: String!
   sendVerification(phoneNumber: String!): String!
-  textDownloadLink(phoneNumber: String!): String!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
 }

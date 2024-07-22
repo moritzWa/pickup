@@ -59,24 +59,8 @@ export const config = {
     },
     redis: {
         persistedRedisUrl: process.env.PERSISTED_REDIS_URL || "",
-        importsRedisUrl:
-            process.env.IMPORT_REDIS_URL ||
-            process.env.PERSISTED_REDIS_URL ||
-            "",
         cacheRedisUrl:
             process.env.CACHE_REDIS_URL ||
-            process.env.PERSISTED_REDIS_URL ||
-            "",
-        recalculateSpeedupRedisUrl:
-            process.env.RECALCULATE_SPEEDUP_REDIS_URL ||
-            process.env.PERSISTED_REDIS_URL ||
-            "",
-        historicalPricingRedisUrl:
-            process.env.HISTORICAL_PRICING_REDIS_URL ||
-            process.env.PERSISTED_REDIS_URL ||
-            "",
-        wrappedRedisUrl:
-            process.env.WRAPPED_REDIS_URL ||
             process.env.PERSISTED_REDIS_URL ||
             "",
     },
