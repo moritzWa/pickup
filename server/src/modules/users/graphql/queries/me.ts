@@ -3,7 +3,6 @@ import {
     Context,
     throwIfNotAuthenticated,
 } from "src/core/surfaces/graphql/context";
-import { analytics } from "src/utils/segment";
 import * as crypto from "crypto";
 import { config } from "src/config";
 import { Maybe, success } from "src/core/logic";

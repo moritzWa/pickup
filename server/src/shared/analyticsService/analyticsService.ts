@@ -1,5 +1,5 @@
 import { failure, UnexpectedError } from "src/core/logic";
-import { analytics } from "src/utils/segment";
+// import { analytics } from "src/utils/segment";
 
 export enum EventName {
     UserCreated = "User Created",
@@ -23,12 +23,12 @@ const track = ({ userId, anonymousId, eventName, properties }: TrackParams) => {
             return failure(new Error("Need either a user ID or anonymous ID."));
         }
 
-        analytics.track({
-            userId,
-            anonymousId,
-            event: eventName,
-            properties,
-        });
+        // analytics.track({
+        //     userId,
+        //     anonymousId,
+        //     event: eventName,
+        //     properties,
+        // });
     } catch (err) {
         return failure(new UnexpectedError(err));
     }
