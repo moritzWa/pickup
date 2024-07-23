@@ -73,6 +73,7 @@ type Mutation {
   sendVerification(phoneNumber: String!): String!
   startCourse(courseId: ID!): Course!
   startLesson(lessonId: String!): LessonSession!
+  transcribe(audioFileUrl: String!, lessonId: ID!): TranscribeResponse!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
 }
@@ -97,6 +98,10 @@ type Query {
   me: User
   myCourses: [Course!]!
   mySessions: [LessonSession!]!
+}
+
+type TranscribeResponse {
+  transcription: String!
 }
 
 """The `Upload` scalar type represents a file upload."""

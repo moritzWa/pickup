@@ -1,0 +1,111 @@
+{
+  // VSCode Settings Variables: https://code.visualstudio.com/docs/editor/variables-reference
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Server > Jest: Run All Tests",
+      "program": "./node_modules/jest/bin/jest.js",
+      "args": [
+        "-c",
+        "./src/__tests__/config/jest.config.js",
+        "--verbose",
+        "-i",
+        "--no-cache"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/server"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Server > Jest: Watch Current File",
+      "program": "./node_modules/.bin/jest",
+      "args": [
+        "${file}",
+        "-c",
+        "./src/__tests__/config/jest.config.js",
+        "--verbose",
+        "-i",
+        "--no-cache",
+        "--watchAll"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/server"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Server > Run Script (Debugger)",
+      "args": [
+        "./node_modules/.bin/ts-node",
+        "--transpile-only",
+        "-r",
+        "tsconfig-paths/register",
+        "${file}"
+      ],
+      "env": {
+        "TZ": "UTC"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/server",
+      "runtimeExecutable": "/Users/andrew/.nvm/versions/node/v18.13.0/bin/node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Server > Run Script (Debugger) with GC",
+      "runtimeArgs": [
+        "--expose-gc",
+        "-r",
+        "ts-node/register/transpile-only",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "args": ["${file}"],
+      "env": {
+        "TZ": "UTC"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/server",
+      "runtimeExecutable": "/Users/andrew/.nvm/versions/node/v18.13.0/bin/node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Server > Run Script",
+      "args": [
+        "./node_modules/.bin/ts-node",
+        "--transpile-only",
+        "--no-warnings",
+        "-r",
+        "tsconfig-paths/register",
+        "${file}"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/server"
+    },
+    {
+      "name": "Server > Nodemon: Run Debugger",
+      "type": "node",
+      "request": "attach",
+      // VS Code default debug port is 9229. Feel free to change it you are
+      // running mulitple applications in different VS Code windows. If you
+      // want to change the port, make sure to update the script, i.e.,
+      // "start:inspect": "nodemon --inspect=1234 src/index.ts",
+      "port": 9229,
+      // If you make changes to your code and save changes, nodemon will
+      // automatically restart your server. In a similar way, you can restart
+      // the debugger. If "restart" is set to false, then every time you save
+      // new changes to your code while running nodemon, you will need
+      // to re-run the debugger
+      "restart": true
+    }
+  ]
+}

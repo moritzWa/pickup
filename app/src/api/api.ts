@@ -133,6 +133,14 @@ const StartLesson = gql`
   }
 `;
 
+const Transcribe = gql`
+  mutation Transcribe($lessonId: ID!, $audioFileUrl: String!) {
+    transcribe(lessonId: $lessonId, audioFileUrl: $audioFileUrl) {
+      transcription
+    }
+  }
+`;
+
 const StartCourse = gql`
   ${BaseCourseFields}
   mutation StartCOurse($courseId: ID!) {
@@ -178,6 +186,7 @@ export const api = {
     lessons: GetCourseLessons,
   },
   lessons: {
+    transcribe: Transcribe,
     start: StartLesson,
     progress: GetLessonProgress,
     get: GetLesson,

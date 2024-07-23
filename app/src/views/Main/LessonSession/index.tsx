@@ -10,7 +10,7 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
-import { useTheme } from "src/hooks";
+import { useMe, useTheme } from "src/hooks";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -23,11 +23,14 @@ import {
 } from "@fortawesome/pro-solid-svg-icons";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "src/navigation";
-import { useQuery } from "@apollo/client";
-import { Query, QueryGetLessonArgs } from "src/api/generated/types";
+import { useMutation, useQuery } from "@apollo/client";
+import { Mutation, Query, QueryGetLessonArgs } from "src/api/generated/types";
 import { api } from "src/api";
 import Back from "src/components/Back";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Voice from "@react-native-voice/voice";
+import * as Speech from "expo-speech";
+import { storage } from "src/utils/firebase";
 
 const SIZE = 150;
 
@@ -35,6 +38,10 @@ const LessonSession = () => {
   const route = useRoute<RouteProp<RootStackParamList, "LessonSession">>();
   const lessonId = route.params?.lessonId || "";
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+
+  const { me } = useMe();
+  const [transcribe, { error: transcribeError, data: transcriptionData }] =
+    useMutation<Pick<Mutation, "transcribe">>(api.lessons.transcribe);
 
   const [recording, setRecording] = useState<Audio.Recording>();
   const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
@@ -103,7 +110,7 @@ const LessonSession = () => {
       setRecording(recordingObject);
 
       await recordingObject.prepareToRecordAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
+        Audio.RecordingOptionsPresets.LOW_QUALITY
       );
 
       await recordingObject.startAsync();
@@ -141,8 +148,23 @@ const LessonSession = () => {
 
         const uri = recording.getURI();
 
+        // const { transcription } = await Speech.speak(uri);
         if (uri) {
           setLastRecordingUri(uri);
+
+          const fileData = await FileSystem.readAsStringAsync(uri, {
+            encoding: "base64",
+          });
+
+          // log the size of the file data
+          console.log("File size:", fileData.length);
+
+          // await transcribe({
+          //   variables: {
+          //     lessonId,
+          //     audioFileUrl: "",
+          //   },
+          // });
         }
       } catch (error) {
         console.error("Failed to stop recording", error);
@@ -158,11 +180,46 @@ const LessonSession = () => {
   }
 
   const _playRecordingUri = async () => {
-    if (lastRecordingUri) {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: lastRecordingUri },
-        { shouldPlay: true }
-      );
+    try {
+      if (lastRecordingUri) {
+        const fileName = lastRecordingUri.split("/").pop();
+
+        console.log(fileName);
+
+        const fileRef = storage().ref(
+          `users/${me?.authProviderId}/recordings/${Date.now()}-${fileName}`
+        );
+
+        const upload = fileRef.putFile(lastRecordingUri);
+
+        await upload.then(async () => {
+          const url = await fileRef.getDownloadURL();
+
+          console.log(`audio url: ${url}`);
+
+          await transcribe({
+            variables: {
+              lessonId,
+              audioFileUrl: url,
+            },
+          });
+        });
+
+        // const fileObj = {
+        //   uri: lastRecordingUri,
+        //   name: "audio.aac",
+        //   type: "audio/aac",
+        // };
+
+        // const { sound } = await Audio.Sound.createAsync(
+        //   { uri: lastRecordingUri },
+        //   { shouldPlay: true }
+        // );
+
+        // upload it to server
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -242,12 +299,20 @@ const LessonSession = () => {
     }
   };
 
+  const _openLesson = () => {
+    // TODO: lesson
+  };
+
   const theme = useTheme();
   const lesson = lessonData?.getLesson;
   const insets = useSafeAreaInsets();
 
+  if (__DEV__ && transcribeError) {
+    console.log(transcribeError);
+  }
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1, paddingTop: insets.top }}>
       <View style={{ position: "absolute", top: insets.top + 15, left: 15 }}>
         <Back />
       </View>
@@ -255,16 +320,17 @@ const LessonSession = () => {
       {isRecording ? (
         <View
           style={{
-            paddingHorizontal: 15,
             paddingVertical: 10,
             position: "absolute",
             top: insets.top + 15,
             right: 15,
+            width: 130,
             backgroundColor: colors.red100,
-            borderRadius: 10,
+            borderRadius: 100,
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <View
@@ -283,27 +349,19 @@ const LessonSession = () => {
       ) : (
         <View
           style={{
-            paddingHorizontal: 15,
             paddingVertical: 10,
             position: "absolute",
             top: insets.top + 15,
+            width: 130,
+            justifyContent: "center",
             right: 15,
             backgroundColor: theme.secondaryBackground,
-            borderRadius: 10,
+            borderRadius: 100,
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
           }}
         >
-          <View
-            style={{
-              backgroundColor: theme.text,
-              width: 10,
-              height: 10,
-              borderRadius: 100,
-              marginRight: 10,
-            }}
-          />
           <Text style={{ color: theme.text, fontSize: 16 }}>Not Recording</Text>
         </View>
       )}
@@ -338,7 +396,7 @@ const LessonSession = () => {
               justifyContent: "center",
               alignItems: "center",
             }}
-            activeOpacity={0.8}
+            activeOpacity={1}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
             onPress={_startOrStopRecording}
@@ -367,6 +425,7 @@ const LessonSession = () => {
             }}
           >
             <TouchableOpacity
+              activeOpacity={0.8}
               style={{
                 padding: 10,
                 paddingHorizontal: 15,
@@ -396,14 +455,32 @@ const LessonSession = () => {
             </TouchableOpacity>
           </View>
         )}
+
+        {transcriptionData ? (
+          <Text
+            style={{
+              color: theme.text,
+              marginTop: 15,
+              fontSize: 16,
+              fontFamily: "Raleway-Regular",
+            }}
+          >
+            {transcriptionData?.transcribe?.transcription}
+          </Text>
+        ) : null}
       </View>
 
       <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={_openLesson}
         style={{
           padding: 20,
-          paddingVertical: 15,
-          borderRadius: 20,
-          margin: 10,
+          paddingVertical: 25,
+          borderTopWidth: 1,
+          borderColor: theme.border,
+          paddingBottom: insets.bottom + 25,
+          borderTopRightRadius: 30,
+          borderTopLeftRadius: 30,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -438,9 +515,9 @@ const LessonSession = () => {
 
             <View
               style={{
-                width: 35,
-                height: 35,
-                backgroundColor: colors.green50,
+                width: 30,
+                height: 30,
+                backgroundColor: colors.black,
                 borderRadius: 40,
                 display: "flex",
                 justifyContent: "center",
@@ -450,7 +527,7 @@ const LessonSession = () => {
             >
               <FontAwesomeIcon
                 icon={faIslandTreePalm}
-                size={16}
+                size={12}
                 color={colors.white}
               />
             </View>
@@ -468,7 +545,7 @@ const LessonSession = () => {
           </Text>
         </View>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -94,6 +94,7 @@ export type Mutation = {
   sendVerification: Scalars['String']['output'];
   startCourse: Course;
   startLesson: LessonSession;
+  transcribe: TranscribeResponse;
   updateUser: User;
   verifyPhoneNumber: User;
 };
@@ -120,6 +121,12 @@ export type MutationStartCourseArgs = {
 
 export type MutationStartLessonArgs = {
   lessonId: Scalars['String']['input'];
+};
+
+
+export type MutationTranscribeArgs = {
+  audioFileUrl: Scalars['String']['input'];
+  lessonId: Scalars['ID']['input'];
 };
 
 
@@ -196,6 +203,11 @@ export type QueryGetLessonProgressArgs = {
 
 export type QueryGetLessonSessionsArgs = {
   lessonId: Scalars['ID']['input'];
+};
+
+export type TranscribeResponse = {
+  __typename?: 'TranscribeResponse';
+  transcription: Scalars['String']['output'];
 };
 
 export type User = {

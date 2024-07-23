@@ -7,6 +7,7 @@ import {
     failure,
     success,
 } from "src/core/logic";
+import * as fs from "fs";
 
 export enum OpenAIModel {
     GPT3 = "gpt-3.5-turbo",
@@ -34,10 +35,29 @@ const createCompletion = async (): Promise<
     }
 };
 
+const transcribeAudio = async (
+    audioStream: fs.ReadStream
+): Promise<FailureOrSuccess<DefaultErrors, string>> => {
+    try {
+        const transcription = await client.audio.transcriptions.create({
+            file: audioStream,
+            model: "whisper-1",
+            response_format: "json",
+        });
+
+        return success(transcription.text);
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
 export const openai = {
     chat: {
         completions: {
             create: createCompletion,
         },
+    },
+    audio: {
+        transcribe: transcribeAudio,
     },
 };

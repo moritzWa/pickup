@@ -72,6 +72,9 @@ export interface NexusGenObjects {
     source: string; // String!
   }
   Query: {};
+  TranscribeResponse: { // root type
+    transcription: string; // String!
+  }
   User: entities.User ;
 }
 
@@ -141,6 +144,7 @@ export interface NexusGenFieldTypes {
     sendVerification: string; // String!
     startCourse: NexusGenRootTypes['Course']; // Course!
     startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
+    transcribe: NexusGenRootTypes['TranscribeResponse']; // TranscribeResponse!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
   }
@@ -163,6 +167,9 @@ export interface NexusGenFieldTypes {
     me: NexusGenRootTypes['User'] | null; // User
     myCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     mySessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
+  }
+  TranscribeResponse: { // field return type
+    transcription: string; // String!
   }
   User: { // field return type
     authProvider: NexusGenEnums['UserAuthProviderEnum']; // UserAuthProviderEnum!
@@ -247,6 +254,7 @@ export interface NexusGenFieldTypeNames {
     sendVerification: 'String'
     startCourse: 'Course'
     startLesson: 'LessonSession'
+    transcribe: 'TranscribeResponse'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
   }
@@ -269,6 +277,9 @@ export interface NexusGenFieldTypeNames {
     me: 'User'
     myCourses: 'Course'
     mySessions: 'LessonSession'
+  }
+  TranscribeResponse: { // field return type name
+    transcription: 'String'
   }
   User: { // field return type name
     authProvider: 'UserAuthProviderEnum'
@@ -314,6 +325,10 @@ export interface NexusGenArgTypes {
     }
     startLesson: { // args
       lessonId: string; // String!
+    }
+    transcribe: { // args
+      audioFileUrl: string; // String!
+      lessonId: string; // ID!
     }
     updateUser: { // args
       avatarImageUrl?: string | null; // String
