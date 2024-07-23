@@ -4,6 +4,8 @@ import {
   Button,
   SafeAreaView,
   TouchableOpacity,
+  Alert,
+  Animated,
 } from "react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as FileSystem from "expo-file-system";
@@ -18,10 +20,21 @@ import { useQuery } from "@apollo/client";
 import { Query, QueryGetLessonArgs } from "src/api/generated/types";
 import { api } from "src/api";
 import Back from "src/components/Back";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const SIZE = 150;
 
 const LessonSession = () => {
   const route = useRoute<RouteProp<RootStackParamList, "LessonSession">>();
   const lessonId = route.params?.lessonId || "";
+  const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+
+  const [recording, setRecording] = useState<Audio.Recording>();
+  const [isRecording, setIsRecording] = useState(false);
+  const silenceTimer = useRef<NodeJS.Timeout | null>(null);
+  const audioAnalyzer = useRef(null);
+  const levelCheckInterval = useRef(null);
+  const [timer, setTimer] = useState(0);
 
   const lessonVariables = useMemo(
     (): QueryGetLessonArgs => ({
@@ -39,12 +52,6 @@ const LessonSession = () => {
     variables: lessonVariables,
   });
 
-  const [recording, setRecording] = useState<Audio.Recording>();
-  const [isRecording, setIsRecording] = useState(false);
-  const silenceTimer = useRef<NodeJS.Timeout | null>(null);
-  const audioAnalyzer = useRef(null);
-  const levelCheckInterval = useRef(null);
-
   useEffect(() => {
     return () => {
       if (recording) {
@@ -53,49 +60,122 @@ const LessonSession = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000);
+    } else {
+      if (interval) {
+        clearInterval(interval);
+      }
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+      if (recording) {
+        stopRecording();
+      }
+    };
+  }, [isRecording]);
+
   async function startRecording() {
     try {
+      await stopRecording(); // Stop any existing recording
+
       await Audio.requestPermissionsAsync();
+
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
+      const recordingObject = new Audio.Recording();
+
+      setRecording(recordingObject);
+
+      await recordingObject.prepareToRecordAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      setRecording(recording);
+
+      await recordingObject.startAsync();
+
+      // Your state management here (if using React)
       setIsRecording(true);
+      setTimer(0);
+
+      console.log(recordingObject);
 
       // Start monitoring audio levels
-      startAudioLevelMonitoring(recording);
+      // startAudioLevelMonitoring(recordingObject);
     } catch (err) {
       console.error("Failed to start recording", err);
+      console.log(recording);
+
+      // stop the recording
+      if (recording) {
+        await stopRecording();
+      }
     }
   }
 
   async function stopRecording() {
     setIsRecording(false);
-    if (!recording) {
-      return;
-    }
+    setTimer(0);
 
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
+      if (!recording) {
+        return;
+      }
 
-      if (uri) {
-        sendAudioToBackend(uri);
+      try {
+        await recording.stopAndUnloadAsync();
+
+        const uri = recording.getURI();
+
+        if (uri) {
+          console.log("Recording saved to", uri);
+          // sendAudioToBackend(uri);
+        }
+      } catch (error) {
+        console.error("Failed to stop recording", error);
+      }
+
+      if (silenceTimer.current) {
+        clearTimeout(silenceTimer.current);
+        silenceTimer.current = null;
       }
     } catch (error) {
-      console.error("Failed to stop recording", error);
-    }
-
-    if (silenceTimer.current) {
-      clearTimeout(silenceTimer.current);
-      silenceTimer.current = null;
+      console.error("Failed to unload recording", error);
     }
   }
+
+  const handlePressIn = () => {
+    Animated.spring(animation, {
+      toValue: 0.85, // Scale down to 90%
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(animation, {
+      toValue: 1, // Scale back to original size
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const _startOrStopRecording = async () => {
+    if (isRecording) {
+      await stopRecording();
+    } else {
+      await startRecording();
+    }
+  };
 
   const startAudioLevelMonitoring = (recordingObject: Audio.Recording) => {
     levelCheckInterval.current = setInterval(async () => {
@@ -150,14 +230,70 @@ const LessonSession = () => {
   };
 
   const theme = useTheme();
-  const SIZE = 125;
   const lesson = lessonData?.getLesson;
+  const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ marginLeft: 15 }}>
+      <View style={{ position: "absolute", top: insets.top + 15, left: 15 }}>
         <Back />
       </View>
+
+      {isRecording ? (
+        <View
+          style={{
+            paddingHorizontal: 15,
+            paddingVertical: 10,
+            position: "absolute",
+            top: insets.top + 15,
+            right: 15,
+            backgroundColor: colors.red100,
+            borderRadius: 10,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: colors.red50,
+              width: 10,
+              height: 10,
+              borderRadius: 100,
+              marginRight: 10,
+            }}
+          />
+          <Text style={{ color: colors.red, fontSize: 16 }}>
+            {new Date(timer * 1000).toISOString().substr(11, 8)}
+          </Text>
+        </View>
+      ) : (
+        <View
+          style={{
+            paddingHorizontal: 15,
+            paddingVertical: 10,
+            position: "absolute",
+            top: insets.top + 15,
+            right: 15,
+            backgroundColor: theme.secondaryBackground,
+            borderRadius: 10,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: theme.text,
+              width: 10,
+              height: 10,
+              borderRadius: 100,
+              marginRight: 10,
+            }}
+          />
+          <Text style={{ color: theme.text, fontSize: 16 }}>Not Recording</Text>
+        </View>
+      )}
 
       <View
         style={{
@@ -168,7 +304,7 @@ const LessonSession = () => {
         }}
       >
         {/* make a play button that is colors.pink and uses fontawesome */}
-        <View
+        <Animated.View
           style={{
             width: SIZE,
             height: SIZE,
@@ -177,19 +313,22 @@ const LessonSession = () => {
             justifyContent: "center",
             alignItems: "center",
             alignSelf: "center",
+            transform: [{ scale: animation }],
           }}
         >
           <TouchableOpacity
             style={{
-              width: SIZE - 25,
-              height: SIZE - 25,
+              width: SIZE - 15,
+              height: SIZE - 15,
               borderRadius: 100,
               backgroundColor: colors.pink50,
               justifyContent: "center",
               alignItems: "center",
             }}
             activeOpacity={0.8}
-            onPress={startRecording}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={_startOrStopRecording}
           >
             <FontAwesomeIcon
               style={{
@@ -198,19 +337,10 @@ const LessonSession = () => {
               }}
               icon={faPlay}
               color={colors.white}
-              size={48}
+              size={64}
             />
           </TouchableOpacity>
-        </View>
-
-        <Text
-          style={{
-            marginTop: 20,
-            color: theme.header,
-          }}
-        >
-          {isRecording ? "Recording..." : "Not recording"}
-        </Text>
+        </Animated.View>
       </View>
 
       <TouchableOpacity
@@ -249,7 +379,9 @@ const LessonSession = () => {
           <Text
             style={{
               color: theme.header,
-              fontSize: 16,
+              fontWeight: "bold",
+              fontFamily: "Raleway-Italic",
+              fontSize: 24,
             }}
           >
             {lesson?.title}
