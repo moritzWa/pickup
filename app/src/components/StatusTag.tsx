@@ -122,7 +122,7 @@ export default function StatusTag({
                 marginRight: rightIcon ? 5 : 0,
                 fontSize: 12,
                 textAlign: "center",
-                fontFamily: "Mona-Sans-SemiBold",
+                fontFamily: "Raleway-Semibold",
                 color,
               },
               labelStyle,

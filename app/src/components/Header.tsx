@@ -72,7 +72,7 @@ const Header = ({
           style={{
             flex: 3,
             textAlign: "center",
-            fontFamily: "Mona-Sans-SemiBold",
+            fontFamily: "Raleway-Semibold",
             fontSize: IS_IPAD ? 24 : 16,
             color: header,
           }}

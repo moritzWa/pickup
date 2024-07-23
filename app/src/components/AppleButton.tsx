@@ -123,7 +123,7 @@ export const AppleButton = ({
           <Text
             style={{
               color: colors.white,
-              fontFamily: "Mona-Sans-Semibold",
+              fontFamily: "Raleway-Semibold",
               textAlign: "center",
               fontSize: 16,
             }}

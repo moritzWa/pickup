@@ -51,7 +51,7 @@ const Input = ({
           style={{
             fontSize: 14,
             marginBottom: 5,
-            fontFamily: "Mona-Sans-Medium",
+            fontFamily: "Raleway-Medium",
             color: textPrimary,
           }}
         >
@@ -66,7 +66,7 @@ const Input = ({
           style={{
             fontSize: 12,
             marginBottom: 5,
-            fontFamily: "Mona-Sans-Regular",
+            fontFamily: "Raleway-Regular",
             color: textSecondary,
           }}
         >
@@ -103,7 +103,7 @@ const Input = ({
             fontSize: 12,
             marginTop: 5,
             color: colors.red50,
-            fontFamily: "Mona-Sans-Regular",
+            fontFamily: "Raleway-Regular",
           }}
         >
           {errorMessage}

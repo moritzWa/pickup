@@ -331,7 +331,7 @@ export function PhoneVerification() {
               <Text
                 style={{
                   fontSize: 14,
-                  fontFamily: "Mona-Sans-Semibold",
+                  fontFamily: "Raleway-Semibold",
                   color: colors.primary,
                 }}
               >

@@ -93,7 +93,7 @@ const Button = ({
                 {
                   color: theme.background,
                   textAlign: "center",
-                  fontFamily: "Mona-Sans-SemiBold",
+                  fontFamily: "Raleway-Semibold",
                   width: "100%",
                   fontSize: IS_IPAD ? 24 : 18,
                 },

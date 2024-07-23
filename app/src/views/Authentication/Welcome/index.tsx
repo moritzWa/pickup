@@ -85,7 +85,7 @@ const Welcome = () => {
             style={{
               fontSize: IS_IPAD ? 48 : 26,
               textAlign: "center",
-              fontFamily: "Mona-Sans-Semibold",
+              fontFamily: "Raleway-Semibold",
               color: colors.white,
             }}
           >
@@ -112,7 +112,7 @@ const Welcome = () => {
             }}
             textProps={{
               style: {
-                fontFamily: "Mona-Sans-Semibold",
+                fontFamily: "Raleway-Semibold",
               },
             }}
             onPress={signUp}
@@ -127,7 +127,7 @@ const Welcome = () => {
             textProps={{
               style: {
                 color: colors.black,
-                fontFamily: "Mona-Sans-Semibold",
+                fontFamily: "Raleway-Semibold",
               },
             }}
             onPress={signIn}

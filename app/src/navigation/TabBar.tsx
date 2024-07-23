@@ -197,7 +197,7 @@ const SingleTab = ({
           {badgeColor !== colors.yellow50 ? (
             <Text
               style={{
-                fontFamily: "Mona-Sans-Bold",
+                fontFamily: "Raleway-Bold",
                 color: badgeColor ? colors.black : colors.white,
                 fontSize: 11,
               }}
@@ -212,7 +212,7 @@ const SingleTab = ({
           style={{
             textAlign: "center",
             fontSize: 12,
-            fontFamily: "Mona-Sans-SemiBold",
+            fontFamily: "Raleway-Semibold",
             color: isFocused
               ? theme === "light"
                 ? colors.positive

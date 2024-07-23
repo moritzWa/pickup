@@ -54,6 +54,7 @@ const Home = () => {
                 color: theme.header,
                 fontSize: 22,
                 fontWeight: "bold",
+                fontFamily: "Raleway-Regular",
               }}
             >
               Welcome, Andrew

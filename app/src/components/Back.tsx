@@ -59,6 +59,7 @@ const Back = ({
       {hideBack ? null : (
         <Text
           style={{
+            fontFamily: "Raleway-Regular",
             marginLeft: 5,
             fontSize: IS_IPAD ? 20 : 16,
             color: color,

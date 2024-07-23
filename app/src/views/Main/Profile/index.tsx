@@ -281,10 +281,10 @@ const Profile = () => {
               style={{
                 flex: 1,
                 textAlign: "center",
-                fontFamily: "Mona-Sans-Semibold",
+                fontFamily: "Raleway-Semibold",
                 color: colors.white,
                 fontSize: 16,
-                padding: 20,
+                padding: 15,
               }}
             >
               Share Pickup with a friend
@@ -372,7 +372,7 @@ const Profile = () => {
             name="Enable Push Notifications"
           />
 
-          <Section
+          {/* <Section
             icon={<FontAwesomeIcon icon={faMoon} color={text} />}
             name={"Dark mode"}
             rightIcon={
@@ -385,14 +385,14 @@ const Profile = () => {
                 onChange={() => toggleDarkMode()}
               />
             }
-          />
+          /> */}
 
           <View style={{ height: 1, backgroundColor: secondaryBackground }} />
           <Section
             onPress={_logout}
             icon={<FontAwesomeIcon icon={faSignOut} color={colors.red50} />}
             name="Logout"
-            nameStyle={{ color: colors.red50, fontFamily: "Mona-Sans-Regular" }}
+            nameStyle={{ color: colors.red50, fontFamily: "Raleway-Regular" }}
             showRightIcon={false}
           />
           <View style={{ height: 1, backgroundColor: secondaryBackground }} />
@@ -403,7 +403,7 @@ const Profile = () => {
                   fontSize: 12,
                   paddingVertical: 10,
                   paddingHorizontal: 30,
-                  fontFamily: "Mona-Sans-Bold",
+                  fontFamily: "Raleway-Bold",
                   backgroundColor: secondaryBackground,
                   color: header,
                 }}
@@ -526,7 +526,7 @@ const _ProfilePicture = ({
       <Text
         style={{
           fontSize: 28,
-          fontFamily: "Mona-Sans-Semibold",
+          fontFamily: "Raleway-Semibold",
           color: colors.white,
         }}
       >

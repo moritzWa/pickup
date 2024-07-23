@@ -100,7 +100,7 @@ export const GoogleButton = ({ label, onSuccess, onError }: GoogleProps) => {
           <Text
             style={{
               color: colors.black,
-              fontFamily: "Mona-Sans-Semibold",
+              fontFamily: "Raleway-Semibold",
               textAlign: "center",
               fontSize: IS_IPAD ? 24 : 16,
             }}

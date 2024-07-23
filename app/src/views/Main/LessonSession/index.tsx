@@ -13,7 +13,14 @@ import { Audio } from "expo-av";
 import { useTheme } from "src/hooks";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPlay } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faIslandTreePalm,
+  faPause,
+  faPlay,
+  faRedo,
+  faReplyAll,
+  faTree,
+} from "@fortawesome/pro-solid-svg-icons";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "src/navigation";
 import { useQuery } from "@apollo/client";
@@ -30,6 +37,7 @@ const LessonSession = () => {
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const [recording, setRecording] = useState<Audio.Recording>();
+  const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const silenceTimer = useRef<NodeJS.Timeout | null>(null);
   const audioAnalyzer = useRef(null);
@@ -75,9 +83,6 @@ const LessonSession = () => {
     return () => {
       if (interval) {
         clearInterval(interval);
-      }
-      if (recording) {
-        stopRecording();
       }
     };
   }, [isRecording]);
@@ -137,8 +142,7 @@ const LessonSession = () => {
         const uri = recording.getURI();
 
         if (uri) {
-          console.log("Recording saved to", uri);
-          // sendAudioToBackend(uri);
+          setLastRecordingUri(uri);
         }
       } catch (error) {
         console.error("Failed to stop recording", error);
@@ -152,6 +156,15 @@ const LessonSession = () => {
       console.error("Failed to unload recording", error);
     }
   }
+
+  const _playRecordingUri = async () => {
+    if (lastRecordingUri) {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: lastRecordingUri },
+        { shouldPlay: true }
+      );
+    }
+  };
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -333,19 +346,62 @@ const LessonSession = () => {
             <FontAwesomeIcon
               style={{
                 position: "relative",
-                right: -3,
+                right: !isRecording ? -5 : 0,
               }}
-              icon={faPlay}
+              icon={isRecording ? faPause : faPlay}
               color={colors.white}
               size={64}
             />
           </TouchableOpacity>
         </Animated.View>
+
+        {lastRecordingUri && (
+          <View
+            style={{
+              padding: 15,
+              marginTop: 15,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                padding: 10,
+                paddingHorizontal: 15,
+                backgroundColor: theme.header,
+                borderRadius: 100,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+              onPress={_playRecordingUri}
+            >
+              <FontAwesomeIcon
+                icon={faRedo}
+                color={theme.background}
+                size={24}
+                style={{ marginRight: 10 }}
+              />
+              <Text
+                style={{
+                  color: theme.background,
+                  fontSize: 18,
+                  fontFamily: "Raleway-Medium",
+                }}
+              >
+                Play Recording
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <TouchableOpacity
         style={{
           padding: 20,
+          paddingVertical: 15,
           borderRadius: 20,
           margin: 10,
           display: "flex",
@@ -356,42 +412,56 @@ const LessonSession = () => {
       >
         <View
           style={{
-            width: 40,
-            height: 40,
-            backgroundColor: theme.background,
-            borderRadius: 40,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginRight: 10,
+            // wrap the text
+            flex: 1,
           }}
         >
-          <Text
+          <View
             style={{
-              fontSize: 20,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 5,
             }}
           >
-            🌴
-          </Text>
-        </View>
+            <Text
+              style={{
+                color: theme.header,
+                fontWeight: "bold",
+                fontFamily: "Raleway-Bold",
+                fontSize: 24,
+                flex: 1,
+              }}
+            >
+              {lesson?.title}
+            </Text>
 
-        <View>
-          <Text
-            style={{
-              color: theme.header,
-              fontWeight: "bold",
-              fontFamily: "Raleway-Italic",
-              fontSize: 24,
-            }}
-          >
-            {lesson?.title}
-          </Text>
+            <View
+              style={{
+                width: 35,
+                height: 35,
+                backgroundColor: colors.green50,
+                borderRadius: 40,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: 10,
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faIslandTreePalm}
+                size={16}
+                color={colors.white}
+              />
+            </View>
+          </View>
 
           <Text
             style={{
               marginTop: 5,
               color: theme.text,
-              fontSize: 14,
+              fontSize: 18,
+              fontFamily: "Raleway-Regular",
             }}
           >
             {lesson?.subtitle}

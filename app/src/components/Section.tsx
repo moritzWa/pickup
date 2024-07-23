@@ -99,7 +99,7 @@ const Section = ({
                 {
                   fontSize: 14,
                   textAlign: "left",
-                  fontFamily: "Mona-Sans-Regular",
+                  fontFamily: "Raleway-Regular",
                   color: header,
                 },
                 nameStyle,
@@ -121,7 +121,7 @@ const Section = ({
                 {
                   textAlign: "right",
                   fontSize: 14,
-                  fontFamily: "Mona-Sans-Regular",
+                  fontFamily: "Raleway-Regular",
                   marginHorizontal: 15,
                   marginRight: 0,
                   flex: 1,

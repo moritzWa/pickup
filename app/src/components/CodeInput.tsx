@@ -80,7 +80,7 @@ const CodeInput = ({
           style={{
             fontSize: 22,
             color: theme.header,
-            fontFamily: "Mona-Sans-Expanded-SemiBold",
+            fontFamily: "Raleway-Expanded-SemiBold",
           }}
         >
           {digit}
@@ -126,7 +126,7 @@ const CodeInput = ({
           textAlign: "left",
           width: "100%",
           marginBottom: 10,
-          fontFamily: "Mona-Sans-SemiBold",
+          fontFamily: "Raleway-Semibold",
           color: theme.text,
         }}
       >

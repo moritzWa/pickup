@@ -200,7 +200,7 @@ const Signup = () => {
         <Text
           style={{
             fontSize: 28,
-            fontFamily: "Mona-Sans-Regular",
+            fontFamily: "Raleway-Regular",
             textAlign: "left",
             width: "100%",
             marginTop: 25,
@@ -248,7 +248,7 @@ const Signup = () => {
                   fontSize: 14,
                   flex: 1,
                   color: text,
-                  fontFamily: "Mona-Sans-Regular",
+                  fontFamily: "Raleway-Regular",
                 }}
               >
                 Password
@@ -261,7 +261,7 @@ const Signup = () => {
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: "Mona-Sans-Regular",
+                    fontFamily: "Raleway-Regular",
                     color: text,
                   }}
                 >
