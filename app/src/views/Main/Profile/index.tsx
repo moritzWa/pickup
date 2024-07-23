@@ -262,7 +262,7 @@ const Profile = () => {
         }}
       >
         <LinearGradient
-          colors={[colors.primary, colors.lightBlue60]}
+          colors={[colors.lightBlue80, colors.lightBlue60]}
           start={[0, 0]}
           end={[1, 1]}
           style={{
@@ -283,10 +283,11 @@ const Profile = () => {
                 textAlign: "center",
                 fontFamily: "Mona-Sans-Semibold",
                 color: colors.white,
-                padding: 15,
+                fontSize: 16,
+                padding: 20,
               }}
             >
-              Share Awaken with a friend
+              Share Pickup with a friend
             </Text>
             <FontAwesomeIcon
               style={{
@@ -295,7 +296,7 @@ const Profile = () => {
               }}
               icon={faShareAll}
               color={colors.white}
-              size={18}
+              size={24}
             />
           </TouchableOpacity>
         </LinearGradient>
@@ -313,43 +314,6 @@ const Profile = () => {
         >
           <View>
             <ProfilePicture user={me} />
-          </View>
-
-          <View>
-            {!isNil(me?.number) && (
-              <TouchableOpacity
-                style={{
-                  marginTop: 15,
-                  backgroundColor: secondaryBackground,
-                  borderRadius: 12,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 10,
-                  paddingVertical: 5,
-                }}
-                activeOpacity={0.9}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  Alert.alert(
-                    "Woohooooo",
-                    "You were the " +
-                      _numToFormat(me.number || 0) +
-                      " person to join Awaken 💪"
-                  );
-                }}
-              >
-                <Text
-                  style={{
-                    color: header,
-                    fontSize: 14,
-                    fontFamily: "Mona-Sans-Semibold",
-                  }}
-                >
-                  User #{numbro(me?.number).format("0,0")} 🎖️
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
 
           <View style={{ marginTop: 15, alignItems: "center" }}>
@@ -475,10 +439,6 @@ const Profile = () => {
               Version {constants.version} ({constants.build})
             </Text>
 
-            <TouchableOpacity onPress={_refreshMe} style={{ marginTop: 15 }}>
-              <Text style={{ color: text, fontSize: 16 }}>Refresh Account</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               onPress={_requestDeleteAccount}
               style={{ marginTop: 15, marginBottom: 25 }}
@@ -539,7 +499,7 @@ const _ProfilePicture = ({
             height: 75,
             overflow: "hidden",
             flexShrink: 0,
-            borderRadius: 10,
+            borderRadius: 100,
             // border: "1px solid " + colors.gray60,
           }}
         />
@@ -552,7 +512,7 @@ const _ProfilePicture = ({
       style={{
         width: 75,
         height: 75,
-        borderRadius: 10,
+        borderRadius: 100,
         display: "flex",
         flexDirection: "row",
         alignItems: "center",

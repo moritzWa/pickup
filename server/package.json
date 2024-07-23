@@ -138,6 +138,7 @@
         "dinero.js": "^1.9.1",
         "dotenv": "^10.0.0",
         "double-ended-queue": "^2.1.0-0",
+        "elevenlabs": "^0.10.0",
         "eslint": "^8.56.0",
         "expo-status-bar": "^1.1.0",
         "express": "^4.17.1",

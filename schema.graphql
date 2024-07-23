@@ -7,6 +7,8 @@ type Course {
   createdAt: Date!
   id: String!
   imageUrl: String!
+  isStarted: Boolean
+  mostRecentLesson: Lesson
   subtitle: String!
   textColor: String!
   title: String!
@@ -28,8 +30,16 @@ type GetMobileUpdateResponse {
 }
 
 type Lesson {
+  content: String!
+  courseId: String!
   createdAt: Date!
   id: String!
+  progress: LessonProgress
+  roles: [LessonRole!]!
+  sessions: [LessonSession!]
+  subtitle: String!
+  title: String!
+  type: LessonTypeEnum!
   updatedAt: Date!
 }
 
@@ -39,10 +49,21 @@ type LessonProgress {
   updatedAt: Date!
 }
 
+type LessonRole {
+  context: String!
+  type: String!
+}
+
 type LessonSession {
   createdAt: Date!
   id: String!
   updatedAt: Date!
+}
+
+enum LessonTypeEnum {
+  Game
+  RolePlay
+  Vocabulary
 }
 
 type Mutation {
@@ -64,9 +85,11 @@ type PaymentMethod {
 
 type Query {
   checkCode(referralCode: String!): Boolean!
+  getCourse(courseId: ID!): Course!
   getCourseLessons(courseId: ID!): [Lesson!]!
   getCourses: [Course!]!
   getIntercomMobileToken(platform: String): String!
+  getLesson(lessonId: ID!): Lesson!
   getLessonProgress(lessonId: ID!): LessonProgress!
   getLessonSessions(lessonId: ID!): [LessonSession!]!
   getMobileUpdate: GetMobileUpdateResponse!

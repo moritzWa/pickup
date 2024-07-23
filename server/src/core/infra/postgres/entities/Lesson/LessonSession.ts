@@ -14,7 +14,7 @@ import {
 import { User } from "../User";
 import { Lesson } from "./Lesson";
 import { Participant } from "../Participant";
-import { Course } from "../Course";
+import { Course } from "../Course/Course";
 
 @Entity({
     name: "lesson_sessions",

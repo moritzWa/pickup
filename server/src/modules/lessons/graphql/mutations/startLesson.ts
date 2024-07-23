@@ -18,6 +18,7 @@ import { auth } from "firebase-admin";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { lessonRepo, lessonSessionRepo } from "../../infra";
 import { v4 as uuidv4 } from "uuid";
+import { courseProgressRepo } from "src/modules/courses/infra";
 
 export const startLesson = mutationField("startLesson", {
     type: nonNull("LessonSession"),
@@ -49,6 +50,15 @@ export const startLesson = mutationField("startLesson", {
         throwIfError(sessionResponse);
 
         const session = sessionResponse.value;
+
+        // update the most recently played lesson
+        await courseProgressRepo.updateProgressOfCourse(
+            user.id,
+            lesson.courseId,
+            {
+                mostRecentLessonId: lesson.id,
+            }
+        );
 
         return session;
     },

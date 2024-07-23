@@ -237,7 +237,7 @@ const _getImage = (
         image: HomeIcon,
         active: HomeIconFilled,
       };
-    case "Courses":
+    case "Activity":
       return {
         image: ClockIcon,
         active: ClockIconFilled,

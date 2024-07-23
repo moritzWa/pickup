@@ -12,56 +12,39 @@ import {
     Relation,
 } from "typeorm";
 import { Participant } from "../Participant";
-import { Course } from "../Course/Course";
-import { Lesson } from "./Lesson";
+import { Course } from "./Course";
 import { User } from "../User";
+import { Maybe } from "src/core/logic";
+import { Lesson } from "../Lesson";
 
 @Entity({
-    name: "lesson_progress",
+    name: "course_progress",
 })
-@Index(["lessonId", "userId"], { unique: true })
-export class LessonProgress {
+@Index(["courseId", "userId"], { unique: true })
+export class CourseProgress {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
     @Column({
-        nullable: false,
-        name: "participant_id",
+        nullable: true,
+        name: "most_recent_lesson_id",
         type: "uuid",
     })
-    @Index("progress_participant_id_idx")
-    participantId!: string;
-
-    @ManyToOne(() => Participant, (t) => t.id, {
-        nullable: false,
-        eager: false,
-        onDelete: "CASCADE",
-    })
-    @JoinColumn({ name: "participant_id" })
-    participant!: Participant;
-
-    @Column({
-        nullable: false,
-        name: "lesson_id",
-        type: "uuid",
-    })
-    @Index("progress_lesson_id_idx")
-    lessonId!: string;
+    mostRecentLessonId!: Maybe<string>;
 
     @ManyToOne(() => Lesson, (t) => t.id, {
         nullable: false,
         eager: false,
         onDelete: "CASCADE",
     })
-    @JoinColumn({ name: "lesson_id" })
-    lesson!: Lesson;
+    @JoinColumn({ name: "most_recent_lesson_id" })
+    mostRecentLesson!: Lesson;
 
     @Column({
         nullable: false,
         name: "course_id",
         type: "uuid",
     })
-    @Index("progress_course_id_idx")
     courseId!: string;
 
     @Column({
@@ -69,7 +52,6 @@ export class LessonProgress {
         name: "user_id",
         type: "uuid",
     })
-    @Index("progress_user_id_idx")
     userId!: string;
 
     @ManyToOne(() => Course, (t) => t.id, {

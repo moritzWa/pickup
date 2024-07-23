@@ -3,31 +3,37 @@ import {
     FindManyOptions,
     FindOneOptions,
     getRepository,
+    In,
     Repository,
 } from "typeorm";
-import { sql } from "pg-sql";
 
 import { success, failure, Maybe } from "src/core/logic";
 import { UnexpectedError, NotFoundError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
 import { FailureOrSuccess } from "src/core/logic";
-import { Lesson as LessonModel } from "src/core/infra/postgres/entities";
+import { CourseProgress as CourseProgressModel } from "src/core/infra/postgres/entities";
 import { dataSource } from "src/core/infra/postgres";
 import { Helpers } from "src/utils";
 
-type LessonResponse = FailureOrSuccess<DefaultErrors, LessonModel>;
-type LessonArrayResponse = FailureOrSuccess<DefaultErrors, LessonModel[]>;
+type CourseProgressResponse = FailureOrSuccess<
+    DefaultErrors,
+    CourseProgressModel
+>;
+type CourseProgressArrayResponse = FailureOrSuccess<
+    DefaultErrors,
+    CourseProgressModel[]
+>;
 
-export class PostgresLessonRepository {
-    constructor(private model: typeof LessonModel) {}
+export class PostgresCourseProgressRepository {
+    constructor(private model: typeof CourseProgressModel) {}
 
-    private get repo(): Repository<LessonModel> {
+    private get repo(): Repository<CourseProgressModel> {
         return dataSource.getRepository(this.model);
     }
 
     async find(
-        options: FindManyOptions<LessonModel>
-    ): Promise<LessonArrayResponse> {
+        options: FindManyOptions<CourseProgressModel>
+    ): Promise<CourseProgressArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
             const res = await this.repo.find(query);
@@ -35,47 +41,53 @@ export class PostgresLessonRepository {
         });
     }
 
-    async findForCourse(
-        courseId: string,
-        options?: FindManyOptions<LessonModel>
-    ): Promise<LessonArrayResponse> {
+    findForUserAndCourses = async (
+        userId: string,
+        courseIds: string[],
+        opts: FindManyOptions<CourseProgressModel>
+    ): Promise<CourseProgressArrayResponse> => {
         return Helpers.trySuccessFail(async () => {
-            const res = await this.repo.find({
-                ...options,
-                where: {
-                    ...options?.where,
-                    courseId,
-                },
+            const users = await this.repo.find({
+                ...opts,
+                where: { ...opts?.where, userId, courseId: In(courseIds) },
             });
 
-            return success(res);
+            return success(users);
         });
-    }
+    };
 
     async findOne(
-        options: FindOneOptions<LessonModel>
-    ): Promise<LessonResponse> {
+        options: FindOneOptions<CourseProgressModel>
+    ): Promise<CourseProgressResponse> {
         return Helpers.trySuccessFail(async () => {
             const user = await this.repo.findOne(options);
-            if (!user) return failure(new NotFoundError("Lesson not found."));
+            if (!user)
+                return failure(new NotFoundError("CourseProgress not found."));
             return success(user);
         });
     }
 
-    // YOU MUST CHECK BY LOWERCASE IF YOU SEARCH BY USERNAME!
-    async findByLessonname(username: string): Promise<LessonArrayResponse> {
+    findForCourseAndUser = async (
+        courseId: string,
+        userId: string,
+        opts?: FindManyOptions<CourseProgressModel>
+    ): Promise<CourseProgressResponse> => {
         return Helpers.trySuccessFail(async () => {
-            const users = await this.repo
-                .createQueryBuilder()
-                .where("LOWER(username) = LOWER(:username)", { username })
-                .getMany();
+            const user = await this.repo.findOne({
+                ...opts,
+                where: { ...opts?.where, courseId, userId },
+            });
 
-            return success(users);
+            if (!user) {
+                return failure(new NotFoundError("CourseProgress not found."));
+            }
+
+            return success(user);
         });
-    }
+    };
 
     async count(
-        options: FindManyOptions<LessonModel>
+        options: FindManyOptions<CourseProgressModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
@@ -84,7 +96,7 @@ export class PostgresLessonRepository {
         });
     }
 
-    async findById(userId: string): Promise<LessonResponse> {
+    async findById(userId: string): Promise<CourseProgressResponse> {
         try {
             const user = await this.repo
                 .createQueryBuilder()
@@ -92,7 +104,7 @@ export class PostgresLessonRepository {
                 .getOne();
 
             if (!user) {
-                return failure(new NotFoundError("Lesson not found."));
+                return failure(new NotFoundError("CourseProgress not found."));
             }
 
             return success(user);
@@ -101,7 +113,7 @@ export class PostgresLessonRepository {
         }
     }
 
-    async findByIds(userIds: string[]): Promise<LessonArrayResponse> {
+    async findByIds(userIds: string[]): Promise<CourseProgressArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
@@ -112,24 +124,51 @@ export class PostgresLessonRepository {
         });
     }
 
-    async findByEmail(email: string): Promise<LessonResponse> {
+    async findByEmail(email: string): Promise<CourseProgressResponse> {
         return await Helpers.trySuccessFail(async () => {
             const user = await this.repo
                 .createQueryBuilder()
                 .where("email = :email", { email })
                 .getOne();
             if (!user) {
-                return failure(new NotFoundError("Lesson not found."));
+                return failure(new NotFoundError("CourseProgress not found."));
             }
             return success(user);
         });
     }
 
+    updateProgressOfCourse = async (
+        userId: string,
+        courseId: string,
+        updates: Partial<CourseProgressModel>,
+        dbTxn?: EntityManager
+    ): Promise<CourseProgressResponse> => {
+        try {
+            dbTxn
+                ? await dbTxn.update(this.model, { userId, courseId }, updates)
+                : await this.repo.update({ userId, courseId }, updates);
+
+            const user = dbTxn
+                ? await dbTxn.findOneBy(this.model, { userId, courseId })
+                : await this.repo.findOneBy({ userId, courseId });
+
+            if (!user) {
+                return failure(
+                    new NotFoundError("CourseProgress does not exist!")
+                );
+            }
+
+            return success(user);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
+
     async update(
         userId: string,
-        updates: Partial<LessonModel>,
+        updates: Partial<CourseProgressModel>,
         dbTxn?: EntityManager
-    ): Promise<LessonResponse> {
+    ): Promise<CourseProgressResponse> {
         try {
             dbTxn
                 ? await dbTxn.update(this.model, { id: userId }, updates)
@@ -140,7 +179,9 @@ export class PostgresLessonRepository {
                 : await this.repo.findOneBy({ id: userId });
 
             if (!user) {
-                return failure(new NotFoundError("Lesson does not exist!"));
+                return failure(
+                    new NotFoundError("CourseProgress does not exist!")
+                );
             }
 
             return success(user);
@@ -151,7 +192,7 @@ export class PostgresLessonRepository {
 
     async bulkUpdate(
         userIds: string[],
-        updates: Partial<LessonModel>
+        updates: Partial<CourseProgressModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             if (!userIds.length) {
@@ -160,20 +201,22 @@ export class PostgresLessonRepository {
 
             const updateResult = await this.repo
                 .createQueryBuilder()
-                .update(LessonModel)
+                .update(CourseProgressModel)
                 .set(updates)
                 .where("id IN (:...userIds)", { userIds })
                 .execute();
 
             if (!updateResult) {
-                return failure(new NotFoundError("Lesson update failed."));
+                return failure(
+                    new NotFoundError("CourseProgress update failed.")
+                );
             }
 
             return success(updateResult.affected || 0);
         });
     }
 
-    async save(obj: LessonModel): Promise<LessonResponse> {
+    async save(obj: CourseProgressModel): Promise<CourseProgressResponse> {
         try {
             return success(await this.repo.save(obj));
         } catch (err) {
@@ -182,14 +225,16 @@ export class PostgresLessonRepository {
     }
 
     // hard delete
-    async delete(userId: string): Promise<LessonResponse> {
+    async delete(userId: string): Promise<CourseProgressResponse> {
         try {
             const user = await this.repo.findOne({
                 where: { id: userId },
             });
 
             if (!user) {
-                return failure(new NotFoundError("Lesson does not exist!"));
+                return failure(
+                    new NotFoundError("CourseProgress does not exist!")
+                );
             }
 
             await this.repo.delete({ id: userId });
@@ -201,15 +246,18 @@ export class PostgresLessonRepository {
     }
 
     async create(
-        params: Omit<LessonModel, "accounts">,
+        params: Omit<
+            CourseProgressModel,
+            "course" | "user" | "mostRecentLesson"
+        >,
         dbTxn?: EntityManager
-    ): Promise<LessonResponse> {
+    ): Promise<CourseProgressResponse> {
         try {
-            const newLesson = dbTxn
+            const newCourseProgress = dbTxn
                 ? await dbTxn.save(this.model, params)
                 : await this.repo.save(params);
 
-            return success(newLesson);
+            return success(newCourseProgress);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }

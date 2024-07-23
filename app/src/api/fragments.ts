@@ -1,6 +1,12 @@
 import { gql } from "@apollo/client";
 import { Maybe } from "src/core";
-import { Course, Lesson, Session, User } from "./generated/types";
+import {
+  Course,
+  Lesson,
+  LessonProgress,
+  LessonSession,
+  User,
+} from "./generated/types";
 
 export type BaseUserFields = Pick<
   User,
@@ -52,12 +58,79 @@ export const BaseUserFields = gql`
   }
 `;
 
+export type BaseLessonSessionFields = Pick<LessonSession, "id" | "createdAt">;
+
+export const BaseLessonSessionFields = gql`
+  fragment BaseLessonSessionFields on LessonSession {
+    id
+    createdAt
+  }
+`;
+
+export type BaseLessonProgressFields = Pick<LessonProgress, "id" | "createdAt">;
+
+export const BaseLessonProgressFields = gql`
+  fragment BaseLessonProgressFields on LessonProgress {
+    id
+    createdAt
+  }
+`;
+
+export type BaseLessonFields = Pick<
+  Lesson,
+  | "id"
+  | "createdAt"
+  | "title"
+  | "content"
+  | "courseId"
+  | "progress"
+  | "subtitle"
+  | "roles"
+  | "type"
+> & {
+  progress?: Maybe<BaseLessonProgressFields>;
+  sessions?: Maybe<BaseLessonSessionFields>;
+};
+
+export const BaseLessonFields = gql`
+  ${BaseLessonSessionFields}
+  ${BaseLessonProgressFields}
+  fragment BaseLessonFields on Lesson {
+    id
+    createdAt
+    title
+    subtitle
+    content
+    roles {
+      type
+      context
+    }
+    courseId
+    type
+    progress {
+      ...BaseLessonProgressFields
+    }
+    sessions {
+      ...BaseLessonSessionFields
+    }
+  }
+`;
+
 export type BaseCourseFields = Pick<
   Course,
-  "id" | "imageUrl" | "title" | "backgroundColor" | "textColor" | "subtitle"
->;
+  | "id"
+  | "imageUrl"
+  | "title"
+  | "backgroundColor"
+  | "textColor"
+  | "subtitle"
+  | "isStarted"
+> & {
+  mostRecentLesson?: Maybe<BaseLessonFields>;
+};
 
 export const BaseCourseFields = gql`
+  ${BaseLessonFields}
   fragment BaseCourseFields on Course {
     id
     imageUrl
@@ -65,23 +138,9 @@ export const BaseCourseFields = gql`
     backgroundColor
     textColor
     subtitle
-  }
-`;
-
-export type BaseLessonFields = Pick<Lesson, "id" | "createdAt">;
-
-export const BaseLessonFields = gql`
-  fragment BaseLessonFields on Lesson {
-    id
-    createdAt
-  }
-`;
-
-export type BaseSessionFields = Pick<Session, "id" | "createdAt">;
-
-export const BaseSessionFields = gql`
-  fragment BaseSessionFields on Lesson {
-    id
-    createdAt
+    isStarted
+    mostRecentLesson {
+      ...BaseLessonFields
+    }
   }
 `;

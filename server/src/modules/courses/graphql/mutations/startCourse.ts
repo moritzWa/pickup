@@ -17,7 +17,7 @@ import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
 import { loops } from "src/utils/loops";
 import { auth } from "firebase-admin";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
-import { courseRepo } from "../../infra";
+import { courseProgressRepo, courseRepo } from "../../infra";
 import { participantRepo } from "src/modules/participants/infra";
 import { v4 as uuidv4 } from "uuid";
 import { ParticipantStatus } from "src/core/infra/postgres/entities/Participant";
@@ -43,6 +43,17 @@ export const startCourse = mutationField("startCourse", {
             await ParticipantService.createParticipants(course, user);
 
         throwIfError(participantsResponse);
+
+        const progressResponse = await courseProgressRepo.create({
+            courseId: course.id,
+            id: uuidv4(),
+            userId: user.id,
+            mostRecentLessonId: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+
+        throwIfError(progressResponse);
 
         return course;
     },

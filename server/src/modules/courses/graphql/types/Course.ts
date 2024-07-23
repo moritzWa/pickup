@@ -10,6 +10,10 @@ export const Course = objectType({
         t.nonNull.string("imageUrl");
         t.nonNull.string("textColor");
         t.nonNull.string("backgroundColor");
+        t.nullable.field("mostRecentLesson", {
+            type: nullable("Lesson"),
+        });
+        t.nullable.boolean("isStarted");
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
     },

@@ -1,5 +1,11 @@
 import { gql } from "@apollo/client";
-import { BaseUserFields } from "./fragments";
+import {
+  BaseCourseFields,
+  BaseLessonFields,
+  BaseLessonProgressFields,
+  BaseLessonSessionFields,
+  BaseUserFields,
+} from "./fragments";
 
 const DeleteMe = gql`
   mutation DeleteMe {
@@ -91,6 +97,69 @@ const GetPaymentMethods = gql`
   }
 `;
 
+const GetCourses = gql`
+  ${BaseCourseFields}
+  query GetCourses {
+    getCourses {
+      ...BaseCourseFields
+    }
+  }
+`;
+
+const GetCourse = gql`
+  ${BaseCourseFields}
+  query GetCourse($courseId: ID!) {
+    getCourse(courseId: $courseId) {
+      ...BaseCourseFields
+    }
+  }
+`;
+
+const GetCourseLessons = gql`
+  ${BaseLessonFields}
+  query GetCourseLessons($courseId: ID!) {
+    getCourseLessons(courseId: $courseId) {
+      ...BaseLessonFields
+    }
+  }
+`;
+
+const StartLesson = gql`
+  ${BaseLessonSessionFields}
+  mutation StartLesson($lessonId: ID!) {
+    startLesson(lessonId: $lessonId) {
+      ...BaseLessonSessionFields
+    }
+  }
+`;
+
+const StartCourse = gql`
+  ${BaseCourseFields}
+  mutation StartCOurse($courseId: ID!) {
+    startCourse(courseId: $courseId) {
+      ...BaseCourseFields
+    }
+  }
+`;
+
+const GetLessonProgress = gql`
+  ${BaseLessonProgressFields}
+  query GetLessonProgress($lessonId: ID!) {
+    getLessonProgress(lessonId: $lessonId) {
+      ...BaseLessonProgressFields
+    }
+  }
+`;
+
+const GetLesson = gql`
+  ${BaseLessonFields}
+  query GetLesson($lessonId: ID!) {
+    getLesson(lessonId: $lessonId) {
+      ...BaseLessonFields
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
@@ -101,5 +170,16 @@ export const api = {
     me: GetMe,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,
+  },
+  courses: {
+    start: StartCourse,
+    get: GetCourse,
+    list: GetCourses,
+    lessons: GetCourseLessons,
+  },
+  lessons: {
+    start: StartLesson,
+    progress: GetLessonProgress,
+    get: GetLesson,
   },
 };

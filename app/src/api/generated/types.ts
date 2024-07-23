@@ -24,6 +24,8 @@ export type Course = {
   createdAt: Scalars['Date']['output'];
   id: Scalars['String']['output'];
   imageUrl: Scalars['String']['output'];
+  isStarted?: Maybe<Scalars['Boolean']['output']>;
+  mostRecentLesson?: Maybe<Lesson>;
   subtitle: Scalars['String']['output'];
   textColor: Scalars['String']['output'];
   title: Scalars['String']['output'];
@@ -45,10 +47,44 @@ export type GetMobileUpdateResponse = {
 
 export type Lesson = {
   __typename?: 'Lesson';
+  content: Scalars['String']['output'];
+  courseId: Scalars['String']['output'];
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['String']['output'];
+  progress?: Maybe<LessonProgress>;
+  roles: Array<LessonRole>;
+  sessions?: Maybe<Array<LessonSession>>;
+  subtitle: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  type: LessonTypeEnum;
+  updatedAt: Scalars['Date']['output'];
+};
+
+export type LessonProgress = {
+  __typename?: 'LessonProgress';
   createdAt: Scalars['Date']['output'];
   id: Scalars['String']['output'];
   updatedAt: Scalars['Date']['output'];
 };
+
+export type LessonRole = {
+  __typename?: 'LessonRole';
+  context: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
+export type LessonSession = {
+  __typename?: 'LessonSession';
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['String']['output'];
+  updatedAt: Scalars['Date']['output'];
+};
+
+export enum LessonTypeEnum {
+  Game = 'Game',
+  RolePlay = 'RolePlay',
+  Vocabulary = 'Vocabulary'
+}
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -57,7 +93,7 @@ export type Mutation = {
   getAuthToken: Scalars['String']['output'];
   sendVerification: Scalars['String']['output'];
   startCourse: Course;
-  startSession: Session;
+  startLesson: LessonSession;
   updateUser: User;
   verifyPhoneNumber: User;
 };
@@ -82,8 +118,8 @@ export type MutationStartCourseArgs = {
 };
 
 
-export type MutationStartSessionArgs = {
-  courseId: Scalars['String']['input'];
+export type MutationStartLessonArgs = {
+  lessonId: Scalars['String']['input'];
 };
 
 
@@ -113,19 +149,28 @@ export type PaymentMethod = {
 export type Query = {
   __typename?: 'Query';
   checkCode: Scalars['Boolean']['output'];
+  getCourse: Course;
   getCourseLessons: Array<Lesson>;
   getCourses: Array<Course>;
   getIntercomMobileToken: Scalars['String']['output'];
+  getLesson: Lesson;
+  getLessonProgress: LessonProgress;
+  getLessonSessions: Array<LessonSession>;
   getMobileUpdate: GetMobileUpdateResponse;
   getPaymentMethods: Array<PaymentMethod>;
   me?: Maybe<User>;
   myCourses: Array<Course>;
-  mySessions: Array<Session>;
+  mySessions: Array<LessonSession>;
 };
 
 
 export type QueryCheckCodeArgs = {
   referralCode: Scalars['String']['input'];
+};
+
+
+export type QueryGetCourseArgs = {
+  courseId: Scalars['ID']['input'];
 };
 
 
@@ -138,11 +183,19 @@ export type QueryGetIntercomMobileTokenArgs = {
   platform?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type Session = {
-  __typename?: 'Session';
-  createdAt: Scalars['Date']['output'];
-  id: Scalars['String']['output'];
-  updatedAt: Scalars['Date']['output'];
+
+export type QueryGetLessonArgs = {
+  lessonId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetLessonProgressArgs = {
+  lessonId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetLessonSessionsArgs = {
+  lessonId: Scalars['ID']['input'];
 };
 
 export type User = {

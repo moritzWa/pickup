@@ -11,7 +11,7 @@ import {
     Unique,
 } from "typeorm";
 import { Participant } from "../Participant";
-import { Course } from "../Course";
+import { Course } from "../Course/Course";
 
 export enum LessonType {
     Game = "game",

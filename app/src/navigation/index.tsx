@@ -30,9 +30,13 @@ import { View } from "react-native";
 import { useMe } from "src/hooks";
 import { LINKING } from "./linking";
 import Home from "src/views/Main/Home";
-import Lesson from "src/views/Main/Lesson";
+import Lesson from "src/views/Main/LessonDetails";
 import Courses from "src/views/Main/Courses";
 import Profile from "src/views/Main/Profile";
+import CourseDetails from "src/views/Main/CourseDetails";
+import LessonDetails from "src/views/Main/LessonDetails";
+import LessonSession from "src/views/Main/LessonSession";
+import Activity from "src/views/Main/Activity";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -47,8 +51,10 @@ export type RootStackParamList = {
   Signup: undefined; // params
   Welcome: undefined;
   Main: undefined;
+  LessonDetails?: { lessonId: string };
+  LessonSession?: { lessonId: string };
   Update?: undefined;
-  Portfolio: undefined;
+  CourseDetails?: { courseId: string };
   CategoryDetails?: { categorySlug: string };
   CategoryTokens?: { categorySlug: string };
   Categories?: undefined;
@@ -145,11 +151,11 @@ const MainTabNavigation = () => {
       />
 
       <Tabs.Screen
-        name="Courses"
+        name="Activity"
         options={{
           headerShown: false,
         }}
-        component={Courses}
+        component={Activity}
       />
 
       <Tabs.Screen
@@ -244,7 +250,7 @@ export const MainNavigationStack = () => {
             }}
           />
 
-          <Tabs.Screen
+          <Stack.Screen
             name="Lesson"
             options={{
               headerShown: false,
@@ -252,8 +258,31 @@ export const MainNavigationStack = () => {
             component={Lesson}
           />
 
-          {/* MODALS */}
+          <Stack.Screen
+            name="CourseDetails"
+            options={{
+              headerShown: false,
+            }}
+            component={CourseDetails}
+          />
 
+          <Stack.Screen
+            name="LessonDetails"
+            options={{
+              headerShown: false,
+            }}
+            component={LessonDetails}
+          />
+
+          <Stack.Screen
+            name="LessonSession"
+            options={{
+              headerShown: false,
+            }}
+            component={LessonSession}
+          />
+
+          {/* MODALS */}
           {/* <Stack.Group
             screenOptions={{
               presentation: "modal",

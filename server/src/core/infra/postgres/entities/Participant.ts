@@ -12,7 +12,7 @@ import {
     Relation,
 } from "typeorm";
 import { User } from "./User";
-import { Course } from "./Course";
+import { Course } from "./Course/Course";
 import { Maybe } from "src/core/logic";
 import { Character } from "./Character";
 

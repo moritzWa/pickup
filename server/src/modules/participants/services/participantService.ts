@@ -52,7 +52,7 @@ const createParticipants = async (
                     status: ParticipantStatus.Active,
                     isBot: true,
                     characterId: course.defaultCharacterId,
-                    userId: user.id,
+                    userId: null,
                     courseId: course.id,
                     createdAt: new Date(),
                     updatedAt: new Date(),
@@ -61,6 +61,7 @@ const createParticipants = async (
             );
 
             if (botParticipantResponse.isFailure()) {
+                console.log(botParticipantResponse);
                 throw new Error("Failed to create bot participant");
             }
 

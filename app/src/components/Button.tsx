@@ -57,7 +57,7 @@ const Button = ({
       onPress={_onPress}
       style={[
         {
-          height: 50,
+          height: 45,
           paddingHorizontal: 25,
           borderRadius: 15,
           backgroundColor: theme.header,
@@ -95,7 +95,7 @@ const Button = ({
                   textAlign: "center",
                   fontFamily: "Mona-Sans-SemiBold",
                   width: "100%",
-                  fontSize: IS_IPAD ? 24 : 16,
+                  fontSize: IS_IPAD ? 24 : 18,
                 },
                 textProps?.style,
                 labelStyle,

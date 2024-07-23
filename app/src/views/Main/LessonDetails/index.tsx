@@ -4,12 +4,10 @@ import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
 import { useTheme } from "src/hooks";
 
-const Lesson = () => {
+const LessonDetails = () => {
   return (
     <SafeAreaView>
       <Text>Lesson</Text>
-
-      <AudioStreamingComponent />
     </SafeAreaView>
   );
 };
@@ -144,4 +142,4 @@ const AudioStreamingComponent = () => {
   );
 };
 
-export default Lesson;
+export default LessonDetails;

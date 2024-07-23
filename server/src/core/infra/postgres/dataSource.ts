@@ -11,13 +11,15 @@ const ENTITIES = [
     entities.User,
     entities.Notification,
     entities.Character,
-    entities.Course,
     entities.Participant,
-    entities.Lesson,
     entities.Message,
+    // lesson
     entities.Lesson,
     entities.LessonProgress,
     entities.LessonSession,
+    // course
+    entities.Course,
+    entities.CourseProgress,
 ];
 
 function getMigrationDirectory() {

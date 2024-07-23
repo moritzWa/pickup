@@ -33,6 +33,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  LessonTypeEnum: "game" | "role_play" | "vocabulary"
   UserAuthProviderEnum: "firebase"
 }
 
@@ -59,6 +60,10 @@ export interface NexusGenObjects {
   }
   Lesson: entities.Lesson ;
   LessonProgress: entities.LessonProgress ;
+  LessonRole: { // root type
+    context: string; // String!
+    type: string; // String!
+  }
   LessonSession: entities.LessonSession ;
   Mutation: {};
   PaymentMethod: { // root type
@@ -86,6 +91,8 @@ export interface NexusGenFieldTypes {
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // String!
     imageUrl: string; // String!
+    isStarted: boolean | null; // Boolean
+    mostRecentLesson: NexusGenRootTypes['Lesson'] | null; // Lesson
     subtitle: string; // String!
     textColor: string; // String!
     title: string; // String!
@@ -101,14 +108,26 @@ export interface NexusGenFieldTypes {
     userVersion: string | null; // String
   }
   Lesson: { // field return type
+    content: string; // String!
+    courseId: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // String!
+    progress: NexusGenRootTypes['LessonProgress'] | null; // LessonProgress
+    roles: NexusGenRootTypes['LessonRole'][]; // [LessonRole!]!
+    sessions: NexusGenRootTypes['LessonSession'][] | null; // [LessonSession!]
+    subtitle: string; // String!
+    title: string; // String!
+    type: NexusGenEnums['LessonTypeEnum']; // LessonTypeEnum!
     updatedAt: NexusGenScalars['Date']; // Date!
   }
   LessonProgress: { // field return type
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
+  }
+  LessonRole: { // field return type
+    context: string; // String!
+    type: string; // String!
   }
   LessonSession: { // field return type
     createdAt: NexusGenScalars['Date']; // Date!
@@ -132,9 +151,11 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     checkCode: boolean; // Boolean!
+    getCourse: NexusGenRootTypes['Course']; // Course!
     getCourseLessons: NexusGenRootTypes['Lesson'][]; // [Lesson!]!
     getCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     getIntercomMobileToken: string; // String!
+    getLesson: NexusGenRootTypes['Lesson']; // Lesson!
     getLessonProgress: NexusGenRootTypes['LessonProgress']; // LessonProgress!
     getLessonSessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
@@ -176,6 +197,8 @@ export interface NexusGenFieldTypeNames {
     createdAt: 'Date'
     id: 'String'
     imageUrl: 'String'
+    isStarted: 'Boolean'
+    mostRecentLesson: 'Lesson'
     subtitle: 'String'
     textColor: 'String'
     title: 'String'
@@ -191,14 +214,26 @@ export interface NexusGenFieldTypeNames {
     userVersion: 'String'
   }
   Lesson: { // field return type name
+    content: 'String'
+    courseId: 'String'
     createdAt: 'Date'
     id: 'String'
+    progress: 'LessonProgress'
+    roles: 'LessonRole'
+    sessions: 'LessonSession'
+    subtitle: 'String'
+    title: 'String'
+    type: 'LessonTypeEnum'
     updatedAt: 'Date'
   }
   LessonProgress: { // field return type name
     createdAt: 'Date'
     id: 'String'
     updatedAt: 'Date'
+  }
+  LessonRole: { // field return type name
+    context: 'String'
+    type: 'String'
   }
   LessonSession: { // field return type name
     createdAt: 'Date'
@@ -222,9 +257,11 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     checkCode: 'Boolean'
+    getCourse: 'Course'
     getCourseLessons: 'Lesson'
     getCourses: 'Course'
     getIntercomMobileToken: 'String'
+    getLesson: 'Lesson'
     getLessonProgress: 'LessonProgress'
     getLessonSessions: 'LessonSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
@@ -296,11 +333,17 @@ export interface NexusGenArgTypes {
     checkCode: { // args
       referralCode: string; // String!
     }
+    getCourse: { // args
+      courseId: string; // ID!
+    }
     getCourseLessons: { // args
       courseId: string; // ID!
     }
     getIntercomMobileToken: { // args
       platform?: string | null; // String
+    }
+    getLesson: { // args
+      lessonId: string; // ID!
     }
     getLessonProgress: { // args
       lessonId: string; // ID!

@@ -11,7 +11,7 @@ import {
     ManyToOne,
     Relation,
 } from "typeorm";
-import { Character } from "./Character";
+import { Character } from "../Character";
 
 @Entity({
     name: "courses",
