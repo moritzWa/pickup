@@ -13,7 +13,7 @@ import {
 import { Lesson } from "src/core/infra/postgres/entities";
 
 const transcribeAudioUrl = async (
-    lesson: Lesson,
+    _lesson: Lesson,
     url: string
 ): Promise<FailureOrSuccess<DefaultErrors, string>> => {
     try {

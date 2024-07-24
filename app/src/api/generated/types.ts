@@ -91,6 +91,7 @@ export type Mutation = {
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
+  respond: RespondResponse;
   sendVerification: Scalars['String']['output'];
   startCourse: Course;
   startLesson: LessonSession;
@@ -106,6 +107,12 @@ export type MutationCreateUserArgs = {
   password?: InputMaybe<Scalars['String']['input']>;
   referralCode?: InputMaybe<Scalars['String']['input']>;
   username?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationRespondArgs = {
+  audioFileUrl: Scalars['String']['input'];
+  lessonId: Scalars['ID']['input'];
 };
 
 
@@ -203,6 +210,12 @@ export type QueryGetLessonProgressArgs = {
 
 export type QueryGetLessonSessionsArgs = {
   lessonId: Scalars['ID']['input'];
+};
+
+export type RespondResponse = {
+  __typename?: 'RespondResponse';
+  responseAudioUrl: Scalars['String']['output'];
+  transcription: Scalars['String']['output'];
 };
 
 export type TranscribeResponse = {

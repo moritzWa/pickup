@@ -8,6 +8,7 @@ import {
     success,
 } from "src/core/logic";
 import * as fs from "fs";
+import { SpeechCreateParams } from "openai/resources/audio/speech";
 
 export enum OpenAIModel {
     GPT3 = "gpt-3.5-turbo",
@@ -18,14 +19,14 @@ const client = new OpenAI({
     apiKey: config.openai.apiKey,
 });
 
-const createCompletion = async (): Promise<
+const createCompletion = async (
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]
+): Promise<
     FailureOrSuccess<DefaultErrors, OpenAI.Chat.Completions.ChatCompletion>
 > => {
     try {
         const completion = await client.chat.completions.create({
-            messages: [
-                { role: "system", content: "You are a helpful assistant." },
-            ],
+            messages,
             model: OpenAIModel.GPT4Mini,
         });
 
@@ -51,6 +52,31 @@ const transcribeAudio = async (
     }
 };
 
+//use whisper to generate speech response
+const generateSpeech = async ({
+    model = "tts-1",
+    voice,
+    text,
+}: {
+    text: string;
+    voice: SpeechCreateParams["voice"];
+    model: string;
+}): Promise<FailureOrSuccess<DefaultErrors, Buffer>> => {
+    try {
+        const mp3 = await client.audio.speech.create({
+            model: model,
+            voice: voice,
+            input: text,
+        });
+
+        const buffer = Buffer.from(await mp3.arrayBuffer());
+
+        return success(buffer);
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
 export const openai = {
     chat: {
         completions: {
@@ -59,5 +85,6 @@ export const openai = {
     },
     audio: {
         transcribe: transcribeAudio,
+        speak: generateSpeech,
     },
 };

@@ -72,6 +72,10 @@ export interface NexusGenObjects {
     source: string; // String!
   }
   Query: {};
+  RespondResponse: { // root type
+    responseAudioUrl: string; // String!
+    transcription: string; // String!
+  }
   TranscribeResponse: { // root type
     transcription: string; // String!
   }
@@ -141,6 +145,7 @@ export interface NexusGenFieldTypes {
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
+    respond: NexusGenRootTypes['RespondResponse']; // RespondResponse!
     sendVerification: string; // String!
     startCourse: NexusGenRootTypes['Course']; // Course!
     startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
@@ -167,6 +172,10 @@ export interface NexusGenFieldTypes {
     me: NexusGenRootTypes['User'] | null; // User
     myCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     mySessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
+  }
+  RespondResponse: { // field return type
+    responseAudioUrl: string; // String!
+    transcription: string; // String!
   }
   TranscribeResponse: { // field return type
     transcription: string; // String!
@@ -251,6 +260,7 @@ export interface NexusGenFieldTypeNames {
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
+    respond: 'RespondResponse'
     sendVerification: 'String'
     startCourse: 'Course'
     startLesson: 'LessonSession'
@@ -277,6 +287,10 @@ export interface NexusGenFieldTypeNames {
     me: 'User'
     myCourses: 'Course'
     mySessions: 'LessonSession'
+  }
+  RespondResponse: { // field return type name
+    responseAudioUrl: 'String'
+    transcription: 'String'
   }
   TranscribeResponse: { // field return type name
     transcription: 'String'
@@ -316,6 +330,10 @@ export interface NexusGenArgTypes {
       password?: string | null; // String
       referralCode?: string | null; // String
       username?: string | null; // String
+    }
+    respond: { // args
+      audioFileUrl: string; // String!
+      lessonId: string; // ID!
     }
     sendVerification: { // args
       phoneNumber: string; // String!

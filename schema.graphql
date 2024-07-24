@@ -70,6 +70,7 @@ type Mutation {
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
+  respond(audioFileUrl: String!, lessonId: ID!): RespondResponse!
   sendVerification(phoneNumber: String!): String!
   startCourse(courseId: ID!): Course!
   startLesson(lessonId: String!): LessonSession!
@@ -98,6 +99,11 @@ type Query {
   me: User
   myCourses: [Course!]!
   mySessions: [LessonSession!]!
+}
+
+type RespondResponse {
+  responseAudioUrl: String!
+  transcription: String!
 }
 
 type TranscribeResponse {

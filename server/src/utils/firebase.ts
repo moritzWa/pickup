@@ -70,8 +70,46 @@ async function uploadImageToFirebase(
     }
 }
 
+async function uploadBufferToFirebase(
+    buffer: Buffer,
+    contentType: string
+): Promise<FailureOrSuccess<DefaultErrors, { originalUrl: string }>> {
+    try {
+        const bucket = Firebase.storage().bucket();
+
+        const extension = contentType.split("/")[1];
+
+        // Define file name and path
+        const fileId = uuidv4();
+        const name = `uploads/${fileId}.${extension}`;
+        const file = bucket.file(name);
+
+        // Upload the image to Firebase Storage
+        await file.save(buffer, {
+            contentType: contentType,
+            metadata: {
+                firebaseStorageDownloadTokens: uuidv4(), // Enable public access
+            },
+        });
+
+        // Get URLs for the original and resized images
+        const originalUrl = `https://firebasestorage.googleapis.com/v0/b/${
+            bucket.name
+        }/o/${encodeURIComponent(name)}?alt=media`;
+
+        return success({ originalUrl });
+    } catch (error) {
+        debugger;
+
+        return failure(new UnexpectedError(error));
+    }
+}
+
 export { Firebase };
 
 export const firebase = {
-    storage: { upload: uploadImageToFirebase },
+    storage: {
+        upload: uploadImageToFirebase,
+        uploadBuffer: uploadBufferToFirebase,
+    },
 };

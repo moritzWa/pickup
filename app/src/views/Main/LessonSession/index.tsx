@@ -40,8 +40,9 @@ const LessonSession = () => {
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const { me } = useMe();
-  const [transcribe, { error: transcribeError, data: transcriptionData }] =
-    useMutation<Pick<Mutation, "transcribe">>(api.lessons.transcribe);
+  const [respond, { error: respondError, data: respondData }] = useMutation<
+    Pick<Mutation, "respond">
+  >(api.lessons.respond);
 
   const [recording, setRecording] = useState<Audio.Recording>();
   const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
@@ -197,7 +198,7 @@ const LessonSession = () => {
 
           console.log(`audio url: ${url}`);
 
-          await transcribe({
+          await respond({
             variables: {
               lessonId,
               audioFileUrl: url,
@@ -218,6 +219,19 @@ const LessonSession = () => {
 
         // upload it to server
       }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const _playAudio = async (uri: string) => {
+    try {
+      console.log("recording====");
+      console.log(uri);
+      const { sound } = await Audio.Sound.createAsync(
+        { uri },
+        { shouldPlay: true, volume: 1 }
+      );
     } catch (err) {
       console.log(err);
     }
@@ -247,58 +261,6 @@ const LessonSession = () => {
     }
   };
 
-  const startAudioLevelMonitoring = (recordingObject: Audio.Recording) => {
-    levelCheckInterval.current = setInterval(async () => {
-      if (recordingObject) {
-        try {
-          const status = await recordingObject.getStatusAsync();
-
-          if (status.isRecording) {
-            const { metering = -160 } = status;
-            if (metering > -50) {
-              // Adjust this threshold as needed
-              // Reset silence timer if sound is detected
-              if (silenceTimer.current) {
-                clearTimeout(silenceTimer.current);
-              }
-              silenceTimer.current = setTimeout(() => {
-                stopRecording();
-              }, 1500); // Stop after 1.5 seconds of silence
-            }
-          }
-        } catch (error) {
-          console.error("Error getting recording status:", error);
-        }
-      }
-    }, 100); // Check every 100ms
-  };
-
-  const sendAudioToBackend = async (audioUri: string) => {
-    try {
-      // Read the file as a blob
-      const fileInfo = await FileSystem.getInfoAsync(audioUri);
-      const audioBlob = await FileSystem.readAsStringAsync(audioUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      const formData = new FormData();
-      formData.append("audio", {
-        uri: audioUri,
-        type: "audio/m4a",
-        name: "audio.m4a",
-      } as any); // Use 'as any' to bypass TypeScript checking
-
-      //   const response = await axios.post("YOUR_BACKEND_URL", formData, {
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   });
-      console.log("Backend response:", response.data);
-    } catch (error) {
-      console.error("Error sending audio to backend:", error);
-    }
-  };
-
   const _openLesson = () => {
     // TODO: lesson
   };
@@ -307,8 +269,8 @@ const LessonSession = () => {
   const lesson = lessonData?.getLesson;
   const insets = useSafeAreaInsets();
 
-  if (__DEV__ && transcribeError) {
-    console.log(transcribeError);
+  if (__DEV__ && respondError) {
+    console.log(respondError);
   }
 
   return (
@@ -456,17 +418,53 @@ const LessonSession = () => {
           </View>
         )}
 
-        {transcriptionData ? (
-          <Text
-            style={{
-              color: theme.text,
-              marginTop: 15,
-              fontSize: 16,
-              fontFamily: "Raleway-Regular",
-            }}
-          >
-            {transcriptionData?.transcribe?.transcription}
-          </Text>
+        {respondData ? (
+          <>
+            <Text
+              style={{
+                color: theme.text,
+                marginTop: 15,
+                fontSize: 16,
+                fontFamily: "Raleway-Regular",
+              }}
+            >
+              {respondData?.respond?.transcription}
+            </Text>
+            {/* click to play the responseAudioUrl */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{
+                padding: 15,
+                backgroundColor: theme.header,
+                borderRadius: 100,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 15,
+              }}
+              onPress={async () => {
+                // play the audio here
+
+                await _playAudio(respondData?.respond?.responseAudioUrl || "");
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faReplyAll}
+                color={theme.background}
+                size={24}
+                style={{ marginRight: 10 }}
+              />
+              <Text
+                style={{
+                  color: theme.background,
+                  fontSize: 18,
+                  fontFamily: "Raleway-Medium",
+                }}
+              >
+                Play Response
+              </Text>
+            </TouchableOpacity>
+          </>
         ) : null}
       </View>
 
