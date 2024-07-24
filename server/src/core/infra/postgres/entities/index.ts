@@ -10,5 +10,8 @@ export { Lesson } from "./Lesson/Lesson";
 // courses
 export { Course } from "./Course/Course";
 export { CourseProgress } from "./Course/CourseProgress";
+// content
+export { Content } from "./Content/Content";
+export { ContentSession } from "./Content/ContentSession";
 
 export * from "./types";

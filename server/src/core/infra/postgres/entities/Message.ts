@@ -14,6 +14,8 @@ import {
 import { User } from "./User";
 import { Lesson } from "./Lesson/Lesson";
 import { Participant } from "./Participant";
+import { Maybe } from "src/core/logic";
+import { ContentSession } from "./Content";
 
 @Entity({
     name: "messages",
@@ -56,15 +58,31 @@ export class Message {
     toParticipantId!: string;
 
     @Column({
-        nullable: false,
+        nullable: true,
         name: "lesson_id",
         type: "uuid",
     })
     @Index("messages_lesson_id_idx")
-    lessonId!: string;
+    lessonId!: Maybe<string>;
+
+    @Column({
+        nullable: true,
+        name: "content_session_id",
+        type: "uuid",
+    })
+    @Index("messages_content_session_id_idx")
+    contentSessionId!: Maybe<string>;
+
+    @ManyToOne(() => ContentSession, (t) => t.id, {
+        nullable: true,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "content_session_id" })
+    contentSession!: Relation<Maybe<ContentSession>>;
 
     @ManyToOne(() => Lesson, (t) => t.id, {
-        nullable: false,
+        nullable: true,
         eager: false,
         onDelete: "CASCADE",
     })

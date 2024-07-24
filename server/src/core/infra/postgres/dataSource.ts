@@ -20,6 +20,9 @@ const ENTITIES = [
     // course
     entities.Course,
     entities.CourseProgress,
+    // content
+    entities.Content,
+    entities.ContentSession,
 ];
 
 function getMigrationDirectory() {

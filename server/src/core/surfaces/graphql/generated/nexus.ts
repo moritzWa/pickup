@@ -48,10 +48,21 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  Content: entities.Content ;
+  ContentRespondResponse: { // root type
+    responseAudioUrl: string; // String!
+    transcription: string; // String!
+  }
+  ContentSession: entities.ContentSession ;
   Course: entities.Course ;
   CreateUserResponse: { // root type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
+  }
+  FollowUpQuestion: { // root type
+    answer: string; // String!
+    id: string; // String!
+    question: string; // String!
   }
   GetMobileUpdateResponse: { // root type
     latestVersion?: string | null; // String
@@ -93,6 +104,31 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  Content: { // field return type
+    audioUrl: string; // String!
+    authorImageUrl: string | null; // String
+    authorName: string; // String!
+    context: string; // String!
+    createdAt: NexusGenScalars['Date']; // Date!
+    followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][]; // [FollowUpQuestion!]!
+    id: string; // String!
+    summary: string | null; // String
+    title: string; // String!
+    updatedAt: NexusGenScalars['Date']; // Date!
+    websiteUrl: string; // String!
+  }
+  ContentRespondResponse: { // field return type
+    responseAudioUrl: string; // String!
+    transcription: string; // String!
+  }
+  ContentSession: { // field return type
+    contentId: string; // String!
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // String!
+    timestampCursor: number | null; // Float
+    updatedAt: NexusGenScalars['Date']; // Date!
+    userId: string; // String!
+  }
   Course: { // field return type
     backgroundColor: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
@@ -108,6 +144,11 @@ export interface NexusGenFieldTypes {
   CreateUserResponse: { // field return type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
+  }
+  FollowUpQuestion: { // field return type
+    answer: string; // String!
+    id: string; // String!
+    question: string; // String!
   }
   GetMobileUpdateResponse: { // field return type
     latestVersion: string | null; // String
@@ -146,7 +187,9 @@ export interface NexusGenFieldTypes {
     deleteMe: string; // String!
     getAuthToken: string; // String!
     respond: NexusGenRootTypes['RespondResponse']; // RespondResponse!
+    respondToContent: NexusGenRootTypes['ContentRespondResponse']; // ContentRespondResponse!
     sendVerification: string; // String!
+    startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startCourse: NexusGenRootTypes['Course']; // Course!
     startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
     transcribe: NexusGenRootTypes['TranscribeResponse']; // TranscribeResponse!
@@ -160,6 +203,8 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     checkCode: boolean; // Boolean!
+    getContent: NexusGenRootTypes['Content']; // Content!
+    getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     getCourse: NexusGenRootTypes['Course']; // Course!
     getCourseLessons: NexusGenRootTypes['Lesson'][]; // [Lesson!]!
     getCourses: NexusGenRootTypes['Course'][]; // [Course!]!
@@ -208,6 +253,31 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  Content: { // field return type name
+    audioUrl: 'String'
+    authorImageUrl: 'String'
+    authorName: 'String'
+    context: 'String'
+    createdAt: 'Date'
+    followUpQuestions: 'FollowUpQuestion'
+    id: 'String'
+    summary: 'String'
+    title: 'String'
+    updatedAt: 'Date'
+    websiteUrl: 'String'
+  }
+  ContentRespondResponse: { // field return type name
+    responseAudioUrl: 'String'
+    transcription: 'String'
+  }
+  ContentSession: { // field return type name
+    contentId: 'String'
+    createdAt: 'Date'
+    id: 'String'
+    timestampCursor: 'Float'
+    updatedAt: 'Date'
+    userId: 'String'
+  }
   Course: { // field return type name
     backgroundColor: 'String'
     createdAt: 'Date'
@@ -223,6 +293,11 @@ export interface NexusGenFieldTypeNames {
   CreateUserResponse: { // field return type name
     token: 'String'
     user: 'User'
+  }
+  FollowUpQuestion: { // field return type name
+    answer: 'String'
+    id: 'String'
+    question: 'String'
   }
   GetMobileUpdateResponse: { // field return type name
     latestVersion: 'String'
@@ -261,7 +336,9 @@ export interface NexusGenFieldTypeNames {
     deleteMe: 'String'
     getAuthToken: 'String'
     respond: 'RespondResponse'
+    respondToContent: 'ContentRespondResponse'
     sendVerification: 'String'
+    startContent: 'ContentSession'
     startCourse: 'Course'
     startLesson: 'LessonSession'
     transcribe: 'TranscribeResponse'
@@ -275,6 +352,8 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     checkCode: 'Boolean'
+    getContent: 'Content'
+    getContentSession: 'ContentSession'
     getCourse: 'Course'
     getCourseLessons: 'Lesson'
     getCourses: 'Course'
@@ -335,8 +414,15 @@ export interface NexusGenArgTypes {
       audioFileUrl: string; // String!
       lessonId: string; // ID!
     }
+    respondToContent: { // args
+      audioFileUrl: string; // String!
+      contentId: string; // ID!
+    }
     sendVerification: { // args
       phoneNumber: string; // String!
+    }
+    startContent: { // args
+      contentId: string; // String!
     }
     startCourse: { // args
       courseId: string; // ID!
@@ -365,6 +451,12 @@ export interface NexusGenArgTypes {
   Query: {
     checkCode: { // args
       referralCode: string; // String!
+    }
+    getContent: { // args
+      contentId: string; // ID!
+    }
+    getContentSession: { // args
+      contentId: string; // ID!
     }
     getCourse: { // args
       courseId: string; // ID!

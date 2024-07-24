@@ -2,6 +2,34 @@
 ### Do not make changes to this file directly
 
 
+type Content {
+  audioUrl: String!
+  authorImageUrl: String
+  authorName: String!
+  context: String!
+  createdAt: Date!
+  followUpQuestions: [FollowUpQuestion!]!
+  id: String!
+  summary: String
+  title: String!
+  updatedAt: Date!
+  websiteUrl: String!
+}
+
+type ContentRespondResponse {
+  responseAudioUrl: String!
+  transcription: String!
+}
+
+type ContentSession {
+  contentId: String!
+  createdAt: Date!
+  id: String!
+  timestampCursor: Float
+  updatedAt: Date!
+  userId: String!
+}
+
 type Course {
   backgroundColor: String!
   createdAt: Date!
@@ -22,6 +50,12 @@ type CreateUserResponse {
 
 """Date custom scalar type"""
 scalar Date
+
+type FollowUpQuestion {
+  answer: String!
+  id: String!
+  question: String!
+}
 
 type GetMobileUpdateResponse {
   latestVersion: String
@@ -71,7 +105,9 @@ type Mutation {
   deleteMe: String!
   getAuthToken: String!
   respond(audioFileUrl: String!, lessonId: ID!): RespondResponse!
+  respondToContent(audioFileUrl: String!, contentId: ID!): ContentRespondResponse!
   sendVerification(phoneNumber: String!): String!
+  startContent(contentId: String!): ContentSession!
   startCourse(courseId: ID!): Course!
   startLesson(lessonId: String!): LessonSession!
   transcribe(audioFileUrl: String!, lessonId: ID!): TranscribeResponse!
@@ -87,6 +123,8 @@ type PaymentMethod {
 
 type Query {
   checkCode(referralCode: String!): Boolean!
+  getContent(contentId: ID!): Content!
+  getContentSession(contentId: ID!): ContentSession!
   getCourse(courseId: ID!): Course!
   getCourseLessons(courseId: ID!): [Lesson!]!
   getCourses: [Course!]!
