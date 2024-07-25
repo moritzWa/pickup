@@ -74,12 +74,12 @@ const Home = () => {
             <Text
               style={{
                 color: theme.header,
-                fontSize: 26,
+                fontSize: 28,
                 fontWeight: "bold",
                 fontFamily: "Raleway-Regular",
               }}
             >
-              Welcome, Andrew
+              Hey, Andrew 👋
             </Text>
           </View>
         }
@@ -102,6 +102,10 @@ const Home = () => {
         end={{ x: 1, y: 0 }}
       >
         <TouchableOpacity
+          onPress={() => {
+            // just go to the first content
+            navigation.navigate("ContentSession", { contentId: content[0].id });
+          }}
           style={{
             height: 50,
             display: "flex",

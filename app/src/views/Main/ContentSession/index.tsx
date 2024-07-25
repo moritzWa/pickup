@@ -36,6 +36,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Voice from "@react-native-voice/voice";
 import * as Speech from "expo-speech";
 import { storage } from "src/utils/firebase";
+import { noop } from "lodash";
+import FastImage from "react-native-fast-image";
 
 const SIZE = 150;
 
@@ -50,8 +52,15 @@ const ContentSession = () => {
   // >(api.lessons.respond);
 
   const [recording, setRecording] = useState<Audio.Recording>();
+  const [sound, setSound] = useState<Audio.Sound>();
+
   const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+
+  const [soundStatus, setSoundStatus] = useState<"none" | "paused" | "playing">(
+    "none"
+  );
+
   const silenceTimer = useRef<NodeJS.Timeout | null>(null);
   const audioAnalyzer = useRef(null);
   const levelCheckInterval = useRef(null);
@@ -71,6 +80,12 @@ const ContentSession = () => {
       variables: contentVariables,
     }
   );
+
+  const theme = useTheme();
+  const content = contentData?.getContent;
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const estimatedLen = Math.ceil((content?.lengthSeconds || 0) / 60);
 
   useEffect(() => {
     return () => {
@@ -138,6 +153,13 @@ const ContentSession = () => {
       }
     }
   }
+
+  const pause = async () => {
+    if (sound) {
+      await sound.pauseAsync();
+      setSoundStatus("paused");
+    }
+  };
 
   async function stopRecording() {
     setIsRecording(false);
@@ -230,16 +252,86 @@ const ContentSession = () => {
 
   const _playAudio = async (uri: string) => {
     try {
-      console.log("recording====");
-      console.log(uri);
-      const { sound } = await Audio.Sound.createAsync(
+      if (sound) {
+        await sound.stopAsync();
+      }
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
         { uri },
         { shouldPlay: true, volume: 1 }
       );
+
+      setSound(newSound);
     } catch (err) {
       console.log(err);
     }
   };
+
+  const play = async () => {
+    try {
+      if (soundStatus === "paused" && sound) {
+        // unpause and set to not paused
+        await sound.playAsync();
+        setSoundStatus("playing");
+        return;
+      }
+
+      // we preload the sound (or try to)
+      if (sound) {
+        // play it and set playing
+        await sound.playAsync();
+        setSoundStatus("playing");
+        return;
+      }
+
+      if (!sound) {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: content?.audioUrl || "" },
+          { shouldPlay: true, volume: 1 }
+        );
+
+        setSound(newSound);
+        setSoundStatus("playing");
+        return;
+      }
+
+      // otherwise play
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const playOrPause = async () => {
+    if (soundStatus === "playing") {
+      await pause();
+      setSoundStatus("paused");
+    } else {
+      await play();
+      setSoundStatus("playing");
+    }
+  };
+
+  const _loadSound = async () => {
+    try {
+      if (content?.audioUrl) {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: content?.audioUrl },
+          { shouldPlay: false }
+        );
+
+        setSound(newSound);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // on page load try to load the sound
+  useEffect(() => {
+    if (content?.audioUrl) {
+      _loadSound();
+    }
+  }, [content?.audioUrl]);
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -258,21 +350,23 @@ const ContentSession = () => {
   };
 
   const _startOrStopRecording = async () => {
-    if (isRecording) {
-      await stopRecording();
-    } else {
-      await startRecording();
+    // play recording
+    if (!content?.audioUrl) {
+      Alert.alert("Error", "No audio to play");
+      return;
     }
+
+    await _playAudio(content?.audioUrl);
+    // if (isRecording) {
+    //   await stopRecording();
+    // } else {
+    //   await startRecording();
+    // }
   };
 
   const _openLesson = () => {
     // TODO: lesson
   };
-
-  const theme = useTheme();
-  const content = contentData?.getContent;
-  const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
 
   return (
     <View style={{ flex: 1, paddingTop: insets.top }}>
@@ -280,11 +374,11 @@ const ContentSession = () => {
         style={{
           position: "absolute",
           zIndex: 100,
-          top: insets.top + 15,
+          top: insets.top + 20,
           left: 15,
         }}
       >
-        <Back onPress={() => navigation.goBack()} />
+        <Back hideBack onPress={() => navigation.goBack()} />
       </View>
 
       {isRecording ? (
@@ -340,8 +434,9 @@ const ContentSession = () => {
         style={{
           flex: 1,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: "flex-start",
+          justifyContent: "flex-start",
+          marginTop: 225,
         }}
       >
         {/* make a play button that is colors.pink and uses fontawesome */}
@@ -369,14 +464,19 @@ const ContentSession = () => {
             activeOpacity={1}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            onPress={_startOrStopRecording}
+            onPress={playOrPause}
           >
             <FontAwesomeIcon
               style={{
                 position: "relative",
-                right: !isRecording ? -5 : 0,
+                right:
+                  soundStatus === "none" || soundStatus === "paused" ? -5 : 0,
               }}
-              icon={isRecording ? faPause : faPlay}
+              icon={
+                soundStatus === "none" || soundStatus === "paused"
+                  ? faPlay
+                  : faPause
+              }
               color={colors.white}
               size={64}
             />
@@ -427,62 +527,59 @@ const ContentSession = () => {
         )}
       </View>
 
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={_openLesson}
+      <View
         style={{
-          padding: 20,
-          paddingVertical: 25,
-          borderTopWidth: 1,
-          borderColor: theme.border,
-          paddingBottom: insets.bottom + 25,
-          borderTopRightRadius: 30,
-          borderTopLeftRadius: 30,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: theme.secondaryBackground,
+          marginHorizontal: 15,
+          marginBottom: insets.bottom + 15,
         }}
       >
         <View
           style={{
-            // wrap the text
-            flex: 1,
+            flexDirection: "row",
+            alignItems: "flex-start",
+            backgroundColor: theme.secondaryBackground,
+            borderRadius: 20,
+            padding: 15,
           }}
         >
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 5,
+          <FastImage
+            source={{
+              uri: content?.authorImageUrl,
             }}
-          >
+            style={{
+              width: 45,
+              marginRight: 10,
+              height: 45,
+              borderRadius: 40,
+            }}
+          />
+
+          <View style={{ flex: 1 }}>
             <Text
               style={{
                 color: theme.header,
-                fontWeight: "bold",
-                fontFamily: "Raleway-Bold",
-                fontSize: 24,
-                flex: 1,
+                fontSize: 16,
+                fontFamily: "Raleway-SemiBold",
               }}
             >
               {content?.title}
             </Text>
-          </View>
 
-          <Text
-            style={{
-              marginTop: 5,
-              color: theme.text,
-              fontSize: 18,
-              fontFamily: "Raleway-Regular",
-            }}
-          >
-            By {content?.authorName}
-          </Text>
+            <Text
+              style={{
+                marginTop: 5,
+                color: theme.text,
+                fontSize: 14,
+                fontFamily: "Raleway-Medium",
+              }}
+            >
+              {content?.authorName}
+              {"  "}•{"  "}
+              {estimatedLen} mins
+            </Text>
+          </View>
         </View>
-      </TouchableOpacity>
+      </View>
     </View>
   );
 };

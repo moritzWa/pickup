@@ -64,8 +64,6 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
 
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
 
-  console.log(error);
-
   return (
     <View
       style={{

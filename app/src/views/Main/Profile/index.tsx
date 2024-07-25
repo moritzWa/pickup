@@ -261,7 +261,7 @@ const Profile = () => {
           backgroundColor: background,
         }}
       >
-        <LinearGradient
+        {/* <LinearGradient
           colors={[colors.lightBlue80, colors.lightBlue60]}
           start={[0, 0]}
           end={[1, 1]}
@@ -299,24 +299,24 @@ const Profile = () => {
               size={24}
             />
           </TouchableOpacity>
-        </LinearGradient>
+        </LinearGradient> */}
 
         <View
           style={{
             alignItems: "center",
             paddingVertical: 25,
-            paddingTop: 35,
+            paddingHorizontal: 20,
             backgroundColor: background,
             borderBottomWidth: 1,
             borderBottomColor: border,
             width: "100%",
           }}
         >
-          <View>
+          {/* <View>
             <ProfilePicture user={me} />
-          </View>
+          </View> */}
 
-          <View style={{ marginTop: 15, alignItems: "center" }}>
+          <View style={{ alignItems: "center" }}>
             <Text
               style={[
                 styles.email,
@@ -333,6 +333,7 @@ const Profile = () => {
 
         <View
           style={{
+            marginTop: 25,
             flex: 1,
             width: "100%",
             flexDirection: "column",

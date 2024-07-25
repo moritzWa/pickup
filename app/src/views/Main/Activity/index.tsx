@@ -44,7 +44,7 @@ const Activity = () => {
           <RefreshControl refreshing={false} onRefresh={onRefresh} />
         }
         keyExtractor={(c) => c.id}
-        contentContainerStyle={{ padding: 5 }}
+        contentContainerStyle={{ padding: 5, paddingBottom: 100 }}
         ListHeaderComponent={
           <View
             style={{

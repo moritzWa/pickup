@@ -58,12 +58,40 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSContactsUsageDescription</key>
+	<string>Used to make it easier to share Pickup with your contact book.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used to determine where you are located.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We use the microphone to let you chat with our AI characters.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to set a profile picture.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>We use speech recognition to determine if you are speaking / responding to us.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Raleway-Black.ttf</string>
+		<string>Raleway-BlackItalic.ttf</string>
+		<string>Raleway-Bold.ttf</string>
+		<string>Raleway-BoldItalic.ttf</string>
+		<string>Raleway-ExtraBold.ttf</string>
+		<string>Raleway-ExtraBoldItalic.ttf</string>
+		<string>Raleway-ExtraLight.ttf</string>
+		<string>Raleway-ExtraLightItalic.ttf</string>
+		<string>Raleway-Italic.ttf</string>
+		<string>Raleway-Light.ttf</string>
+		<string>Raleway-LightItalic.ttf</string>
+		<string>Raleway-Medium.ttf</string>
+		<string>Raleway-MediumItalic.ttf</string>
+		<string>Raleway-Regular.ttf</string>
+		<string>Raleway-SemiBold.ttf</string>
+		<string>Raleway-SemiBoldItalic.ttf</string>
+		<string>Raleway-Thin.ttf</string>
+		<string>Raleway-ThinItalic.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
@@ -86,32 +114,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSContactsUsageDescription</key>
-	<string>Used to make it easier to share Pickup with your contact book.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Used to set a profile picture.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Used to determine where you are located.</string>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Raleway-Black.ttf</string>
-		<string>Raleway-BlackItalic.ttf</string>
-		<string>Raleway-Bold.ttf</string>
-		<string>Raleway-BoldItalic.ttf</string>
-		<string>Raleway-ExtraBold.ttf</string>
-		<string>Raleway-ExtraBoldItalic.ttf</string>
-		<string>Raleway-ExtraLight.ttf</string>
-		<string>Raleway-ExtraLightItalic.ttf</string>
-		<string>Raleway-Italic.ttf</string>
-		<string>Raleway-Light.ttf</string>
-		<string>Raleway-LightItalic.ttf</string>
-		<string>Raleway-Medium.ttf</string>
-		<string>Raleway-MediumItalic.ttf</string>
-		<string>Raleway-Regular.ttf</string>
-		<string>Raleway-SemiBold.ttf</string>
-		<string>Raleway-SemiBoldItalic.ttf</string>
-		<string>Raleway-Thin.ttf</string>
-		<string>Raleway-ThinItalic.ttf</string>
-	</array>
 </dict>
 </plist>
