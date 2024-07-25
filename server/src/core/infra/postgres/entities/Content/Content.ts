@@ -11,6 +11,7 @@ import {
     Unique,
 } from "typeorm";
 import { User } from "../User";
+import { Category } from "../types";
 
 export type FollowUpQuestion = {
     id: string;
@@ -38,6 +39,22 @@ export class Content {
         type: "text",
     })
     audioUrl!: string;
+
+    // estimated length of the audio
+    @Column({
+        nullable: false,
+        name: "length_seconds",
+        type: "int",
+    })
+    lengthSeconds!: number;
+
+    @Column({
+        nullable: false,
+        name: "categories",
+        type: "jsonb",
+        default: "[]",
+    })
+    categories!: Category[];
 
     @Column({
         nullable: false,

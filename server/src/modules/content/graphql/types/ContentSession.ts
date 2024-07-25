@@ -11,5 +11,8 @@ export const ContentSession = objectType({
         t.nonNull.string("userId");
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
+        t.field("content", {
+            type: nullable("Content"),
+        });
     },
 });

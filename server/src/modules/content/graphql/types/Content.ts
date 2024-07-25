@@ -20,7 +20,10 @@ export const Content = objectType({
         t.nonNull.string("authorName");
         t.nullable.string("authorImageUrl");
         t.nonNull.string("title");
+        // categories list of string
+        t.nonNull.list.nonNull.string("categories");
         t.nullable.string("summary");
+        t.nonNull.int("lengthSeconds");
         t.nonNull.string("websiteUrl");
         t.field("followUpQuestions", {
             type: nonNull(list(nonNull("FollowUpQuestion"))),

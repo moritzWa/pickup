@@ -4,93 +4,71 @@ import {
   TouchableOpacity,
   SafeAreaView,
   FlatList,
+  RefreshControl,
+  Alert,
 } from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
 import { Query } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
 import { BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPlay } from "@fortawesome/pro-solid-svg-icons";
+import { faArrowRight, faPlay } from "@fortawesome/pro-solid-svg-icons";
+import { ContentRow } from "./ContentRow";
 
 const Activity = () => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
 
-  const { data } = useQuery<Pick<Query, "getCourses">>(api.courses.list);
+  const { data, refetch, error } = useQuery<Pick<Query, "getContentFeed">>(
+    api.content.feed
+  );
 
-  const courses = data?.getCourses ?? [];
+  const [startCourse] = useMutation(api.courses.start);
+
+  const content = data?.getContentFeed ?? [];
+
+  const onRefresh = async () => {
+    await refetch();
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <FlatList
-        data={courses}
+        data={content}
+        refreshControl={
+          <RefreshControl refreshing={false} onRefresh={onRefresh} />
+        }
         keyExtractor={(c) => c.id}
+        contentContainerStyle={{ padding: 5 }}
         ListHeaderComponent={
           <View
             style={{
-              padding: 15,
+              padding: 10,
+              paddingVertical: 25,
             }}
           >
+            {/* <Impressions impressions={impressionsData} /> */}
+
             <Text
               style={{
                 color: theme.header,
-                fontSize: 22,
+                fontSize: 26,
                 fontWeight: "bold",
+                fontFamily: "Raleway-Regular",
               }}
             >
-              Activity
+              Your Activity
             </Text>
           </View>
         }
-        renderItem={({ item: c }) => <ActivityRow course={c} />}
+        renderItem={({ item: c }) => <ContentRow content={c} />}
       />
     </SafeAreaView>
-  );
-};
-
-const ActivityRow = ({ course: c }: { course: BaseCourseFields }) => {
-  const navigation = useNavigation<NavigationProps>();
-  const theme = useTheme();
-
-  return (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate("CourseDetails", {
-          courseId: c.id,
-        })
-      }
-      style={{
-        margin: 10,
-        padding: 20,
-        borderColor: theme.border,
-        borderRadius: 15,
-        borderWidth: 1,
-      }}
-    >
-      <Text
-        style={{
-          color: theme.header,
-          fontSize: 18,
-        }}
-      >
-        {c.title}
-      </Text>
-
-      <Text
-        style={{
-          color: theme.text,
-          fontSize: 16,
-          marginVertical: 5,
-        }}
-      >
-        {c.subtitle}
-      </Text>
-    </TouchableOpacity>
   );
 };
 

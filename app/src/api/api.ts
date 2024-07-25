@@ -1,5 +1,7 @@
 import { gql } from "@apollo/client";
 import {
+  BaseContentFields,
+  BaseContentSessionFields,
   BaseCourseFields,
   BaseLessonFields,
   BaseLessonProgressFields,
@@ -152,9 +154,18 @@ const Respond = gql`
 
 const StartCourse = gql`
   ${BaseCourseFields}
-  mutation StartCOurse($courseId: ID!) {
+  mutation StartCourse($courseId: ID!) {
     startCourse(courseId: $courseId) {
       ...BaseCourseFields
+    }
+  }
+`;
+
+const StartContent = gql`
+  ${BaseContentSessionFields}
+  mutation StartContent($contentId: ID!) {
+    startContent(contentId: $contentId) {
+      ...BaseContentSessionFields
     }
   }
 `;
@@ -177,6 +188,26 @@ const GetLesson = gql`
   }
 `;
 
+// content
+
+const GetContentFeed = gql`
+  ${BaseContentFields}
+  query GetContentFeed($limit: Int) {
+    getContentFeed(limit: $limit) {
+      ...BaseContentFields
+    }
+  }
+`;
+
+const GetContent = gql`
+  ${BaseContentFields}
+  query GetContent($contentId: ID!) {
+    getContent(contentId: $contentId) {
+      ...BaseContentFields
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
@@ -187,6 +218,11 @@ export const api = {
     me: GetMe,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,
+  },
+  content: {
+    start: StartContent,
+    feed: GetContentFeed,
+    get: GetContent,
   },
   courses: {
     start: StartCourse,

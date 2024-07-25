@@ -1,4 +1,3 @@
-export const primary = "#FAB505";
 export const lighterPrimary = "#1E3DCC";
 export const primaryGreen = "#00E894";
 export const white = "white";
@@ -173,3 +172,5 @@ export const textDarkNeutralSecondary = "#999999";
 
 export const bgDarkNeutralTertiary = "#1F1F1F";
 export const bgLightNeutralTertiary = "#FAFAFA";
+
+export const primary = pink60;

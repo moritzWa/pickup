@@ -37,6 +37,7 @@ import CourseDetails from "src/views/Main/CourseDetails";
 import LessonDetails from "src/views/Main/LessonDetails";
 import LessonSession from "src/views/Main/LessonSession";
 import Activity from "src/views/Main/Activity";
+import ContentSession from "src/views/Main/ContentSession";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -51,6 +52,7 @@ export type RootStackParamList = {
   Signup: undefined; // params
   Welcome: undefined;
   Main: undefined;
+  ContentSession?: { contentId: string };
   LessonDetails?: { lessonId: string };
   LessonSession?: { lessonId: string };
   Update?: undefined;
@@ -280,6 +282,14 @@ export const MainNavigationStack = () => {
               headerShown: false,
             }}
             component={LessonSession}
+          />
+
+          <Stack.Screen
+            name="ContentSession"
+            options={{
+              headerShown: false,
+            }}
+            component={ContentSession}
           />
 
           {/* MODALS */}

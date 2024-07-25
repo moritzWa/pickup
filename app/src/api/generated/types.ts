@@ -18,6 +18,39 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export type Content = {
+  __typename?: 'Content';
+  audioUrl: Scalars['String']['output'];
+  authorImageUrl?: Maybe<Scalars['String']['output']>;
+  authorName: Scalars['String']['output'];
+  categories: Array<Scalars['String']['output']>;
+  context: Scalars['String']['output'];
+  createdAt: Scalars['Date']['output'];
+  followUpQuestions: Array<FollowUpQuestion>;
+  id: Scalars['String']['output'];
+  lengthSeconds: Scalars['Int']['output'];
+  summary?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['Date']['output'];
+  websiteUrl: Scalars['String']['output'];
+};
+
+export type ContentRespondResponse = {
+  __typename?: 'ContentRespondResponse';
+  responseAudioUrl: Scalars['String']['output'];
+  transcription: Scalars['String']['output'];
+};
+
+export type ContentSession = {
+  __typename?: 'ContentSession';
+  contentId: Scalars['String']['output'];
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['String']['output'];
+  timestampCursor?: Maybe<Scalars['Float']['output']>;
+  updatedAt: Scalars['Date']['output'];
+  userId: Scalars['String']['output'];
+};
+
 export type Course = {
   __typename?: 'Course';
   backgroundColor: Scalars['String']['output'];
@@ -36,6 +69,13 @@ export type CreateUserResponse = {
   __typename?: 'CreateUserResponse';
   token: Scalars['String']['output'];
   user: User;
+};
+
+export type FollowUpQuestion = {
+  __typename?: 'FollowUpQuestion';
+  answer: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  question: Scalars['String']['output'];
 };
 
 export type GetMobileUpdateResponse = {
@@ -92,7 +132,9 @@ export type Mutation = {
   deleteMe: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
   respond: RespondResponse;
+  respondToContent: ContentRespondResponse;
   sendVerification: Scalars['String']['output'];
+  startContent: ContentSession;
   startCourse: Course;
   startLesson: LessonSession;
   transcribe: TranscribeResponse;
@@ -116,8 +158,19 @@ export type MutationRespondArgs = {
 };
 
 
+export type MutationRespondToContentArgs = {
+  audioFileUrl: Scalars['String']['input'];
+  contentId: Scalars['ID']['input'];
+};
+
+
 export type MutationSendVerificationArgs = {
   phoneNumber: Scalars['String']['input'];
+};
+
+
+export type MutationStartContentArgs = {
+  contentId: Scalars['String']['input'];
 };
 
 
@@ -163,6 +216,10 @@ export type PaymentMethod = {
 export type Query = {
   __typename?: 'Query';
   checkCode: Scalars['Boolean']['output'];
+  getActivity: Array<ContentSession>;
+  getContent: Content;
+  getContentFeed: Array<Content>;
+  getContentSession: ContentSession;
   getCourse: Course;
   getCourseLessons: Array<Lesson>;
   getCourses: Array<Course>;
@@ -180,6 +237,21 @@ export type Query = {
 
 export type QueryCheckCodeArgs = {
   referralCode: Scalars['String']['input'];
+};
+
+
+export type QueryGetContentArgs = {
+  contentId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetContentFeedArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryGetContentSessionArgs = {
+  contentId: Scalars['ID']['input'];
 };
 
 

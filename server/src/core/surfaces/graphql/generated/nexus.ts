@@ -108,10 +108,12 @@ export interface NexusGenFieldTypes {
     audioUrl: string; // String!
     authorImageUrl: string | null; // String
     authorName: string; // String!
+    categories: string[]; // [String!]!
     context: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][]; // [FollowUpQuestion!]!
     id: string; // String!
+    lengthSeconds: number; // Int!
     summary: string | null; // String
     title: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
@@ -122,6 +124,7 @@ export interface NexusGenFieldTypes {
     transcription: string; // String!
   }
   ContentSession: { // field return type
+    content: NexusGenRootTypes['Content'] | null; // Content
     contentId: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // String!
@@ -203,7 +206,9 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     checkCode: boolean; // Boolean!
+    getActivity: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getContent: NexusGenRootTypes['Content']; // Content!
+    getContentFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     getCourse: NexusGenRootTypes['Course']; // Course!
     getCourseLessons: NexusGenRootTypes['Lesson'][]; // [Lesson!]!
@@ -257,10 +262,12 @@ export interface NexusGenFieldTypeNames {
     audioUrl: 'String'
     authorImageUrl: 'String'
     authorName: 'String'
+    categories: 'String'
     context: 'String'
     createdAt: 'Date'
     followUpQuestions: 'FollowUpQuestion'
     id: 'String'
+    lengthSeconds: 'Int'
     summary: 'String'
     title: 'String'
     updatedAt: 'Date'
@@ -271,6 +278,7 @@ export interface NexusGenFieldTypeNames {
     transcription: 'String'
   }
   ContentSession: { // field return type name
+    content: 'Content'
     contentId: 'String'
     createdAt: 'Date'
     id: 'String'
@@ -352,7 +360,9 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     checkCode: 'Boolean'
+    getActivity: 'ContentSession'
     getContent: 'Content'
+    getContentFeed: 'Content'
     getContentSession: 'ContentSession'
     getCourse: 'Course'
     getCourseLessons: 'Lesson'
@@ -454,6 +464,9 @@ export interface NexusGenArgTypes {
     }
     getContent: { // args
       contentId: string; // ID!
+    }
+    getContentFeed: { // args
+      limit?: number | null; // Int
     }
     getContentSession: { // args
       contentId: string; // ID!

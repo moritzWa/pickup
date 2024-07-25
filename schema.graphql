@@ -6,10 +6,12 @@ type Content {
   audioUrl: String!
   authorImageUrl: String
   authorName: String!
+  categories: [String!]!
   context: String!
   createdAt: Date!
   followUpQuestions: [FollowUpQuestion!]!
   id: String!
+  lengthSeconds: Int!
   summary: String
   title: String!
   updatedAt: Date!
@@ -22,6 +24,7 @@ type ContentRespondResponse {
 }
 
 type ContentSession {
+  content: Content
   contentId: String!
   createdAt: Date!
   id: String!
@@ -123,7 +126,9 @@ type PaymentMethod {
 
 type Query {
   checkCode(referralCode: String!): Boolean!
+  getActivity: [ContentSession!]!
   getContent(contentId: ID!): Content!
+  getContentFeed(limit: Int): [Content!]!
   getContentSession(contentId: ID!): ContentSession!
   getCourse(courseId: ID!): Course!
   getCourseLessons(courseId: ID!): [Lesson!]!

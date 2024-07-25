@@ -1,6 +1,8 @@
 import { gql } from "@apollo/client";
 import { Maybe } from "src/core";
 import {
+  Content,
+  ContentSession,
   Course,
   Lesson,
   LessonProgress,
@@ -141,6 +143,55 @@ export const BaseCourseFields = gql`
     isStarted
     mostRecentLesson {
       ...BaseLessonFields
+    }
+  }
+`;
+
+export type BaseContentFields = Pick<
+  Content,
+  | "id"
+  | "audioUrl"
+  | "authorImageUrl"
+  | "authorName"
+  | "context"
+  | "followUpQuestions"
+  | "title"
+  | "summary"
+  | "websiteUrl"
+  | "lengthSeconds"
+  | "categories"
+>;
+
+export const BaseContentFields = gql`
+  fragment BaseContentFields on Content {
+    id
+    audioUrl
+    authorImageUrl
+    authorName
+    context
+    followUpQuestions {
+      id
+      question
+      answer
+    }
+    title
+    summary
+    websiteUrl
+    lengthSeconds
+    categories
+  }
+`;
+
+export type BaseContentSessionFields = Pick<ContentSession, "id"> & {
+  content: BaseContentFields | null;
+};
+
+export const BaseContentSessionFields = gql`
+  ${BaseContentFields}
+  fragment BaseContentSessionFields on ContentSession {
+    id
+    content {
+      ...BaseContentFields
     }
   }
 `;

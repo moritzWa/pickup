@@ -6,3 +6,14 @@ export enum Country {
     CA = "CA",
     AU = "AU",
 }
+
+export enum Category {
+    Language = "language",
+    Entrepreneurship = "entrepreneurship",
+    History = "history",
+    Science = "science",
+    Philosophy = "philosophy",
+    PublicSpeaking = "public_speaking",
+    Negotiation = "negotiation",
+    Product = "product",
+}

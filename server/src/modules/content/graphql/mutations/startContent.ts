@@ -28,6 +28,16 @@ export const startContent = mutationField("startContent", {
 
         throwIfError(contentResponse);
 
+        const existingSessionResponse =
+            await contentSessionRepo.findForContentAndUser({
+                userId: user.id,
+                contentId,
+            });
+
+        if (existingSessionResponse.isSuccess()) {
+            return existingSessionResponse.value;
+        }
+
         const content = contentResponse.value;
 
         const sessionResponse = await contentSessionRepo.create({
@@ -38,6 +48,8 @@ export const startContent = mutationField("startContent", {
             createdAt: new Date(),
             updatedAt: new Date(),
         });
+
+        console.log(sessionResponse);
 
         throwIfError(sessionResponse);
 
