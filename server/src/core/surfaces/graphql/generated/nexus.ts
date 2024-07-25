@@ -432,7 +432,7 @@ export interface NexusGenArgTypes {
       phoneNumber: string; // String!
     }
     startContent: { // args
-      contentId: string; // String!
+      contentId: string; // ID!
     }
     startCourse: { // args
       courseId: string; // ID!

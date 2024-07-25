@@ -1,6 +1,6 @@
 import { ApolloError } from "apollo-server-errors";
 import { StatusCodes } from "http-status-codes";
-import { booleanArg, mutationField, nonNull, stringArg } from "nexus";
+import { booleanArg, idArg, mutationField, nonNull, stringArg } from "nexus";
 import {
     throwIfError,
     throwIfErrorAndDatadog,
@@ -16,7 +16,7 @@ import { contentRepo, contentSessionRepo } from "../../infra";
 export const startContent = mutationField("startContent", {
     type: nonNull("ContentSession"),
     args: {
-        contentId: nonNull(stringArg()),
+        contentId: nonNull(idArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);
@@ -34,7 +34,10 @@ export const startContent = mutationField("startContent", {
                 contentId,
             });
 
-        if (existingSessionResponse.isSuccess()) {
+        if (
+            existingSessionResponse.isSuccess() &&
+            existingSessionResponse.value
+        ) {
             return existingSessionResponse.value;
         }
 

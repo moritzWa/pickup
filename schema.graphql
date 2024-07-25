@@ -110,7 +110,7 @@ type Mutation {
   respond(audioFileUrl: String!, lessonId: ID!): RespondResponse!
   respondToContent(audioFileUrl: String!, contentId: ID!): ContentRespondResponse!
   sendVerification(phoneNumber: String!): String!
-  startContent(contentId: String!): ContentSession!
+  startContent(contentId: ID!): ContentSession!
   startCourse(courseId: ID!): Course!
   startLesson(lessonId: String!): LessonSession!
   transcribe(audioFileUrl: String!, lessonId: ID!): TranscribeResponse!

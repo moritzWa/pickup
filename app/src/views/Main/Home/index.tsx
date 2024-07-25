@@ -17,9 +17,15 @@ import { NavigationProps } from "src/navigation";
 import { BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRight, faPlay } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faArrowRight,
+  faCar,
+  faCarBolt,
+  faPlay,
+} from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "./Github";
 import { ContentRow } from "./ContentRow";
+import { LinearGradient } from "expo-linear-gradient";
 
 const generateImpressionsData = () => {
   const impressions = [];
@@ -55,7 +61,7 @@ const Home = () => {
           <RefreshControl refreshing={false} onRefresh={onRefresh} />
         }
         keyExtractor={(c) => c.id}
-        contentContainerStyle={{ padding: 5 }}
+        contentContainerStyle={{ padding: 5, paddingBottom: 150 }}
         ListHeaderComponent={
           <View
             style={{
@@ -79,6 +85,53 @@ const Home = () => {
         }
         renderItem={({ item: c }) => <ContentRow content={c} />}
       />
+
+      <LinearGradient
+        style={{
+          position: "absolute",
+          bottom: 93,
+          height: 50,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          flexDirection: "row",
+        }}
+        colors={[colors.pink80, colors.pink50, colors.pink80]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <TouchableOpacity
+          style={{
+            height: 50,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            flexDirection: "row",
+          }}
+          activeOpacity={1}
+        >
+          <Text
+            style={{
+              color: colors.white,
+              fontFamily: "Raleway-SemiBold",
+              textAlign: "center",
+              fontSize: 18,
+              fontWeight: "bold",
+            }}
+          >
+            Car Mode
+          </Text>
+
+          <FontAwesomeIcon
+            style={{ marginLeft: 10 }}
+            icon={faCar}
+            color={colors.white}
+            size={20}
+          />
+        </TouchableOpacity>
+      </LinearGradient>
     </SafeAreaView>
   );
 };

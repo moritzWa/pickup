@@ -57,9 +57,9 @@ const Button = ({
       onPress={_onPress}
       style={[
         {
-          height: 45,
+          height: 40,
           paddingHorizontal: 25,
-          borderRadius: 15,
+          borderRadius: 100,
           backgroundColor: theme.header,
           alignItems: "center",
           marginBottom: 5,
@@ -95,7 +95,7 @@ const Button = ({
                   textAlign: "center",
                   fontFamily: "Raleway-Semibold",
                   width: "100%",
-                  fontSize: IS_IPAD ? 24 : 18,
+                  fontSize: IS_IPAD ? 24 : 14,
                 },
                 textProps?.style,
                 labelStyle,

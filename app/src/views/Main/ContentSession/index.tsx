@@ -21,10 +21,15 @@ import {
   faReplyAll,
   faTree,
 } from "@fortawesome/pro-solid-svg-icons";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "src/navigation";
 import { useMutation, useQuery } from "@apollo/client";
-import { Mutation, Query, QueryGetLessonArgs } from "src/api/generated/types";
+import {
+  Mutation,
+  Query,
+  QueryGetContentArgs,
+  QueryGetLessonArgs,
+} from "src/api/generated/types";
 import { api } from "src/api";
 import Back from "src/components/Back";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -40,9 +45,9 @@ const ContentSession = () => {
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const { me } = useMe();
-  const [respond, { error: respondError, data: respondData }] = useMutation<
-    Pick<Mutation, "respond">
-  >(api.lessons.respond);
+  // const [respond, { error: respondError, data: respondData }] = useMutation<
+  //   Pick<Mutation, "respond">
+  // >(api.lessons.respond);
 
   const [recording, setRecording] = useState<Audio.Recording>();
   const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
@@ -52,21 +57,20 @@ const ContentSession = () => {
   const levelCheckInterval = useRef(null);
   const [timer, setTimer] = useState(0);
 
-  const lessonVariables = useMemo(
-    (): QueryGetLessonArgs => ({
-      lessonId,
+  const contentVariables = useMemo(
+    (): QueryGetContentArgs => ({
+      contentId,
     }),
-    [lessonId]
+    [contentId]
   );
 
-  const {
-    data: lessonData,
-    error,
-    refetch: refetchCourse,
-  } = useQuery<Pick<Query, "getLesson">>(api.lessons.get, {
-    skip: !lessonVariables.lessonId,
-    variables: lessonVariables,
-  });
+  const { data: contentData, error } = useQuery<Pick<Query, "getContent">>(
+    api.content.get,
+    {
+      skip: !contentVariables.contentId,
+      variables: contentVariables,
+    }
+  );
 
   useEffect(() => {
     return () => {
@@ -198,12 +202,12 @@ const ContentSession = () => {
 
           console.log(`audio url: ${url}`);
 
-          await respond({
-            variables: {
-              lessonId,
-              audioFileUrl: url,
-            },
-          });
+          // await respond({
+          //   variables: {
+          //     lessonId,
+          //     audioFileUrl: url,
+          //   },
+          // });
         });
 
         // const fileObj = {
@@ -266,17 +270,21 @@ const ContentSession = () => {
   };
 
   const theme = useTheme();
-  const lesson = lessonData?.getLesson;
+  const content = contentData?.getContent;
   const insets = useSafeAreaInsets();
-
-  if (__DEV__ && respondError) {
-    console.log(respondError);
-  }
+  const navigation = useNavigation();
 
   return (
     <View style={{ flex: 1, paddingTop: insets.top }}>
-      <View style={{ position: "absolute", top: insets.top + 15, left: 15 }}>
-        <Back />
+      <View
+        style={{
+          position: "absolute",
+          zIndex: 100,
+          top: insets.top + 15,
+          left: 15,
+        }}
+      >
+        <Back onPress={() => navigation.goBack()} />
       </View>
 
       {isRecording ? (
@@ -417,55 +425,6 @@ const ContentSession = () => {
             </TouchableOpacity>
           </View>
         )}
-
-        {respondData ? (
-          <>
-            <Text
-              style={{
-                color: theme.text,
-                marginTop: 15,
-                fontSize: 16,
-                fontFamily: "Raleway-Regular",
-              }}
-            >
-              {respondData?.respond?.transcription}
-            </Text>
-            {/* click to play the responseAudioUrl */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={{
-                padding: 15,
-                backgroundColor: theme.header,
-                borderRadius: 100,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 15,
-              }}
-              onPress={async () => {
-                // play the audio here
-
-                await _playAudio(respondData?.respond?.responseAudioUrl || "");
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faReplyAll}
-                color={theme.background}
-                size={24}
-                style={{ marginRight: 10 }}
-              />
-              <Text
-                style={{
-                  color: theme.background,
-                  fontSize: 18,
-                  fontFamily: "Raleway-Medium",
-                }}
-              >
-                Play Response
-              </Text>
-            </TouchableOpacity>
-          </>
-        ) : null}
       </View>
 
       <TouchableOpacity
@@ -508,27 +467,8 @@ const ContentSession = () => {
                 flex: 1,
               }}
             >
-              {lesson?.title}
+              {content?.title}
             </Text>
-
-            <View
-              style={{
-                width: 30,
-                height: 30,
-                backgroundColor: colors.black,
-                borderRadius: 40,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginRight: 10,
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faIslandTreePalm}
-                size={12}
-                color={colors.white}
-              />
-            </View>
           </View>
 
           <Text
@@ -539,7 +479,7 @@ const ContentSession = () => {
               fontFamily: "Raleway-Regular",
             }}
           >
-            {lesson?.subtitle}
+            By {content?.authorName}
           </Text>
         </View>
       </TouchableOpacity>

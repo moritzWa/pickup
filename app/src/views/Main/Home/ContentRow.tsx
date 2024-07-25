@@ -25,12 +25,12 @@ import FastImage from "react-native-fast-image";
 export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
-  const [startContent] = useMutation(api.content.start);
+  const [startContent, { error }] = useMutation(api.content.start);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const start = async () => {
     try {
-      await startContent({
+      const response = await startContent({
         variables: {
           contentId: c.id,
         },
@@ -63,6 +63,8 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
   };
 
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
+
+  console.log(error);
 
   return (
     <View
@@ -150,8 +152,8 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               height: 45,
               borderRadius: 100,
               backgroundColor: colors.primary,
-              justifyContent: "center",
-              alignItems: "center",
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
               alignSelf: "center",
               transform: [{ scale: animation }],
             }}
@@ -168,7 +170,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                 borderRadius: 25,
                 backgroundColor: colors.pink60,
               }}
-              activeOpacity={0.8}
+              activeOpacity={1}
               onPress={start}
             >
               <FontAwesomeIcon

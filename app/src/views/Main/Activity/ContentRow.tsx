@@ -16,10 +16,17 @@ import { api } from "src/api";
 import { Query } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
 import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
-import { colors } from "src/components";
+import { Button, colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRight, faPlay } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faArrowRight,
+  faCheck,
+  faCheckCircle,
+  faChevronRight,
+  faPlay,
+} from "@fortawesome/pro-solid-svg-icons";
 import FastImage from "react-native-fast-image";
+import { noop } from "lodash";
 
 export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
   const navigation = useNavigation<NavigationProps>();
@@ -89,9 +96,11 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               uri: c.authorImageUrl,
             }}
             style={{
-              width: 45,
+              width: 25,
+              position: "relative",
+              top: 2,
               marginRight: 10,
-              height: 45,
+              height: 25,
               borderRadius: 40,
             }}
           />
@@ -120,68 +129,39 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               {estimatedLen} mins
             </Text>
 
-            {(c.categories ?? []).length > 0 ? (
-              <View
-                style={{
-                  marginTop: 10,
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: theme.text,
-                    fontSize: 12,
-                    fontFamily: "Raleway-Bold",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {(c.categories || []).join(" • ")}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-
-          <Animated.View
-            style={{
-              width: 45,
-              height: 45,
-              borderRadius: 100,
-              backgroundColor: colors.primary,
-              justifyContent: "center",
-              alignItems: "center",
-              alignSelf: "center",
-              transform: [{ scale: animation }],
-            }}
-          >
-            <TouchableOpacity
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
+            <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "100%",
-                borderRadius: 25,
-                backgroundColor: colors.pink60,
-              }}
-              activeOpacity={0.8}
-              onPress={() => {
-                navigation.navigate("LessonSession", {
-                  lessonId: "TODO:",
-                });
+                marginTop: 10,
               }}
             >
               <FontAwesomeIcon
-                icon={faPlay}
-                color={colors.white}
-                size={24}
-                style={{ position: "relative", right: -2 }}
+                icon={faCheckCircle}
+                color={colors.primary}
+                size={16}
               />
-            </TouchableOpacity>
-          </Animated.View>
+              <Text
+                style={{
+                  color: theme.text,
+                  fontSize: 14,
+                  marginLeft: 5,
+                  fontFamily: "Raleway-Medium",
+                }}
+              >
+                Listened on July 12th
+              </Text>
+            </View>
+          </View>
+
+          {/* right arrow */}
+          <View style={{ alignSelf: "center", alignItems: "center" }}>
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              color={theme.textSubtle}
+              size={16}
+            />
+          </View>
         </View>
       </View>
     </View>
