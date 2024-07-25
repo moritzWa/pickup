@@ -52,7 +52,7 @@ export type RootStackParamList = {
   Signup: undefined; // params
   Welcome: undefined;
   Main: undefined;
-  ContentSession?: { contentId: string };
+  ContentSession?: { contentId: string; isCarMode: boolean };
   LessonDetails?: { lessonId: string };
   LessonSession?: { lessonId: string };
   Update?: undefined;

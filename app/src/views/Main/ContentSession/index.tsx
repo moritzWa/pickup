@@ -44,6 +44,7 @@ const SIZE = 150;
 const ContentSession = () => {
   const route = useRoute<RouteProp<RootStackParamList, "ContentSession">>();
   const contentId = route.params?.contentId || "";
+  const isCarMode = route.params?.isCarMode || false;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const { me } = useMe();
@@ -559,8 +560,8 @@ const ContentSession = () => {
             <Text
               style={{
                 color: theme.header,
-                fontSize: 16,
-                fontFamily: "Raleway-SemiBold",
+                fontSize: isCarMode ? 24 : 16,
+                fontFamily: "Raleway-Bold",
               }}
             >
               {content?.title}
@@ -568,9 +569,9 @@ const ContentSession = () => {
 
             <Text
               style={{
-                marginTop: 5,
+                marginTop: 10,
                 color: theme.text,
-                fontSize: 14,
+                fontSize: isCarMode ? 18 : 14,
                 fontFamily: "Raleway-Medium",
               }}
             >

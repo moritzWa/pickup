@@ -104,7 +104,10 @@ const Home = () => {
         <TouchableOpacity
           onPress={() => {
             // just go to the first content
-            navigation.navigate("ContentSession", { contentId: content[0].id });
+            navigation.navigate("ContentSession", {
+              contentId: content[0].id,
+              isCarMode: true,
+            });
           }}
           style={{
             height: 50,
