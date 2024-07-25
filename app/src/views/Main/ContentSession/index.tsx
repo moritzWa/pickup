@@ -445,7 +445,8 @@ const ContentSession = () => {
             width: SIZE,
             height: SIZE,
             borderRadius: 100,
-            backgroundColor: colors.pink90,
+            backgroundColor:
+              theme.theme === "dark" ? colors.pink20 : colors.pink90,
             justifyContent: "center",
             alignItems: "center",
             alignSelf: "center",

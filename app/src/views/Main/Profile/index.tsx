@@ -373,7 +373,7 @@ const Profile = () => {
             name="Enable Push Notifications"
           />
 
-          {/* <Section
+          <Section
             icon={<FontAwesomeIcon icon={faMoon} color={text} />}
             name={"Dark mode"}
             rightIcon={
@@ -386,7 +386,7 @@ const Profile = () => {
                 onChange={() => toggleDarkMode()}
               />
             }
-          /> */}
+          />
 
           <View style={{ height: 1, backgroundColor: secondaryBackground }} />
           <Section
