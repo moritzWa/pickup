@@ -43,10 +43,11 @@ export const respondToContent = mutationField("respondToContent", {
 
         const content = contentResponse.value;
 
-        // const respondResponse = await ResponseService.respond(
-        //     lesson,
-        //     audioFileUrl
-        // );
+        const respondResponse = await ResponseService.respondToContent(
+            content,
+            user,
+            audioFileUrl
+        );
 
         // throwIfError(respondResponse);
 

@@ -65,7 +65,11 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={1}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={start}
       style={{
         margin: 5,
         borderColor: theme.border,
@@ -110,7 +114,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
 
             <Text
               style={{
-                marginTop: 5,
+                marginTop: 8,
                 color: theme.text,
                 fontSize: 14,
                 fontFamily: "Raleway-Medium",
@@ -124,7 +128,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             {(c.categories ?? []).length > 0 ? (
               <View
                 style={{
-                  marginTop: 10,
+                  marginTop: 8,
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
@@ -132,7 +136,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               >
                 <Text
                   style={{
-                    color: theme.text,
+                    color: colors.primary,
                     fontSize: 12,
                     fontFamily: "Raleway-Bold",
                     textTransform: "uppercase",
@@ -146,19 +150,21 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
 
           <Animated.View
             style={{
-              width: 45,
-              height: 45,
+              marginLeft: 5,
+              width: 55,
+              height: 55,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
               borderRadius: 100,
               backgroundColor: colors.primary,
-              justifyContent: "flex-start",
-              alignItems: "flex-start",
               alignSelf: "center",
               transform: [{ scale: animation }],
             }}
           >
-            <TouchableOpacity
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
+            {/* <TouchableOpacity
+              // onPressIn={handlePressIn}
+              // onPressOut={handlePressOut}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -166,21 +172,20 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                 width: "100%",
                 height: "100%",
                 borderRadius: 25,
-                backgroundColor: colors.pink60,
               }}
               activeOpacity={1}
               onPress={start}
-            >
-              <FontAwesomeIcon
-                icon={faPlay}
-                color={colors.white}
-                size={24}
-                style={{ position: "relative", right: -2 }}
-              />
-            </TouchableOpacity>
+            > */}
+            <FontAwesomeIcon
+              icon={faPlay}
+              color={colors.white}
+              size={24}
+              style={{ position: "relative", right: -2 }}
+            />
+            {/* </TouchableOpacity> */}
           </Animated.View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };

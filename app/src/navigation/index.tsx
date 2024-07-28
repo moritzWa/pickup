@@ -51,6 +51,7 @@ export type RootStackParamList = {
   Login: undefined; // params
   Signup: undefined; // params
   Welcome: undefined;
+  CarMode?: { contentId: string; isCarMode: boolean };
   Main: undefined;
   ContentSession?: { contentId: string; isCarMode: boolean };
   LessonDetails?: { lessonId: string };
@@ -150,6 +151,14 @@ const MainTabNavigation = () => {
           headerShown: false,
         }}
         component={Home}
+      />
+
+      <Tabs.Screen
+        name="CarMode"
+        options={{
+          headerShown: false,
+        }}
+        component={ContentSession}
       />
 
       <Tabs.Screen

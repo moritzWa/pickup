@@ -29,6 +29,8 @@ const FriendsIcon = require("src/assets/icons/friends-outline.png");
 const FriendsIconFilled = require("src/assets/icons/friends.png");
 const PortfolioIcon = require("src/assets/icons/portfolio.png");
 const PortfolioIconFilled = require("src/assets/icons/portfolio-solid.png");
+const CarIcon = require("src/assets/icons/car-regular.png");
+const CarIconFilled = require("src/assets/icons/car-solid.png");
 
 function _TabBar(tabBarProps: BottomTabBarProps) {
   const { state, descriptors } = tabBarProps;
@@ -237,6 +239,11 @@ const _getImage = (
         image: HomeIcon,
         active: HomeIconFilled,
       };
+    case "CarMode":
+      return {
+        image: CarIcon,
+        active: CarIconFilled,
+      };
     case "Activity":
       return {
         image: ClockIcon,
@@ -244,8 +251,8 @@ const _getImage = (
       };
     case "Profile":
       return {
-        image: SettingsIcon,
-        active: SettingsIconFilled,
+        image: ProfileIcon,
+        active: ProfileIconFilled,
       };
     default:
       return null;

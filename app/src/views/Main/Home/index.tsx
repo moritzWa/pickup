@@ -61,6 +61,8 @@ const Home = () => {
           <RefreshControl refreshing={false} onRefresh={onRefresh} />
         }
         keyExtractor={(c) => c.id}
+        // hide scrollbar
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 5, paddingBottom: 150 }}
         ListHeaderComponent={
           <View
@@ -97,20 +99,23 @@ const Home = () => {
           width: "100%",
           flexDirection: "row",
         }}
-        colors={[colors.pink80, colors.pink50, colors.pink80]}
+        colors={
+          theme.theme === "dark"
+            ? [colors.pink70, colors.primary, colors.pink70]
+            : [colors.pink70, colors.primary, colors.pink70]
+        }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
       >
         <TouchableOpacity
           onPress={() => {
             // just go to the first content
-            navigation.navigate("ContentSession", {
+            navigation.navigate("CarMode", {
               contentId: content[0].id,
               isCarMode: true,
             });
           }}
           style={{
-            height: 50,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",

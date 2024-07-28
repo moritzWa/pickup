@@ -1,3 +1,4 @@
+import { Audio } from "expo-av";
 import { Maybe } from "src/core";
 
 export enum WalletProvider {
@@ -14,6 +15,13 @@ export type UserState = {
   authStatus: AuthStatus;
 };
 
+export type AudioState = {
+  sound: Audio.Sound | null;
+  audioUrl: string | null;
+  currentMs: number | null;
+  durationMs: number | null;
+};
+
 export type GlobalState = {
   isRecalculating: boolean;
   recalculateFinishEta: Maybe<Date>;
@@ -28,4 +36,5 @@ export type GlobalState = {
 export type ReduxState = {
   user: UserState;
   global: GlobalState;
+  audio: AudioState;
 };

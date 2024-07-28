@@ -173,4 +173,4 @@ export const textDarkNeutralSecondary = "#999999";
 export const bgDarkNeutralTertiary = "#1F1F1F";
 export const bgLightNeutralTertiary = "#FAFAFA";
 
-export const primary = pink60;
+export const primary = purple70;

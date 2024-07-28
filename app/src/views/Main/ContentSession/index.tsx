@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   Alert,
   Animated,
+  StyleSheet,
+  Dimensions,
 } from "react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as FileSystem from "expo-file-system";
-import { Audio } from "expo-av";
+import { AVPlaybackStatus, Audio } from "expo-av";
 import { useMe, useTheme } from "src/hooks";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -38,14 +40,20 @@ import * as Speech from "expo-speech";
 import { storage } from "src/utils/firebase";
 import { noop } from "lodash";
 import FastImage from "react-native-fast-image";
+import Slider from "@react-native-community/slider";
+import { useSpeech } from "./useSpeech";
 
 const SIZE = 150;
 
 const ContentSession = () => {
   const route = useRoute<RouteProp<RootStackParamList, "ContentSession">>();
   const contentId = route.params?.contentId || "";
-  const isCarMode = route.params?.isCarMode || false;
+  const isCarMode =
+    route.params?.isCarMode || false || route.name === "CarMode";
+
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+
+  const { width } = Dimensions.get("window");
 
   const { me } = useMe();
   // const [respond, { error: respondError, data: respondData }] = useMutation<
@@ -61,11 +69,14 @@ const ContentSession = () => {
   const [soundStatus, setSoundStatus] = useState<"none" | "paused" | "playing">(
     "none"
   );
+  const [duration, setDuration] = useState(0);
+  const [position, setPosition] = useState(0);
 
   const silenceTimer = useRef<NodeJS.Timeout | null>(null);
   const audioAnalyzer = useRef(null);
   const levelCheckInterval = useRef(null);
   const [timer, setTimer] = useState(0);
+  const { startSpeech } = useSpeech();
 
   const contentVariables = useMemo(
     (): QueryGetContentArgs => ({
@@ -115,33 +126,39 @@ const ContentSession = () => {
     };
   }, [isRecording]);
 
+  const updateStatus = (status: AVPlaybackStatus) => {
+    if (status.isLoaded) {
+      setPosition(status.positionMillis);
+      setDuration(status.durationMillis || 0);
+    } else {
+      if (status.error) {
+        console.log(`FATAL PLAYER ERROR: ${status.error}`);
+      }
+    }
+  };
+
   async function startRecording() {
     try {
-      await stopRecording(); // Stop any existing recording
-
-      await Audio.requestPermissionsAsync();
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const recordingObject = new Audio.Recording();
-
-      setRecording(recordingObject);
-
-      await recordingObject.prepareToRecordAsync(
-        Audio.RecordingOptionsPresets.LOW_QUALITY
-      );
-
-      await recordingObject.startAsync();
-
-      // Your state management here (if using React)
-      setIsRecording(true);
-      setTimer(0);
-
-      console.log(recordingObject);
-
+      // _detectSpeech();
+      // await stopRecording(); // Stop any existing recording
+      // await Audio.requestPermissionsAsync();
+      // await Audio.setAudioModeAsync({
+      //   allowsRecordingIOS: true,
+      //   playsInSilentModeIOS: true,
+      // });
+      // const recordingObject = new Audio.Recording();
+      // setRecording(recordingObject);
+      // await recordingObject.prepareToRecordAsync(
+      //   Audio.RecordingOptionsPresets.LOW_QUALITY
+      // );
+      // await recordingObject.startAsync();
+      // recordingObject.setOnRecordingStatusUpdate((status) => {
+      //   console.log("db: " + status.metering);
+      // });
+      // // Your state management here (if using React)
+      // setIsRecording(true);
+      // setTimer(0);
+      // console.log(recordingObject);
       // Start monitoring audio levels
       // startAudioLevelMonitoring(recordingObject);
     } catch (err) {
@@ -159,6 +176,12 @@ const ContentSession = () => {
     if (sound) {
       await sound.pauseAsync();
       setSoundStatus("paused");
+
+      // set the position to be the correct one
+      const status = await sound.getStatusAsync();
+      if (status.isLoaded) {
+        setPosition(status.positionMillis);
+      }
     }
   };
 
@@ -239,30 +262,8 @@ const ContentSession = () => {
         //   type: "audio/aac",
         // };
 
-        // const { sound } = await Audio.Sound.createAsync(
-        //   { uri: lastRecordingUri },
-        //   { shouldPlay: true }
-        // );
-
         // upload it to server
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const _playAudio = async (uri: string) => {
-    try {
-      if (sound) {
-        await sound.stopAsync();
-      }
-
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri },
-        { shouldPlay: true, volume: 1 }
-      );
-
-      setSound(newSound);
     } catch (err) {
       console.log(err);
     }
@@ -279,6 +280,7 @@ const ContentSession = () => {
 
       // we preload the sound (or try to)
       if (sound) {
+        console.log(sound);
         // play it and set playing
         await sound.playAsync();
         setSoundStatus("playing");
@@ -286,10 +288,11 @@ const ContentSession = () => {
       }
 
       if (!sound) {
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: content?.audioUrl || "" },
-          { shouldPlay: true, volume: 1 }
-        );
+        const newSound = await _loadSound();
+
+        if (!newSound) {
+          return;
+        }
 
         setSound(newSound);
         setSoundStatus("playing");
@@ -315,17 +318,31 @@ const ContentSession = () => {
   const _loadSound = async () => {
     try {
       if (content?.audioUrl) {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
         const { sound: newSound } = await Audio.Sound.createAsync(
           { uri: content?.audioUrl },
           { shouldPlay: false }
         );
 
         setSound(newSound);
+        newSound.setOnPlaybackStatusUpdate(updateStatus);
+
+        return newSound;
       }
+
+      return null;
     } catch (err) {
       console.log(err);
     }
   };
+
+  // useEffect(() => {
+  //   startSpeech();
+  // }, []);
 
   // on page load try to load the sound
   useEffect(() => {
@@ -350,37 +367,82 @@ const ContentSession = () => {
     }).start();
   };
 
-  const _startOrStopRecording = async () => {
-    // play recording
-    if (!content?.audioUrl) {
-      Alert.alert("Error", "No audio to play");
-      return;
+  const onSlidingComplete = async (value: number) => {
+    if (sound) {
+      await sound.setPositionAsync(value);
+      if (soundStatus !== "playing") {
+        await sound.playAsync();
+        setSoundStatus("playing");
+      }
     }
-
-    await _playAudio(content?.audioUrl);
-    // if (isRecording) {
-    //   await stopRecording();
-    // } else {
-    //   await startRecording();
-    // }
   };
 
-  const _openLesson = () => {
-    // TODO: lesson
+  const formatTime = (timeMillis: number) => {
+    const totalSeconds = Math.floor(timeMillis / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
   };
+
+  const listenForSpeech = async () => {
+    try {
+      Voice.onSpeechStart = () => {
+        console.log("Speech started.");
+      };
+
+      Voice.onSpeechEnd = () => {
+        console.log("Speech ended.");
+      };
+
+      Voice.onSpeechResults = (e) => {
+        console.log("Speech results.");
+        console.log(e);
+        // console.log(e.value[0]);
+      };
+
+      await Voice.start("en-US");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    void listenForSpeech();
+
+    return () => {
+      console.log("destroying voice");
+      Voice.destroy();
+    };
+  }, []);
+
+  // get the time we are in the audio and the time left for the audio
+  const currentTime = formatTime(position);
+
+  // console.log(position, duration);
 
   return (
-    <View style={{ flex: 1, paddingTop: insets.top }}>
-      <View
-        style={{
-          position: "absolute",
-          zIndex: 100,
-          top: insets.top + 20,
-          left: 15,
-        }}
-      >
-        <Back hideBack onPress={() => navigation.goBack()} />
-      </View>
+    <View
+      style={{
+        flex: 1,
+        paddingTop: insets.top,
+        paddingBottom: isCarMode ? 65 : 0,
+      }}
+    >
+      {!isCarMode && (
+        <View
+          style={{
+            position: "absolute",
+            zIndex: 100,
+            top: insets.top + 20,
+            left: 15,
+          }}
+        >
+          <Back hideBack onPress={() => navigation.goBack()} />
+        </View>
+      )}
 
       {isRecording ? (
         <View
@@ -447,7 +509,7 @@ const ContentSession = () => {
             height: SIZE,
             borderRadius: 100,
             backgroundColor:
-              theme.theme === "dark" ? colors.pink20 : colors.pink90,
+              theme.theme === "dark" ? colors.purple20 : colors.purple90,
             justifyContent: "center",
             alignItems: "center",
             alignSelf: "center",
@@ -459,7 +521,7 @@ const ContentSession = () => {
               width: SIZE - 15,
               height: SIZE - 15,
               borderRadius: 100,
-              backgroundColor: colors.pink50,
+              backgroundColor: colors.primary,
               justifyContent: "center",
               alignItems: "center",
             }}
@@ -484,6 +546,38 @@ const ContentSession = () => {
             />
           </TouchableOpacity>
         </Animated.View>
+
+        {/* <TouchableOpacity
+          activeOpacity={0.8}
+          style={{
+            padding: 10,
+            marginTop: 15,
+            paddingHorizontal: 15,
+            alignSelf: "center",
+            backgroundColor: theme.header,
+            borderRadius: 100,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+          onPress={_playRecordingUri}
+        >
+          <FontAwesomeIcon
+            icon={faRedo}
+            color={theme.background}
+            size={24}
+            style={{ marginRight: 10 }}
+          />
+          <Text
+            style={{
+              color: theme.background,
+              fontSize: 18,
+              fontFamily: "Raleway-Medium",
+            }}
+          >
+            Play Recording
+          </Text>
+        </TouchableOpacity> */}
 
         {lastRecordingUri && (
           <View
@@ -530,6 +624,62 @@ const ContentSession = () => {
       </View>
 
       <View
+        style={[
+          styles.container,
+          {
+            marginBottom: 30,
+          },
+        ]}
+      >
+        <Slider
+          style={{
+            width: width * 1.75,
+            alignSelf: "center",
+            height: 35,
+            transform: [{ scaleX: 0.5 }, { scaleY: 0.5 }],
+          }}
+          minimumValue={0}
+          maximumValue={duration}
+          value={position}
+          onSlidingComplete={onSlidingComplete}
+          minimumTrackTintColor={theme.header}
+          maximumTrackTintColor={theme.secondaryBackground2}
+          thumbTintColor={theme.header}
+          // change the size of the thumb
+        />
+
+        <View
+          style={{
+            width: "87%",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginHorizontal: 15,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.text,
+              fontSize: 14,
+              fontFamily: "Raleway-Medium",
+            }}
+          >
+            {formatTime(position)}
+          </Text>
+
+          <Text
+            style={{
+              color: theme.text,
+              fontSize: 14,
+              fontFamily: "Raleway-Medium",
+            }}
+          >
+            -{formatTime(duration - position)}
+          </Text>
+        </View>
+      </View>
+
+      <View
         style={{
           marginHorizontal: 15,
           marginBottom: insets.bottom + 15,
@@ -540,7 +690,7 @@ const ContentSession = () => {
             flexDirection: "row",
             alignItems: "flex-start",
             backgroundColor: theme.secondaryBackground,
-            borderRadius: 20,
+            borderRadius: 30,
             padding: 15,
           }}
         >
@@ -553,6 +703,8 @@ const ContentSession = () => {
               marginRight: 10,
               height: 45,
               borderRadius: 40,
+              borderColor: theme.header,
+              borderWidth: 1,
             }}
           />
 
@@ -560,7 +712,7 @@ const ContentSession = () => {
             <Text
               style={{
                 color: theme.header,
-                fontSize: isCarMode ? 24 : 16,
+                fontSize: 18,
                 fontFamily: "Raleway-Bold",
               }}
             >
@@ -571,7 +723,7 @@ const ContentSession = () => {
               style={{
                 marginTop: 10,
                 color: theme.text,
-                fontSize: isCarMode ? 18 : 14,
+                fontSize: 16,
                 fontFamily: "Raleway-Medium",
               }}
             >
@@ -585,5 +737,31 @@ const ContentSession = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    alignItems: "center",
+  },
+  slider: {
+    width: "90%",
+    height: 40,
+  },
+  customThumb: {
+    position: "absolute",
+    top: 12,
+    width: 40, // Adjust thumb size
+    height: 40, // Adjust thumb size
+    borderRadius: 20, // Make it circular
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  innerThumb: {
+    width: 20, // Inner thumb size
+    height: 20, // Inner thumb size
+    borderRadius: 10, // Make it circular
+    backgroundColor: "#1EB1FC", // Thumb color
+  },
+});
 
 export default ContentSession;
