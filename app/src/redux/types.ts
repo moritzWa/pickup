@@ -16,7 +16,7 @@ export type UserState = {
 };
 
 export type AudioState = {
-  sound: Audio.Sound | null;
+  // sound: Audio.Sound | null;
   audioUrl: string | null;
   currentMs: number | null;
   durationMs: number | null;

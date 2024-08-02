@@ -5,13 +5,11 @@ import { Audio } from "expo-av";
 // initial state
 const initialState: AudioState = {
   audioUrl: null,
-  sound: null,
   currentMs: null,
   durationMs: null,
 };
 
 // actions
-export const setAudio = createAction<AudioState["sound"]>("SET_AUDIO");
 export const setAudioUrl =
   createAction<AudioState["audioUrl"]>("SET_AUDIO_URL");
 export const setCurrentMs =
@@ -22,9 +20,6 @@ export const setDurationMs =
 // reducer
 export const audioReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(setAudio, (state, action) => {
-      state.sound = action.payload.;
-    })
     .addCase(setAudioUrl, (state, action) => {
       state.audioUrl = action.payload;
     })
@@ -37,8 +32,6 @@ export const audioReducer = createReducer(initialState, (builder) => {
 });
 
 // selectors
-export const getSound = (state: ReduxState): AudioState["sound"] =>
-  state.audio.sound;
 
 export const getAudioUrl = (state: ReduxState): AudioState["audioUrl"] =>
   state.audio.audioUrl;
