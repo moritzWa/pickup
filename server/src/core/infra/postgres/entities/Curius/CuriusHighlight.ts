@@ -24,9 +24,9 @@ export class CuriusHighlight {
     @Column()
     userId!: number;
 
-    @ManyToOne(() => CuriusLink, (link) => link.highlights)
+    @ManyToOne(() => CuriusLink, (link) => link.highlights, { lazy: true })
     @JoinColumn({ name: "link_id" })
-    link!: CuriusLink;
+    link!: Promise<CuriusLink>;
 
     @Column()
     linkId!: number;

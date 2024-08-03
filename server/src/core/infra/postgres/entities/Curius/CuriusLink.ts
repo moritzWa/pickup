@@ -27,13 +27,13 @@ export class CuriusLink {
         page_type?: string;
     };
 
-    @Column({ nullable: true })
+    @Column({ type: "timestamp", nullable: true })
     createdDate!: Date | null;
 
-    @Column()
+    @Column({ type: "timestamp" })
     modifiedDate!: Date;
 
-    @Column({ nullable: true })
+    @Column({ type: "timestamp", nullable: true })
     lastCrawled!: Date | null;
 
     @Column("int", { array: true })
@@ -42,12 +42,14 @@ export class CuriusLink {
     @Column()
     readCount!: number;
 
-    @OneToMany(() => CuriusUser, (user) => user.link)
+    @OneToMany(() => CuriusUser, (user) => user.link, { lazy: true })
     users!: Promise<CuriusUser[]>;
 
-    @OneToMany(() => CuriusComment, (comment) => comment.link)
+    @OneToMany(() => CuriusComment, (comment) => comment.link, { lazy: true })
     comments!: Promise<CuriusComment[]>;
 
-    @OneToMany(() => CuriusHighlight, (highlight) => highlight.link)
+    @OneToMany(() => CuriusHighlight, (highlight) => highlight.link, {
+        lazy: true,
+    })
     highlights!: Promise<CuriusHighlight[]>;
 }

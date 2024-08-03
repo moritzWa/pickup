@@ -57,69 +57,76 @@ const saveCuriusData = async (data: LinkViewResponse) => {
         readCount: link.readCount,
     });
 
+    // Technically dont need it's own repo and we could use dataSource.manager.save(CuriusLink, curiusLink);
     await curiusLinkRepo.save(curiusLink);
 
     // Save CuriusUsers
-    for (const user of link.users) {
-        const curiusUser = new CuriusUser();
-        Object.assign(curiusUser, {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userLink: user.userLink,
-            lastOnline: new Date(user.lastOnline),
-        });
-        curiusUser.link = Promise.resolve(curiusLink);
-        await curiusUserRepo.save(curiusUser);
+    if (Array.isArray(link.users)) {
+        for (const user of link.users) {
+            const curiusUser = new CuriusUser();
+            Object.assign(curiusUser, {
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                userLink: user.userLink,
+                lastOnline: new Date(user.lastOnline),
+            });
+            curiusUser.link = Promise.resolve(curiusLink);
+            await curiusUserRepo.save(curiusUser);
+        }
     }
 
     // Save CuriusComments
-    for (const comment of link.comments) {
-        const curiusComment = new CuriusComment();
-        Object.assign(curiusComment, {
-            id: comment.id,
-            userId: comment.userId,
-            parentId: comment.parentId,
-            text: comment.text,
-            createdDate: new Date(comment.createdDate),
-            modifiedDate: new Date(comment.modifiedDate),
-        });
-        curiusComment.link = Promise.resolve(curiusLink);
-        await curiusCommentRepo.save(curiusComment);
+    if (Array.isArray(link.comments)) {
+        for (const comment of link.comments) {
+            const curiusComment = new CuriusComment();
+            Object.assign(curiusComment, {
+                id: comment.id,
+                userId: comment.userId,
+                parentId: comment.parentId,
+                text: comment.text,
+                createdDate: new Date(comment.createdDate),
+                modifiedDate: new Date(comment.modifiedDate),
+            });
+            curiusComment.link = Promise.resolve(curiusLink);
+            await curiusCommentRepo.save(curiusComment);
+        }
     }
 
     // Save CuriusHighlights
-    for (const highlight of link.highlights) {
-        const curiusHighlight = new CuriusHighlight();
-        Object.assign(curiusHighlight, {
-            id: highlight.id,
-            userId: highlight.userId,
-            linkId: highlight.linkId,
-            highlight: highlight.highlight,
-            createdDate: new Date(highlight.createdDate),
-            position: highlight.position,
-            verified: highlight.verified,
-            leftContext: highlight.leftContext,
-            rightContext: highlight.rightContext,
-            rawHighlight: highlight.rawHighlight,
-        });
-        curiusHighlight.link = Promise.resolve(curiusLink);
-        await curiusHighlightRepo.save(curiusHighlight);
-
-        // Save CuriusMentions
-        for (const mention of highlight.mentions) {
-            const curiusMention = new CuriusMention();
-            Object.assign(curiusMention, {
-                fromUid: mention.fromUid,
-                toUid: mention.toUid,
-                createdDate: new Date(mention.createdDate),
+    if (Array.isArray(link.highlights)) {
+        for (const highlight of link.highlights) {
+            const curiusHighlight = new CuriusHighlight();
+            Object.assign(curiusHighlight, {
+                id: highlight.id,
+                userId: highlight.userId,
+                linkId: highlight.linkId,
+                highlight: highlight.highlight,
+                createdDate: new Date(highlight.createdDate),
+                position: highlight.position,
+                verified: highlight.verified,
+                leftContext: highlight.leftContext,
+                rightContext: highlight.rightContext,
+                rawHighlight: highlight.rawHighlight,
             });
-            curiusMention.link = Promise.resolve(curiusLink);
-            curiusMention.user = Promise.resolve({
-                id: mention.user.id,
-            } as CuriusUser);
-            curiusMention.highlight = Promise.resolve(curiusHighlight);
-            await curiusMentionRepo.save(curiusMention);
+            curiusHighlight.link = Promise.resolve(curiusLink);
+            await curiusHighlightRepo.save(curiusHighlight);
+
+            // Save CuriusMentions
+            if (Array.isArray(highlight.mentions)) {
+                for (const mention of highlight.mentions) {
+                    const curiusMention = new CuriusMention();
+                    Object.assign(curiusMention, {
+                        fromUid: mention.fromUid,
+                        toUid: mention.toUid,
+                        createdDate: new Date(mention.createdDate),
+                    });
+                    curiusMention.link = Promise.resolve(curiusLink);
+                    curiusMention.user = { id: mention.user.id } as CuriusUser;
+                    curiusMention.highlight = Promise.resolve(curiusHighlight);
+                    await curiusMentionRepo.save(curiusMention);
+                }
+            }
         }
     }
 };

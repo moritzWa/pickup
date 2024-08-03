@@ -20,17 +20,17 @@ export class CuriusMention {
     @Column()
     toUid!: number;
 
-    @ManyToOne(() => CuriusLink)
+    @ManyToOne(() => CuriusLink, { lazy: true })
     @JoinColumn({ name: "link_id" })
-    link!: CuriusLink;
+    link!: Promise<CuriusLink>;
 
     @ManyToOne(() => CuriusUser)
     @JoinColumn({ name: "user_id" })
     user!: CuriusUser;
 
-    @ManyToOne(() => CuriusHighlight, { nullable: true })
+    @ManyToOne(() => CuriusHighlight, { nullable: true, lazy: true })
     @JoinColumn({ name: "highlight_id" })
-    highlight?: CuriusHighlight;
+    highlight?: Promise<CuriusHighlight>;
 
     @Column()
     createdDate!: Date;
