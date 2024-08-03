@@ -13,6 +13,7 @@ type Content {
   id: String!
   lengthSeconds: Int!
   summary: String
+  thumbnailImageUrl: String
   title: String!
   updatedAt: Date!
   websiteUrl: String!
