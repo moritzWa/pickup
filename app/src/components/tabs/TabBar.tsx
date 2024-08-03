@@ -47,8 +47,8 @@ export const TabBar = ({ tabs }: Props) => {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        borderBottomWidth: 1,
-        borderBottomColor: secondaryBackground,
+        // borderBottomWidth: 1,
+        // borderBottomColor: secondaryBackground,
         paddingBottom: 0,
         marginBottom: 15,
       }}

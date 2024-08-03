@@ -61,6 +61,8 @@ import ActionSheet from "react-native-action-sheet";
 import { storage } from "src/utils/firebase";
 import { v4 as uuidv4 } from "uuid";
 import { TabBar } from "src/components/tabs";
+import { BaseContentFields } from "src/api/fragments";
+import { ContentRow } from "src/components/Content/ContentRow";
 
 export const UserProfile = () => {
   const { me } = useMe();
@@ -95,7 +97,13 @@ export const UserProfile = () => {
 
   const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
-  const friendsBuyFeed = useMemo(() => [], []);
+  const { data, error } = useQuery<Pick<Query, "getContentFeed">>(
+    api.content.feed
+  );
+
+  const [startCourse] = useMutation(api.courses.start);
+
+  const content = (data?.getContentFeed ?? []) as BaseContentFields[];
 
   const _onRefresh = async () => {
     setIsRefreshing(true);
@@ -112,13 +120,12 @@ export const UserProfile = () => {
   //   Alert.alert(JSON.stringify(profileError, null, 2));
   // }
 
-  const buyFeedSection: SectionListData<any | {}> = useMemo(
+  const contentSection: SectionListData<any | {}> = useMemo(
     () => ({
-      key: "buyFeed",
-      data: (friendsBuyFeed?.length ?? 0) > 0 ? friendsBuyFeed ?? [] : [{}],
-      keyExtractor: (item) => (item as any)?.id || "empty",
+      key: "content-feed",
+      data: [{}],
       renderItem: ({ item }) =>
-        !friendsBuyFeed?.length ? (
+        !content?.length ? (
           <View>
             <Text
               style={{
@@ -130,27 +137,35 @@ export const UserProfile = () => {
                 fontFamily: "Mona-Sans-Regular",
               }}
             >
-              No recent buys.
+              No content
             </Text>
           </View>
         ) : (
-          <View>
-            <Text>hello</Text>
-          </View>
+          <FlatList
+            data={content}
+            keyExtractor={(item) => item.id}
+            style={{ padding: 10 }}
+            renderItem={({ item }) => <ContentRow content={item} />}
+          />
         ),
     }),
-    [friendsBuyFeed]
+    [textPrimary, content]
   );
 
   const tabs = useMemo(() => {
     return [
       {
-        name: "Buys",
+        name: "All",
         onClick: noop,
         isActive: true,
       },
       {
-        name: "Feed",
+        name: "Bookmarks",
+        onClick: () => Alert.alert("Coming soon 👀"),
+        isActive: false,
+      },
+      {
+        name: "Liked",
         onClick: () => Alert.alert("Coming soon 👀"),
         isActive: false,
       },
@@ -168,12 +183,14 @@ export const UserProfile = () => {
         data: [{}],
         renderItem: () => (
           // select between tabs
-          <TabBar tabs={tabs} />
+          <View style={{ marginBottom: 0 }}>
+            <TabBar tabs={tabs} />
+          </View>
         ),
       },
-      buyFeedSection,
+      contentSection,
     ],
-    [buyFeedSection, isME, profile, username, secondaryBackground]
+    [contentSection, isME, profile, username, secondaryBackground]
   );
 
   //   if (__DEV__ && error) {

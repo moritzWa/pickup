@@ -47,7 +47,7 @@ export const TabOption = ({
       activeOpacity={0.8}
       onPress={onPress}
       style={{
-        paddingHorizontal: 0,
+        paddingHorizontal: 5,
         marginRight: 15,
         display: "flex",
         flexDirection: "column",
@@ -56,7 +56,7 @@ export const TabOption = ({
     >
       <Text
         style={{
-          fontFamily: "Mona-Sans-SemiBold",
+          fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
           fontSize: 16,
           color: isActive ? theme.textPrimary : theme.textSecondary,
         }}
@@ -64,7 +64,7 @@ export const TabOption = ({
         {label}
       </Text>
 
-      <View
+      {/* <View
         style={{
           height: 3,
           backgroundColor: isActive ? theme.header : "transparent",
@@ -72,7 +72,7 @@ export const TabOption = ({
           borderRadius: 100,
           width: 60,
         }}
-      />
+      /> */}
     </TouchableOpacity>
   );
 };
