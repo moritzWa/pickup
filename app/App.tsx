@@ -1,3 +1,4 @@
+import "react-native-get-random-values";
 import React, { useMemo } from "react";
 import { StatusBar } from "expo-status-bar";
 import {

@@ -50,6 +50,7 @@ export const startContent = mutationField("startContent", {
             timestampCursor: 0,
             createdAt: new Date(),
             updatedAt: new Date(),
+            percentFinished: null,
         });
 
         console.log(sessionResponse);

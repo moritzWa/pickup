@@ -23,6 +23,7 @@ const ENTITIES = [
     // content
     entities.Content,
     entities.ContentSession,
+    entities.Relationship,
 ];
 
 function getMigrationDirectory() {

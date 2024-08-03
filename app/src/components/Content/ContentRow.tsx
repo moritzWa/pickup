@@ -32,7 +32,7 @@ import {
   faPlay,
   faVolumeMedium,
 } from "@fortawesome/pro-solid-svg-icons";
-import { Impressions } from "./Github";
+import { Impressions } from "../../views/Main/Home/Github";
 import FastImage from "react-native-fast-image";
 
 export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {

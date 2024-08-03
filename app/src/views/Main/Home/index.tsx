@@ -28,7 +28,7 @@ import {
   faPlay,
 } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "./Github";
-import { ContentRow } from "./ContentRow";
+import { ContentRow } from "../../../components/Content/ContentRow";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "src/components/Header";
 import FastImage from "react-native-fast-image";
@@ -90,7 +90,7 @@ const Home = () => {
         renderItem={({ item: c }) => <ContentRow content={c} />}
       />
 
-      <CarMode content={content} />
+      <CurrentAudio content={content} />
     </SafeAreaView>
   );
 };
@@ -205,7 +205,7 @@ const Options = () => {
           onPressIn={onPressIn}
           onPressOut={onPressOut}
           onPress={onPress}
-          activeOpacity={0.9}
+          activeOpacity={1}
           style={{
             display: "flex",
             alignItems: "center",
@@ -222,13 +222,13 @@ const Options = () => {
               marginRight: 5,
             }}
           >
-            Car Mode
+            Start
           </Text>
 
           <FontAwesomeIcon
             icon={faPlay}
             color={colors.white}
-            size={18}
+            size={14}
             style={{ position: "relative", right: -2 }}
           />
         </TouchableOpacity>
@@ -237,11 +237,13 @@ const Options = () => {
   );
 };
 
-const CarMode = ({ content }: { content: BaseContentFields[] }) => {
+const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+
+  const color = colors.purple90;
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -268,7 +270,7 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
         padding: 15,
         paddingHorizontal: 0,
         paddingBottom: 2,
-        backgroundColor: theme.background,
+        // backgroundColor: colors.pink90,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -291,7 +293,7 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
         onPress={() => {
           // just go to the first content
           navigation.navigate("CarMode", {
-            contentId: content[0].id,
+            contentId: content[0]?.id || "",
             isCarMode: true,
           });
         }}
@@ -389,11 +391,15 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
       {/* make a progress bar */}
       <View
         style={{
-          width: "100%",
+          width: "95%",
           height: 4,
+          marginBottom: 1,
+          marginHorizontal: 5,
+          alignSelf: "center",
           backgroundColor: theme.border,
           borderRadius: 10,
           marginTop: 10,
+          overflow: "hidden",
         }}
       >
         <LinearGradient

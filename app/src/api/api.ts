@@ -78,6 +78,21 @@ const GetMe = gql`
   }
 `;
 
+const GetProfile = gql`
+  query GetProfile($userId: ID!) {
+    getProfile(userId: $userId) {
+      id
+      username
+      name
+      description
+      numFollowers
+      numFollowing
+      avatarImageUrl
+      isFollowing
+    }
+  }
+`;
+
 const GetIntercomMobileToken = gql`
   query GetIntercomMobileToken {
     getIntercomMobileToken
@@ -216,6 +231,7 @@ export const api = {
     update: UpdateUser,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
+    getProfile: GetProfile,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,
   },

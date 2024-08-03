@@ -128,6 +128,17 @@ type PaymentMethod {
   source: String!
 }
 
+type Profile {
+  avatarImageUrl: String
+  description: String!
+  id: ID!
+  isFollowing: Boolean!
+  name: String!
+  numFollowers: Int!
+  numFollowing: Int!
+  username: String!
+}
+
 type Query {
   checkCode(referralCode: String!): Boolean!
   getActivity: [ContentSession!]!
@@ -143,6 +154,7 @@ type Query {
   getLessonSessions(lessonId: ID!): [LessonSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
   getPaymentMethods: [PaymentMethod!]!
+  getProfile(userId: ID): Profile!
   me: User
   myCourses: [Course!]!
   mySessions: [LessonSession!]!

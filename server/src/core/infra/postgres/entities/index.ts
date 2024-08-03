@@ -13,5 +13,7 @@ export { CourseProgress } from "./Course/CourseProgress";
 // content
 export { Content } from "./Content/Content";
 export { ContentSession } from "./Content/ContentSession";
+// relationships
+export { Relationship } from "./Relationship";
 
 export * from "./types";

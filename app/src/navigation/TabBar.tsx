@@ -31,6 +31,8 @@ const PortfolioIcon = require("src/assets/icons/portfolio.png");
 const PortfolioIconFilled = require("src/assets/icons/portfolio-solid.png");
 const CarIcon = require("src/assets/icons/car-regular.png");
 const CarIconFilled = require("src/assets/icons/car-solid.png");
+const InboxIcon = require("src/assets/icons/inbox-regular.png");
+const InboxIconFilled = require("src/assets/icons/inbox-solid.png");
 
 function _TabBar(tabBarProps: BottomTabBarProps) {
   const { state, descriptors } = tabBarProps;
@@ -246,13 +248,13 @@ const _getImage = (
       };
     case "Activity":
       return {
-        image: ClockIcon,
-        active: ClockIconFilled,
+        image: InboxIcon,
+        active: InboxIconFilled,
       };
     case "Profile":
       return {
-        image: SettingsIcon,
-        active: SettingsIconFilled,
+        image: ProfileIcon,
+        active: ProfileIconFilled,
       };
     default:
       return null;
