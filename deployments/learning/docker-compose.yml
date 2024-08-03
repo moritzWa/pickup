@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: "learning"
+      POSTGRES_DB: "pickup"
       POSTGRES_PASSWORD: "password"
       POSTGRES_USER: "user"
 
