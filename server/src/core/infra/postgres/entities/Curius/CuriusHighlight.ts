@@ -1,0 +1,61 @@
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { CuriusComment } from "./CuriusComment";
+import { CuriusLink } from "./CuriusLink";
+import { CuriusMention } from "./CuriusMention";
+import { CuriusUser } from "./CuriusUser";
+
+@Entity({ name: "curius_highlights" })
+export class CuriusHighlight {
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @ManyToOne(() => CuriusUser)
+    @JoinColumn({ name: "user_id" })
+    user!: CuriusUser;
+
+    @Column()
+    userId!: number;
+
+    @ManyToOne(() => CuriusLink, (link) => link.highlights)
+    @JoinColumn({ name: "link_id" })
+    link!: CuriusLink;
+
+    @Column()
+    linkId!: number;
+
+    @Column()
+    highlight!: string;
+
+    @Column()
+    createdDate!: Date;
+
+    @Column({ type: "jsonb" })
+    position!: any;
+
+    @Column({ nullable: true })
+    verified?: boolean;
+
+    @Column()
+    leftContext!: string;
+
+    @Column()
+    rightContext!: string;
+
+    @Column()
+    rawHighlight!: string;
+
+    @OneToOne(() => CuriusComment, { nullable: true })
+    @JoinColumn({ name: "comment_id" })
+    comment?: CuriusComment;
+
+    @OneToMany(() => CuriusMention, (mention) => mention.highlight)
+    mentions!: CuriusMention[];
+}

@@ -13,5 +13,11 @@ export { CourseProgress } from "./Course/CourseProgress";
 // content
 export { Content } from "./Content/Content";
 export { ContentSession } from "./Content/ContentSession";
+// curius
+export { CuriusLink } from "./Curius/CuriusLink";
+export { CuriusUser } from "./Curius/CuriusUser";
+export { CuriusMention } from "./Curius/CuriusMention";
+export { CuriusHighlight } from "./Curius/CuriusHighlight";
+export { CuriusComment } from "./Curius/CuriusComment";
 
 export * from "./types";

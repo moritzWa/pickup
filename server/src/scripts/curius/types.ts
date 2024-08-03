@@ -19,7 +19,7 @@ export interface LinkViewResponse {
         readCount: number;
         users: (User & { savedDate: string })[];
         comments: Comment[];
-        highlights: FullHighlight[][];
+        highlights: Highlight[];
     };
 }
 
@@ -41,6 +41,17 @@ export interface Mention {
     createdDate: Date;
 }
 
+export interface Comment {
+    id: number;
+    user: User;
+    userId: number;
+    parentId: number;
+    text: string;
+    createdDate: Date;
+    modifiedDate: Date;
+    replies?: Comment[];
+}
+
 export interface Highlight {
     id: number;
     userId: number;
@@ -52,9 +63,7 @@ export interface Highlight {
     leftContext: string;
     rightContext: string;
     rawHighlight: string;
-}
-
-export interface FullHighlight extends Highlight {
+    // full
     comment: Maybe<Comment>;
     mentions: Mention[];
     user: User;
