@@ -265,19 +265,24 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
     <BlurView
       style={{
         position: "absolute",
-        bottom: 92,
+        bottom: 100,
         overflow: "hidden",
         padding: 15,
         paddingHorizontal: 0,
-        paddingBottom: 2,
-        // backgroundColor: colors.pink90,
+        paddingBottom: 0,
+        backgroundColor: theme.theme === "light" ? "#DFDCFB" : "#050129",
         display: "flex",
+        alignSelf: "center",
+        opacity: 0.97,
+        borderRadius: 15,
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        width: "100%",
-        borderTopColor: theme.border,
-        borderTopWidth: 1,
+        width: "97%",
+        borderWidth: 1,
+        borderColor: theme.border,
+        // borderTopColor: theme.border,
+        // borderTopWidth: 1,
       }}
       intensity={75} // You can adjust the intensity of the blur
       tint={theme.theme}
@@ -326,7 +331,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           <Text
             style={{
               flex: 1,
-              color: theme.text,
+              color: theme.header,
               fontFamily: "Raleway-SemiBold",
               textAlign: "center",
               fontSize: 16,
@@ -391,9 +396,9 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
       {/* make a progress bar */}
       <View
         style={{
-          width: "95%",
+          width: "100%",
           height: 4,
-          marginBottom: 1,
+          marginBottom: 0,
           marginHorizontal: 5,
           alignSelf: "center",
           backgroundColor: theme.border,
@@ -403,7 +408,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         }}
       >
         <LinearGradient
-          colors={[colors.purple80, colors.primary]}
+          colors={[colors.primary, colors.primary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{
