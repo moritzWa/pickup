@@ -14,7 +14,7 @@ export class CuriusComment {
     @PrimaryColumn()
     id!: number;
 
-    @ManyToOne(() => CuriusUser)
+    @ManyToOne(() => CuriusUser, { eager: true })
     @JoinColumn({ name: "user_id" })
     user!: CuriusUser;
 

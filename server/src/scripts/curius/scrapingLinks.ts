@@ -105,7 +105,17 @@ const saveCuriusComment = async (comment, curiusLink) => {
         createdDate: new Date(comment.createdDate),
         modifiedDate: new Date(comment.modifiedDate),
     });
-    curiusComment.link = Promise.resolve(curiusLink);
+    // const user = await curiusUserRepo.findOne({
+    //     where: { id: comment.userId },
+    // });
+    const user = await dataSource.query(
+        `SELECT * FROM "curius_users" WHERE id = ${comment.userId}`
+    );
+
+    if (user) {
+        curiusComment.user = user;
+    }
+
     await curiusCommentRepo.save(curiusComment);
 
     if (Array.isArray(comment.replies)) {
