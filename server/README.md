@@ -22,7 +22,7 @@ await queryRunner.query(
 );
 ```
 
-### Docker
+### Docker & Server
 
 Start Docker locally
 
@@ -69,23 +69,15 @@ run the inngest
 npx inngest-cli@latest dev -u http://localhost:8000/inngest
 ```
 
-change to the web directory
+### App
 
-run
+change to the app directory
 
-```console
-yarn
-```
+run this to launch the app in a simulator
 
 ```console
-npm run start
+npm run ios
 ```
-
-go to
-
-http://localhost:3000
-
-and everything should be running
 
 # How to use the Node.js Debugger in VS Code
 
