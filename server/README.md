@@ -76,8 +76,10 @@ change to the app directory
 run this to launch the app in a simulator
 
 ```console
-npm run ios
+npm run start
 ```
+
+and choose your platform
 
 # How to use the Node.js Debugger in VS Code
 
