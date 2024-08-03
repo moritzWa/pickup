@@ -64,7 +64,6 @@ const Home = () => {
     <SafeAreaView style={{ flex: 1 }}>
       <View
         style={{
-          paddingBottom: 5,
           alignItems: "center",
         }}
       >
@@ -135,6 +134,23 @@ export enum DiscoveryTab {
 const Options = () => {
   const theme = useTheme();
   const activeTab = DiscoveryTab.All;
+  const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+
+  const onPressIn = () => {
+    Animated.spring(animation, {
+      toValue: 0.9, // Scale down to 90%
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const onPressOut = () => {
+    Animated.spring(animation, {
+      toValue: 1, // Scale back to original size
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const onPress = () => {
     // TODO:
@@ -143,22 +159,80 @@ const Options = () => {
   return (
     <View
       style={{
+        paddingHorizontal: 5,
+        paddingBottom: 5,
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
       }}
     >
-      <SingleFilter
-        onPress={onPress}
-        isActive={DiscoveryTab.All === activeTab}
-        label="For you"
-      />
+      <View
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <SingleFilter
+          onPress={onPress}
+          isActive={DiscoveryTab.All === activeTab}
+          label="For you"
+        />
 
-      <SingleFilter
-        onPress={onPress}
-        isActive={DiscoveryTab.Popular === activeTab}
-        label="Popular"
-      />
+        <SingleFilter
+          onPress={onPress}
+          isActive={DiscoveryTab.Popular === activeTab}
+          label="Popular"
+        />
+      </View>
+
+      <Animated.View
+        style={{
+          marginRight: 10,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 100,
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+          backgroundColor: colors.primary,
+          alignSelf: "center",
+          transform: [{ scale: animation }],
+        }}
+      >
+        <TouchableOpacity
+          onPressIn={onPressIn}
+          onPressOut={onPressOut}
+          onPress={onPress}
+          activeOpacity={0.9}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "row",
+            padding: 5,
+            borderRadius: 100,
+          }}
+        >
+          <Text
+            style={{
+              color: colors.white,
+              fontFamily: "Raleway-Bold",
+              fontSize: 16,
+              marginRight: 5,
+            }}
+          >
+            Car Mode
+          </Text>
+
+          <FontAwesomeIcon
+            icon={faPlay}
+            color={colors.white}
+            size={18}
+            style={{ position: "relative", right: -2 }}
+          />
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 };
@@ -189,21 +263,19 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
     <BlurView
       style={{
         position: "absolute",
-        bottom: 100,
+        bottom: 92,
         overflow: "hidden",
         padding: 15,
         paddingHorizontal: 0,
-        paddingBottom: 0,
-        backgroundColor: colors.secondaryPrimary,
+        paddingBottom: 2,
+        backgroundColor: theme.background,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        width: "95%",
-        borderRadius: 10,
-        alignSelf: "center",
-        // borderTopColor: theme.border,
-        // borderTopWidth: 1,
+        width: "100%",
+        borderTopColor: theme.border,
+        borderTopWidth: 1,
       }}
       intensity={75} // You can adjust the intensity of the blur
       tint={theme.theme}
@@ -252,7 +324,7 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
           <Text
             style={{
               flex: 1,
-              color: colors.purple20, // theme.text,
+              color: theme.text,
               fontFamily: "Raleway-SemiBold",
               textAlign: "center",
               fontSize: 16,
@@ -265,6 +337,7 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
           <View
             style={{
               display: "flex",
+              marginTop: 5,
               flexDirection: "row",
               alignItems: "center",
             }}
@@ -279,9 +352,9 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
             <Text
               style={{
                 color: theme.text,
-                fontFamily: "Raleway-Regular",
+                fontFamily: "Raleway-Medium",
                 textAlign: "center",
-                fontSize: 16,
+                fontSize: 14,
               }}
               numberOfLines={1}
             >
@@ -316,14 +389,11 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
       {/* make a progress bar */}
       <View
         style={{
-          width: "95%",
-          // marginHorizontal: 5,
-          height: 5,
-          marginBottom: 10,
+          width: "100%",
+          height: 4,
           backgroundColor: theme.border,
           borderRadius: 10,
           marginTop: 10,
-          overflow: "hidden",
         }}
       >
         <LinearGradient
@@ -332,7 +402,9 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
           end={{ x: 1, y: 0 }}
           style={{
             width: "30%",
-            height: 5,
+            height: 4,
+            borderTopRightRadius: 10,
+            borderBottomRightRadius: 10,
           }}
         />
       </View>

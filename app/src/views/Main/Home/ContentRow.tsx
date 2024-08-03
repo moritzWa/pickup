@@ -113,7 +113,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             numberOfLines={1}
             style={{
               color: theme.header,
-              fontSize: 20,
+              fontSize: 18,
               flex: 1,
               marginRight: 20,
               fontFamily: "Raleway-SemiBold",
