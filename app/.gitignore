@@ -38,3 +38,8 @@ yarn-error.*
 .expo
 dist/
 web-build/
+eas.json
+
+# Xcode
+*.xcodeproj
+*.pbxproj

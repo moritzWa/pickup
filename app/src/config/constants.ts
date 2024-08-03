@@ -1,4 +1,4 @@
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import VersionNumber from "react-native-version-number";
 
 const FIREBASE_DEV_WEB_CLIENT =
@@ -16,12 +16,14 @@ const SEGMENT_PROD_KEY = "FAKE_AcDfCneDRg4qHGCqBejNqcUyu4SlDdlt"; // "NCFMzL2Asn
 const SEGMENT_WRITE_KEY = __DEV__ ? SEGMENT_DEV_KEY : SEGMENT_PROD_KEY;
 
 const API_URL = __DEV__
-  ? "https://68c7a93084a8.ngrok.app" // "http://localhost:8888"
-  : "https://api.talkpickup.com";
+  ? "http://localhost:8888"
+  : // ? "https://68c7a93084a8.ngrok.app" // "http://localhost:8888"
+    "https://api.talkpickup.com";
 
 const ONE_SIGNAL_APP_ID = "42bfa89f-bfc6-472c-ab88-b73491ed37fe";
 
-const DEV_URL = "https://3695-107-195-70-9.ngrok-free.app"; // "http://localhost:3000";
+// const DEV_URL = "https://3695-107-195-70-9.ngrok-free.app"; // "http://localhost:3000";
+const DEV_URL = "localhost:3000";
 const PROD_URL = "https://talkpickup.com";
 const WEBSITE_URL = __DEV__ ? DEV_URL : PROD_URL;
 
