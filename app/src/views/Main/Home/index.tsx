@@ -6,8 +6,10 @@ import {
   FlatList,
   RefreshControl,
   Alert,
+  Image,
+  Animated,
 } from "react-native";
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
@@ -21,11 +23,16 @@ import {
   faArrowRight,
   faCar,
   faCarBolt,
+  faHeadphones,
+  faHeadphonesAlt,
   faPlay,
 } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "./Github";
 import { ContentRow } from "./ContentRow";
 import { LinearGradient } from "expo-linear-gradient";
+import Header from "src/components/Header";
+import FastImage from "react-native-fast-image";
+import { BlurView } from "expo-blur";
 
 const generateImpressionsData = () => {
   const impressions = [];
@@ -55,6 +62,15 @@ const Home = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <View
+        style={{
+          paddingBottom: 5,
+          alignItems: "center",
+        }}
+      >
+        <Options />
+      </View>
+
       <FlatList
         data={content}
         refreshControl={
@@ -67,39 +83,15 @@ const Home = () => {
         keyExtractor={(c) => c.id}
         // hide scrollbar
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 5, paddingBottom: 150 }}
-        ListHeaderComponent={
-          <View>
-            <View
-              style={{
-                paddingVertical: 25,
-                paddingBottom: 15,
-              }}
-            >
-              {/* <Impressions impressions={impressionsData} /> */}
-
-              <View style={{ marginBottom: 10 }}>
-                <Text
-                  style={{
-                    color: theme.header,
-                    fontSize: 28,
-                    paddingHorizontal: 10,
-                    fontWeight: "bold",
-                    fontFamily: "Raleway-Regular",
-                  }}
-                >
-                  Discover
-                </Text>
-              </View>
-
-              <Options />
-            </View>
-          </View>
-        }
+        contentContainerStyle={{
+          padding: 10,
+          paddingTop: 15,
+          paddingBottom: 150,
+        }}
         renderItem={({ item: c }) => <ContentRow content={c} />}
       />
 
-      {/* <CarMode content={content} /> */}
+      <CarMode content={content} />
     </SafeAreaView>
   );
 };
@@ -159,13 +151,9 @@ const Options = () => {
       <SingleFilter
         onPress={onPress}
         isActive={DiscoveryTab.All === activeTab}
-        label="All"
+        label="For you"
       />
-      <SingleFilter
-        onPress={onPress}
-        isActive={DiscoveryTab.Unread === activeTab}
-        label="Unread"
-      />
+
       <SingleFilter
         onPress={onPress}
         isActive={DiscoveryTab.Popular === activeTab}
@@ -179,25 +167,53 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 
+  const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+
+  const handlePressIn = () => {
+    Animated.spring(animation, {
+      toValue: 0.8, // Scale down to 90%
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(animation, {
+      toValue: 1, // Scale back to original size
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
-    <LinearGradient
+    <BlurView
       style={{
         position: "absolute",
-        bottom: 93,
-        height: 50,
+        bottom: 100,
+        overflow: "hidden",
+        padding: 15,
+        paddingHorizontal: 0,
+        paddingBottom: 0,
+        backgroundColor: colors.secondaryPrimary,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        width: "100%",
-        flexDirection: "row",
+        flexDirection: "column",
+        width: "95%",
+        borderRadius: 10,
+        alignSelf: "center",
+        // borderTopColor: theme.border,
+        // borderTopWidth: 1,
       }}
-      colors={
-        theme.theme === "dark"
-          ? [colors.pink70, colors.primary, colors.pink70]
-          : [colors.pink70, colors.primary, colors.pink70]
-      }
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
+      intensity={75} // You can adjust the intensity of the blur
+      tint={theme.theme}
+      // colors={
+      //   theme.theme === "dark"
+      //     ? [colors.back, colors.primary, colors.pink70]
+      //     : [colors.pink70, colors.primary, colors.pink70]
+      // }
+      // start={{ x: 0, y: 0 }}
+      // end={{ x: 1, y: 0 }}
     >
       <TouchableOpacity
         onPress={() => {
@@ -207,7 +223,10 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
             isCarMode: true,
           });
         }}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         style={{
+          paddingHorizontal: 10,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -216,26 +235,108 @@ const CarMode = ({ content }: { content: BaseContentFields[] }) => {
         }}
         activeOpacity={1}
       >
-        <Text
+        <Image
+          source={{
+            uri: "https://firebasestorage.googleapis.com/v0/b/learning-dev-ai.appspot.com/o/uploads%2Fpm.png?alt=media&token=3581d334-5f19-4ecc-a465-f7628b678a50",
+          }}
+          style={{ width: 40, height: 40, borderRadius: 10 }}
+        />
+
+        <View
           style={{
-            color: colors.white,
-            fontFamily: "Raleway-SemiBold",
-            textAlign: "center",
-            fontSize: 18,
-            fontWeight: "bold",
+            marginLeft: 10,
+            flex: 1,
+            alignItems: "flex-start",
           }}
         >
-          Car Mode
-        </Text>
+          <Text
+            style={{
+              flex: 1,
+              color: colors.purple20, // theme.text,
+              fontFamily: "Raleway-SemiBold",
+              textAlign: "center",
+              fontSize: 16,
+            }}
+            numberOfLines={1}
+          >
+            Social game: how to win and influencer
+          </Text>
 
-        <FontAwesomeIcon
-          style={{ marginLeft: 10 }}
-          icon={faCar}
-          color={colors.white}
-          size={20}
-        />
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faHeadphonesAlt}
+              color={theme.text}
+              size={12}
+              style={{ marginRight: 5 }}
+            />
+
+            <Text
+              style={{
+                color: theme.text,
+                fontFamily: "Raleway-Regular",
+                textAlign: "center",
+                fontSize: 16,
+              }}
+              numberOfLines={1}
+            >
+              2min left
+            </Text>
+          </View>
+        </View>
+
+        <Animated.View
+          style={{
+            marginLeft: 15,
+            width: 40,
+            height: 40,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 100,
+            backgroundColor: colors.primary,
+            alignSelf: "center",
+            transform: [{ scale: animation }],
+          }}
+        >
+          <FontAwesomeIcon
+            icon={faPlay}
+            color={colors.white}
+            size={18}
+            style={{ position: "relative", right: -2 }}
+          />
+        </Animated.View>
       </TouchableOpacity>
-    </LinearGradient>
+
+      {/* make a progress bar */}
+      <View
+        style={{
+          width: "95%",
+          // marginHorizontal: 5,
+          height: 5,
+          marginBottom: 10,
+          backgroundColor: theme.border,
+          borderRadius: 10,
+          marginTop: 10,
+          overflow: "hidden",
+        }}
+      >
+        <LinearGradient
+          colors={[colors.purple80, colors.primary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{
+            width: "30%",
+            height: 5,
+          }}
+        />
+      </View>
+    </BlurView>
   );
 };
 
