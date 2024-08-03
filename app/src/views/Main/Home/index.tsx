@@ -14,7 +14,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
 import { Query } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
-import { BaseCourseFields } from "src/api/fragments";
+import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -47,7 +47,7 @@ const Home = () => {
 
   const [startCourse] = useMutation(api.courses.start);
 
-  const content = data?.getContentFeed ?? [];
+  const content = (data?.getContentFeed ?? []) as BaseContentFields[];
 
   const onRefresh = async () => {
     await refetch();
@@ -88,63 +88,72 @@ const Home = () => {
         renderItem={({ item: c }) => <ContentRow content={c} />}
       />
 
-      <LinearGradient
+      {/* <CarMode content={content} /> */}
+    </SafeAreaView>
+  );
+};
+
+const CarMode = ({ content }: { content: BaseContentFields[] }) => {
+  const theme = useTheme();
+  const navigation = useNavigation<NavigationProps>();
+
+  return (
+    <LinearGradient
+      style={{
+        position: "absolute",
+        bottom: 93,
+        height: 50,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        flexDirection: "row",
+      }}
+      colors={
+        theme.theme === "dark"
+          ? [colors.pink70, colors.primary, colors.pink70]
+          : [colors.pink70, colors.primary, colors.pink70]
+      }
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+    >
+      <TouchableOpacity
+        onPress={() => {
+          // just go to the first content
+          navigation.navigate("CarMode", {
+            contentId: content[0].id,
+            isCarMode: true,
+          });
+        }}
         style={{
-          position: "absolute",
-          bottom: 93,
-          height: 50,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           width: "100%",
           flexDirection: "row",
         }}
-        colors={
-          theme.theme === "dark"
-            ? [colors.pink70, colors.primary, colors.pink70]
-            : [colors.pink70, colors.primary, colors.pink70]
-        }
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+        activeOpacity={1}
       >
-        <TouchableOpacity
-          onPress={() => {
-            // just go to the first content
-            navigation.navigate("CarMode", {
-              contentId: content[0].id,
-              isCarMode: true,
-            });
-          }}
+        <Text
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            flexDirection: "row",
+            color: colors.white,
+            fontFamily: "Raleway-SemiBold",
+            textAlign: "center",
+            fontSize: 18,
+            fontWeight: "bold",
           }}
-          activeOpacity={1}
         >
-          <Text
-            style={{
-              color: colors.white,
-              fontFamily: "Raleway-SemiBold",
-              textAlign: "center",
-              fontSize: 18,
-              fontWeight: "bold",
-            }}
-          >
-            Car Mode
-          </Text>
+          Car Mode
+        </Text>
 
-          <FontAwesomeIcon
-            style={{ marginLeft: 10 }}
-            icon={faCar}
-            color={colors.white}
-            size={20}
-          />
-        </TouchableOpacity>
-      </LinearGradient>
-    </SafeAreaView>
+        <FontAwesomeIcon
+          style={{ marginLeft: 10 }}
+          icon={faCar}
+          color={colors.white}
+          size={20}
+        />
+      </TouchableOpacity>
+    </LinearGradient>
   );
 };
 
