@@ -109,11 +109,13 @@ export interface NexusGenFieldTypes {
     authorImageUrl: string | null; // String
     authorName: string; // String!
     categories: string[]; // [String!]!
+    contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][]; // [FollowUpQuestion!]!
     id: string; // String!
     lengthSeconds: number; // Int!
+    sourceImageUrl: string | null; // String
     summary: string | null; // String
     thumbnailImageUrl: string | null; // String
     title: string; // String!
@@ -129,6 +131,7 @@ export interface NexusGenFieldTypes {
     contentId: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // String!
+    percentFinished: number | null; // Float
     timestampCursor: number | null; // Float
     updatedAt: NexusGenScalars['Date']; // Date!
     userId: string; // String!
@@ -264,11 +267,13 @@ export interface NexusGenFieldTypeNames {
     authorImageUrl: 'String'
     authorName: 'String'
     categories: 'String'
+    contentSession: 'ContentSession'
     context: 'String'
     createdAt: 'Date'
     followUpQuestions: 'FollowUpQuestion'
     id: 'String'
     lengthSeconds: 'Int'
+    sourceImageUrl: 'String'
     summary: 'String'
     thumbnailImageUrl: 'String'
     title: 'String'
@@ -284,6 +289,7 @@ export interface NexusGenFieldTypeNames {
     contentId: 'String'
     createdAt: 'Date'
     id: 'String'
+    percentFinished: 'Float'
     timestampCursor: 'Float'
     updatedAt: 'Date'
     userId: 'String'

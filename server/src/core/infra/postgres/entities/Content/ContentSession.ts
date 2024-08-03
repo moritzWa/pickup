@@ -30,6 +30,14 @@ export class ContentSession {
     timestampCursor!: number | null;
 
     @Column({
+        nullable: true,
+        name: "percent_finished",
+        type: "numeric",
+        // 1 to 100
+    })
+    percentFinished!: number | null;
+
+    @Column({
         nullable: false,
         name: "content_id",
         type: "uuid",

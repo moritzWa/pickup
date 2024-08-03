@@ -9,6 +9,7 @@ export const ContentSession = objectType({
         t.nullable.float("timestampCursor");
         t.nonNull.string("contentId");
         t.nonNull.string("userId");
+        t.nullable.float("percentFinished");
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
         t.field("content", {

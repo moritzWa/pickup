@@ -58,31 +58,42 @@ const Home = () => {
       <FlatList
         data={content}
         refreshControl={
-          <RefreshControl refreshing={false} onRefresh={onRefresh} />
+          <RefreshControl
+            tintColor={theme.activityIndicator}
+            refreshing={false}
+            onRefresh={onRefresh}
+          />
         }
         keyExtractor={(c) => c.id}
         // hide scrollbar
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 5, paddingBottom: 150 }}
         ListHeaderComponent={
-          <View
-            style={{
-              padding: 10,
-              paddingVertical: 25,
-            }}
-          >
-            {/* <Impressions impressions={impressionsData} /> */}
-
-            <Text
+          <View>
+            <View
               style={{
-                color: theme.header,
-                fontSize: 28,
-                fontWeight: "bold",
-                fontFamily: "Raleway-Regular",
+                paddingVertical: 25,
+                paddingBottom: 15,
               }}
             >
-              Hey, Andrew 👋
-            </Text>
+              {/* <Impressions impressions={impressionsData} /> */}
+
+              <View style={{ marginBottom: 10 }}>
+                <Text
+                  style={{
+                    color: theme.header,
+                    fontSize: 28,
+                    paddingHorizontal: 10,
+                    fontWeight: "bold",
+                    fontFamily: "Raleway-Regular",
+                  }}
+                >
+                  Discover
+                </Text>
+              </View>
+
+              <Options />
+            </View>
           </View>
         }
         renderItem={({ item: c }) => <ContentRow content={c} />}
@@ -90,6 +101,77 @@ const Home = () => {
 
       {/* <CarMode content={content} /> */}
     </SafeAreaView>
+  );
+};
+
+const SingleFilter = ({
+  label,
+  onPress,
+  isActive,
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+}) => {
+  const theme = useTheme();
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.9}
+      style={{ flexDirection: "row", padding: 10 }}
+    >
+      <Text
+        style={{
+          color: isActive ? theme.header : theme.text,
+          fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
+          fontSize: 18,
+        }}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+export enum DiscoveryTab {
+  All = "all",
+  Unread = "unread",
+  Popular = "popular",
+}
+
+const Options = () => {
+  const theme = useTheme();
+  const activeTab = DiscoveryTab.All;
+
+  const onPress = () => {
+    // TODO:
+  };
+
+  return (
+    <View
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
+      <SingleFilter
+        onPress={onPress}
+        isActive={DiscoveryTab.All === activeTab}
+        label="All"
+      />
+      <SingleFilter
+        onPress={onPress}
+        isActive={DiscoveryTab.Unread === activeTab}
+        label="Unread"
+      />
+      <SingleFilter
+        onPress={onPress}
+        isActive={DiscoveryTab.Popular === activeTab}
+        label="Popular"
+      />
+    </View>
   );
 };
 

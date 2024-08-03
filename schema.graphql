@@ -7,11 +7,13 @@ type Content {
   authorImageUrl: String
   authorName: String!
   categories: [String!]!
+  contentSession: ContentSession
   context: String!
   createdAt: Date!
   followUpQuestions: [FollowUpQuestion!]!
   id: String!
   lengthSeconds: Int!
+  sourceImageUrl: String
   summary: String
   thumbnailImageUrl: String
   title: String!
@@ -29,6 +31,7 @@ type ContentSession {
   contentId: String!
   createdAt: Date!
   id: String!
+  percentFinished: Float
   timestampCursor: Float
   updatedAt: Date!
   userId: String!

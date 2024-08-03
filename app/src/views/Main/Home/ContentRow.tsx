@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Alert,
   Animated,
+  Image,
 } from "react-native";
 import React, { useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -18,7 +19,19 @@ import { NavigationProps } from "src/navigation";
 import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRight, faPlay } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faArrowRight,
+  faCircle,
+  faCircle0,
+  faCircleNotch,
+  faClock,
+  faHourglass,
+  faHourglass1,
+  faHourglass3,
+  faHourglassClock,
+  faPlay,
+  faVolumeMedium,
+} from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "./Github";
 import FastImage from "react-native-fast-image";
 
@@ -71,16 +84,46 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
       onPressOut={handlePressOut}
       onPress={start}
       style={{
-        margin: 5,
-        borderColor: theme.border,
-        borderRadius: 15,
-        borderWidth: 1,
-        paddingVertical: 15,
+        paddingVertical: 25,
       }}
     >
       <View
         style={{
-          paddingHorizontal: 15,
+          paddingHorizontal: 10,
+          marginBottom: 15,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          numberOfLines={1}
+          style={{
+            color: theme.header,
+            fontSize: 18,
+            flex: 1,
+            fontFamily: "Raleway-SemiBold",
+          }}
+        >
+          {c.title}
+        </Text>
+
+        <View style={{ marginLeft: 15 }}>
+          <Image
+            source={{ uri: c.sourceImageUrl }}
+            tintColor={theme.header}
+            style={{
+              width: 22,
+              height: 22,
+            }}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+
+      <View
+        style={{
+          paddingHorizontal: 10,
         }}
       >
         <View
@@ -91,41 +134,100 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
         >
           <FastImage
             source={{
-              uri: c.authorImageUrl,
+              uri: c.thumbnailImageUrl,
             }}
             style={{
-              width: 45,
-              marginRight: 10,
-              height: 45,
-              borderRadius: 40,
+              width: 65,
+              marginRight: 15,
+              height: 65,
+              borderRadius: 10,
             }}
           />
 
           <View style={{ flex: 1 }}>
             <Text
               style={{
-                color: theme.header,
-                fontSize: 16,
-                fontFamily: "Raleway-SemiBold",
-              }}
-            >
-              {c.title}
-            </Text>
-
-            <Text
-              style={{
-                marginTop: 8,
                 color: theme.text,
                 fontSize: 14,
                 fontFamily: "Raleway-Medium",
               }}
+              numberOfLines={2}
             >
-              {c.authorName}
-              {"  "}•{"  "}
-              {estimatedLen} mins
+              {c.summary}
             </Text>
 
-            {(c.categories ?? []).length > 0 ? (
+            <View
+              style={{
+                marginTop: 15,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  flex: 1,
+                  color: theme.header,
+                  fontSize: 14,
+                  fontFamily: "Raleway-Medium",
+                }}
+              >
+                {c.authorName}
+              </Text>
+
+              <View
+                style={{
+                  display: "flex",
+                  marginRight: 15,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faClock}
+                  color={theme.header}
+                  size={14}
+                  style={{ marginRight: 5 }}
+                />
+
+                <Text
+                  style={{
+                    color: theme.header,
+                    fontSize: 14,
+                    fontFamily: "Raleway-Medium",
+                  }}
+                >
+                  {estimatedLen}min
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faCircleNotch}
+                  color={theme.header}
+                  size={14}
+                  style={{ marginRight: 5 }}
+                />
+
+                <Text
+                  style={{
+                    color: theme.header,
+                    fontSize: 14,
+                    fontFamily: "Raleway-Medium",
+                  }}
+                >
+                  21%
+                </Text>
+              </View>
+            </View>
+
+            {/* {(c.categories ?? []).length > 0 ? (
               <View
                 style={{
                   marginTop: 8,
@@ -145,10 +247,10 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                   {(c.categories || []).join(" • ")}
                 </Text>
               </View>
-            ) : null}
+            ) : null} */}
           </View>
 
-          <Animated.View
+          {/* <Animated.View
             style={{
               marginLeft: 5,
               width: 55,
@@ -162,28 +264,13 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               transform: [{ scale: animation }],
             }}
           >
-            {/* <TouchableOpacity
-              // onPressIn={handlePressIn}
-              // onPressOut={handlePressOut}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "100%",
-                borderRadius: 25,
-              }}
-              activeOpacity={1}
-              onPress={start}
-            > */}
             <FontAwesomeIcon
               icon={faPlay}
               color={colors.white}
               size={24}
               style={{ position: "relative", right: -2 }}
             />
-            {/* </TouchableOpacity> */}
-          </Animated.View>
+          </Animated.View> */}
         </View>
       </View>
     </TouchableOpacity>

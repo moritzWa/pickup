@@ -29,6 +29,7 @@ export type Content = {
   followUpQuestions: Array<FollowUpQuestion>;
   id: Scalars['String']['output'];
   lengthSeconds: Scalars['Int']['output'];
+  sourceImageUrl?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
   thumbnailImageUrl?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
@@ -48,6 +49,7 @@ export type ContentSession = {
   contentId: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
   id: Scalars['String']['output'];
+  percentFinished?: Maybe<Scalars['Float']['output']>;
   timestampCursor?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['Date']['output'];
   userId: Scalars['String']['output'];

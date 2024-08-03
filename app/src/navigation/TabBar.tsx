@@ -48,9 +48,9 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
 
   return (
     <>
-      <View
-        // intensity={90} // You can adjust the intensity of the blur
-        // tint={theme}
+      <BlurView
+        intensity={75} // You can adjust the intensity of the blur
+        tint={theme}
         style={{
           flexDirection: "column",
           width: "100%",
@@ -58,7 +58,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
           bottom: 0,
           left: 0,
           borderTopWidth: 1,
-          backgroundColor: background,
+          // backgroundColor: background,
           borderTopColor: medBackground,
         }}
       >
@@ -85,7 +85,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
             );
           })}
         </View>
-      </View>
+      </BlurView>
     </>
   );
 }
@@ -251,8 +251,8 @@ const _getImage = (
       };
     case "Profile":
       return {
-        image: ProfileIcon,
-        active: ProfileIconFilled,
+        image: SettingsIcon,
+        active: SettingsIconFilled,
       };
     default:
       return null;

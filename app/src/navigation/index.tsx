@@ -277,6 +277,8 @@ export const MainNavigationStack = () => {
             component={CourseDetails}
           />
 
+          {/* <Stack.Screen name="Profile" component={Profile} /> */}
+
           <Stack.Screen
             name="LessonDetails"
             options={{
