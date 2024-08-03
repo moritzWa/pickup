@@ -29,7 +29,9 @@ export const User = objectType({
         t.nullable.string("referredByCode");
         t.nullable.string("referredByName");
         t.nullable.float("number");
-        t.nullable.string("avatarImageUrl");
+        t.nullable.string("avatarImageUrl", {
+            resolve: (u) => u.imageUrl,
+        });
         t.nullable.string("role");
         t.nonNull.string("description");
         t.nullable.string("referralCode");

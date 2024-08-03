@@ -247,7 +247,7 @@ const Profile = () => {
         backgroundColor: background,
       }}
     >
-      <Header title="Profile" />
+      <Header hasBackButton title="Settings" />
       <ScrollView
         refreshControl={
           <RefreshControl

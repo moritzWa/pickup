@@ -47,6 +47,7 @@ const UpdateUser = gql`
     $hasMobile: Boolean
     $hasPushNotifications: Boolean
     $biometricPublicKey: String
+    $avatarImageUrl: String
   ) {
     updateUser(
       name: $name
@@ -54,6 +55,7 @@ const UpdateUser = gql`
       hasMobile: $hasMobile
       hasPushNotifications: $hasPushNotifications
       biometricPublicKey: $biometricPublicKey
+      avatarImageUrl: $avatarImageUrl
     ) {
       ...BaseUserFields
     }

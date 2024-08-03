@@ -37,7 +37,7 @@ export const getProfile = queryField("getProfile", {
 
         return {
             id: user.id,
-            username: "TODO:",
+            username: "user_name_todo",
             name: user.name || "",
             description: user.description,
             numFollowers: 0,

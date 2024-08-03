@@ -109,7 +109,9 @@ export const UserProfile = () => {
     setIsRefreshing(true);
     try {
       await Promise.all([
-        // TODO:
+        apolloClient.refetchQueries({
+          include: [api.users.getProfile, api.users.me],
+        }),
       ]);
     } finally {
       setIsRefreshing(false);
@@ -134,7 +136,7 @@ export const UserProfile = () => {
                 flex: 1,
                 alignSelf: "center",
                 marginTop: 100,
-                fontFamily: "Mona-Sans-Regular",
+                fontFamily: "Railway-Regular",
               }}
             >
               No content
@@ -353,7 +355,7 @@ const Profile = ({ username }: { username: string | null }) => {
   //   };
 
   const _editProfile = () => {
-    navigation.navigate("EditProfile");
+    navigation.navigate("Settings");
   };
 
   const _openSettings = () => {
@@ -382,8 +384,8 @@ const Profile = ({ username }: { username: string | null }) => {
             {!!profile?.name ? (
               <Text
                 style={{
-                  fontFamily: "Mona-Sans-Expanded-Bold",
-                  fontSize: 18,
+                  fontFamily: "Raleway-Bold",
+                  fontSize: 20,
                   color: textPrimary,
                   textAlign: "center",
                 }}
@@ -409,7 +411,7 @@ const Profile = ({ username }: { username: string | null }) => {
             >
               <Text
                 style={{
-                  fontFamily: "Mona-Sans-Medium",
+                  fontFamily: "Raleway-Regular",
                   fontSize: 14,
                   marginTop: 5,
                   textAlign: "center",
@@ -429,7 +431,7 @@ const Profile = ({ username }: { username: string | null }) => {
             {!!profile?.description ? (
               <Text
                 style={{
-                  fontFamily: "Mona-Sans-Regular",
+                  fontFamily: "Raleway-Regular",
                   fontSize: 16,
                   textAlign: "left",
                   marginTop: 20,
@@ -494,7 +496,7 @@ const Profile = ({ username }: { username: string | null }) => {
               tintColor={textPrimary}
             />
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             activeOpacity={0.8}
             style={{
               borderRadius: 100,
@@ -521,7 +523,7 @@ const Profile = ({ username }: { username: string | null }) => {
               }}
               tintColor={textPrimary}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           {/* <TouchableOpacity
             activeOpacity={0.8}
             style={{
