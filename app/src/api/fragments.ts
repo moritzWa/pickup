@@ -160,6 +160,8 @@ export type BaseContentFields = Pick<
   | "websiteUrl"
   | "lengthSeconds"
   | "categories"
+  | "thumbnailImageUrl"
+  | "sourceImageUrl"
 >;
 
 export const BaseContentFields = gql`
@@ -179,6 +181,8 @@ export const BaseContentFields = gql`
     websiteUrl
     lengthSeconds
     categories
+    thumbnailImageUrl
+    sourceImageUrl
   }
 `;
 

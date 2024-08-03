@@ -47,6 +47,7 @@ const UpdateUser = gql`
     $hasMobile: Boolean
     $hasPushNotifications: Boolean
     $biometricPublicKey: String
+    $avatarImageUrl: String
   ) {
     updateUser(
       name: $name
@@ -54,6 +55,7 @@ const UpdateUser = gql`
       hasMobile: $hasMobile
       hasPushNotifications: $hasPushNotifications
       biometricPublicKey: $biometricPublicKey
+      avatarImageUrl: $avatarImageUrl
     ) {
       ...BaseUserFields
     }
@@ -74,6 +76,21 @@ const GetMe = gql`
   query GetMe {
     me {
       ...BaseUserFields
+    }
+  }
+`;
+
+const GetProfile = gql`
+  query GetProfile($userId: ID!) {
+    getProfile(userId: $userId) {
+      id
+      username
+      name
+      description
+      numFollowers
+      numFollowing
+      avatarImageUrl
+      isFollowing
     }
   }
 `;
@@ -216,6 +233,7 @@ export const api = {
     update: UpdateUser,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
+    getProfile: GetProfile,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,
   },

@@ -82,6 +82,16 @@ export interface NexusGenObjects {
     paymentMethodId: string; // String!
     source: string; // String!
   }
+  Profile: { // root type
+    avatarImageUrl?: string | null; // String
+    description: string; // String!
+    id: string; // ID!
+    isFollowing: boolean; // Boolean!
+    name: string; // String!
+    numFollowers: number; // Int!
+    numFollowing: number; // Int!
+    username: string; // String!
+  }
   Query: {};
   RespondResponse: { // root type
     responseAudioUrl: string; // String!
@@ -109,11 +119,13 @@ export interface NexusGenFieldTypes {
     authorImageUrl: string | null; // String
     authorName: string; // String!
     categories: string[]; // [String!]!
+    contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][]; // [FollowUpQuestion!]!
     id: string; // String!
     lengthSeconds: number; // Int!
+    sourceImageUrl: string | null; // String
     summary: string | null; // String
     thumbnailImageUrl: string | null; // String
     title: string; // String!
@@ -129,6 +141,7 @@ export interface NexusGenFieldTypes {
     contentId: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     id: string; // String!
+    percentFinished: number | null; // Float
     timestampCursor: number | null; // Float
     updatedAt: NexusGenScalars['Date']; // Date!
     userId: string; // String!
@@ -205,6 +218,16 @@ export interface NexusGenFieldTypes {
     paymentMethodId: string; // String!
     source: string; // String!
   }
+  Profile: { // field return type
+    avatarImageUrl: string | null; // String
+    description: string; // String!
+    id: string; // ID!
+    isFollowing: boolean; // Boolean!
+    name: string; // String!
+    numFollowers: number; // Int!
+    numFollowing: number; // Int!
+    username: string; // String!
+  }
   Query: { // field return type
     checkCode: boolean; // Boolean!
     getActivity: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
@@ -220,6 +243,7 @@ export interface NexusGenFieldTypes {
     getLessonSessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
+    getProfile: NexusGenRootTypes['Profile']; // Profile!
     me: NexusGenRootTypes['User'] | null; // User
     myCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     mySessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
@@ -264,11 +288,13 @@ export interface NexusGenFieldTypeNames {
     authorImageUrl: 'String'
     authorName: 'String'
     categories: 'String'
+    contentSession: 'ContentSession'
     context: 'String'
     createdAt: 'Date'
     followUpQuestions: 'FollowUpQuestion'
     id: 'String'
     lengthSeconds: 'Int'
+    sourceImageUrl: 'String'
     summary: 'String'
     thumbnailImageUrl: 'String'
     title: 'String'
@@ -284,6 +310,7 @@ export interface NexusGenFieldTypeNames {
     contentId: 'String'
     createdAt: 'Date'
     id: 'String'
+    percentFinished: 'Float'
     timestampCursor: 'Float'
     updatedAt: 'Date'
     userId: 'String'
@@ -360,6 +387,16 @@ export interface NexusGenFieldTypeNames {
     paymentMethodId: 'String'
     source: 'String'
   }
+  Profile: { // field return type name
+    avatarImageUrl: 'String'
+    description: 'String'
+    id: 'ID'
+    isFollowing: 'Boolean'
+    name: 'String'
+    numFollowers: 'Int'
+    numFollowing: 'Int'
+    username: 'String'
+  }
   Query: { // field return type name
     checkCode: 'Boolean'
     getActivity: 'ContentSession'
@@ -375,6 +412,7 @@ export interface NexusGenFieldTypeNames {
     getLessonSessions: 'LessonSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
     getPaymentMethods: 'PaymentMethod'
+    getProfile: 'Profile'
     me: 'User'
     myCourses: 'Course'
     mySessions: 'LessonSession'
@@ -490,6 +528,9 @@ export interface NexusGenArgTypes {
     }
     getLessonSessions: { // args
       lessonId: string; // ID!
+    }
+    getProfile: { // args
+      userId?: string | null; // ID
     }
   }
 }

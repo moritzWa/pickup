@@ -32,12 +32,13 @@ import { LINKING } from "./linking";
 import Home from "src/views/Main/Home";
 import Lesson from "src/views/Main/LessonDetails";
 import Courses from "src/views/Main/Courses";
-import Profile from "src/views/Main/Profile";
+import Settings from "src/views/Main/Settings";
 import CourseDetails from "src/views/Main/CourseDetails";
 import LessonDetails from "src/views/Main/LessonDetails";
 import LessonSession from "src/views/Main/LessonSession";
 import Activity from "src/views/Main/Activity";
 import ContentSession from "src/views/Main/ContentSession";
+import { UserProfile } from "src/views/Main/Profile";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -174,7 +175,7 @@ const MainTabNavigation = () => {
         options={{
           headerShown: false,
         }}
-        component={Profile}
+        component={UserProfile}
       />
     </Tabs.Navigator>
   );
@@ -275,6 +276,14 @@ export const MainNavigationStack = () => {
               headerShown: false,
             }}
             component={CourseDetails}
+          />
+
+          <Stack.Screen
+            name="Settings"
+            component={Settings}
+            options={{
+              headerShown: false,
+            }}
           />
 
           <Stack.Screen

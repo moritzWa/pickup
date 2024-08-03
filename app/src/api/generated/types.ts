@@ -24,11 +24,13 @@ export type Content = {
   authorImageUrl?: Maybe<Scalars['String']['output']>;
   authorName: Scalars['String']['output'];
   categories: Array<Scalars['String']['output']>;
+  contentSession?: Maybe<ContentSession>;
   context: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
   followUpQuestions: Array<FollowUpQuestion>;
   id: Scalars['String']['output'];
   lengthSeconds: Scalars['Int']['output'];
+  sourceImageUrl?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
   thumbnailImageUrl?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
@@ -48,6 +50,7 @@ export type ContentSession = {
   contentId: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
   id: Scalars['String']['output'];
+  percentFinished?: Maybe<Scalars['Float']['output']>;
   timestampCursor?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['Date']['output'];
   userId: Scalars['String']['output'];
@@ -215,6 +218,18 @@ export type PaymentMethod = {
   source: Scalars['String']['output'];
 };
 
+export type Profile = {
+  __typename?: 'Profile';
+  avatarImageUrl?: Maybe<Scalars['String']['output']>;
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isFollowing: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  numFollowers: Scalars['Int']['output'];
+  numFollowing: Scalars['Int']['output'];
+  username: Scalars['String']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   checkCode: Scalars['Boolean']['output'];
@@ -231,6 +246,7 @@ export type Query = {
   getLessonSessions: Array<LessonSession>;
   getMobileUpdate: GetMobileUpdateResponse;
   getPaymentMethods: Array<PaymentMethod>;
+  getProfile: Profile;
   me?: Maybe<User>;
   myCourses: Array<Course>;
   mySessions: Array<LessonSession>;
@@ -284,6 +300,11 @@ export type QueryGetLessonProgressArgs = {
 
 export type QueryGetLessonSessionsArgs = {
   lessonId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetProfileArgs = {
+  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type RespondResponse = {

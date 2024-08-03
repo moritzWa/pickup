@@ -7,11 +7,13 @@ type Content {
   authorImageUrl: String
   authorName: String!
   categories: [String!]!
+  contentSession: ContentSession
   context: String!
   createdAt: Date!
   followUpQuestions: [FollowUpQuestion!]!
   id: String!
   lengthSeconds: Int!
+  sourceImageUrl: String
   summary: String
   thumbnailImageUrl: String
   title: String!
@@ -29,6 +31,7 @@ type ContentSession {
   contentId: String!
   createdAt: Date!
   id: String!
+  percentFinished: Float
   timestampCursor: Float
   updatedAt: Date!
   userId: String!
@@ -125,6 +128,17 @@ type PaymentMethod {
   source: String!
 }
 
+type Profile {
+  avatarImageUrl: String
+  description: String!
+  id: ID!
+  isFollowing: Boolean!
+  name: String!
+  numFollowers: Int!
+  numFollowing: Int!
+  username: String!
+}
+
 type Query {
   checkCode(referralCode: String!): Boolean!
   getActivity: [ContentSession!]!
@@ -140,6 +154,7 @@ type Query {
   getLessonSessions(lessonId: ID!): [LessonSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
   getPaymentMethods: [PaymentMethod!]!
+  getProfile(userId: ID): Profile!
   me: User
   myCourses: [Course!]!
   mySessions: [LessonSession!]!

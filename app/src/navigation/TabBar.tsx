@@ -31,6 +31,8 @@ const PortfolioIcon = require("src/assets/icons/portfolio.png");
 const PortfolioIconFilled = require("src/assets/icons/portfolio-solid.png");
 const CarIcon = require("src/assets/icons/car-regular.png");
 const CarIconFilled = require("src/assets/icons/car-solid.png");
+const InboxIcon = require("src/assets/icons/inbox-regular.png");
+const InboxIconFilled = require("src/assets/icons/inbox-solid.png");
 
 function _TabBar(tabBarProps: BottomTabBarProps) {
   const { state, descriptors } = tabBarProps;
@@ -49,7 +51,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
   return (
     <>
       <View
-        // intensity={90} // You can adjust the intensity of the blur
+        // intensity={75} // You can adjust the intensity of the blur
         // tint={theme}
         style={{
           flexDirection: "column",
@@ -246,8 +248,8 @@ const _getImage = (
       };
     case "Activity":
       return {
-        image: ClockIcon,
-        active: ClockIconFilled,
+        image: InboxIcon,
+        active: InboxIconFilled,
       };
     case "Profile":
       return {

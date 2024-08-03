@@ -1,569 +1,879 @@
-import {
-  faBullhorn,
-  faChevronDown,
-  faComment,
-  faDatabase,
-  faFileSpreadsheet,
-  faHeart,
-  faMask,
-  faMoon,
-  faSearch,
-  faServer,
-  faShareAll,
-  faSignOut,
-  faTaxi,
-  faToggleOn,
-  faUserCircle,
-} from "@fortawesome/sharp-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { useNavigation, useIsFocused } from "@react-navigation/core";
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Button,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  ScrollView,
-  Switch,
-  Share,
-  RefreshControl,
-} from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { colors } from "src/components";
-import Section from "src/components/Section";
-import { constants } from "src/config";
-import { Maybe } from "src/core";
-import { useMe } from "src/hooks";
-import { NavigationProps, RootStackParamList } from "src/navigation";
-import { auth } from "src/utils/firebase";
-import { OneSignal } from "react-native-onesignal";
-import InAppReview from "react-native-in-app-review";
+import React from "react";
 import {
   ApolloError,
-  useApolloClient,
   useLazyQuery,
   useMutation,
   useQuery,
 } from "@apollo/client";
-import { api } from "src/api";
-import { isNil, truncate } from "lodash";
+import {
+  CommonActions,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Linking,
+  Platform,
+  RefreshControl,
+  SectionList,
+  SectionListData,
+  Share,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { api, apolloClient } from "src/api";
 import {
   Mutation,
   MutationUpdateUserArgs,
+  Profile as ProfileT,
   Query,
 } from "src/api/generated/types";
-import Header from "src/components/Header";
-import FastImage from "react-native-fast-image";
 import { useTheme } from "src/hooks/useTheme";
-import { LinearGradient } from "expo-linear-gradient";
+import { NavigationProps, RootStackParamList } from "src/navigation";
+import Header from "src/components/Header";
+import { Button, colors } from "src/components";
+import { FollowersInfo } from "src/components/FollowersInfo";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMe } from "src/hooks";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faPen,
+  faPlus,
+  faPlusCircle,
+  faPlusLarge,
+} from "@fortawesome/pro-solid-svg-icons";
+import { hasValue } from "src/core";
 import * as Haptics from "expo-haptics";
-import numbro from "numbro";
-import { check, PERMISSIONS, RESULTS } from "react-native-permissions";
-import { BaseUserFields } from "src/api/fragments";
+import { last, noop } from "lodash";
+import { constants } from "src/config";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { PERMISSIONS, RESULTS, check, request } from "react-native-permissions";
+import ImagePicker, {
+  Image as ImageResponse,
+} from "react-native-image-crop-picker";
+import ActionSheet from "react-native-action-sheet";
+import { storage } from "src/utils/firebase";
+import { v4 as uuidv4 } from "uuid";
+import { TabBar } from "src/components/tabs";
+import { BaseContentFields } from "src/api/fragments";
+import { ContentRow } from "src/components/Content/ContentRow";
 
-const Profile = () => {
-  const navigation = useNavigation<NavigationProps>();
-  const { me, refetchMe } = useMe("cache-first");
+export const UserProfile = () => {
+  const { me } = useMe();
+  const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
+  const username = params?.username ?? me?.id;
+  const insets = useSafeAreaInsets();
+  const isME = username === me?.id;
 
-  const canLeaveReview = InAppReview.isAvailable();
-  const [hasPush, setHasPush] = useState(false);
-  const dispatch = useDispatch();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const [updateUser] = useMutation(api.users.update);
-
-  const [hasEnabledFaceId, setHasEnabledFaceId] = useState(false);
-  const apolloClient = useApolloClient();
-  const [getIntercomMobileToken] = useLazyQuery<
-    Pick<Query, "getIntercomMobileToken">
-  >(api.users.getIntercomHash);
-  const [deleteMe, { loading: loadingDelete }] = useMutation(
-    api.users.deleteMe
-  );
-  const isFocused = useIsFocused();
-
   const {
-    toggleDarkMode,
     background,
+    textPrimary,
+    activityIndicator,
     secondaryBackground,
-    text,
     header,
-    theme,
-    border,
   } = useTheme();
 
-  const _logout = async () => {
-    try {
-      await Promise.all([
-        auth().signOut(),
-        // Intercom.logout(),
-        OneSignal.logout(),
-      ]);
-    } catch (err) {
-      console.log(err);
-    }
+  const {
+    data: getProfileData,
+    loading: loadingProfile,
+    refetch,
+    error: profileError,
+  } = useQuery<{
+    getProfile: ProfileT;
+  }>(api.users.getProfile, {
+    skip: !me,
+    variables: {
+      userId: me?.id || "",
+    },
+  });
 
-    navigation.navigate("Authentication", { screen: "Welcome" });
-  };
+  const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
-  const _leaveReview = () => {
-    InAppReview.RequestInAppReview()
-      .then((hasFlowFinishedSuccessfully) => {
-        // when return true then flow finished successfully
-      })
-      .catch((error) => {
-        //we continue our app flow.
-        // we have some error could happen while lanuching InAppReview,
-        // Check table for errors and code number that can return in catch.
-        console.log(error);
-      });
-  };
+  const { data, error } = useQuery<Pick<Query, "getContentFeed">>(
+    api.content.feed
+  );
 
-  const _requestNotificationPermission = async () => {
-    const hasPermission = await OneSignal.Notifications.hasPermission();
-    if (hasPermission) {
-      setHasPush(true);
-      await updateUser({ variables: { hasPushNotifications: true } });
-      return;
-    }
+  const [startCourse] = useMutation(api.courses.start);
 
-    // request permission. if cannot or don't have permission, navigate to the app store settings page
-    const hasNotifPermission = await OneSignal.Notifications.requestPermission(
-      true
-    );
+  const content = (data?.getContentFeed ?? []) as BaseContentFields[];
 
-    await updateUser({
-      variables: { hasPushNotifications: hasNotifPermission },
-    });
-  };
-
-  const _refreshMe = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const _onRefresh = async () => {
     setIsRefreshing(true);
     try {
-      await refetchMe();
+      await Promise.all([
+        apolloClient.refetchQueries({
+          include: [api.users.getProfile, api.users.me],
+        }),
+      ]);
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  const _leaveFeedback = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const data = await getIntercomMobileToken();
-    const hash = data?.data?.getIntercomMobileToken;
+  // if (profileError && __DEV__) {
+  //   Alert.alert(JSON.stringify(profileError, null, 2));
+  // }
 
-    if (!hash) {
-      Alert.alert("Error", "Please try again later");
-      return;
-    }
-  };
+  const contentSection: SectionListData<any | {}> = useMemo(
+    () => ({
+      key: "content-feed",
+      data: [{}],
+      renderItem: ({ item }) =>
+        !content?.length ? (
+          <View>
+            <Text
+              style={{
+                color: textPrimary,
+                fontSize: 18,
+                flex: 1,
+                alignSelf: "center",
+                marginTop: 100,
+                fontFamily: "Railway-Regular",
+              }}
+            >
+              No content
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={content}
+            keyExtractor={(item) => item.id}
+            style={{ padding: 10 }}
+            renderItem={({ item }) => <ContentRow content={item} />}
+          />
+        ),
+    }),
+    [textPrimary, content]
+  );
 
-  const _deleteMyAccount = async () => {
-    try {
-      await deleteMe();
-
-      try {
-        await Promise.all([
-          auth().signOut(),
-          // Intercom.logout(),
-          OneSignal.logout(),
-        ]);
-      } catch (err) {
-        console.log(err);
-      }
-
-      navigation.navigate("Authentication", { screen: "Welcome" });
-    } catch (err) {
-      if (err instanceof ApolloError) {
-        Alert.alert("Error", err.message);
-      }
-
-      Alert.alert("Error", "Please try again later");
-    }
-  };
-
-  const _requestDeleteAccount = () => {
-    // prompt user
-    Alert.alert(
-      "Are you sure?",
-      "This action cannot be undone. All your data will be deleted.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: async () => _deleteMyAccount(),
-        },
-      ]
-    );
-  };
-
-  const onShare = async () => {
-    try {
-      const result = await Share.share({
-        title: "Pickup",
-        message:
-          "Track all your crypto across wallets, exchanges, and DeFi in one place.",
-        url: "https://apps.apple.com/us/app/awaken-portfolio/id6472827013",
-      });
-
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
-    } catch (error: any) {
-      Alert.alert(error.message);
-    }
-  };
-
-  useEffect(() => {
-    refetchMe();
-  }, [isFocused]);
-
-  useEffect(() => {
-    (async () => {
-      const hasPermission = await OneSignal.Notifications.hasPermission();
-      setHasPush(hasPermission);
-    })();
+  const tabs = useMemo(() => {
+    return [
+      {
+        name: "All",
+        onClick: noop,
+        isActive: true,
+      },
+      {
+        name: "Bookmarks",
+        onClick: () => Alert.alert("Coming soon 👀"),
+        isActive: false,
+      },
+      {
+        name: "Liked",
+        onClick: () => Alert.alert("Coming soon 👀"),
+        isActive: false,
+      },
+    ];
   }, []);
+
+  const sections = useMemo(
+    () => [
+      {
+        key: "profile",
+        data: [{}],
+        renderItem: () => <Profile username={username ?? null} />,
+      },
+      {
+        data: [{}],
+        renderItem: () => (
+          // select between tabs
+          <View style={{ marginBottom: 0 }}>
+            <TabBar tabs={tabs} />
+          </View>
+        ),
+      },
+      contentSection,
+    ],
+    [contentSection, isME, profile, username, secondaryBackground]
+  );
+
+  //   if (__DEV__ && error) {
+  //     console.error(JSON.stringify(error, null, 2));
+  //   }
+
+  // if (loadingProfile) {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         backgroundColor: background,
+  //         alignItems: "center",
+  //         display: "flex",
+  //         flexDirection: "row",
+  //         justifyContent: "center",
+  //       }}
+  //     >
+  //       <ActivityIndicator size="large" color={activityIndicator} />
+  //     </View>
+  //   );
+  // }
+
+  //   if (!profile) {
+  //     return (
+  //       <View
+  //         style={{
+  //           flex: 1,
+  //           backgroundColor: background,
+  //           alignItems: "center",
+  //           display: "flex",
+  //           flexDirection: "column",
+  //           justifyContent: "center",
+  //         }}
+  //       >
+  //         <Header hasBackButton />
+
+  //         <Text
+  //           style={{
+  //             color: textPrimary,
+  //             fontSize: 18,
+  //             flex: 1,
+  //             alignSelf: "center",
+  //             marginTop: 100,
+  //             fontFamily: "Mona-Sans-Regular",
+  //           }}
+  //         >
+  //           Profile not found.
+  //         </Text>
+  //       </View>
+  //     );
+  //   }
 
   return (
     <View
       style={{
         flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
+        paddingTop: isME ? insets.top : 0,
         backgroundColor: background,
       }}
     >
-      <Header title="Profile" />
-      <ScrollView
+      {!isME ? <Header hasBackButton /> : null}
+
+      {/* <ProfileImage name={profile?.name} /> */}
+
+      <SectionList
+        contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            tintColor={header}
-            onRefresh={_refreshMe}
+            onRefresh={_onRefresh}
+            tintColor={activityIndicator}
           />
         }
-        contentContainerStyle={{
-          paddingBottom: 100,
-          backgroundColor: background,
-        }}
-      >
-        {/* <LinearGradient
-          colors={[colors.lightBlue80, colors.lightBlue60]}
-          start={[0, 0]}
-          end={[1, 1]}
-          style={{
-            flex: 1,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-            onPress={onShare}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={{
-                flex: 1,
-                textAlign: "center",
-                fontFamily: "Raleway-Semibold",
-                color: colors.white,
-                fontSize: 16,
-                padding: 15,
-              }}
-            >
-              Share Pickup with a friend
-            </Text>
-            <FontAwesomeIcon
-              style={{
-                right: 15,
-                position: "absolute",
-              }}
-              icon={faShareAll}
-              color={colors.white}
-              size={24}
-            />
-          </TouchableOpacity>
-        </LinearGradient> */}
-
-        <View
-          style={{
-            alignItems: "center",
-            paddingVertical: 25,
-            paddingHorizontal: 20,
-            backgroundColor: background,
-            borderBottomWidth: 1,
-            borderBottomColor: border,
-            width: "100%",
-          }}
-        >
-          {/* <View>
-            <ProfilePicture user={me} />
-          </View> */}
-
-          <View style={{ alignItems: "center" }}>
-            <Text
-              style={[
-                styles.email,
-                {
-                  color: text,
-                  fontSize: 13,
-                },
-              ]}
-            >
-              Logged in as {me?.email || ""}
-            </Text>
-          </View>
-        </View>
-
-        <View
-          style={{
-            marginTop: 25,
-            flex: 1,
-            width: "100%",
-            flexDirection: "column",
-            display: "flex",
-          }}
-        >
-          <Section
-            onPress={_leaveFeedback}
-            icon={<FontAwesomeIcon icon={faComment} color={text} />}
-            name="Leave Feedback"
-          />
-          {canLeaveReview && (
-            <Section
-              onPress={_leaveReview}
-              icon={<FontAwesomeIcon icon={faHeart} color={text} />}
-              name="Leave a Review"
-            />
-          )}
-          {/* <Section
-            onPress={_enableFaceID}
-            imageComponent={
-              <Image
-                style={{
-                  width: 15,
-                  height: 15,
-                }}
-                source={require("src/assets/social/faceid.png")}
-                tintColor={text}
-              />
-            }
-            name={hasEnabledFaceId ? "Face ID Enabled ✅" : "Enable Face ID"}
-          /> */}
-
-          <Section
-            onPress={_requestNotificationPermission}
-            icon={<FontAwesomeIcon icon={faBullhorn} color={text} />}
-            name="Enable Push Notifications"
-          />
-
-          <Section
-            icon={<FontAwesomeIcon icon={faMoon} color={text} />}
-            name={"Dark mode"}
-            rightIcon={
-              <Switch
-                trackColor={{
-                  true: colors.primary,
-                  false: theme === "dark" ? colors.gray20 : colors.gray60,
-                }}
-                value={theme === "dark"}
-                onChange={() => toggleDarkMode()}
-              />
-            }
-          />
-
-          <View style={{ height: 1, backgroundColor: secondaryBackground }} />
-          <Section
-            onPress={_logout}
-            icon={<FontAwesomeIcon icon={faSignOut} color={colors.red50} />}
-            name="Logout"
-            nameStyle={{ color: colors.red50, fontFamily: "Raleway-Regular" }}
-            showRightIcon={false}
-          />
-          <View style={{ height: 1, backgroundColor: secondaryBackground }} />
-          {me?.isSuperuser && (
-            <View>
-              <Text
-                style={{
-                  fontSize: 12,
-                  paddingVertical: 10,
-                  paddingHorizontal: 30,
-                  fontFamily: "Raleway-Bold",
-                  backgroundColor: secondaryBackground,
-                  color: header,
-                }}
-              >
-                Admin Only 🕵️‍♂️
-              </Text>
-              <View
-                style={{ height: 1, backgroundColor: secondaryBackground }}
-              />
-
-              <Section
-                onPress={() =>
-                  Alert.alert(
-                    "Nvm, going to add this later bc would be helpful."
-                  )
-                }
-                icon={<FontAwesomeIcon icon={faServer} color={text} />}
-                name="Server API Url"
-              />
-              <View
-                style={{ height: 1, backgroundColor: secondaryBackground }}
-              />
-            </View>
-          )}
-
-          <View style={{ marginTop: 35, alignItems: "center" }}>
-            <Text
-              style={{
-                fontSize: 14,
-                color: text,
-              }}
-            >
-              Version {constants.version} ({constants.build})
-            </Text>
-
-            <TouchableOpacity
-              onPress={_requestDeleteAccount}
-              style={{ marginTop: 15, marginBottom: 25 }}
-            >
-              <Text style={{ color: colors.red50, fontSize: 16 }}>
-                Delete Account
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-      {/* More user details or actions can be added here */}
+        sections={sections}
+      />
     </View>
   );
 };
 
-const _numToFormat = (n: number) => {
-  // 1 = 1st, 2 = 2nd, 3 = 3rd, 4 = 4th, etc.
-  const j = n % 10;
-  const k = n % 100;
-  if (j === 1 && k !== 11) {
-    return n + "st";
-  }
-  if (j === 2 && k !== 12) {
-    return n + "nd";
-  }
-  if (j === 3 && k !== 13) {
-    return n + "rd";
-  }
-  return n + "th";
-};
+const Profile = ({ username }: { username: string | null }) => {
+  const { me } = useMe();
+  const isME = username === me?.id;
 
-const _ProfilePicture = ({
-  user,
-}: {
-  user?: Maybe<BaseUserFields>;
-  numberUser?: Maybe<number>;
-}) => {
-  const [profileUrl, setProfileUrl] = useState(user?.avatarImageUrl);
+  const navigation = useNavigation<NavigationProps>();
+  const fullTheme = useTheme();
+  const {
+    background,
+    textPrimary,
+    activityIndicator,
+    text,
+    theme,
+    textSecondary,
+  } = fullTheme;
 
-  useEffect(
-    () => setProfileUrl(user?.avatarImageUrl || ""),
-    [user?.avatarImageUrl]
-  );
+  const {
+    data: getProfileData,
+    loading: loadingProfile,
+    error: profileError,
+  } = useQuery<{
+    getProfile: ProfileT;
+  }>(api.users.getProfile, {
+    skip: !me,
+    variables: {
+      userId: me?.id || "",
+    },
+  });
 
-  if (profileUrl) {
-    const isGithub = profileUrl.includes("github.com");
-    const imageUrl = isGithub ? profileUrl + "?raw=true" : profileUrl;
-    const isVideo = imageUrl.includes(".mp4");
+  const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
-    if (!isVideo) {
-      return (
-        <FastImage
-          source={{ uri: imageUrl }}
-          resizeMode="cover"
-          style={{
-            width: 75,
-            height: 75,
-            overflow: "hidden",
-            flexShrink: 0,
-            borderRadius: 100,
-            // border: "1px solid " + colors.gray60,
-          }}
-        />
-      );
-    }
-  }
+  //   const [followProfile, { loading: loadingFollow }] = useMutation<
+  //     Pick<Mutation, "followProfile">
+  //   >(api.profiles.follow);
+
+  //   const [unfollowProfile, { loading: loadingUnfollow }] = useMutation<
+  //     Pick<Mutation, "unfollowProfile">
+  //   >(api.profiles.unfollow);
+
+  //   const followUser = async () => {
+  //     try {
+  //       await followProfile({
+  //         variables: {
+  //           username,
+  //         },
+  //         refetchQueries: [api.profiles.getProfile],
+  //       });
+
+  //       // Alert.alert("Success", `Successfully followed ${profile?.name}.`);
+  //     } catch (e) {
+  //       console.error(e);
+
+  //       Alert.alert(
+  //         "Error",
+  //         (e as any)?.message || "An error occurred. Please try again."
+  //       );
+  //     }
+  //   };
+
+  //   const unfollowUser = async () => {
+  //     try {
+  //       await unfollowProfile({
+  //         variables: {
+  //           username,
+  //         },
+  //         refetchQueries: [api.profiles.getProfile],
+  //       });
+
+  //       // Alert.alert(
+  //       //   "Success",
+  //       //   `Successfully un-followed ${profile?.name.trim() || "user"}.`
+  //       // );
+  //     } catch (e) {
+  //       console.error(e);
+
+  //       Alert.alert(
+  //         "Error",
+  //         (e as any)?.message || "An error occurred. Please try again."
+  //       );
+  //     }
+  //   };
+
+  const _editProfile = () => {
+    navigation.navigate("Settings");
+  };
+
+  const _openSettings = () => {
+    navigation.navigate("Settings");
+  };
 
   return (
     <View
       style={{
-        width: 75,
-        height: 75,
-        borderRadius: 100,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        flexShrink: 0,
-        flexGrow: 0,
-        justifyContent: "center",
-        backgroundColor: colors.purple80,
-        marginRight: 0,
+        // borderBottomWidth: 1,
+        paddingBottom: 5,
+        // borderBottomColor: border,
       }}
     >
-      <Text
-        style={{
-          fontSize: 28,
-          fontFamily: "Raleway-Semibold",
-          color: colors.white,
-        }}
-      >
-        {user?.name?.charAt(0).toUpperCase()}
-      </Text>
+      <View>
+        <View
+          style={{
+            alignItems: "flex-start",
+            marginTop: 25,
+            paddingHorizontal: 15,
+          }}
+        >
+          <ProfilePicture profile={profile ?? null} />
+
+          <View style={{ marginTop: 20, alignItems: "flex-start" }}>
+            {!!profile?.name ? (
+              <Text
+                style={{
+                  fontFamily: "Raleway-Bold",
+                  fontSize: 20,
+                  color: textPrimary,
+                  textAlign: "center",
+                }}
+              >
+                {profile?.name}
+              </Text>
+            ) : null}
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                // copy to clipboard the username
+                Clipboard.setString(profile?.username || "");
+              }}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 5,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Raleway-Regular",
+                  fontSize: 14,
+                  marginTop: 5,
+                  textAlign: "center",
+                  color: textSecondary,
+                }}
+              >
+                @{profile?.username}
+              </Text>
+
+              {/* <Image
+                source={require("src/assets/icons/clone-filled.png")}
+                style={{ width: 15, height: 15, marginLeft: 5 }}
+                tintColor={textSecondary}
+              /> */}
+            </TouchableOpacity>
+
+            {!!profile?.description ? (
+              <Text
+                style={{
+                  fontFamily: "Raleway-Regular",
+                  fontSize: 16,
+                  textAlign: "left",
+                  marginTop: 20,
+                  color: textSecondary,
+                }}
+                // numberOfLines={3}
+              >
+                {profile?.description}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+
+        <FollowersInfo
+          containerStyle={{
+            alignSelf: "flex-start",
+            padding: 5,
+            marginTop: 20,
+            paddingBottom: 15,
+            paddingTop: 0,
+          }}
+          username={username ?? null}
+        />
+      </View>
+      {isME ? (
+        <View
+          style={{
+            position: "absolute",
+            top: 25,
+            right: 15,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={{
+              borderRadius: 100,
+              height: 35,
+              width: 35,
+              marginRight: 5,
+              alignSelf: "center",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingHorizontal: 0,
+              borderWidth: 1,
+              borderColor: fullTheme.borderDark,
+              backgroundColor: background,
+            }}
+            onPress={_openSettings}
+          >
+            <Image
+              source={require("src/assets/icons/settings-filled.png")}
+              style={{
+                width: 18,
+                height: 18,
+              }}
+              tintColor={textPrimary}
+            />
+          </TouchableOpacity>
+          {/* <TouchableOpacity
+            activeOpacity={0.8}
+            style={{
+              borderRadius: 100,
+              height: 35,
+              width: 35,
+              marginRight: 5,
+              alignSelf: "center",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingHorizontal: 0,
+              borderWidth: 1,
+              borderColor: fullTheme.borderDark,
+              backgroundColor: background,
+            }}
+            onPress={_editProfile}
+          >
+            <Image
+              source={require("src/assets/icons/pen-solid.png")}
+              style={{
+                width: 15,
+                height: 15,
+              }}
+              tintColor={textPrimary}
+            />
+          </TouchableOpacity> */}
+          {/* <TouchableOpacity
+            activeOpacity={0.8}
+            style={{
+              borderRadius: 100,
+              height: 35,
+              width: 35,
+              marginRight: 5,
+              alignSelf: "center",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingHorizontal: 0,
+              borderWidth: 1,
+              borderColor: fullTheme.borderDark,
+              backgroundColor: background,
+            }}
+            onPress={_shareProfile}
+          >
+            <Image
+              source={require("src/assets/icons/share.png")}
+              style={{
+                width: 15,
+                height: 15,
+              }}
+              tintColor={textPrimary}
+            />
+          </TouchableOpacity> */}
+        </View>
+      ) : (
+        <View
+          style={{
+            position: "absolute",
+            top: 25,
+            right: 15,
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          {/* <Button
+            style={{
+              borderRadius: 100,
+              height: 35,
+              paddingVertical: 0,
+              padding: 0,
+              alignSelf: "center",
+              width: 85,
+              paddingHorizontal: 0,
+              borderWidth: profile?.isFollowing ? 1 : 0,
+              borderColor: fullTheme.borderDark,
+              backgroundColor: profile?.isFollowing ? background : header,
+            }}
+            textProps={{
+              style: {
+                fontSize: 14,
+                color: profile?.isFollowing ? textPrimary : background,
+              },
+            }}
+            onPress={profile?.isFollowing ? unfollowUser : followUser}
+            loading={loadingFollow || loadingUnfollow}
+            label={profile?.isFollowing ? "Unfollow" : "Follow"}
+          /> */}
+        </View>
+      )}
     </View>
   );
 };
 
-const ProfilePicture = React.memo(_ProfilePicture, (prevProps, nextProps) => {
-  return (
-    prevProps.user?.avatarImageUrl === nextProps.user?.avatarImageUrl &&
-    prevProps.numberUser === nextProps.numberUser
+const ProfilePicture = ({ profile }: { profile?: ProfileT | null }) => {
+  const fullTheme = useTheme();
+
+  const { me } = useMe();
+  const [profileUrl, setProfileUrl] = useState<string | null>(null);
+  const [updateUser] = useMutation<Mutation, MutationUpdateUserArgs>(
+    api.users.update
   );
-});
+  const [isLoading, setLoading] = useState(false);
 
-const styles = StyleSheet.create({
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50, // Makes it circular
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginVertical: 8,
-  },
-  email: {
-    fontSize: 16,
-    color: "gray",
-    marginTop: 5,
-  },
-  bio: {
-    textAlign: "center",
-    marginVertical: 8,
-  },
-});
+  const isME = me && me.id === profile?.id;
 
-export default Profile;
+  const initials = useMemo(() => {
+    if (!profile) {
+      return "";
+    }
+
+    const name = profile?.name || profile?.username || "";
+
+    const names = name.split(" ");
+
+    if (names.length === 1) {
+      return names[0].charAt(0).toUpperCase();
+    }
+
+    return names
+      .slice(0, 2)
+      .map((n: string) => n.charAt(0).toUpperCase())
+      .join("");
+  }, [profile]);
+
+  const _handleCamera = async () => {
+    const CAMERA_PERMISSION = Platform.select({
+      ios: PERMISSIONS.IOS.CAMERA,
+      android: PERMISSIONS.ANDROID.CAMERA,
+      default: PERMISSIONS.IOS.CAMERA,
+    });
+
+    const cameraPermission = await check(CAMERA_PERMISSION);
+
+    if (cameraPermission === RESULTS.BLOCKED) {
+      await Linking.openSettings();
+      return;
+    }
+
+    if (cameraPermission !== RESULTS.GRANTED) {
+      const permission = await request(CAMERA_PERMISSION);
+
+      if (permission !== RESULTS.GRANTED) {
+        return;
+      }
+    }
+
+    ImagePicker.openCamera({
+      width: 300,
+      height: 300,
+      cropping: true,
+      multiple: false,
+      includeBase64: true,
+    }).then(async (response) => {
+      if (response) {
+        await uploadProfilePhoto(response as ImageResponse);
+      }
+    });
+  };
+
+  const _handlePhotos = async () => {
+    const PHOTO_PERMISSION = Platform.select({
+      ios: PERMISSIONS.IOS.PHOTO_LIBRARY,
+      android: PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+      default: PERMISSIONS.IOS.PHOTO_LIBRARY,
+    });
+
+    const photosPermission = await check(PHOTO_PERMISSION);
+
+    if (photosPermission === RESULTS.BLOCKED) {
+      await Linking.openSettings();
+      return;
+    }
+
+    // if it isn't granted or limited -> ask them
+    if (
+      photosPermission !== RESULTS.GRANTED &&
+      photosPermission !== RESULTS.LIMITED
+    ) {
+      const permission = await request(PHOTO_PERMISSION);
+
+      // if (permission === RESULTS.BLOCKED) {
+      //   await Linking.openSettings();
+      //   return;
+      // }
+
+      if (permission !== RESULTS.GRANTED) {
+        return;
+      }
+    }
+
+    ImagePicker.openPicker({
+      width: 300,
+      height: 300,
+      cropping: true,
+      multiple: false,
+      includeBase64: true,
+      mediaType: "photo",
+    }).then(async (response) => {
+      if (response) {
+        await uploadProfilePhoto(response as ImageResponse);
+      }
+    });
+  };
+
+  const _removePhoto = async () => {
+    try {
+      setLoading(true);
+
+      const variables: MutationUpdateUserArgs = {
+        avatarImageUrl: "", // empty string is removing it
+      };
+
+      await updateUser({
+        variables,
+        refetchQueries: [api.users.me],
+      });
+
+      setProfileUrl(null);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ApolloError) {
+        Alert.alert(err.message);
+        return;
+      }
+
+      Alert.alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showActionSheet = () => {
+    const hasProfileUrl = !!me?.avatarImageUrl;
+
+    const options = Platform.select({
+      ios: [
+        "Take Photo...",
+        "Choose from Library...",
+        hasProfileUrl ? "Remove Photo" : "",
+        "Cancel",
+      ],
+      android: [
+        "Take Photo...",
+        "Choose from Library...",
+        hasProfileUrl ? "Remove Photo" : "",
+        "Cancel",
+      ],
+      default: [
+        "Take Photo...",
+        "Choose from Library...",
+        hasProfileUrl ? "Remove Photo" : "",
+        "Cancel",
+      ],
+    }).filter((o) => o as string);
+
+    ActionSheet.showActionSheetWithOptions(
+      {
+        options,
+        title: "Select Profile",
+        tintColor: colors.lightBlue50,
+        cancelButtonIndex: options.length - 1,
+      },
+      async (buttonIndex) => {
+        if (buttonIndex === 0) {
+          await _handleCamera();
+        } else if (buttonIndex === 1) {
+          await _handlePhotos();
+        } else if (buttonIndex === 2 && hasProfileUrl) {
+          await _removePhoto();
+        }
+      }
+    );
+  };
+
+  const uploadProfilePhoto = async (result: ImageResponse) => {
+    setLoading(true);
+
+    try {
+      // the part after the period, egt the png jpg etc...
+      const ext = result.mime.split("/")[1];
+
+      // random string
+      const fileRef = storage().ref(
+        `users/${me?.authProviderId}/avatars/${uuidv4()}.${ext}`
+      );
+
+      const upload = fileRef.putFile(result.path);
+
+      await upload.then(async () => {
+        const profileUrl = await fileRef.getDownloadURL();
+
+        const variables = {
+          avatarImageUrl: profileUrl,
+        };
+
+        await updateUser({
+          variables,
+          refetchQueries: [api.users.me],
+        });
+      });
+
+      Alert.alert("Success", "Profile photo updated.");
+    } catch (err) {
+      Alert.alert("ERROR");
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(
+    () => setProfileUrl(me?.avatarImageUrl || ""),
+    [me?.avatarImageUrl]
+  );
+
+  //   if (__DEV__ && error) {
+  //     console.log(JSON.stringify(error, null, 2));
+  //   }
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      disabled={!isME}
+      style={{ position: "relative" }}
+      onPress={showActionSheet}
+    >
+      <Image
+        style={{
+          height: 75,
+          width: 75,
+          borderRadius: 100,
+          borderWidth: 2,
+          borderColor: fullTheme.borderDark,
+        }}
+        source={{
+          uri: profileUrl || "",
+        }}
+      />
+
+      {isME && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: -5,
+            right: -5,
+            backgroundColor: fullTheme.background,
+            borderRadius: 100,
+            height: 30,
+            width: 30,
+            padding: 5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 1,
+            borderColor: fullTheme.borderDark,
+          }}
+        >
+          {isLoading ? (
+            <ActivityIndicator
+              style={{
+                // make it 0.8 the size
+                transform: [{ scale: 0.8 }],
+              }}
+              color={fullTheme.activityIndicator}
+              size={15}
+            />
+          ) : (
+            <FontAwesomeIcon
+              icon={faPen}
+              color={fullTheme.textPrimary}
+              size={15}
+            />
+          )}
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};

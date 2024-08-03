@@ -454,7 +454,7 @@ const ContentSession = () => {
         </View>
       )}
 
-      {isRecording ? (
+      {/* {isRecording ? (
         <View
           style={{
             paddingVertical: 10,
@@ -501,7 +501,7 @@ const ContentSession = () => {
         >
           <Text style={{ color: theme.text, fontSize: 16 }}>Not Recording</Text>
         </View>
-      )}
+      )} */}
 
       <View
         style={{
@@ -519,7 +519,7 @@ const ContentSession = () => {
             height: SIZE,
             borderRadius: 100,
             backgroundColor:
-              theme.theme === "dark" ? colors.purple20 : colors.purple90,
+              theme.theme === "dark" ? colors.lightBlue10 : colors.lightBlue90,
             justifyContent: "center",
             alignItems: "center",
             alignSelf: "center",

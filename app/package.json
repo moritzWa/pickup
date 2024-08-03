@@ -40,6 +40,7 @@
     "@types/lodash": "^4.17.7",
     "@types/react": "~18.2.79",
     "@types/redux-logger": "^3.0.13",
+    "@types/uuid": "^10.0.0",
     "apollo-link-error": "^1.1.13",
     "apollo-upload-client": "^18.0.1",
     "axios": "^1.7.2",
@@ -59,9 +60,12 @@
     "numbro": "^2.5.0",
     "react": "18.2.0",
     "react-native": "0.74.3",
+    "react-native-action-sheet": "^2.2.0",
     "react-native-device-info": "^11.1.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-gesture-handler": "^2.17.1",
+    "react-native-get-random-values": "^1.11.0",
+    "react-native-image-crop-picker": "^0.41.2",
     "react-native-in-app-review": "^4.3.3",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-navigation-bar-color": "^2.0.2",
@@ -77,7 +81,8 @@
     "react-native-version-number": "^0.3.6",
     "react-redux": "^9.1.2",
     "redux-logger": "^3.0.6",
-    "typescript": "~5.3.3"
+    "typescript": "~5.3.3",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
