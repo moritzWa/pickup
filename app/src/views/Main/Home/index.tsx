@@ -280,9 +280,8 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         flexDirection: "column",
         width: "97%",
         borderWidth: 1,
-        borderColor: theme.border,
-        // borderTopColor: theme.border,
-        // borderTopWidth: 1,
+        borderColor: theme.medBackground,
+        // shadow
       }}
       intensity={75} // You can adjust the intensity of the blur
       tint={theme.theme}
@@ -401,7 +400,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           marginBottom: 0,
           marginHorizontal: 5,
           alignSelf: "center",
-          backgroundColor: theme.border,
+          backgroundColor: theme.background,
           borderRadius: 10,
           marginTop: 10,
           overflow: "hidden",
