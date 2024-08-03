@@ -19,7 +19,7 @@ export interface LinkViewResponse {
         readCount?: number;
         users?: (User & { savedDate: string })[];
         comments?: Comment[];
-        highlights?: Highlight[];
+        highlights?: Highlight[][];
     };
 }
 

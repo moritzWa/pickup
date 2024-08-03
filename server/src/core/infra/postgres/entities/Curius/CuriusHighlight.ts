@@ -37,7 +37,7 @@ export class CuriusHighlight {
     @Column()
     createdDate!: Date;
 
-    @Column({ type: "jsonb" })
+    @Column({ type: "jsonb", nullable: true })
     position!: any;
 
     @Column({ nullable: true })
