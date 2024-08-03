@@ -19,6 +19,7 @@ export const Content = objectType({
         t.nonNull.string("audioUrl");
         t.nonNull.string("authorName");
         t.nullable.string("authorImageUrl");
+        t.nullable.string("thumbnailImageUrl");
         t.nonNull.string("title");
         // categories list of string
         t.nonNull.list.nonNull.string("categories");

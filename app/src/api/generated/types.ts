@@ -30,6 +30,7 @@ export type Content = {
   id: Scalars['String']['output'];
   lengthSeconds: Scalars['Int']['output'];
   summary?: Maybe<Scalars['String']['output']>;
+  thumbnailImageUrl?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['Date']['output'];
   websiteUrl: Scalars['String']['output'];
@@ -43,6 +44,7 @@ export type ContentRespondResponse = {
 
 export type ContentSession = {
   __typename?: 'ContentSession';
+  content?: Maybe<Content>;
   contentId: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
   id: Scalars['String']['output'];
@@ -170,7 +172,7 @@ export type MutationSendVerificationArgs = {
 
 
 export type MutationStartContentArgs = {
-  contentId: Scalars['String']['input'];
+  contentId: Scalars['ID']['input'];
 };
 
 

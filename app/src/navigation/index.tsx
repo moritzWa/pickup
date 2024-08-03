@@ -153,13 +153,13 @@ const MainTabNavigation = () => {
         component={Home}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="CarMode"
         options={{
           headerShown: false,
         }}
         component={ContentSession}
-      />
+      /> */}
 
       <Tabs.Screen
         name="Activity"

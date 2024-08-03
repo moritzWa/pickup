@@ -115,6 +115,7 @@ export interface NexusGenFieldTypes {
     id: string; // String!
     lengthSeconds: number; // Int!
     summary: string | null; // String
+    thumbnailImageUrl: string | null; // String
     title: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
     websiteUrl: string; // String!
@@ -269,6 +270,7 @@ export interface NexusGenFieldTypeNames {
     id: 'String'
     lengthSeconds: 'Int'
     summary: 'String'
+    thumbnailImageUrl: 'String'
     title: 'String'
     updatedAt: 'Date'
     websiteUrl: 'String'

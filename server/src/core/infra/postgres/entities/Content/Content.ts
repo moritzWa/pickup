@@ -34,6 +34,13 @@ export class Content {
     context!: string;
 
     @Column({
+        nullable: true,
+        name: "thumbnail_image_url",
+        type: "text",
+    })
+    thumbnailImageUrl!: string | null;
+
+    @Column({
         nullable: false,
         name: "audio_url",
         type: "text",

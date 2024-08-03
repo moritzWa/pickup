@@ -8,7 +8,7 @@ import {
 } from "src/core/logic";
 import OpenAI from "openai";
 import { firebase, openai } from "src/utils";
-import { contentMessageRepo, contentSessionRepo } from "../infra";
+import { contentSessionRepo } from "../infra";
 import { v4 as uuidv4 } from "uuid";
 
 export type RespondData = {
@@ -105,16 +105,16 @@ const respondToContent = async (
 
     const contentSession = contentSessionResponse.value;
 
-    const messagesResponse = await contentMessageRepo.findForContentAndUser({
-        contentId: content.id,
-        userId: user.id,
-    });
+    // const messagesResponse = await contentMessageRepo.findForContentAndUser({
+    //     contentId: content.id,
+    //     userId: user.id,
+    // });
 
-    if (messagesResponse.isFailure()) {
-        return failure(messagesResponse.error);
-    }
+    // if (messagesResponse.isFailure()) {
+    //     return failure(messagesResponse.error);
+    // }
 
-    const messages = messagesResponse.value;
+    const messages = []; // messagesResponse.value;
 
     const transcriptionResponse = await TranscribeService.transcribeAudioUrl(
         audioFileUrl
@@ -136,12 +136,12 @@ const respondToContent = async (
             role: "system",
             content: `Background: You are a tutor who wants to help teach this content.`,
         },
-        ...messages.map(
-            (message): OpenAI.Chat.ChatCompletionMessageParam => ({
-                role: message.isBot ? "assistant" : "user",
-                content: message.message,
-            })
-        ),
+        // ...messages.map(
+        //     (message): OpenAI.Chat.ChatCompletionMessageParam => ({
+        //         role: message.isBot ? "assistant" : "user",
+        //         content: message.message,
+        //     })
+        // ),
         {
             role: "user",
             content: transcription,
@@ -187,29 +187,29 @@ const respondToContent = async (
 
     // save the user message + the bot response
 
-    await contentMessageRepo.create({
-        audioUrl: audioFileUrl,
-        id: uuidv4(),
-        contentId: content.id,
-        contentSessionId: contentSession.id,
-        isBot: false,
-        message: transcription,
-        userId: user.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    });
+    // await contentMessageRepo.create({
+    //     audioUrl: audioFileUrl,
+    //     id: uuidv4(),
+    //     contentId: content.id,
+    //     contentSessionId: contentSession.id,
+    //     isBot: false,
+    //     message: transcription,
+    //     userId: user.id,
+    //     createdAt: new Date(),
+    //     updatedAt: new Date(),
+    // });
 
-    await contentMessageRepo.create({
-        audioUrl: upload.originalUrl,
-        id: uuidv4(),
-        contentId: content.id,
-        contentSessionId: contentSession.id,
-        isBot: true,
-        message: response,
-        userId: user.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    });
+    // await contentMessageRepo.create({
+    //     audioUrl: upload.originalUrl,
+    //     id: uuidv4(),
+    //     contentId: content.id,
+    //     contentSessionId: contentSession.id,
+    //     isBot: true,
+    //     message: response,
+    //     userId: user.id,
+    //     createdAt: new Date(),
+    //     updatedAt: new Date(),
+    // });
 
     return success({
         transcription: transcription,
