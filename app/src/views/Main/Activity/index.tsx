@@ -185,7 +185,7 @@ const Options = () => {
         <SingleFilter
           onPress={onPress}
           isActive={DiscoveryTab.Popular === activeTab}
-          label="Unstated only"
+          label="Unread only"
         />
       </View>
 
