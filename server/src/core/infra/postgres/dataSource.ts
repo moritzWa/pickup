@@ -1,9 +1,9 @@
-import { join } from "path";
 import { merge } from "lodash/fp";
-import { DataSource, DataSourceOptions } from "typeorm";
-import * as entities from "./entities";
+import { join } from "path";
 import { config } from "src/config";
 import { SlowQueryLogger } from "src/utils/typeormLogger";
+import { DataSource, DataSourceOptions } from "typeorm";
+import * as entities from "./entities";
 
 const hasLogging = process.env.TYPEORM_LOGGING === "true";
 
@@ -23,6 +23,12 @@ const ENTITIES = [
     // content
     entities.Content,
     entities.ContentSession,
+    // curius
+    entities.CuriusLink,
+    entities.CuriusUser,
+    entities.CuriusComment,
+    entities.CuriusHighlight,
+    entities.CuriusMention,
 ];
 
 function getMigrationDirectory() {

@@ -26,5 +26,5 @@ export class CuriusUser {
 
     @ManyToOne(() => CuriusLink, (link) => link.users)
     @JoinColumn({ name: "link_id" })
-    link!: CuriusLink;
+    link!: Promise<CuriusLink>;
 }

@@ -1,14 +1,14 @@
-import { makeSchema, fieldAuthorizePlugin } from "nexus";
+import * as GraphQLUpload from "graphql-upload/GraphQLUpload.js";
+import { fieldAuthorizePlugin, makeSchema } from "nexus";
 import * as path from "path";
 import { DateScalar } from "./base";
-import * as GraphQLUpload from "graphql-upload/GraphQLUpload.js";
 
 // resolvers
-import * as schemas from "src/shared/schemas";
-import * as users from "src/modules/users/graphql";
+import * as content from "src/modules/content/graphql";
 import * as courses from "src/modules/courses/graphql";
 import * as lessons from "src/modules/lessons/graphql";
-import * as content from "src/modules/content/graphql";
+import * as users from "src/modules/users/graphql";
+import * as schemas from "src/shared/schemas";
 
 const types = {
     Date: DateScalar,

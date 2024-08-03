@@ -1,4 +1,19 @@
-// scrape links 1-5 using https://curius.app/api/linkview/n and header Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjk1NywiaWF0IjoxNzE1NTUwMzA2LCJleHAiOjE3NDY5OTk5MDZ9.tjIhVHbkf_lc3st0hdLdoUTDfN32VaQPeWYGRKlNGNc
+import { dataSource } from "src/core/infra/postgres";
+import {
+    CuriusComment,
+    CuriusHighlight,
+    CuriusLink,
+    CuriusMention,
+    CuriusUser,
+} from "src/core/infra/postgres/entities/";
+import {
+    curiusCommentRepo,
+    curiusHighlightRepo,
+    curiusLinkRepo,
+    curiusMentionRepo,
+    curiusUserRepo,
+} from "src/modules/curius/infra";
+import { LinkViewResponse } from "./types";
 
 const token =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjk1NywiaWF0IjoxNzE1NTUwMzA2LCJleHAiOjE3NDY5OTk5MDZ9.tjIhVHbkf_lc3st0hdLdoUTDfN32VaQPeWYGRKlNGNc";
@@ -7,10 +22,106 @@ const headers = {
 };
 
 const scrapeCuriusLinks = async () => {
-    for (let i = 1; i <= 5; i++) {
+    await dataSource.initialize();
+
+    const numLinks = 5;
+
+    console.log(`Scraping ${numLinks} Curius Links...`);
+    for (let i = 1; i <= numLinks; i++) {
         const linkViewUrl = `https://curius.app/api/linkview/${i}`;
         const response = await fetch(linkViewUrl, { headers });
-        const data = await response.json();
-        console.log(data);
+        const data: LinkViewResponse = await response.json();
+
+        await saveCuriusData(data);
+    }
+
+    await dataSource.destroy();
+};
+
+const saveCuriusData = async (data: LinkViewResponse) => {
+    const { link } = data;
+
+    // Save CuriusLink
+    const curiusLink = new CuriusLink();
+    Object.assign(curiusLink, {
+        id: link.id,
+        link: link.link,
+        title: link.title,
+        favorite: link.favorite,
+        snippet: link.snippet,
+        metadata: link.metadata,
+        createdDate: link.createdDate ? new Date(link.createdDate) : null,
+        modifiedDate: new Date(link.modifiedDate),
+        lastCrawled: link.lastCrawled ? new Date(link.lastCrawled) : null,
+        userIds: link.userIds,
+        readCount: link.readCount,
+    });
+
+    await curiusLinkRepo.save(curiusLink);
+
+    // Save CuriusUsers
+    for (const user of link.users) {
+        const curiusUser = new CuriusUser();
+        Object.assign(curiusUser, {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            userLink: user.userLink,
+            lastOnline: new Date(user.lastOnline),
+        });
+        curiusUser.link = Promise.resolve(curiusLink);
+        await curiusUserRepo.save(curiusUser);
+    }
+
+    // Save CuriusComments
+    for (const comment of link.comments) {
+        const curiusComment = new CuriusComment();
+        Object.assign(curiusComment, {
+            id: comment.id,
+            userId: comment.userId,
+            parentId: comment.parentId,
+            text: comment.text,
+            createdDate: new Date(comment.createdDate),
+            modifiedDate: new Date(comment.modifiedDate),
+        });
+        curiusComment.link = Promise.resolve(curiusLink);
+        await curiusCommentRepo.save(curiusComment);
+    }
+
+    // Save CuriusHighlights
+    for (const highlight of link.highlights) {
+        const curiusHighlight = new CuriusHighlight();
+        Object.assign(curiusHighlight, {
+            id: highlight.id,
+            userId: highlight.userId,
+            linkId: highlight.linkId,
+            highlight: highlight.highlight,
+            createdDate: new Date(highlight.createdDate),
+            position: highlight.position,
+            verified: highlight.verified,
+            leftContext: highlight.leftContext,
+            rightContext: highlight.rightContext,
+            rawHighlight: highlight.rawHighlight,
+        });
+        curiusHighlight.link = Promise.resolve(curiusLink);
+        await curiusHighlightRepo.save(curiusHighlight);
+
+        // Save CuriusMentions
+        for (const mention of highlight.mentions) {
+            const curiusMention = new CuriusMention();
+            Object.assign(curiusMention, {
+                fromUid: mention.fromUid,
+                toUid: mention.toUid,
+                createdDate: new Date(mention.createdDate),
+            });
+            curiusMention.link = Promise.resolve(curiusLink);
+            curiusMention.user = Promise.resolve({
+                id: mention.user.id,
+            } as CuriusUser);
+            curiusMention.highlight = Promise.resolve(curiusHighlight);
+            await curiusMentionRepo.save(curiusMention);
+        }
     }
 };
+
+scrapeCuriusLinks().catch(console.error);

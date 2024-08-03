@@ -1,11 +1,4 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { CuriusComment } from "./CuriusComment";
 import { CuriusHighlight } from "./CuriusHighlight";
 import { CuriusUser } from "./CuriusUser";
@@ -50,11 +43,11 @@ export class CuriusLink {
     readCount!: number;
 
     @OneToMany(() => CuriusUser, (user) => user.link)
-    users!: CuriusUser[];
+    users!: Promise<CuriusUser[]>;
 
     @OneToMany(() => CuriusComment, (comment) => comment.link)
-    comments!: CuriusComment[];
+    comments!: Promise<CuriusComment[]>;
 
     @OneToMany(() => CuriusHighlight, (highlight) => highlight.link)
-    highlights!: CuriusHighlight[];
+    highlights!: Promise<CuriusHighlight[]>;
 }
