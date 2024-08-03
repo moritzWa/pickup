@@ -1,15 +1,9 @@
-import {
-    Column,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { CuriusLink } from "./CuriusLink";
 
 @Entity({ name: "curius_users" })
 export class CuriusUser {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: number;
 
     @Column()

@@ -1,17 +1,11 @@
-import {
-    Column,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { CuriusHighlight } from "./CuriusHighlight";
 import { CuriusLink } from "./CuriusLink";
 import { CuriusUser } from "./CuriusUser";
 
 @Entity({ name: "curius_mentions" })
 export class CuriusMention {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: number;
 
     @Column()

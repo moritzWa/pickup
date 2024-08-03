@@ -6,20 +6,20 @@ export interface LinkViewResponse {
         link: string;
         title: string;
         favorite: boolean;
-        snippet: string;
+        snippet?: string;
         metadata?: {
             full_text?: string;
             author?: string;
             page_type?: string;
         };
-        createdDate: string | null;
-        modifiedDate: string;
-        lastCrawled: string | null;
-        userIds: number[];
-        readCount: number;
-        users: (User & { savedDate: string })[];
-        comments: Comment[];
-        highlights: Highlight[];
+        createdDate?: string;
+        modifiedDate?: string;
+        lastCrawled?: string;
+        userIds?: number[];
+        readCount?: number;
+        users?: (User & { savedDate: string })[];
+        comments?: Comment[];
+        highlights?: Highlight[][];
     };
 }
 
