@@ -1,11 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { CuriusComment } from "./CuriusComment";
 import { CuriusHighlight } from "./CuriusHighlight";
 import { CuriusUser } from "./CuriusUser";
 
 @Entity({ name: "curius_links" })
 export class CuriusLink {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: number;
 
     @Column()

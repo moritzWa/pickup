@@ -24,13 +24,16 @@ const headers = {
 const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
+    const startLink = 500;
     const numLinks = 5;
 
     console.log(`Scraping ${numLinks} Curius Links...`);
-    for (let i = 1; i <= numLinks; i++) {
+    for (let i = startLink; i <= startLink + numLinks; i++) {
         const linkViewUrl = `https://curius.app/api/linkview/${i}`;
         const response = await fetch(linkViewUrl, { headers });
         const data: LinkViewResponse = await response.json();
+
+        console.log("data in scrapingLinks", JSON.stringify(data, null, 2));
 
         await saveCuriusData(data);
     }
@@ -48,16 +51,15 @@ const saveCuriusData = async (data: LinkViewResponse) => {
         link: link.link,
         title: link.title,
         favorite: link.favorite,
-        snippet: link.snippet,
-        metadata: link.metadata,
+        snippet: link.snippet || null,
+        metadata: link.metadata || null,
         createdDate: link.createdDate ? new Date(link.createdDate) : null,
-        modifiedDate: new Date(link.modifiedDate),
+        modifiedDate: link.modifiedDate ? new Date(link.modifiedDate) : null,
         lastCrawled: link.lastCrawled ? new Date(link.lastCrawled) : null,
-        userIds: link.userIds,
-        readCount: link.readCount,
+        userIds: link.userIds || [],
+        readCount: link.readCount || 0,
     });
 
-    // Technically dont need it's own repo and we could use dataSource.manager.save(CuriusLink, curiusLink);
     await curiusLinkRepo.save(curiusLink);
 
     // Save CuriusUsers

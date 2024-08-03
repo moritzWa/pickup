@@ -5,7 +5,7 @@ import {
     ManyToOne,
     OneToMany,
     OneToOne,
-    PrimaryGeneratedColumn,
+    PrimaryColumn,
 } from "typeorm";
 import { CuriusComment } from "./CuriusComment";
 import { CuriusLink } from "./CuriusLink";
@@ -14,7 +14,7 @@ import { CuriusUser } from "./CuriusUser";
 
 @Entity({ name: "curius_highlights" })
 export class CuriusHighlight {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: number;
 
     @ManyToOne(() => CuriusUser)

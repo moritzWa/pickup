@@ -4,14 +4,14 @@ import {
     JoinColumn,
     ManyToOne,
     OneToMany,
-    PrimaryGeneratedColumn,
+    PrimaryColumn,
 } from "typeorm";
 import { CuriusLink } from "./CuriusLink";
 import { CuriusUser } from "./CuriusUser";
 
 @Entity({ name: "curius_comments" })
 export class CuriusComment {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: number;
 
     @ManyToOne(() => CuriusUser)
