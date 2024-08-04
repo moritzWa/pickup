@@ -86,6 +86,8 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
       style={{
         padding: 15,
         borderRadius: 15,
+        borderColor: theme.border,
+        borderWidth: 1,
         backgroundColor: theme.background,
         // shadow
         shadowColor: "#000",
@@ -93,7 +95,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
           width: 0,
           height: 0,
         },
-        shadowOpacity: 0.08,
+        shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 5,
         marginBottom: 15,
