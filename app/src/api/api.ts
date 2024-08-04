@@ -118,9 +118,13 @@ const GetPaymentMethods = gql`
 
 const GetCurrentContentSession = gql`
   ${BaseContentSessionFields}
+  ${BaseContentFields}
   query GetCurrentContentSession {
     getCurrentContentSession {
       ...BaseContentSessionFields
+      content {
+        ...BaseContentFields
+      }
     }
   }
 `;

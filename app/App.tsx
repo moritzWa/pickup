@@ -133,13 +133,13 @@ function App() {
   };
 
   const _initIntercom = async () => {
-    if (me && me.intercomMobileUserHash) {
-      console.log(
-        `[intercom: logging in ${me.id} with hash ${me.intercomMobileUserHash}]`
-      );
-    } else {
-      console.log("[intercom: logging in as un-indentified]");
-    }
+    // if (me && me.intercomMobileUserHash) {
+    //   // console.log(
+    //   //   `[intercom: logging in ${me.id} with hash ${me.intercomMobileUserHash}]`
+    //   // );
+    // } else {
+    //   console.log("[intercom: logging in as un-indentified]");
+    // }
   };
 
   const _initOneSignal = async () => {
