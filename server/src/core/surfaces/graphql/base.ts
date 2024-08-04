@@ -5,7 +5,7 @@ export const DateScalar = scalarType({
     name: "Date",
     asNexusMethod: "date",
     description: "Date custom scalar type",
-    parseValue(value) {
+    parseValue(value: any) {
         return new Date(value);
     },
     serialize(value) {
