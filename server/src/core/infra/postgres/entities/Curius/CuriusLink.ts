@@ -26,19 +26,14 @@ export class CuriusLink {
         author?: string;
         page_type?: string;
 
-        // postlight/parser stuff
-        content?: string;
-        title?: string;
-        date_published?: string;
-        lead_image_url?: string;
-        dek?: string;
-        next_page_url?: string;
-        domain?: string;
+        // mozilla/readability
+        length?: number;
         excerpt?: string;
-        word_count?: number;
-        direction?: string;
-        total_pages?: number;
-        rendered_pages?: number;
+        byline?: string;
+        dir?: string;
+        siteName?: string;
+        lang?: string;
+        publishedTime?: string;
     };
 
     @Column({ type: "timestamp", nullable: true, name: "created_date" })
