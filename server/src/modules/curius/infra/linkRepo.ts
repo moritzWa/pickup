@@ -7,6 +7,7 @@ import { UnexpectedError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
 
 type LinkResponse = FailureOrSuccess<DefaultErrors, CuriusLink>;
+type LinksResponse = FailureOrSuccess<DefaultErrors, CuriusLink[]>;
 
 export class PostgresCuriusLinkRepository {
     constructor(private model: typeof CuriusLink) {}
@@ -19,6 +20,14 @@ export class PostgresCuriusLinkRepository {
     async save(obj: CuriusLink): Promise<LinkResponse> {
         try {
             return success(await this.repo.save(obj));
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async find(): Promise<LinksResponse> {
+        try {
+            return success(await this.repo.find());
         } catch (err) {
             return failure(new UnexpectedError(err));
         }
