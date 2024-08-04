@@ -243,7 +243,9 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
 
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
+  const activeContent = content[1];
   const color = colors.purple90;
+  const [startContent, { error }] = useMutation(api.content.start);
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -261,6 +263,28 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
     }).start();
   };
 
+  const openContent = async () => {
+    try {
+      const contentId = activeContent?.id;
+
+      const response = await startContent({
+        variables: {
+          contentId: contentId,
+        },
+      });
+
+      navigation.navigate("ContentSession", { contentId, isCarMode: false });
+    } catch (err) {
+      console.log(err);
+      Alert.alert(
+        "Error",
+        "There was an error starting the course. Please try again."
+      );
+    }
+  };
+
+  const bg = theme.theme === "light" ? "#DFDCFB" : "#050129";
+
   return (
     <BlurView
       style={{
@@ -270,7 +294,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         padding: 15,
         paddingHorizontal: 0,
         paddingBottom: 0,
-        backgroundColor: theme.theme === "light" ? "#DFDCFB" : "#050129",
+        backgroundColor: bg,
         display: "flex",
         alignSelf: "center",
         opacity: 0.97,
@@ -294,15 +318,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
       // end={{ x: 1, y: 0 }}
     >
       <TouchableOpacity
-        onPress={() => {
-          // just go to the first content
-          navigation.navigate("CarMode", {
-            contentId: content[0]?.id || "",
-            isCarMode: true,
-          });
-        }}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
+        onPress={openContent}
         style={{
           paddingHorizontal: 10,
           display: "flex",
@@ -315,7 +331,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
       >
         <Image
           source={{
-            uri: "https://firebasestorage.googleapis.com/v0/b/learning-dev-ai.appspot.com/o/uploads%2Fpm.png?alt=media&token=3581d334-5f19-4ecc-a465-f7628b678a50",
+            uri: activeContent.thumbnailImageUrl || "",
           }}
           style={{ width: 40, height: 40, borderRadius: 10 }}
         />
@@ -337,7 +353,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
             }}
             numberOfLines={1}
           >
-            Social game: how to win and influencer
+            {activeContent?.title || ""}
           </Text>
 
           <View
@@ -369,27 +385,34 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           </View>
         </View>
 
-        <Animated.View
-          style={{
-            marginLeft: 15,
-            width: 40,
-            height: 40,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 100,
-            backgroundColor: colors.primary,
-            alignSelf: "center",
-            transform: [{ scale: animation }],
-          }}
+        <TouchableOpacity
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          onPress={() => Alert.alert("pause")}
+          activeOpacity={1}
         >
-          <FontAwesomeIcon
-            icon={faPlay}
-            color={colors.white}
-            size={18}
-            style={{ position: "relative", right: -2 }}
-          />
-        </Animated.View>
+          <Animated.View
+            style={{
+              marginLeft: 15,
+              width: 40,
+              height: 40,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 100,
+              backgroundColor: colors.primary,
+              alignSelf: "center",
+              transform: [{ scale: animation }],
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faPlay}
+              color={colors.white}
+              size={18}
+              style={{ position: "relative", right: -2 }}
+            />
+          </Animated.View>
+        </TouchableOpacity>
       </TouchableOpacity>
 
       {/* make a progress bar */}
@@ -400,7 +423,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           marginBottom: 0,
           marginHorizontal: 5,
           alignSelf: "center",
-          backgroundColor: theme.background,
+          backgroundColor: bg,
           borderRadius: 10,
           marginTop: 10,
           overflow: "hidden",

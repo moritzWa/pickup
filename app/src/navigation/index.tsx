@@ -302,23 +302,21 @@ export const MainNavigationStack = () => {
             component={LessonSession}
           />
 
-          <Stack.Screen
-            name="ContentSession"
-            options={{
-              headerShown: false,
-            }}
-            component={ContentSession}
-          />
-
           {/* MODALS */}
-          {/* <Stack.Group
+          <Stack.Group
             screenOptions={{
               presentation: "modal",
               animation: "default",
             }}
           >
-            
-          </Stack.Group> */}
+            <Stack.Screen
+              name="ContentSession"
+              options={{
+                headerShown: false,
+              }}
+              component={ContentSession}
+            />
+          </Stack.Group>
         </Stack.Navigator>
       </NavigationContainer>
     </View>

@@ -21,6 +21,7 @@ type ButtonProps = {
   style?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
   icon?: JSX.Element;
+  iconPosition?: "left" | "right";
   textProps?: TextProps;
   loading?: boolean;
 } & TouchableOpacityProps;
@@ -30,6 +31,7 @@ const Button = ({
   onPress,
   style,
   icon,
+  iconPosition,
   textProps,
   loading,
   labelStyle,
@@ -57,7 +59,7 @@ const Button = ({
       onPress={_onPress}
       style={[
         {
-          height: 40,
+          height: 45,
           paddingHorizontal: 25,
           borderRadius: 100,
           backgroundColor: theme.header,
@@ -86,6 +88,8 @@ const Button = ({
         />
       ) : (
         <>
+          {iconPosition === "left" ? icon : null}
+
           {typeof label === "string" ? (
             <Text
               {...textProps}
@@ -95,7 +99,7 @@ const Button = ({
                   textAlign: "center",
                   fontFamily: "Raleway-Semibold",
                   width: "100%",
-                  fontSize: IS_IPAD ? 24 : 14,
+                  fontSize: IS_IPAD ? 24 : 16,
                 },
                 textProps?.style,
                 labelStyle,
@@ -107,7 +111,7 @@ const Button = ({
             label
           )}
 
-          {icon}
+          {iconPosition === "right" ? icon : null}
         </>
       )}
     </TouchableOpacity>

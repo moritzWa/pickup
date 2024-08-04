@@ -1084,6 +1084,8 @@ PODS:
   - React-Mapbuffer (0.74.3):
     - glog
     - React-debug
+  - react-native-airplay-button (1.1.0):
+    - React-Core
   - react-native-get-random-values (1.11.0):
     - React-Core
   - react-native-in-app-review (4.3.3):
@@ -1497,6 +1499,7 @@ DEPENDENCIES:
   - React-jsitracing (from `../node_modules/react-native/ReactCommon/hermes/executor/`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - react-native-airplay-button (from `../node_modules/react-native-airplay-button`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
   - react-native-onesignal (from `../node_modules/react-native-onesignal`)
@@ -1654,6 +1657,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-airplay-button:
+    :path: "../node_modules/react-native-airplay-button"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
   react-native-in-app-review:
@@ -1808,6 +1813,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 1aa5681c353b41573b03e0e480a5adf5fa1c56d8
   React-logger: fa92ba4d3a5d39ac450f59be2a3cec7b099f0304
   React-Mapbuffer: 70da5955150a58732e9336a0c7e71cd49e909f25
+  react-native-airplay-button: 90c7ba52402c8e92342003b8a1ff78dfb4357a9e
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-onesignal: 592184d34780d04ebbea2b9844d5b6088606cb30

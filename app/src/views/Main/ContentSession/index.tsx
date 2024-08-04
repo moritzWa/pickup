@@ -1,13 +1,13 @@
 import {
   View,
   Text,
-  Button,
   SafeAreaView,
   TouchableOpacity,
   Alert,
   Animated,
   StyleSheet,
   Dimensions,
+  Image,
 } from "react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as FileSystem from "expo-file-system";
@@ -18,9 +18,14 @@ import {
   InterruptionModeIOS,
 } from "expo-av";
 import { useMe, useTheme } from "src/hooks";
-import { colors } from "src/components";
+import { Button, colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
+  faBackward,
+  faCaretLeft,
+  faCaretRight,
+  faChevronLeft,
+  faForward,
   faIslandTreePalm,
   faPause,
   faPlay,
@@ -47,8 +52,9 @@ import { noop } from "lodash";
 import FastImage from "react-native-fast-image";
 import Slider from "@react-native-community/slider";
 import { useSpeech } from "./useSpeech";
+import Close from "src/components/Close";
 
-const SIZE = 150;
+const SIZE = 125;
 
 const ContentSession = () => {
   const route = useRoute<RouteProp<RootStackParamList, "ContentSession">>();
@@ -428,6 +434,18 @@ const ContentSession = () => {
     };
   }, []);
 
+  const skip = async (seconds: number) => {
+    // skip this number of seconds
+    if (sound) {
+      const currentPosition = await sound.getStatusAsync();
+      if (currentPosition.isLoaded) {
+        const newPosition = currentPosition.positionMillis + seconds * 1000;
+        sound.setPositionAsync(newPosition);
+        setPosition(newPosition);
+      }
+    }
+  };
+
   // get the time we are in the audio and the time left for the audio
   const currentTime = formatTime(position);
 
@@ -437,22 +455,72 @@ const ContentSession = () => {
     <View
       style={{
         flex: 1,
-        paddingTop: insets.top,
-        paddingBottom: isCarMode ? 65 : 0,
       }}
     >
-      {!isCarMode && (
+      <View
+        style={{
+          marginTop: 20,
+          zIndex: 100,
+        }}
+      >
+        <Close />
+      </View>
+
+      <View
+        style={{
+          marginHorizontal: 15,
+          marginRight: 60,
+          // backgroundColor: "blue",
+        }}
+      >
         <View
           style={{
-            position: "absolute",
-            zIndex: 100,
-            top: insets.top + 20,
-            left: 15,
+            flexDirection: "row",
+            alignItems: "flex-start",
+            // backgroundColor: theme.secondaryBackground,
+            // borderRadius: 30,
+            padding: 10,
           }}
         >
-          <Back hideBack onPress={() => navigation.goBack()} />
+          <FastImage
+            source={{
+              uri: content?.thumbnailImageUrl,
+            }}
+            style={{
+              width: 50,
+              marginRight: 10,
+              height: 50,
+              borderRadius: 10,
+            }}
+          />
+
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                color: theme.header,
+                fontSize: 18,
+                fontFamily: "Raleway-Bold",
+              }}
+              numberOfLines={1}
+            >
+              {content?.title}
+            </Text>
+
+            <Text
+              style={{
+                marginTop: 7,
+                color: theme.text,
+                fontSize: 16,
+                fontFamily: "Raleway-Medium",
+              }}
+            >
+              {content?.authorName}
+              {"  "}•{"  "}
+              {estimatedLen} mins
+            </Text>
+          </View>
         </View>
-      )}
+      </View>
 
       {/* {isRecording ? (
         <View
@@ -507,55 +575,97 @@ const ContentSession = () => {
         style={{
           flex: 1,
           display: "flex",
-          alignItems: "flex-start",
+          paddingHorizontal: 25,
+          width: "100%",
+          alignItems: "center",
           justifyContent: "flex-start",
-          marginTop: 225,
+          flexDirection: "row",
         }}
       >
-        {/* make a play button that is colors.pink and uses fontawesome */}
-        <Animated.View
+        <TouchableOpacity
+          activeOpacity={0.9}
           style={{
-            width: SIZE,
-            height: SIZE,
-            borderRadius: 100,
-            backgroundColor:
-              theme.theme === "dark" ? colors.lightBlue10 : colors.lightBlue90,
-            justifyContent: "center",
-            alignItems: "center",
-            alignSelf: "center",
-            transform: [{ scale: animation }],
+            padding: 25,
           }}
+          onPress={() => skip(15)}
         >
-          <TouchableOpacity
+          <Image
             style={{
-              width: SIZE - 15,
-              height: SIZE - 15,
+              width: SIZE / 3,
+              height: SIZE / 3,
+            }}
+            tintColor={theme.text}
+            resizeMode="contain"
+            source={require("src/assets/icons/backward-15.png")}
+          />
+        </TouchableOpacity>
+
+        <View style={{ flex: 1 }}>
+          {/* make a play button that is colors.pink and uses fontawesome */}
+          <Animated.View
+            style={{
+              width: SIZE,
+              height: SIZE,
               borderRadius: 100,
-              backgroundColor: colors.primary,
+              backgroundColor:
+                theme.theme === "dark"
+                  ? colors.lightBlue10
+                  : colors.lightBlue90,
               justifyContent: "center",
               alignItems: "center",
+              alignSelf: "center",
+              transform: [{ scale: animation }],
             }}
-            activeOpacity={1}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            onPress={playOrPause}
           >
-            <FontAwesomeIcon
+            <TouchableOpacity
               style={{
-                position: "relative",
-                right:
-                  soundStatus === "none" || soundStatus === "paused" ? -5 : 0,
+                width: SIZE - 15,
+                height: SIZE - 15,
+                borderRadius: 100,
+                backgroundColor: colors.primary,
+                justifyContent: "center",
+                alignItems: "center",
               }}
-              icon={
-                soundStatus === "none" || soundStatus === "paused"
-                  ? faPlay
-                  : faPause
-              }
-              color={colors.white}
-              size={64}
-            />
-          </TouchableOpacity>
-        </Animated.View>
+              activeOpacity={1}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              onPress={playOrPause}
+            >
+              <FontAwesomeIcon
+                style={{
+                  position: "relative",
+                  right:
+                    soundStatus === "none" || soundStatus === "paused" ? -5 : 0,
+                }}
+                icon={
+                  soundStatus === "none" || soundStatus === "paused"
+                    ? faPlay
+                    : faPause
+                }
+                color={colors.white}
+                size={SIZE / 2}
+              />
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={{
+            padding: 25,
+          }}
+          onPress={() => skip(15)}
+        >
+          <Image
+            tintColor={theme.text}
+            style={{
+              width: SIZE / 3,
+              height: SIZE / 3,
+            }}
+            resizeMode="contain"
+            source={require("src/assets/icons/forward-15.png")}
+          />
+        </TouchableOpacity>
 
         {/* <TouchableOpacity
           activeOpacity={0.8}
@@ -637,7 +747,7 @@ const ContentSession = () => {
         style={[
           styles.container,
           {
-            marginBottom: 30,
+            marginBottom: 50,
           },
         ]}
       >
@@ -652,9 +762,9 @@ const ContentSession = () => {
           maximumValue={duration}
           value={position}
           onSlidingComplete={onSlidingComplete}
-          minimumTrackTintColor={theme.header}
+          minimumTrackTintColor={theme.text}
           maximumTrackTintColor={theme.secondaryBackground2}
-          thumbTintColor={theme.header}
+          thumbTintColor={theme.text}
           // change the size of the thumb
         />
 
@@ -691,58 +801,61 @@ const ContentSession = () => {
 
       <View
         style={{
-          marginHorizontal: 15,
-          marginBottom: insets.bottom + 15,
+          paddingBottom: insets.bottom + 15,
+          display: "flex",
+          flexDirection: "row",
+          paddingHorizontal: 10,
+          // space between button
+          justifyContent: "space-between",
         }}
       >
-        <View
+        <Button
+          label="Previous"
           style={{
-            flexDirection: "row",
-            alignItems: "flex-start",
-            backgroundColor: theme.secondaryBackground,
-            borderRadius: 30,
-            padding: 15,
+            flex: 1,
+            marginRight: 5,
+            backgroundColor: theme.medBackground,
           }}
-        >
-          <FastImage
-            source={{
-              uri: content?.authorImageUrl,
-            }}
-            style={{
-              width: 45,
-              marginRight: 10,
-              height: 45,
-              borderRadius: 40,
-              borderColor: theme.header,
-              borderWidth: 1,
-            }}
-          />
+          onPress={() => {
+            skip(15);
+          }}
+          labelStyle={{
+            color: theme.text,
+          }}
+          iconPosition="left"
+          icon={
+            <FontAwesomeIcon
+              icon={faBackward}
+              color={theme.text}
+              size={18}
+              style={{ position: "absolute", left: 15 }}
+            />
+          }
+        />
 
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                color: theme.header,
-                fontSize: 18,
-                fontFamily: "Raleway-Bold",
-              }}
-            >
-              {content?.title}
-            </Text>
-
-            <Text
-              style={{
-                marginTop: 10,
-                color: theme.text,
-                fontSize: 16,
-                fontFamily: "Raleway-Medium",
-              }}
-            >
-              {content?.authorName}
-              {"  "}•{"  "}
-              {estimatedLen} mins
-            </Text>
-          </View>
-        </View>
+        <Button
+          label="Next"
+          style={{
+            flex: 1,
+            marginLeft: 5,
+            backgroundColor: theme.medBackground,
+          }}
+          onPress={() => {
+            skip(15);
+          }}
+          iconPosition="right"
+          labelStyle={{
+            color: theme.text,
+          }}
+          icon={
+            <FontAwesomeIcon
+              icon={faForward}
+              color={theme.text}
+              size={18}
+              style={{ position: "absolute", right: 15 }}
+            />
+          }
+        />
       </View>
     </View>
   );
