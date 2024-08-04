@@ -4,10 +4,13 @@
 
 // Parser.parse(url).then(result => console.log(result));
 
-import { parse } from "@postlight/parser";
+// import { parse } from "@postlight/parser";
 import { dataSource } from "src/core/infra/postgres";
 import { FailureOrSuccess, Success } from "src/core/logic/FailureOrSuccess";
 import { curiusLinkRepo } from "src/modules/curius/infra";
+
+// FIXME: cannot get @postlight to install for some reason
+const parse = {} as any;
 
 export const isSuccess = <E, V>(
     result: FailureOrSuccess<E, V>
