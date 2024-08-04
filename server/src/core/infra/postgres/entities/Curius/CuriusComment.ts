@@ -36,10 +36,10 @@ export class CuriusComment {
     @Column()
     text!: string;
 
-    @Column()
+    @Column({ name: "created_date" })
     createdDate!: Date;
 
-    @Column()
+    @Column({ name: "modified_date" })
     modifiedDate!: Date;
 
     @ManyToOne(() => CuriusLink, (link) => link.comments, { lazy: true })

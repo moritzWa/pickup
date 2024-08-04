@@ -26,6 +26,6 @@ export class CuriusMention {
     @JoinColumn({ name: "highlight_id" })
     highlight?: Promise<CuriusHighlight>;
 
-    @Column()
+    @Column({ name: "created_date" })
     createdDate!: Date;
 }

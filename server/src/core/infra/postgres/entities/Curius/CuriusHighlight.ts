@@ -34,7 +34,7 @@ export class CuriusHighlight {
     @Column()
     highlight!: string;
 
-    @Column()
+    @Column({ name: "created_date" })
     createdDate!: Date;
 
     @Column({ type: "jsonb", nullable: true })
