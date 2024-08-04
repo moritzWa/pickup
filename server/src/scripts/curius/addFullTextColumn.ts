@@ -1,16 +1,16 @@
 // options:
-// - https://www.npmjs.com/package/@postlight/parser <- current pick
-// - https://www.npmjs.com/package/@mozilla/readability
+// - https://www.npmjs.com/package/@postlight/parser // uses private github dependency only accessible via ssh token
+// - https://www.npmjs.com/package/@mozilla/readability <- current pick
 
 // Parser.parse(url).then(result => console.log(result));
 
 // import { parse } from "@postlight/parser";
+import { Readability } from "@mozilla/readability"; // Import Readability
+import { JSDOM } from "jsdom"; // Import JSDOM
+import { NodeHtmlMarkdown } from "node-html-markdown"; // Import NodeHtmlMarkdown
 import { dataSource } from "src/core/infra/postgres";
 import { FailureOrSuccess, Success } from "src/core/logic/FailureOrSuccess";
 import { curiusLinkRepo } from "src/modules/curius/infra";
-
-// FIXME: cannot get @postlight to install for some reason
-const parse = {} as any;
 
 export const isSuccess = <E, V>(
     result: FailureOrSuccess<E, V>
@@ -36,28 +36,25 @@ const addFullTextToLinks = async () => {
     for (let i = 0; i < links.length; i++) {
         const link = links[i];
         try {
-            const result = await parse(link.link, {
-                contentType: "markdown",
-            });
+            const { window } = new JSDOM(
+                await fetch(link.link).then((res) => res.text())
+            ); // Fetch and create DOM
+            const result = new Readability(window.document).parse(); // Use Readability to parse
 
             link.metadata = {
                 ...link.metadata,
 
-                content: result.content,
-                title: result.title,
-                date_published: result.date_published,
-                lead_image_url: result.lead_image_url,
-                dek: result.dek,
-                next_page_url: result.next_page_url,
-                domain: result.domain,
-                excerpt: result.excerpt,
-                word_count: result.word_count,
-                direction: result.direction,
-                total_pages: result.total_pages,
-                rendered_pages: result.rendered_pages,
+                length: result?.length,
+                excerpt: result?.excerpt,
+                byline: result?.byline,
+                dir: result?.dir,
+                siteName: result?.siteName,
+                lang: result?.lang,
+                publishedTime: result?.publishedTime,
             };
 
-            link.fullText = result.content;
+            link.title = result?.title || link.title;
+            link.fullText = NodeHtmlMarkdown.translate(result?.content || "");
 
             const saveResponse = await curiusLinkRepo.save(link);
             if (isSuccess(saveResponse)) {
