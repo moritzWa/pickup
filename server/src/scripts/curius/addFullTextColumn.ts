@@ -41,12 +41,22 @@ const addFullTextToLinks = async () => {
 
             link.metadata = {
                 ...link.metadata,
-                full_text: result.content,
-                author: result.author,
+
+                content: result.content,
+                title: result.title,
                 date_published: result.date_published,
+                lead_image_url: result.lead_image_url,
+                dek: result.dek,
+                next_page_url: result.next_page_url,
+                domain: result.domain,
                 excerpt: result.excerpt,
                 word_count: result.word_count,
+                direction: result.direction,
+                total_pages: result.total_pages,
+                rendered_pages: result.rendered_pages,
             };
+
+            link.fullText = result.content;
 
             const saveResponse = await curiusLinkRepo.save(link);
             if (isSuccess(saveResponse)) {

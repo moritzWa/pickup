@@ -14,30 +14,11 @@ export class CuriusLink {
     @Column()
     title!: string;
 
-    @Column()
-    favorite!: boolean;
+    @Column({ type: "text", name: "full_text", nullable: true })
+    fullText?: string;
 
     @Column()
     snippet!: string;
-
-    /* 
-
-"title": "Thunder (mascot)",
-  "content": "... <p><b>Thunder</b> is the <a href=\"https://en.wikipedia.org/wiki/Stage_name\">stage name</a> for the...",
-  "author": "Wikipedia Contributors",
-  "date_published": "2016-09-16T20:56:00.000Z",
-  "lead_image_url": null,
-  "dek": null,
-  "next_page_url": null,
-  "url": "https://en.wikipedia.org/wiki/Thunder_(mascot)",
-  "domain": "en.wikipedia.org",
-  "excerpt": "Thunder Thunder is the stage name for the horse who is the official live animal mascot for the Denver Broncos",
-  "word_count": 4677,
-  "direction": "ltr",
-  "total_pages": 1,
-  "rendered_pages": 1
-
-*/
 
     @Column({ type: "jsonb", nullable: true })
     metadata?: {
