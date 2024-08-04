@@ -13,7 +13,7 @@ import React, { useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
-import { api } from "src/api";
+import { api, apolloClient } from "src/api";
 import { Query } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
 import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
@@ -59,6 +59,9 @@ const Home = () => {
 
   const onRefresh = async () => {
     await refetch();
+    apolloClient.refetchQueries({
+      include: [api.content.current],
+    });
   };
 
   return (

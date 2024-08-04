@@ -85,6 +85,12 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   };
 
   const bg = theme.theme === "light" ? "#DFDCFB" : "#050129";
+  const title = activeContent?.content?.title;
+  const thumbnailImageUrl = activeContent?.content?.thumbnailImageUrl;
+  const leftMs =
+    (activeContent?.durationMs ?? 0) - (activeContent?.currentMs ?? 0);
+  const leftMinutes = Math.floor(leftMs / 60000);
+  const percentFinished = activeContent?.percentFinished ?? 0;
 
   if (!activeContent) {
     return null;
@@ -134,12 +140,14 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         }}
         activeOpacity={1}
       >
-        <Image
-          source={{
-            uri: activeContent?.thumbnailImageUrl || "",
-          }}
-          style={{ width: 40, height: 40, borderRadius: 10 }}
-        />
+        {thumbnailImageUrl ? (
+          <Image
+            source={{
+              uri: thumbnailImageUrl,
+            }}
+            style={{ width: 40, height: 40, borderRadius: 10 }}
+          />
+        ) : null}
 
         <View
           style={{
@@ -158,7 +166,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
             }}
             numberOfLines={1}
           >
-            {activeContent?.title || ""}
+            {title || ""}
           </Text>
 
           <View
@@ -185,7 +193,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
               }}
               numberOfLines={1}
             >
-              2min left
+              {leftMinutes}min left
             </Text>
           </View>
         </View>
@@ -239,7 +247,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{
-            width: "30%",
+            width: Math.floor(percentFinished).toString() + "%",
             height: 4,
             borderTopRightRadius: 10,
             borderBottomRightRadius: 10,
