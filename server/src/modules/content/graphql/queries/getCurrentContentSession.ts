@@ -20,7 +20,10 @@ export const getCurrentContentSession = queryField("getCurrentContentSession", {
         }
 
         const contentSession = await contentSessionRepo.findById(
-            user.currentContentSessionId
+            user.currentContentSessionId,
+            {
+                relations: { content: true },
+            }
         );
 
         throwIfError(contentSession);

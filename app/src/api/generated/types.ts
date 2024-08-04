@@ -29,6 +29,7 @@ export type Content = {
   createdAt: Scalars['Date']['output'];
   followUpQuestions: Array<FollowUpQuestion>;
   id: Scalars['String']['output'];
+  lengthMs: Scalars['Int']['output'];
   lengthSeconds: Scalars['Int']['output'];
   sourceImageUrl?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
@@ -49,6 +50,8 @@ export type ContentSession = {
   content?: Maybe<Content>;
   contentId: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
+  currentMs?: Maybe<Scalars['Float']['output']>;
+  durationMs?: Maybe<Scalars['Float']['output']>;
   id: Scalars['String']['output'];
   percentFinished?: Maybe<Scalars['Float']['output']>;
   timestampCursor?: Maybe<Scalars['Float']['output']>;
@@ -142,7 +145,9 @@ export type Mutation = {
   startContent: ContentSession;
   startCourse: Course;
   startLesson: LessonSession;
+  startListening: ContentSession;
   transcribe: TranscribeResponse;
+  updateContentSession: ContentSession;
   updateUser: User;
   verifyPhoneNumber: User;
 };
@@ -195,6 +200,14 @@ export type MutationTranscribeArgs = {
 };
 
 
+export type MutationUpdateContentSessionArgs = {
+  contentSessionId: Scalars['ID']['input'];
+  currentMs?: InputMaybe<Scalars['Int']['input']>;
+  isBookmarked?: InputMaybe<Scalars['Boolean']['input']>;
+  isLiked?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
 export type MutationUpdateUserArgs = {
   avatarImageUrl?: InputMaybe<Scalars['String']['input']>;
   biometricPublicKey?: InputMaybe<Scalars['String']['input']>;
@@ -240,6 +253,7 @@ export type Query = {
   getCourse: Course;
   getCourseLessons: Array<Lesson>;
   getCourses: Array<Course>;
+  getCurrentContentSession?: Maybe<ContentSession>;
   getIntercomMobileToken: Scalars['String']['output'];
   getLesson: Lesson;
   getLessonProgress: LessonProgress;
