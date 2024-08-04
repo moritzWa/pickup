@@ -24,10 +24,34 @@ export class ContentSession {
     // current timestamp
     @Column({
         nullable: true,
-        name: "timestamp_cursor",
+        name: "current_ms",
         type: "numeric",
     })
-    timestampCursor!: number | null;
+    currentMs!: number | null;
+
+    @Column({
+        nullable: true,
+        name: "duration_ms",
+        type: "numeric",
+    })
+    durationMs!: number | null;
+
+    // is bookmarked
+    @Column({
+        nullable: false,
+        name: "is_bookmarked",
+        type: "boolean",
+        default: false,
+    })
+    isBookmarked!: boolean;
+
+    @Column({
+        nullable: false,
+        name: "is_liked",
+        type: "boolean",
+        default: false,
+    })
+    isLiked!: boolean;
 
     @Column({
         nullable: true,

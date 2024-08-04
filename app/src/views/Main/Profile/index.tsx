@@ -445,7 +445,7 @@ const Profile = ({ username }: { username: string | null }) => {
           </View>
         </View>
 
-        <FollowersInfo
+        {/* <FollowersInfo
           containerStyle={{
             alignSelf: "flex-start",
             padding: 5,
@@ -454,7 +454,7 @@ const Profile = ({ username }: { username: string | null }) => {
             paddingTop: 0,
           }}
           username={username ?? null}
-        />
+        /> */}
       </View>
       {isME ? (
         <View

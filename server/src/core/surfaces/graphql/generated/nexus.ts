@@ -124,6 +124,7 @@ export interface NexusGenFieldTypes {
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][]; // [FollowUpQuestion!]!
     id: string; // String!
+    lengthMs: number; // Int!
     lengthSeconds: number; // Int!
     sourceImageUrl: string | null; // String
     summary: string | null; // String
@@ -140,6 +141,8 @@ export interface NexusGenFieldTypes {
     content: NexusGenRootTypes['Content'] | null; // Content
     contentId: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
+    currentMs: number | null; // Float
+    durationMs: number | null; // Float
     id: string; // String!
     percentFinished: number | null; // Float
     timestampCursor: number | null; // Float
@@ -209,7 +212,9 @@ export interface NexusGenFieldTypes {
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startCourse: NexusGenRootTypes['Course']; // Course!
     startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
+    startListening: NexusGenRootTypes['ContentSession']; // ContentSession!
     transcribe: NexusGenRootTypes['TranscribeResponse']; // TranscribeResponse!
+    updateContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
   }
@@ -237,6 +242,7 @@ export interface NexusGenFieldTypes {
     getCourse: NexusGenRootTypes['Course']; // Course!
     getCourseLessons: NexusGenRootTypes['Lesson'][]; // [Lesson!]!
     getCourses: NexusGenRootTypes['Course'][]; // [Course!]!
+    getCurrentContentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     getIntercomMobileToken: string; // String!
     getLesson: NexusGenRootTypes['Lesson']; // Lesson!
     getLessonProgress: NexusGenRootTypes['LessonProgress']; // LessonProgress!
@@ -293,6 +299,7 @@ export interface NexusGenFieldTypeNames {
     createdAt: 'Date'
     followUpQuestions: 'FollowUpQuestion'
     id: 'String'
+    lengthMs: 'Int'
     lengthSeconds: 'Int'
     sourceImageUrl: 'String'
     summary: 'String'
@@ -309,6 +316,8 @@ export interface NexusGenFieldTypeNames {
     content: 'Content'
     contentId: 'String'
     createdAt: 'Date'
+    currentMs: 'Float'
+    durationMs: 'Float'
     id: 'String'
     percentFinished: 'Float'
     timestampCursor: 'Float'
@@ -378,7 +387,9 @@ export interface NexusGenFieldTypeNames {
     startContent: 'ContentSession'
     startCourse: 'Course'
     startLesson: 'LessonSession'
+    startListening: 'ContentSession'
     transcribe: 'TranscribeResponse'
+    updateContentSession: 'ContentSession'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
   }
@@ -406,6 +417,7 @@ export interface NexusGenFieldTypeNames {
     getCourse: 'Course'
     getCourseLessons: 'Lesson'
     getCourses: 'Course'
+    getCurrentContentSession: 'ContentSession'
     getIntercomMobileToken: 'String'
     getLesson: 'Lesson'
     getLessonProgress: 'LessonProgress'
@@ -483,6 +495,12 @@ export interface NexusGenArgTypes {
     transcribe: { // args
       audioFileUrl: string; // String!
       lessonId: string; // ID!
+    }
+    updateContentSession: { // args
+      contentSessionId: string; // ID!
+      currentMs?: number | null; // Int
+      isBookmarked?: boolean | null; // Boolean
+      isLiked?: boolean | null; // Boolean
     }
     updateUser: { // args
       avatarImageUrl?: string | null; // String

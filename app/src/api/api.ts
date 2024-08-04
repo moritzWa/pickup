@@ -116,6 +116,15 @@ const GetPaymentMethods = gql`
   }
 `;
 
+const GetCurrentContentSession = gql`
+  ${BaseContentSessionFields}
+  query GetCurrentContentSession {
+    getCurrentContentSession {
+      ...BaseContentSessionFields
+    }
+  }
+`;
+
 const GetCourses = gql`
   ${BaseCourseFields}
   query GetCourses {
@@ -238,6 +247,7 @@ export const api = {
     paymentMethods: GetPaymentMethods,
   },
   content: {
+    current: GetCurrentContentSession,
     start: StartContent,
     feed: GetContentFeed,
     get: GetContent,

@@ -44,6 +44,9 @@ export const createFullUser = async ({
         }
     >
 > => {
+    // generate a random username of the name + random digit
+    const username = `${name}${Math.floor(Math.random() * 100_000)}`;
+
     // const usernameCheck = await ProfileService.checkValidUsername(
     //     username,
     //     null
@@ -55,6 +58,8 @@ export const createFullUser = async ({
     // create user
     const userResponse = await UserService.create({
         id: uuidv4(),
+        username: username,
+        currentContentSessionId: null,
         hasTwoFactorAuth: false,
         isInfluencer: false,
         authProvider: UserAuthProvider.Firebase,

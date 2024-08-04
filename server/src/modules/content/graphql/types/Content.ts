@@ -25,7 +25,10 @@ export const Content = objectType({
         // categories list of string
         t.nonNull.list.nonNull.string("categories");
         t.nullable.string("summary");
-        t.nonNull.int("lengthSeconds");
+        t.nonNull.int("lengthMs");
+        t.nonNull.int("lengthSeconds", {
+            resolve: (content) => Math.ceil(content.lengthMs / 1000),
+        });
         t.nonNull.string("websiteUrl");
         t.nullable.field("contentSession", {
             type: nullable("ContentSession"),

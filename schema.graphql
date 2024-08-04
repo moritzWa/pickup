@@ -12,6 +12,7 @@ type Content {
   createdAt: Date!
   followUpQuestions: [FollowUpQuestion!]!
   id: String!
+  lengthMs: Int!
   lengthSeconds: Int!
   sourceImageUrl: String
   summary: String
@@ -30,6 +31,8 @@ type ContentSession {
   content: Content
   contentId: String!
   createdAt: Date!
+  currentMs: Float
+  durationMs: Float
   id: String!
   percentFinished: Float
   timestampCursor: Float
@@ -117,7 +120,9 @@ type Mutation {
   startContent(contentId: ID!): ContentSession!
   startCourse(courseId: ID!): Course!
   startLesson(lessonId: String!): LessonSession!
+  startListening: ContentSession!
   transcribe(audioFileUrl: String!, lessonId: ID!): TranscribeResponse!
+  updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean): ContentSession!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
 }
@@ -148,6 +153,7 @@ type Query {
   getCourse(courseId: ID!): Course!
   getCourseLessons(courseId: ID!): [Lesson!]!
   getCourses: [Course!]!
+  getCurrentContentSession: ContentSession
   getIntercomMobileToken(platform: String): String!
   getLesson(lessonId: ID!): Lesson!
   getLessonProgress(lessonId: ID!): LessonProgress!

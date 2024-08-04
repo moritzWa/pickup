@@ -219,7 +219,7 @@ export class PostgresUserRepository {
     }
 
     async create(
-        params: Omit<UserModel, "accounts">,
+        params: Omit<UserModel, "accounts" | "currentContentSession">,
         dbTxn?: EntityManager
     ): Promise<UserResponse> {
         try {

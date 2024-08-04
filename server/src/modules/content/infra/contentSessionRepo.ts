@@ -110,18 +110,24 @@ export class PostgresContentSessionRepository {
         });
     }
 
-    async findById(userId: string): Promise<ContentSessionResponse> {
+    async findById(
+        sessionId: string,
+        opts?: FindOneOptions<ContentSessionModel>
+    ): Promise<ContentSessionResponse> {
         try {
-            const user = await this.repo
-                .createQueryBuilder()
-                .where("id = :userId", { userId })
-                .getOne();
+            const session = await this.repo.findOne({
+                ...opts,
+                where: {
+                    ...opts?.where,
+                    id: sessionId,
+                },
+            });
 
-            if (!user) {
-                return failure(new NotFoundError("ContentSession not found."));
+            if (!session) {
+                return failure(new NotFoundError("Session not found."));
             }
 
-            return success(user);
+            return success(session);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }

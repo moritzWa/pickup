@@ -57,10 +57,10 @@ export class Content {
     // estimated length of the audio
     @Column({
         nullable: false,
-        name: "length_seconds",
+        name: "length_ms",
         type: "int",
     })
-    lengthSeconds!: number;
+    lengthMs!: number;
 
     @Column({
         nullable: false,
