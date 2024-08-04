@@ -29,6 +29,23 @@ export class ContentSession {
     })
     timestampCursor!: number | null;
 
+    // is bookmarked
+    @Column({
+        nullable: false,
+        name: "is_bookmarked",
+        type: "boolean",
+        default: false,
+    })
+    isBookmarked!: boolean;
+
+    @Column({
+        nullable: false,
+        name: "is_liked",
+        type: "boolean",
+        default: false,
+    })
+    isLiked!: boolean;
+
     @Column({
         nullable: true,
         name: "percent_finished",

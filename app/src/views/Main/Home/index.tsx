@@ -331,7 +331,7 @@ const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
       >
         <Image
           source={{
-            uri: activeContent.thumbnailImageUrl || "",
+            uri: activeContent?.thumbnailImageUrl || "",
           }}
           style={{ width: 40, height: 40, borderRadius: 10 }}
         />

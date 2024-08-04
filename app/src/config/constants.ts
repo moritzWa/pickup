@@ -17,8 +17,9 @@ const SEGMENT_WRITE_KEY = __DEV__ ? SEGMENT_DEV_KEY : SEGMENT_PROD_KEY;
 
 const API_URL = __DEV__
   ? "http://localhost:8888"
-  : // ? "https://68c7a93084a8.ngrok.app" // "http://localhost:8888"
-    "https://api.talkpickup.com";
+  : "https://api.talkpickup.com"; // ? "https://68c7a93084a8.ngrok.app" // "http://localhost:8888"
+
+console.log(API_URL);
 
 const ONE_SIGNAL_APP_ID = "42bfa89f-bfc6-472c-ab88-b73491ed37fe";
 

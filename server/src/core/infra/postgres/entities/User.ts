@@ -1,5 +1,14 @@
 import { Maybe } from "src/core/logic";
-import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    Index,
+    ManyToOne,
+    JoinColumn,
+    Relation,
+} from "typeorm";
+import { ContentSession } from "./Content";
 
 export enum UserRole {
     User = "user",
@@ -136,6 +145,15 @@ export class User {
     hasMobile!: boolean;
 
     @Column({
+        nullable: true,
+        type: "boolean",
+        default: false,
+        name: "username",
+    })
+    @Index("users_username_idx")
+    username!: string | null;
+
+    @Column({
         nullable: false,
         type: "boolean",
         default: false,
@@ -179,6 +197,21 @@ export class User {
         default: false,
     })
     isInfluencer!: boolean;
+
+    @Column({
+        nullable: true,
+        name: "current_content_session_id",
+        type: "uuid",
+    })
+    currentContentSessionId!: Maybe<string>;
+
+    @ManyToOne(() => ContentSession, (t) => t.id, {
+        nullable: true,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "current_content_session_id" })
+    currentContentSession!: Maybe<Relation<ContentSession>>;
 
     @Column({
         nullable: false,
