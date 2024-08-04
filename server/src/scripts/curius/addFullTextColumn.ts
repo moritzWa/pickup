@@ -15,8 +15,6 @@ export const isSuccess = <E, V>(
     return result.isSuccess();
 };
 
-console.log("Parser imported:", parse);
-
 const addFullTextToLinks = async () => {
     await dataSource.initialize();
 
