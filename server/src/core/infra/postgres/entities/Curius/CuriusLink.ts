@@ -27,10 +27,10 @@ export class CuriusLink {
         page_type?: string;
     };
 
-    @Column({ type: "timestamp", nullable: true })
+    @Column({ type: "timestamp", nullable: true, name: "created_date" })
     createdDate!: Date | null;
 
-    @Column({ type: "timestamp" })
+    @Column({ type: "timestamp", name: "modified_date" })
     modifiedDate!: Date;
 
     @Column({ type: "timestamp", nullable: true })
