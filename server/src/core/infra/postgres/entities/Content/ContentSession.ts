@@ -24,10 +24,17 @@ export class ContentSession {
     // current timestamp
     @Column({
         nullable: true,
-        name: "timestamp_cursor",
+        name: "current_ms",
         type: "numeric",
     })
-    timestampCursor!: number | null;
+    currentMs!: number | null;
+
+    @Column({
+        nullable: true,
+        name: "duration_ms",
+        type: "numeric",
+    })
+    durationMs!: number | null;
 
     // is bookmarked
     @Column({

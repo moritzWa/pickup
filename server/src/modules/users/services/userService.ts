@@ -26,7 +26,7 @@ const bulkUpdate = async (txnIds: string[], updates: Partial<User>) =>
     pgUserRepo.bulkUpdate(txnIds, updates);
 
 const create = async (
-    params: Omit<User, "accounts" | "number">
+    params: Omit<User, "accounts" | "number" | "currentContentSession">
 ): Promise<CreateUserResponse> => {
     let user: Maybe<User> = null;
 

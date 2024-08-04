@@ -13,25 +13,24 @@ import { v4 as uuidv4 } from "uuid";
 import { courseProgressRepo } from "src/modules/courses/infra";
 import { contentRepo, contentSessionRepo } from "../../infra";
 
-export const startContent = mutationField("startContent", {
+export const startListening = mutationField("startListening", {
     type: nonNull("ContentSession"),
-    args: {
-        contentId: nonNull(idArg()),
-    },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);
 
-        const { contentId } = args;
         const user = ctx.me!;
 
-        const contentResponse = await contentRepo.findById(contentId);
+        // TODO: make this actually find the best thing we can start playing for the person
+        const contentResponse = await contentRepo.findOne({});
 
         throwIfError(contentResponse);
+
+        const content = contentResponse.value;
 
         const existingSessionResponse =
             await contentSessionRepo.findForContentAndUser({
                 userId: user.id,
-                contentId,
+                contentId: content.id,
             });
 
         if (
@@ -40,8 +39,6 @@ export const startContent = mutationField("startContent", {
         ) {
             return existingSessionResponse.value;
         }
-
-        const content = contentResponse.value;
 
         const sessionResponse = await contentSessionRepo.create({
             id: uuidv4(),
@@ -55,8 +52,6 @@ export const startContent = mutationField("startContent", {
             updatedAt: new Date(),
             percentFinished: null,
         });
-
-        console.log(sessionResponse);
 
         throwIfError(sessionResponse);
 
