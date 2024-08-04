@@ -6,20 +6,20 @@ export interface LinkViewResponse {
         link: string;
         title: string;
         favorite: boolean;
-        snippet: string;
+        snippet?: string;
         metadata?: {
             full_text?: string;
             author?: string;
             page_type?: string;
         };
-        createdDate: string | null;
-        modifiedDate: string;
-        lastCrawled: string | null;
-        userIds: number[];
-        readCount: number;
-        users: (User & { savedDate: string })[];
-        comments: Comment[];
-        highlights: FullHighlight[][];
+        createdDate?: string;
+        modifiedDate?: string;
+        lastCrawled?: string;
+        userIds?: number[];
+        readCount?: number;
+        users?: (User & { savedDate: string })[];
+        comments?: Comment[];
+        highlights?: Highlight[][];
     };
 }
 
@@ -41,6 +41,17 @@ export interface Mention {
     createdDate: Date;
 }
 
+export interface Comment {
+    id: number;
+    user: User;
+    userId: number;
+    parentId: number;
+    text: string;
+    createdDate: Date;
+    modifiedDate: Date;
+    replies?: Comment[];
+}
+
 export interface Highlight {
     id: number;
     userId: number;
@@ -52,9 +63,7 @@ export interface Highlight {
     leftContext: string;
     rightContext: string;
     rawHighlight: string;
-}
-
-export interface FullHighlight extends Highlight {
+    // full
     comment: Maybe<Comment>;
     mentions: Mention[];
     user: User;
