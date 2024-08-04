@@ -21,9 +21,11 @@ import { useMe, useTheme } from "src/hooks";
 import { Button, colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
+  faBackward,
   faCaretLeft,
   faCaretRight,
   faChevronLeft,
+  faForward,
   faIslandTreePalm,
   faPause,
   faPlay,
@@ -499,6 +501,7 @@ const ContentSession = () => {
                 fontSize: 18,
                 fontFamily: "Raleway-Bold",
               }}
+              numberOfLines={1}
             >
               {content?.title}
             </Text>
@@ -822,9 +825,9 @@ const ContentSession = () => {
           iconPosition="left"
           icon={
             <FontAwesomeIcon
-              icon={faCaretLeft}
+              icon={faBackward}
               color={theme.text}
-              size={24}
+              size={18}
               style={{ position: "absolute", left: 15 }}
             />
           }
@@ -846,9 +849,9 @@ const ContentSession = () => {
           }}
           icon={
             <FontAwesomeIcon
-              icon={faCaretRight}
+              icon={faForward}
               color={theme.text}
-              size={24}
+              size={18}
               style={{ position: "absolute", right: 15 }}
             />
           }
