@@ -1,14 +1,14 @@
 version: "2"
 
 services:
-  redis:
+  pickup-redis:
     image: redis:latest
-    container_name: redis
+    container_name: pickup-redis
     ports:
       - "6379:6379"
-  postgres:
+  pickup-postgres:
     image: pgvector/pgvector:pg16
-    container_name: postgres
+    container_name: pickup-postgres
     ports:
       - "5432:5432"
     environment:
