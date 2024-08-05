@@ -33,6 +33,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  ContentFeedFilter: "for_you" | "new" | "popular"
   LessonTypeEnum: "game" | "role_play" | "vocabulary"
   UserAuthProviderEnum: "firebase"
 }
@@ -138,12 +139,14 @@ export interface NexusGenFieldTypes {
     transcription: string; // String!
   }
   ContentSession: { // field return type
+    bookmarkedAt: NexusGenScalars['Date'] | null; // Date
     content: NexusGenRootTypes['Content'] | null; // Content
     contentId: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     currentMs: number | null; // Float
     durationMs: number | null; // Float
     id: string; // String!
+    isBookmarked: boolean | null; // Boolean
     percentFinished: number | null; // Float
     timestampCursor: number | null; // Float
     updatedAt: NexusGenScalars['Date']; // Date!
@@ -313,12 +316,14 @@ export interface NexusGenFieldTypeNames {
     transcription: 'String'
   }
   ContentSession: { // field return type name
+    bookmarkedAt: 'Date'
     content: 'Content'
     contentId: 'String'
     createdAt: 'Date'
     currentMs: 'Float'
     durationMs: 'Float'
     id: 'String'
+    isBookmarked: 'Boolean'
     percentFinished: 'Float'
     timestampCursor: 'Float'
     updatedAt: 'Date'
@@ -524,6 +529,7 @@ export interface NexusGenArgTypes {
       contentId: string; // ID!
     }
     getContentFeed: { // args
+      filter?: NexusGenEnums['ContentFeedFilter'] | null; // ContentFeedFilter
       limit?: number | null; // Int
     }
     getContentSession: { // args

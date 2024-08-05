@@ -587,7 +587,7 @@ const ContentSession = () => {
           style={{
             padding: 25,
           }}
-          onPress={() => skip(15)}
+          onPress={() => skip(-15)}
         >
           <Image
             style={{

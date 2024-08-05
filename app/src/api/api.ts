@@ -118,9 +118,13 @@ const GetPaymentMethods = gql`
 
 const GetCurrentContentSession = gql`
   ${BaseContentSessionFields}
+  ${BaseContentFields}
   query GetCurrentContentSession {
     getCurrentContentSession {
       ...BaseContentSessionFields
+      content {
+        ...BaseContentFields
+      }
     }
   }
 `;
@@ -196,6 +200,15 @@ const StartContent = gql`
   }
 `;
 
+const StartListening = gql`
+  ${BaseContentSessionFields}
+  mutation StartListening {
+    startListening {
+      ...BaseContentSessionFields
+    }
+  }
+`;
+
 const GetLessonProgress = gql`
   ${BaseLessonProgressFields}
   query GetLessonProgress($lessonId: ID!) {
@@ -251,6 +264,7 @@ export const api = {
     start: StartContent,
     feed: GetContentFeed,
     get: GetContent,
+    startListening: StartListening,
   },
   courses: {
     start: StartCourse,

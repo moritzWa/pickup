@@ -75,6 +75,26 @@ export class PostgresContentSessionRepository {
         });
     }
 
+    findBookmarks = async (
+        userId: string,
+        options?: FindManyOptions<ContentSessionModel>
+    ): Promise<ContentSessionArrayResponse> => {
+        try {
+            const res = await this.repo.find({
+                ...options,
+                where: {
+                    ...options?.where,
+                    userId,
+                    isBookmarked: true,
+                },
+            });
+
+            return success(res);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
+
     async findOne(
         options: FindOneOptions<ContentSessionModel>
     ): Promise<ContentSessionResponse> {

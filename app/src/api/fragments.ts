@@ -194,6 +194,16 @@ export const BaseContentSessionFields = gql`
   ${BaseContentFields}
   fragment BaseContentSessionFields on ContentSession {
     id
+    timestampCursor
+    currentMs
+    durationMs
+    contentId
+    userId
+    percentFinished
+    isBookmarked
+    bookmarkedAt
+    createdAt
+    updatedAt
     content {
       ...BaseContentFields
     }

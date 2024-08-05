@@ -17,6 +17,8 @@ import { Content } from "./Content";
 @Entity({
     name: "content_sessions",
 })
+@Index("user_bookmarked_at_idx", { synchronize: false })
+@Index("user_last_listened_at_idx", { synchronize: false })
 export class ContentSession {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
@@ -44,6 +46,21 @@ export class ContentSession {
         default: false,
     })
     isBookmarked!: boolean;
+
+    // bookmarked at
+    @Column({
+        nullable: true,
+        name: "bookmarked_at",
+        type: "timestamp",
+    })
+    bookmarkedAt!: Date | null;
+
+    @Column({
+        nullable: true,
+        name: "last_listened_at",
+        type: "timestamp",
+    })
+    lastListenedAt!: Date | null;
 
     @Column({
         nullable: false,

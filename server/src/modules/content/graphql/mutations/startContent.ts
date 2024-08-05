@@ -50,6 +50,8 @@ export const startContent = mutationField("startContent", {
             isLiked: false,
             contentId: content.id,
             userId: user.id,
+            lastListenedAt: new Date(),
+            bookmarkedAt: null,
             currentMs: 0,
             durationMs: content.lengthMs,
             createdAt: new Date(),
