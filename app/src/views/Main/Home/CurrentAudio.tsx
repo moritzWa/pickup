@@ -9,8 +9,8 @@ import {
   Image,
   Animated,
 } from "react-native";
-import React, { useMemo, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useMemo, useRef } from "react";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
@@ -38,15 +38,20 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 
-  const { data: contentData } = useQuery<
+  const { data: contentData, refetch } = useQuery<
     Pick<Query, "getCurrentContentSession">
   >(api.content.current, {});
 
+  const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const color = colors.purple90;
   const [startContent, { error }] = useMutation(api.content.start);
+
+  useEffect(() => {
+    refetch();
+  }, [isFocused]);
 
   const handlePressIn = () => {
     Animated.spring(animation, {

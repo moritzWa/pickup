@@ -9,51 +9,49 @@ import {
   Image,
   Animated,
 } from "react-native";
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
 import { api, apolloClient } from "src/api";
-import { Mutation, Query } from "src/api/generated/types";
+import {
+  ContentFeedFilter,
+  Mutation,
+  Query,
+  QueryGetContentFeedArgs,
+} from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
 import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faArrowRight,
-  faCar,
-  faCarBolt,
-  faHeadphones,
-  faHeadphonesAlt,
-  faPlay,
-} from "@fortawesome/pro-solid-svg-icons";
+import { faPlay } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "./Github";
 import { ContentRow } from "../../../components/Content/ContentRow";
-import { LinearGradient } from "expo-linear-gradient";
-import Header from "src/components/Header";
-import FastImage from "react-native-fast-image";
-import { BlurView } from "expo-blur";
 import { CurrentAudio } from "./CurrentAudio";
-
-const generateImpressionsData = () => {
-  const impressions = [];
-  for (let i = 0; i < 365; i++) {
-    impressions.push({ completed: Math.random() > 0.5 });
-  }
-  return impressions;
-};
-
-const impressionsData = generateImpressionsData();
+import { useDispatch, useSelector } from "react-redux";
+import { getHomeFilter, setHomeFilter } from "src/redux/reducers/globalState";
+import * as Haptics from "expo-haptics";
 
 const Home = () => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
+  const filter = useSelector(getHomeFilter);
 
-  const { data, refetch, error } = useQuery<Pick<Query, "getContentFeed">>(
-    api.content.feed
+  const variables = useMemo(
+    (): QueryGetContentFeedArgs => ({
+      filter: filter,
+      limit: 10,
+    }),
+    [filter]
   );
 
-  const [startCourse] = useMutation(api.courses.start);
+  const { data, refetch, error } = useQuery<Pick<Query, "getContentFeed">>(
+    api.content.feed,
+    {
+      variables,
+      fetchPolicy: "cache-and-network",
+    }
+  );
 
   const content = (data?.getContentFeed ?? []) as BaseContentFields[];
 
@@ -137,9 +135,10 @@ export enum DiscoveryTab {
 
 const Options = () => {
   const theme = useTheme();
-  const activeTab = DiscoveryTab.All;
+  const filter = useSelector(getHomeFilter);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
+  const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
   const [startListening] = useMutation<Pick<Mutation, "startListening">>(
     api.content.startListening
@@ -161,25 +160,10 @@ const Options = () => {
     }).start();
   };
 
-  const onPress = async () => {
-    try {
-      const response = await startListening();
+  const onPress = async (feed: ContentFeedFilter) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      const session = response.data?.startListening;
-
-      if (!session) {
-        return;
-      }
-
-      navigation.navigate("ContentSession", {
-        contentId: session.contentId,
-        isCarMode: false,
-      });
-    } catch (err) {
-      console.log(err);
-
-      Alert.alert("Error", "Failed to start listening");
-    }
+    dispatch(setHomeFilter(feed));
   };
 
   return (
@@ -201,14 +185,14 @@ const Options = () => {
         }}
       >
         <SingleFilter
-          onPress={onPress}
-          isActive={DiscoveryTab.All === activeTab}
+          onPress={() => onPress(ContentFeedFilter.ForYou)}
+          isActive={filter === ContentFeedFilter.ForYou}
           label="For you"
         />
 
         <SingleFilter
-          onPress={onPress}
-          isActive={DiscoveryTab.Popular === activeTab}
+          onPress={() => onPress(ContentFeedFilter.Popular)}
+          isActive={filter === ContentFeedFilter.Popular}
           label="Popular"
         />
       </View>

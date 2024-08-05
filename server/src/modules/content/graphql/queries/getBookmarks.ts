@@ -7,12 +7,13 @@ import { stripe } from "src/utils";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { lessonRepo } from "src/modules/lessons/infra";
 import { contentSessionRepo } from "../../infra";
+import { omit } from "lodash";
 
 export const getBookmarks = queryField("getBookmarks", {
-    type: nonNull(list(nonNull("ContentSession"))),
+    type: nonNull(list(nonNull("Content"))),
     args: {
         limit: nullable(intArg()),
-        page: nullable(idArg()),
+        page: nullable(intArg()),
     },
     resolve: async (_parent, args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);
@@ -31,6 +32,11 @@ export const getBookmarks = queryField("getBookmarks", {
 
         throwIfError(contentSessionsResponse);
 
-        return contentSessionsResponse.value;
+        const content = contentSessionsResponse.value.map((cs) => ({
+            ...cs.content,
+            session: omit(cs, ["content"]),
+        }));
+
+        return content;
     },
 });
