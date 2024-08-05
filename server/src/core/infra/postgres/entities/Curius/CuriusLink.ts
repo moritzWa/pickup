@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { CuriusComment } from "./CuriusComment";
 import { CuriusHighlight } from "./CuriusHighlight";
+import { CuriusLinkChunk } from "./CuriusLinkChunk";
 import { CuriusUser } from "./CuriusUser";
 
 @Entity({ name: "curius_links" })
@@ -17,8 +18,8 @@ export class CuriusLink {
     @Column({ type: "text", name: "full_text", nullable: true })
     fullText?: string;
 
-    @Column("text")
-    embedding!: string; // actually VECTOR(256). vector type not supported: https://github.com/typeorm/typeorm/issues/10056
+    @OneToMany(() => CuriusLinkChunk, (chunk) => chunk.link, { lazy: true })
+    chunks!: Promise<CuriusLinkChunk[]>;
 
     @Column()
     snippet!: string;

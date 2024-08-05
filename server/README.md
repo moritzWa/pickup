@@ -52,8 +52,13 @@ Acquire the .env files for server and frontend copy them into the server and web
 
 ```console
 npm run install:all
-npm run migrate:generate ./src/migrations/account-sub-types
 npm run migrate:run
+```
+
+If you make a change to the schema you can create a new migration with:
+
+```console
+npm run migrate:generate ./src/migrations/account-sub-types
 ```
 
 in separate terminals run

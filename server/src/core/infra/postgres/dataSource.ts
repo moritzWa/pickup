@@ -25,6 +25,7 @@ const ENTITIES = [
     entities.ContentSession,
     // curius
     entities.CuriusLink,
+    entities.CuriusLinkChunk,
     entities.CuriusUser,
     entities.CuriusComment,
     entities.CuriusHighlight,
