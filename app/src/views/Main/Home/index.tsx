@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
 import { api, apolloClient } from "src/api";
-import { Query } from "src/api/generated/types";
+import { Mutation, Query } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
 import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
@@ -140,6 +140,11 @@ const Options = () => {
   const activeTab = DiscoveryTab.All;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
+  const navigation = useNavigation<NavigationProps>();
+  const [startListening] = useMutation<Pick<Mutation, "startListening">>(
+    api.content.startListening
+  );
+
   const onPressIn = () => {
     Animated.spring(animation, {
       toValue: 0.9, // Scale down to 90%
@@ -156,8 +161,25 @@ const Options = () => {
     }).start();
   };
 
-  const onPress = () => {
-    // TODO:
+  const onPress = async () => {
+    try {
+      const response = await startListening();
+
+      const session = response.data?.startListening;
+
+      if (!session) {
+        return;
+      }
+
+      navigation.navigate("ContentSession", {
+        contentId: session.contentId,
+        isCarMode: false,
+      });
+    } catch (err) {
+      console.log(err);
+
+      Alert.alert("Error", "Failed to start listening");
+    }
   };
 
   return (

@@ -21,11 +21,13 @@ export const startListening = mutationField("startListening", {
         const user = ctx.me!;
 
         // TODO: make this actually find the best thing we can start playing for the person
-        const contentResponse = await contentRepo.findOne({});
+        const contentResponse = await contentRepo.find({
+            take: 1,
+        });
 
         throwIfError(contentResponse);
 
-        const content = contentResponse.value;
+        const content = contentResponse.value[0];
 
         const existingSessionResponse =
             await contentSessionRepo.findForContentAndUser({
