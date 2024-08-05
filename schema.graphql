@@ -22,18 +22,26 @@ type Content {
   websiteUrl: String!
 }
 
+enum ContentFeedFilter {
+  for_you
+  new
+  popular
+}
+
 type ContentRespondResponse {
   responseAudioUrl: String!
   transcription: String!
 }
 
 type ContentSession {
+  bookmarkedAt: Date
   content: Content
   contentId: String!
   createdAt: Date!
   currentMs: Float
   durationMs: Float
   id: String!
+  isBookmarked: Boolean
   percentFinished: Float
   timestampCursor: Float
   updatedAt: Date!
@@ -148,7 +156,7 @@ type Query {
   checkCode(referralCode: String!): Boolean!
   getActivity: [ContentSession!]!
   getContent(contentId: ID!): Content!
-  getContentFeed(limit: Int): [Content!]!
+  getContentFeed(filter: ContentFeedFilter, limit: Int): [Content!]!
   getContentSession(contentId: ID!): ContentSession!
   getCourse(courseId: ID!): Course!
   getCourseLessons(courseId: ID!): [Lesson!]!

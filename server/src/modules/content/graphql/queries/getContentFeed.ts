@@ -1,4 +1,12 @@
-import { idArg, intArg, list, nonNull, nullable, queryField } from "nexus";
+import {
+    enumType,
+    idArg,
+    intArg,
+    list,
+    nonNull,
+    nullable,
+    queryField,
+} from "nexus";
 import {
     Context,
     throwIfNotAuthenticated,
@@ -10,10 +18,16 @@ import { contentRepo, contentSessionRepo } from "../../infra";
 import { In } from "typeorm";
 import { keyBy } from "lodash";
 
+export const ContentFeedFilter = enumType({
+    name: "ContentFeedFilter",
+    members: ["popular", "for_you", "new"],
+});
+
 export const getContentFeed = queryField("getContentFeed", {
     type: nonNull(list(nonNull("Content"))),
     args: {
         limit: nullable(intArg()),
+        filter: nullable("ContentFeedFilter"),
     },
     resolve: async (_parent, args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);

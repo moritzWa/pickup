@@ -60,6 +60,9 @@ export const updateContentSession = mutationField("updateContentSession", {
                 isLiked: args.isLiked ?? contentSession.isLiked,
                 currentMs: args.currentMs ?? contentSession.currentMs,
                 percentFinished: percentFinished,
+                bookmarkedAt: args.isBookmarked
+                    ? new Date()
+                    : contentSession.bookmarkedAt,
                 updatedAt: new Date(),
             }
         );

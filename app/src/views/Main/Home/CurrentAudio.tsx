@@ -90,7 +90,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const leftMs =
     (activeContent?.durationMs ?? 0) - (activeContent?.currentMs ?? 0);
   const leftMinutes = Math.floor(leftMs / 60000);
-  const percentFinished = activeContent?.percentFinished ?? 0;
+  const percentFinished = Math.max(activeContent?.percentFinished ?? 0, 5);
 
   if (!activeContent) {
     return null;

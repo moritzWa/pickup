@@ -18,6 +18,8 @@ export const ContentSession = objectType({
         t.nonNull.string("contentId");
         t.nonNull.string("userId");
         t.nullable.float("percentFinished");
+        t.nullable.boolean("isBookmarked");
+        t.nullable.date("bookmarkedAt");
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
         t.field("content", {
