@@ -39,6 +39,10 @@ export const startContent = mutationField("startContent", {
             existingSessionResponse.isSuccess() &&
             existingSessionResponse.value
         ) {
+            await pgUserRepo.update(user.id, {
+                currentContentSessionId: existingSessionResponse.value.id,
+            });
+
             return existingSessionResponse.value;
         }
 
