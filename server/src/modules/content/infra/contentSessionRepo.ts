@@ -95,6 +95,26 @@ export class PostgresContentSessionRepository {
         }
     };
 
+    findLikes = async (
+        userId: string,
+        options?: FindManyOptions<ContentSessionModel>
+    ): Promise<ContentSessionArrayResponse> => {
+        try {
+            const res = await this.repo.find({
+                ...options,
+                where: {
+                    ...options?.where,
+                    userId,
+                    isLiked: true,
+                },
+            });
+
+            return success(res);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
+
     async findOne(
         options: FindOneOptions<ContentSessionModel>
     ): Promise<ContentSessionResponse> {

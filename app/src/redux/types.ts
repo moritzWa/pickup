@@ -1,4 +1,5 @@
 import { Audio } from "expo-av";
+import { ActivityFilter, ContentFeedFilter } from "src/api/generated/types";
 import { Maybe } from "src/core";
 
 export enum WalletProvider {
@@ -22,14 +23,15 @@ export type AudioState = {
   durationMs: number | null;
 };
 
+export enum ProfileTabFilter {
+  All = "all",
+  Bookmarks = "bookmarks",
+}
+
 export type GlobalState = {
-  isRecalculating: boolean;
-  recalculateFinishEta: Maybe<Date>;
-  isImporting: boolean;
-  isGlobalRuleMode: boolean;
-  hasBanner: boolean;
-  showConfetti: boolean;
-  isIncognito: boolean;
+  homeFilter: ContentFeedFilter;
+  profileFilter: ProfileTabFilter;
+  activityFilter: ActivityFilter;
   theme: "light" | "dark";
 };
 

@@ -1,64 +1,58 @@
 import { createAction, createReducer, createSelector } from "@reduxjs/toolkit";
 import { Maybe } from "src/core";
-import { GlobalState, ReduxState } from "../types";
+import { GlobalState, ProfileTabFilter, ReduxState } from "../types";
+import { ActivityFilter, ContentFeedFilter } from "src/api/generated/types";
 
 // initial state
 const initialState: GlobalState = {
-  isRecalculating: false,
-  recalculateFinishEta: null,
-  isImporting: false,
-  isGlobalRuleMode: false,
-  hasBanner: false,
-  showConfetti: false,
+  homeFilter: ContentFeedFilter.ForYou,
+  profileFilter: ProfileTabFilter.All,
+  activityFilter: ActivityFilter.New,
   theme: "dark",
-  isIncognito: false,
 };
 
 // actions
-export const setGlobalRuleMode = createAction<boolean>(
-  "SET_GLOBAL_STATE_RULE_MODE"
+export const setHomeFilter = createAction<ContentFeedFilter>("SET_HOME_FILTER");
+export const setProfileFilter =
+  createAction<ProfileTabFilter>("SET_PROFILE_FILTER");
+export const setActivityFilter = createAction<ActivityFilter>(
+  "SET_ACTIVITY_FILTER"
 );
-
-export const setHasBanner = createAction<boolean>("SET_HAS_BANNER");
-export const setIsIncognito = createAction<boolean>("SET_IS_INCOGNITO");
-
-export const setShowConfetti = createAction<boolean>("SET_SHOW_CONFETTI");
-
 export const setTheme = createAction<"light" | "dark">("SET_THEME");
 
 // reducer
 export const globalStateReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(setGlobalRuleMode, (state, action) => {
-      state.isGlobalRuleMode = action.payload;
+    .addCase(setHomeFilter, (state, action) => {
+      state.homeFilter = action.payload;
     })
-    .addCase(setHasBanner, (state, action) => {
-      state.hasBanner = action.payload;
+    .addCase(setProfileFilter, (state, action) => {
+      state.profileFilter = action.payload;
     })
-    .addCase(setShowConfetti, (state, action) => {
-      state.showConfetti = action.payload;
+    .addCase(setActivityFilter, (state, action) => {
+      state.activityFilter = action.payload;
     })
     .addCase(setTheme, (state, action) => {
       state.theme = action.payload;
-    })
-    .addCase(setIsIncognito, (state, action) => {
-      state.isIncognito = action.payload;
     });
 });
 
-export const getIsGlobalRuleMode = (state: ReduxState): boolean =>
-  state.global.isGlobalRuleMode;
+export const getHomeFilter = createSelector(
+  (state: ReduxState) => state.global.homeFilter,
+  (homeFilter) => homeFilter
+);
 
-export const getHasBanner = (state: ReduxState): boolean =>
-  state.global.hasBanner;
+export const getProfileFilter = createSelector(
+  (state: ReduxState) => state.global.profileFilter,
+  (profileFilter) => profileFilter
+);
 
-export const getShowConfetti = (state: ReduxState): boolean =>
-  state.global.showConfetti;
+export const getActivityFilter = createSelector(
+  (state: ReduxState) => state.global.activityFilter,
+  (activityFilter) => activityFilter
+);
 
 export const getTheme = createSelector(
   (state: ReduxState) => state.global.theme,
   (theme) => theme
 );
-
-export const getIsIncognito = (state: ReduxState): boolean =>
-  state.global.isIncognito;

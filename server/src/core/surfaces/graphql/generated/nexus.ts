@@ -33,6 +33,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  ActivityFilter: "new" | "unread"
   ContentFeedFilter: "for_you" | "new" | "popular"
   LessonTypeEnum: "game" | "role_play" | "vocabulary"
   UserAuthProviderEnum: "firebase"
@@ -238,7 +239,8 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     checkCode: boolean; // Boolean!
-    getActivity: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
+    getActivity: NexusGenRootTypes['Content'][]; // [Content!]!
+    getBookmarks: NexusGenRootTypes['Content'][]; // [Content!]!
     getContent: NexusGenRootTypes['Content']; // Content!
     getContentFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
@@ -250,6 +252,7 @@ export interface NexusGenFieldTypes {
     getLesson: NexusGenRootTypes['Lesson']; // Lesson!
     getLessonProgress: NexusGenRootTypes['LessonProgress']; // LessonProgress!
     getLessonSessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
+    getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
     getProfile: NexusGenRootTypes['Profile']; // Profile!
@@ -415,7 +418,8 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     checkCode: 'Boolean'
-    getActivity: 'ContentSession'
+    getActivity: 'Content'
+    getBookmarks: 'Content'
     getContent: 'Content'
     getContentFeed: 'Content'
     getContentSession: 'ContentSession'
@@ -427,6 +431,7 @@ export interface NexusGenFieldTypeNames {
     getLesson: 'Lesson'
     getLessonProgress: 'LessonProgress'
     getLessonSessions: 'LessonSession'
+    getLikes: 'ContentSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
     getPaymentMethods: 'PaymentMethod'
     getProfile: 'Profile'
@@ -525,6 +530,13 @@ export interface NexusGenArgTypes {
     checkCode: { // args
       referralCode: string; // String!
     }
+    getActivity: { // args
+      filter?: NexusGenEnums['ActivityFilter'] | null; // ActivityFilter
+    }
+    getBookmarks: { // args
+      limit?: number | null; // Int
+      page?: number | null; // Int
+    }
     getContent: { // args
       contentId: string; // ID!
     }
@@ -552,6 +564,10 @@ export interface NexusGenArgTypes {
     }
     getLessonSessions: { // args
       lessonId: string; // ID!
+    }
+    getLikes: { // args
+      limit?: number | null; // Int
+      page?: number | null; // Int
     }
     getProfile: { // args
       userId?: string | null; // ID

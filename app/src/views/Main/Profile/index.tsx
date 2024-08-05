@@ -63,6 +63,12 @@ import { v4 as uuidv4 } from "uuid";
 import { TabBar } from "src/components/tabs";
 import { BaseContentFields } from "src/api/fragments";
 import { ContentRow } from "src/components/Content/ContentRow";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getProfileFilter,
+  setProfileFilter,
+} from "src/redux/reducers/globalState";
+import { ProfileTabFilter } from "src/redux/types";
 
 export const UserProfile = () => {
   const { me } = useMe();
@@ -95,15 +101,31 @@ export const UserProfile = () => {
     },
   });
 
+  const profileFilter = useSelector(getProfileFilter);
   const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
   const { data, error } = useQuery<Pick<Query, "getContentFeed">>(
     api.content.feed
   );
 
+  const { data: bookmarksData } = useQuery<Pick<Query, "getBookmarks">>(
+    api.content.bookmarks
+  );
+
   const [startCourse] = useMutation(api.courses.start);
 
-  const content = (data?.getContentFeed ?? []) as BaseContentFields[];
+  const dispatch = useDispatch();
+
+  const bookmarks = (bookmarksData?.getBookmarks ?? []) as BaseContentFields[];
+  const feed = (data?.getContentFeed ?? []) as BaseContentFields[];
+
+  const content = useMemo(() => {
+    if (profileFilter === ProfileTabFilter.Bookmarks) {
+      return bookmarks;
+    }
+
+    return feed;
+  }, [bookmarks, feed, profileFilter]);
 
   const _onRefresh = async () => {
     setIsRefreshing(true);
@@ -139,7 +161,11 @@ export const UserProfile = () => {
                 fontFamily: "Railway-Regular",
               }}
             >
-              No content
+              No{" "}
+              {profileFilter === ProfileTabFilter.Bookmarks
+                ? "bookmarks"
+                : "content"}{" "}
+              found.
             </Text>
           </View>
         ) : (
@@ -154,25 +180,25 @@ export const UserProfile = () => {
     [textPrimary, content]
   );
 
+  const _onPressTab = async (tab: ProfileTabFilter) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    dispatch(setProfileFilter(tab));
+  };
+
   const tabs = useMemo(() => {
     return [
       {
         name: "All",
-        onClick: noop,
-        isActive: true,
+        onClick: () => _onPressTab(ProfileTabFilter.All),
+        isActive: profileFilter === ProfileTabFilter.All,
       },
       {
         name: "Bookmarks",
-        onClick: () => Alert.alert("Coming soon 👀"),
-        isActive: false,
-      },
-      {
-        name: "Liked",
-        onClick: () => Alert.alert("Coming soon 👀"),
-        isActive: false,
+        onClick: () => _onPressTab(ProfileTabFilter.Bookmarks),
+        isActive: profileFilter === ProfileTabFilter.Bookmarks,
       },
     ];
-  }, []);
+  }, [profileFilter]);
 
   const sections = useMemo(
     () => [
@@ -192,7 +218,7 @@ export const UserProfile = () => {
       },
       contentSection,
     ],
-    [contentSection, isME, profile, username, secondaryBackground]
+    [contentSection, isME, profile, username, secondaryBackground, tabs]
   );
 
   //   if (__DEV__ && error) {
@@ -825,18 +851,43 @@ const ProfilePicture = ({ profile }: { profile?: ProfileT | null }) => {
       style={{ position: "relative" }}
       onPress={showActionSheet}
     >
-      <Image
-        style={{
-          height: 75,
-          width: 75,
-          borderRadius: 100,
-          borderWidth: 2,
-          borderColor: fullTheme.borderDark,
-        }}
-        source={{
-          uri: profileUrl || "",
-        }}
-      />
+      {profileUrl ? (
+        <Image
+          style={{
+            height: 75,
+            width: 75,
+            borderRadius: 100,
+            borderWidth: 2,
+            borderColor: fullTheme.borderDark,
+          }}
+          source={{
+            uri: profileUrl || "",
+          }}
+        />
+      ) : (
+        <View
+          style={{
+            height: 75,
+            width: 75,
+            borderRadius: 100,
+            backgroundColor: fullTheme.header,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 28,
+              color: fullTheme.background,
+              fontFamily: "Raleway-Bold",
+            }}
+          >
+            {initials}
+          </Text>
+        </View>
+      )}
 
       {isME && (
         <View
