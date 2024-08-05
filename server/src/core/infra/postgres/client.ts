@@ -1,15 +1,14 @@
-import { config } from "src/config";
 import { last } from "lodash/fp";
-import { makeDataSource } from "./dataSource";
-import { DataSource, DataSourceOptions, EntityManager } from "typeorm";
+import { config } from "src/config";
 import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
-    Maybe,
     success,
     UnexpectedError,
 } from "src/core/logic";
+import { DataSource, DataSourceOptions, EntityManager } from "typeorm";
+import { makeDataSource } from "./dataSource";
 
 export const postgresUrl = config.postgres.uri;
 
@@ -26,6 +25,28 @@ export const connect = async (
     );
 
     dataSource = await makeDataSource(params).initialize();
+
+    // Check if pgvector is installed and create it if not
+    try {
+        await dataSource.query("SELECT 'vector'::regtype");
+        console.log("pgvector is already installed");
+    } catch (error) {
+        console.log("pgvector is not installed, creating extension...");
+        await dataSource.query("CREATE EXTENSION IF NOT EXISTS vector");
+        console.log("PG Vector extension enabled successfully.");
+    }
+
+    // Modify the curius_links table to add the embedding column if it doesn't exist
+    // await dataSource.query(`
+    //     DO $$
+    //     BEGIN
+    //         IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    //                        WHERE table_name='curius_links' AND column_name='embedding') THEN
+    //             ALTER TABLE curius_links
+    //             ADD COLUMN embedding VECTOR(256);
+    //         END IF;
+    //     END $$;
+    // `);
 
     return dataSource;
 };

@@ -28,16 +28,23 @@ Start Docker locally
 
 go to deployments/learning and edit docker-compose.yml
 
-add the following to the zookeeper section
+Pull the [pgvector PostgreSQL Docker image](https://hub.docker.com/r/pgvector/pgvector):
 
-```json
-environment:
-  ZOOKEEPER_CLIENT_PORT: 2181
+```
+docker pull pgvector/pgvector:pg16
 ```
 
-run
+run:
 
+```
 docker compose up
+```
+
+If you want to kill the postgres container
+
+```
+docker compose down
+```
 
 go back to the server directory and run the migrations now that postgres is up (in the docker container)
 

@@ -17,6 +17,9 @@ export class CuriusLink {
     @Column({ type: "text", name: "full_text", nullable: true })
     fullText?: string;
 
+    @Column("text")
+    embedding!: string; // actually VECTOR(256). vector type not supported: https://github.com/typeorm/typeorm/issues/10056
+
     @Column()
     snippet!: string;
 
