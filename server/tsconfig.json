@@ -17,7 +17,7 @@
         "baseUrl": "./",
         "noImplicitThis": false,
         "strict": true,
-        "typeRoots": ["node_modules/@types"],
+        "typeRoots": ["node_modules/@types", "node_modules/@types/ioredis"],
         "allowSyntheticDefaultImports": false,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
