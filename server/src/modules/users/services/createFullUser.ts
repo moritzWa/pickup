@@ -45,7 +45,10 @@ export const createFullUser = async ({
     >
 > => {
     // generate a random username of the name + random digit
-    const username = `${name}${Math.floor(Math.random() * 100_000)}`;
+    const username = `${name}${Math.floor(Math.random() * 100_000)}`
+        .toLowerCase()
+        .trim()
+        .replace(/\s/g, "");
 
     // const usernameCheck = await ProfileService.checkValidUsername(
     //     username,

@@ -146,8 +146,7 @@ export class User {
 
     @Column({
         nullable: true,
-        type: "boolean",
-        default: false,
+        type: "text",
         name: "username",
     })
     @Index("users_username_idx")
