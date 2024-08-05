@@ -6,7 +6,7 @@ import {
     OneToMany,
     PrimaryColumn,
 } from "typeorm";
-import { CuriusLink } from "./CuriusLink";
+import type { CuriusLink } from "./CuriusLink";
 import { CuriusUser } from "./CuriusUser";
 
 @Entity({ name: "curius_comments" })
@@ -42,7 +42,7 @@ export class CuriusComment {
     @Column({ name: "modified_date" })
     modifiedDate!: Date;
 
-    @ManyToOne(() => CuriusLink, (link) => link.comments, { lazy: true })
+    @ManyToOne("CuriusLink", "comments", { lazy: true })
     @JoinColumn({ name: "link_id" })
     link!: Promise<CuriusLink>;
 }

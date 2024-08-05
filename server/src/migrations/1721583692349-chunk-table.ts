@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddEmbeddingColumn1722801464849 implements MigrationInterface {
-    name = "AddEmbeddingColumn1722801464849";
+    name = "AddEmbeddingColumn1722801464850";
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`

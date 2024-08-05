@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { CuriusLink } from "./CuriusLink";
+import type { CuriusLink } from "./CuriusLink";
 
 @Entity({ name: "curius_users" })
 export class CuriusUser {
@@ -18,7 +18,7 @@ export class CuriusUser {
     @Column()
     lastOnline!: Date;
 
-    @ManyToOne(() => CuriusLink, (link) => link.users)
+    @ManyToOne("CuriusLink", "users")
     @JoinColumn({ name: "link_id" })
     link!: Promise<CuriusLink>;
 }

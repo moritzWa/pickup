@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { CuriusComment } from "./CuriusComment";
+import type { CuriusComment } from "./CuriusComment";
 import { CuriusHighlight } from "./CuriusHighlight";
 import { CuriusLinkChunk } from "./CuriusLinkChunk";
 import { CuriusUser } from "./CuriusUser";
@@ -58,7 +58,7 @@ export class CuriusLink {
     @OneToMany(() => CuriusUser, (user) => user.link, { lazy: true })
     users!: Promise<CuriusUser[]>;
 
-    @OneToMany(() => CuriusComment, (comment) => comment.link, { lazy: true })
+    @OneToMany("CuriusComment", "link", { lazy: true })
     comments!: Promise<CuriusComment[]>;
 
     @OneToMany(() => CuriusHighlight, (highlight) => highlight.link, {
