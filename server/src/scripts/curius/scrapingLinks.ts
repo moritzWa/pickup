@@ -24,8 +24,8 @@ const headers = {
 const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
-    const startLink = 536;
-    const numLinks = 50;
+    const startLink = 580;
+    const numLinks = 20;
     // latest as of 2024-08-03 is 127456
 
     console.log(`Scraping ${numLinks} Curius Links...`);

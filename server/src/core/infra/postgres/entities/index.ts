@@ -1,12 +1,12 @@
-export { User } from "./User";
-export { Notification } from "./Notification";
 export { Character } from "./Character";
-export { Participant } from "./Participant";
 export { Message } from "./Message";
+export { Notification } from "./Notification";
+export { Participant } from "./Participant";
+export { User } from "./User";
 // lessons
-export { LessonSession } from "./Lesson/LessonSession";
-export { LessonProgress } from "./Lesson/LessonProgress";
 export { Lesson } from "./Lesson/Lesson";
+export { LessonProgress } from "./Lesson/LessonProgress";
+export { LessonSession } from "./Lesson/LessonSession";
 // courses
 export { Course } from "./Course/Course";
 export { CourseProgress } from "./Course/CourseProgress";
@@ -14,11 +14,12 @@ export { CourseProgress } from "./Course/CourseProgress";
 export { Content } from "./Content/Content";
 export { ContentSession } from "./Content/ContentSession";
 // curius
-export { CuriusLink } from "./Curius/CuriusLink";
-export { CuriusUser } from "./Curius/CuriusUser";
-export { CuriusMention } from "./Curius/CuriusMention";
-export { CuriusHighlight } from "./Curius/CuriusHighlight";
 export { CuriusComment } from "./Curius/CuriusComment";
+export { CuriusHighlight } from "./Curius/CuriusHighlight";
+export { CuriusLink } from "./Curius/CuriusLink";
+export { CuriusLinkChunk } from "./Curius/CuriusLinkChunk";
+export { CuriusMention } from "./Curius/CuriusMention";
+export { CuriusUser } from "./Curius/CuriusUser";
 // relationships
 export { Relationship } from "./Relationship";
 
