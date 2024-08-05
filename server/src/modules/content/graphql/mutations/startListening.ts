@@ -49,6 +49,8 @@ export const startListening = mutationField("startListening", {
             currentMs: 0,
             durationMs: content.lengthMs,
             createdAt: new Date(),
+            lastListenedAt: new Date(),
+            bookmarkedAt: null,
             updatedAt: new Date(),
             percentFinished: null,
         });

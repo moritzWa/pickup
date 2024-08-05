@@ -64,6 +64,7 @@ export const updateContentSession = mutationField("updateContentSession", {
                     ? new Date()
                     : contentSession.bookmarkedAt,
                 updatedAt: new Date(),
+                lastListenedAt: new Date(),
             }
         );
 

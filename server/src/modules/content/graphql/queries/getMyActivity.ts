@@ -20,7 +20,7 @@ export const getMyActivity = queryField("getMyActivity", {
         const { limit, page } = args;
         const user = ctx.me!;
 
-        const contentSessionsResponse = await contentSessionRepo.findBookmarks(
+        const contentSessionsResponse = await contentSessionRepo.findForUser(
             user.id,
             {
                 take: limit ?? 20,
