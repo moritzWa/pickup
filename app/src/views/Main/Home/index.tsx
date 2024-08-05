@@ -166,6 +166,28 @@ const Options = () => {
     dispatch(setHomeFilter(feed));
   };
 
+  const onStartListening = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    const { data } = await startListening({
+      variables: {
+        contentId: null,
+      },
+    });
+
+    const session = data?.startListening;
+
+    if (!session) {
+      Alert.alert("Error", "Failed to start listening");
+      return;
+    }
+
+    navigation.navigate("ContentSession", {
+      contentId: session.contentId,
+      isCarMode: false,
+    });
+  };
+
   return (
     <View
       style={{
@@ -214,7 +236,7 @@ const Options = () => {
         <TouchableOpacity
           onPressIn={onPressIn}
           onPressOut={onPressOut}
-          onPress={onPress}
+          onPress={onStartListening}
           activeOpacity={1}
           style={{
             display: "flex",

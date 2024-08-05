@@ -12,6 +12,7 @@ import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
 import { courseProgressRepo } from "src/modules/courses/infra";
 import { contentRepo, contentSessionRepo } from "../../infra";
+import { pgUserRepo } from "src/modules/users/infra/postgres";
 
 export const startListening = mutationField("startListening", {
     type: nonNull("ContentSession"),
@@ -39,6 +40,10 @@ export const startListening = mutationField("startListening", {
             existingSessionResponse.isSuccess() &&
             existingSessionResponse.value
         ) {
+            await pgUserRepo.update(user.id, {
+                currentContentSessionId: existingSessionResponse.value.id,
+            });
+
             return existingSessionResponse.value;
         }
 
@@ -60,6 +65,10 @@ export const startListening = mutationField("startListening", {
         throwIfError(sessionResponse);
 
         const session = sessionResponse.value;
+
+        await pgUserRepo.update(user.id, {
+            currentContentSessionId: session.id,
+        });
 
         return session;
     },

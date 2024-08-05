@@ -63,9 +63,13 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
         variables: {
           contentId: c.id,
         },
+        refetchQueries: [api.content.current],
       });
 
-      navigation.navigate("ContentSession", { contentId: c.id });
+      navigation.navigate("ContentSession", {
+        contentId: c.id,
+        isCarMode: false,
+      });
     } catch (err) {
       console.log(err);
       Alert.alert(
