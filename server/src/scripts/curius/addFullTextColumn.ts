@@ -46,11 +46,22 @@ const addFullTextToLinks = async () => {
             let result;
 
             if (link.link.endsWith(".pdf")) {
-                const pdfBuffer = await fetch(link.link).then((res) =>
-                    res.arrayBuffer()
-                );
-                const parsedPDF = await pdf(Buffer.from(pdfBuffer));
-                link.fullText = sanitizeText(parsedPDF.text);
+                const response = await fetch(link.link);
+
+                // Check if the response is successful and the content type is PDF
+                if (
+                    response.ok &&
+                    response.headers
+                        .get("content-type")
+                        ?.includes("application/pdf")
+                ) {
+                    const pdfBuffer = await response.arrayBuffer();
+                    const parsedPDF = await pdf(Buffer.from(pdfBuffer));
+                    link.fullText = sanitizeText(parsedPDF.text);
+                } else {
+                    console.log(`Skipping inaccessible PDF: ${link.link}`);
+                    continue; // Skip to the next link
+                }
             } else {
                 const { window } = new JSDOM(
                     await fetch(link.link).then((res) => res.text())
@@ -96,6 +107,7 @@ const addFullTextToLinks = async () => {
                 }/${totalLinks}):`,
                 error
             );
+            continue; // Skip to the next link on error
         }
 
         // Log progress every 10 links
