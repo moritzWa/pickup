@@ -10,6 +10,7 @@ const deleteAllCuriusData = async () => {
     await dataSource.query('TRUNCATE TABLE "curius_mentions" CASCADE');
     await dataSource.query('TRUNCATE TABLE "curius_users" CASCADE');
     await dataSource.query('TRUNCATE TABLE "curius_links" CASCADE');
+    await dataSource.query('TRUNCATE TABLE "curius_link_chunks" CASCADE');
 
     console.log("All Curius data deleted.");
 
