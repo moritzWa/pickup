@@ -35,7 +35,10 @@ const addEmbeddingsToLinks = async () => {
     try {
         const linksResponse = await curiusLinkRepo.find();
         if (!isSuccess(linksResponse)) {
-            console.error("Failed to fetch links:", linksResponse.error);
+            console.error(
+                "embedding.ts: Failed to fetch links:",
+                linksResponse.error
+            );
             await dataSource.destroy();
             return;
         }
@@ -46,13 +49,16 @@ const addEmbeddingsToLinks = async () => {
         for (let i = 0; i < links.length; i++) {
             const link = links[i];
             console.log(
-                `Processing link ${i + 1} of ${links.length}: ${link.id}`
+                `embedding.ts: Processing link ${i + 1} of ${links.length}: ${
+                    link.id
+                }`
             );
 
             try {
                 const content = link.fullText || link.title;
                 const chunks = chunkText(content);
 
+                // embed each chunk
                 for (let j = 0; j < chunks.length; j++) {
                     const chunk = chunks[j];
                     const embedding = await openai.embeddings.create({
@@ -72,25 +78,31 @@ const addEmbeddingsToLinks = async () => {
                     await curiusLinkChunkRepo.save(linkChunk);
                 }
 
-                console.log(`Added embeddings for link ${link.id}`);
+                console.log(
+                    `embedding.ts: Added embeddings for link ${link.id}`
+                );
             } catch (error) {
                 console.error(
-                    `Failed to generate embedding for link ${link.id}:`,
+                    `embedding.ts: Failed to generate embedding for link ${link.id}:`,
                     error
                 );
             }
 
             // Log progress every 10 links
             if ((i + 1) % 10 === 0 || i === links.length - 1) {
-                console.log(`Processed ${i + 1} of ${links.length} links`);
+                console.log(
+                    `embedding.ts: Processed ${i + 1} of ${links.length} links`
+                );
             }
         }
 
-        console.log("Finished adding embeddings to links");
+        console.log("embedding.ts: Finished adding embeddings to links");
     } catch (error) {
-        console.error("Error processing links:", error);
+        console.error("embedding.ts: Error processing links:", error);
     } finally {
-        await dataSource.destroy();
+        if (dataSource.isInitialized) {
+            await dataSource.destroy();
+        }
     }
 };
 
