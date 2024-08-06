@@ -51,16 +51,23 @@ const addEmbeddingsToLinks = async () => {
 
         for (let i = 0; i < links.length; i++) {
             const link = links[i];
-            const linkStartTime = performance.now();
-            console.log(
-                `embedding.ts: Processing link ${i + 1} of ${links.length}: ${
-                    link.id
-                }`
-            );
-
             try {
                 const content = link.fullText || link.title;
-                console.log(`Content length: ${content.length} characters`);
+
+                // Handle potential fetch errors
+                if (!content) {
+                    console.error(
+                        `No content available for link ${link.id}. Skipping.`
+                    );
+                    continue; // Skip to the next link
+                }
+
+                const linkStartTime = performance.now();
+                console.log(
+                    `embedding.ts: Processing link ${i + 1} of ${
+                        links.length
+                    }: ${link.id}`
+                );
 
                 const chunkingStartTime = performance.now();
                 const chunks = chunkText(content);
