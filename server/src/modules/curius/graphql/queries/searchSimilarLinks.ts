@@ -14,10 +14,11 @@ export const searchSimilarLinks = queryField("searchSimilarLinks", {
         // throwIfNotAuthenticated(ctx);
 
         const { query, limit } = args;
+        const defaultLimit = 4;
 
         const similarLinksResponse = await curiusLinkRepo.findSimilarLinks(
             query,
-            limit
+            limit ?? defaultLimit
         );
 
         throwIfError(similarLinksResponse);
