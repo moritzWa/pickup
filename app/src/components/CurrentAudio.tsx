@@ -37,12 +37,16 @@ import { BlurView } from "expo-blur";
 import { AppContext } from "App";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getCurrentAudioUrl,
+  getCurrentMs,
+  getDurationMs,
   getIsPlaying,
   setAudioUrl,
   setIsPlaying,
 } from "src/redux/reducers/audio";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { useAudio } from "src/hooks/useAudio";
+import BigNumber from "bignumber.js";
 
 export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
@@ -54,11 +58,16 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
     Pick<Query, "getCurrentContentSession">
   >(api.content.current, {});
 
-  const { download } = useAudio();
+  const currentAudioUrl = useSelector(getCurrentAudioUrl);
+  const { sound: globalSound } = useContext(AppContext);
+  const { downloadAndPlay, toggle } = useAudio();
   const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
   const dispatch = useDispatch();
+
+  const currentMs = useSelector(getCurrentMs);
+  const durationMs = useSelector(getDurationMs);
 
   const color = colors.purple90;
   const [startContent, { error }] = useMutation(api.content.start);
@@ -85,13 +94,11 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
 
   const openContent = async () => {
     try {
-      const contentId = activeContent?.id;
+      const contentId = activeContent?.id || "";
 
-      const response = await startContent({
-        variables: {
-          contentId: contentId,
-        },
-      });
+      if (!contentId) {
+        return;
+      }
 
       navigation.navigate("ContentSession", { contentId, isCarMode: false });
     } catch (err) {
@@ -103,53 +110,50 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
     }
   };
 
-  const playContent = async () => {
-    if (!activeContent?.content?.audioUrl) {
-      return;
-    }
-
-    dispatch(setAudioUrl(activeContent?.content?.audioUrl));
-  };
-
   const playOrPause = async () => {
     try {
       const audioUrl = activeContent?.content?.audioUrl || "";
+      const sound = globalSound?.current || null;
 
-      await download(audioUrl);
+      if (!sound) {
+        return;
+      }
 
-      // if (status.isLoaded) {
-      //   // if playing -> pause
-      //   if (status.isPlaying) {
-      //     await sound.pauseAsync();
-      //     dispatch(setIsPlaying(false));
-      //     return;
-      //   }
+      // this will set it on the ref
+      if (currentAudioUrl !== audioUrl) {
+        await downloadAndPlay(audioUrl);
+        return;
+      }
 
-      //   // if paused -> play
-      //   await sound.playAsync();
-      //   dispatch(setIsPlaying(true));
-      //   return;
-      // }
-
-      // load it in
-
-      dispatch(setIsPlaying(true));
+      await toggle(sound);
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    playContent();
-  }, [activeContent?.content?.audioUrl]);
-
   const bg = theme.theme === "light" ? "#DFDCFB" : "#050129";
   const title = activeContent?.content?.title;
   const thumbnailImageUrl = activeContent?.content?.thumbnailImageUrl;
-  const leftMs =
-    (activeContent?.durationMs ?? 0) - (activeContent?.currentMs ?? 0);
-  const leftMinutes = Math.floor(leftMs / 60000);
-  const percentFinished = Math.max(activeContent?.percentFinished ?? 0, 5);
+
+  const leftMs = (durationMs ?? 0) - (currentMs ?? 0);
+
+  const leftMinutes = Math.floor(leftMs / 60_000);
+
+  const percentFinished = useMemo(
+    () =>
+      Math.max(
+        2,
+        new BigNumber(currentMs ?? 0)
+          .div(durationMs ?? Infinity)
+          .multipliedBy(100)
+          .toNumber()
+      ),
+    [currentMs, durationMs]
+  );
+
+  // console.log("current: " + currentMs);
+  // console.log("duration: " + durationMs);
+  // console.log("finished: " + percentFinished);
 
   if (!activeContent) {
     return null;
@@ -281,7 +285,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
               icon={isPlaying ? faPause : faPlay}
               color={colors.white}
               size={18}
-              style={{ position: "relative", right: -2 }}
+              style={{ position: "relative", right: isPlaying ? 0 : -2 }}
             />
           </Animated.View>
         </TouchableOpacity>
@@ -306,7 +310,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{
-            width: Math.floor(percentFinished).toString() + "%",
+            width: percentFinished.toString() + "%",
             height: 4,
             borderTopRightRadius: 10,
             borderBottomRightRadius: 10,

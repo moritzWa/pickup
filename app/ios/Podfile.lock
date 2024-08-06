@@ -1120,6 +1120,9 @@ PODS:
     - Yoga
   - react-native-splash-screen (3.3.0):
     - React-Core
+  - react-native-track-player (4.1.1):
+    - React-Core
+    - SwiftAudioEx (= 1.1.0)
   - react-native-version-number (0.3.6):
     - React
   - react-native-voice (3.2.4):
@@ -1454,6 +1457,7 @@ PODS:
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
   - SocketRocket (0.7.0)
+  - SwiftAudioEx (1.1.0)
   - TOCropViewController (2.7.4)
   - Yoga (0.0.0)
 
@@ -1511,6 +1515,7 @@ DEPENDENCIES:
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-splash-screen (from `../node_modules/react-native-splash-screen`)
+  - react-native-track-player (from `../node_modules/react-native-track-player`)
   - react-native-version-number (from `../node_modules/react-native-version-number`)
   - "react-native-voice (from `../node_modules/@react-native-voice/voice`)"
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -1576,6 +1581,7 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageWebPCoder
     - SocketRocket
+    - SwiftAudioEx
     - TOCropViewController
 
 EXTERNAL SOURCES:
@@ -1679,6 +1685,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/slider"
   react-native-splash-screen:
     :path: "../node_modules/react-native-splash-screen"
+  react-native-track-player:
+    :path: "../node_modules/react-native-track-player"
   react-native-version-number:
     :path: "../node_modules/react-native-version-number"
   react-native-voice:
@@ -1831,6 +1839,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: b7daa1a8df36095a032dff095a1ea8963cb48371
   react-native-slider: 02d3a22ac87c7e18cf6c797003699c81bc6e9a82
   react-native-splash-screen: 4312f786b13a81b5169ef346d76d33bc0c6dc457
+  react-native-track-player: 82ef1756ffeea61140fea17519ecd6d64ec3cf3e
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   react-native-voice: f5e8eec2278451d0017eb6a30a6ccc726aca34e0
   React-nativeconfig: 84806b820491db30175afbf027e99e8415dc63f0
@@ -1876,6 +1885,7 @@ SPEC CHECKSUMS:
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
+  SwiftAudioEx: f6aa653770f3a0d3851edaf8d834a30aee4a7646
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: bd92064a0d558be92786820514d74fc4dddd1233
 

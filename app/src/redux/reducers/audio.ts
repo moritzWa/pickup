@@ -39,7 +39,7 @@ export const audioReducer = createReducer(initialState, (builder) => {
 
 // selectors
 
-export const getAudioUrl = (state: ReduxState): AudioState["audioUrl"] =>
+export const getCurrentAudioUrl = (state: ReduxState): AudioState["audioUrl"] =>
   state.audio.audioUrl;
 
 export const getCurrentMs = (state: ReduxState): AudioState["currentMs"] =>

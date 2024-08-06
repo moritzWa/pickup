@@ -57,7 +57,7 @@ import { colors } from "src/components";
 import { auth } from "src/utils/firebase";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
-import { getAudioUrl } from "src/redux/reducers/audio";
+import { getCurrentAudioUrl } from "src/redux/reducers/audio";
 import { useAudio } from "src/hooks/useAudio";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
@@ -69,7 +69,11 @@ LogBox.ignoreAllLogs(); //Ignore all log notifications
 //   loadErrorMessages();
 // }
 
-const SOUND_INSTANCE = new Audio.Sound();
+export const AppContext = createContext<{
+  sound: React.MutableRefObject<Audio.Sound> | null;
+}>({
+  sound: null,
+});
 
 function App() {
   const [isLoaded] = Font.useFonts({});
@@ -78,6 +82,8 @@ function App() {
   const { theme, header, background, secondaryBackground } = useTheme();
   const insets = useSafeAreaInsets();
   const { me, refetchMe } = useMe("network-only");
+
+  const sound = useRef(new Audio.Sound());
 
   // just cache this on app load so this info is faster elsewhere
   useQuery(api.categories.list);
@@ -182,6 +188,8 @@ function App() {
     _loadInitialState();
   }, []);
 
+  const { download } = useAudio();
+
   const toastConfig: ToastConfig = {
     success: (props) => (
       <BaseToast
@@ -227,13 +235,13 @@ function App() {
   }
 
   return (
-    <>
+    <AppContext.Provider value={{ sound: sound }}>
       <BottomSheetModalProvider>
         <MainNavigationStack />
       </BottomSheetModalProvider>
 
       <Toast config={toastConfig} />
-    </>
+    </AppContext.Provider>
   );
 }
 

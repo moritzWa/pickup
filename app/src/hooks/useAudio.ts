@@ -1,9 +1,26 @@
-import { Audio } from "expo-av";
+import { AppContext } from "App";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
+import { useContext } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
+import { useDispatch } from "react-redux";
+import {
+  DefaultErrors,
+  failure,
+  FailureOrSuccess,
+  success,
+  UnexpectedError,
+} from "src/core";
+import {
+  setAudioUrl,
+  setCurrentMs,
+  setDurationMs,
+  setIsPlaying,
+} from "src/redux/reducers/audio";
 
 export const useAudio = () => {
-  // TODO: be able to preload and stuff as well
+  const { sound: globalSound } = useContext(AppContext);
+  const dispatch = useDispatch();
 
   const getFileName = async (url: string): Promise<string> => {
     const hash = await JSHash("message", CONSTANTS.HashAlgorithms.sha256);
@@ -25,32 +42,14 @@ export const useAudio = () => {
     console.log("Cached files: ", result.length);
   };
 
-  const getAudio = async (url: string) => {
-    try {
-      await getStoredFiles();
-
-      const fileName = await getFileName(url);
-      const fileUri = (FileSystem.documentDirectory || "") + fileName;
-
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: url },
-        { shouldPlay: true }
-      );
-
-      sound.setOnPlaybackStatusUpdate((playbackStatus) => {
-        if (playbackStatus.isLoaded) {
-          //   setStatus('Playback finished.');
-          sound.unloadAsync(); // Cleanup sound instance
-        }
-      });
-    } catch (error) {
-      console.error(error);
-      //   setStatus('Error occurred while downloading or playing audio.');
-    }
-  };
-
-  const downloadAndPlayAudio = async (url: string) => {
+  const downloadAndPlayAudio = async (
+    url: string
+  ): Promise<FailureOrSuccess<DefaultErrors, Audio.Sound>> => {
     // await getStoredFiles();
+
+    if (!globalSound) {
+      return failure(new UnexpectedError("No sound object found"));
+    }
 
     const fileName = await getFileName(url);
     const fileUri = (FileSystem.documentDirectory || "") + fileName;
@@ -64,28 +63,78 @@ export const useAudio = () => {
 
       const sound = new Audio.Sound();
 
-      //   console.log(sound);
+      globalSound.current = sound;
 
-      sound.setOnPlaybackStatusUpdate(console.log);
+      dispatch(setAudioUrl(url));
+
+      // make it so it can play even if it is muted
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded) {
+          //   console.log(status);
+          dispatch(setCurrentMs(status.positionMillis));
+          dispatch(setDurationMs(status.durationMillis ?? 0));
+        }
+      });
 
       // read file from memory
       await sound.loadAsync(
         {
-          uri: url,
+          uri: uri,
         },
         {
-          shouldPlay: true,
+          shouldPlay: false,
         }
       );
 
-      console.log("done loading sound");
+      await sound.playAsync();
+      dispatch(setIsPlaying(true));
+
+      return success(sound);
     } catch (error) {
       console.error(error);
-      //   setStatus('Error occurred while downloading or playing audio.');
+      return failure(new UnexpectedError(error));
+    }
+  };
+
+  const toggle = async (sound: Audio.Sound) => {
+    try {
+      const status = await sound.getStatusAsync();
+
+      if (status.isLoaded) {
+        // if playing -> pause
+        if (status.isPlaying) {
+          await sound.pauseAsync();
+          dispatch(setIsPlaying(false));
+          console.log("paused");
+          return;
+        }
+
+        // if paused -> play
+        await sound.playAsync();
+        dispatch(setIsPlaying(true));
+        console.log("playing");
+        return;
+      }
+
+      await sound.playAsync();
+      dispatch(setIsPlaying(true));
+    } catch (error) {
+      console.log(error);
     }
   };
 
   return {
-    download: downloadAndPlayAudio,
+    downloadAndPlay: downloadAndPlayAudio,
+    toggle,
   };
 };
