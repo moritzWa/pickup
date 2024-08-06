@@ -9,9 +9,10 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const chunkText = (text: string, chunkSize: number = 300): string[] => {
+// TODO: split this usign tiktoken or similar (could also add sliding/overlapping window)
+const chunkText = (text: string, chunkSize: number = 1200): string[] => {
     const sentences = text.split(". ");
-    const chunks: string[] = []; // Explicitly define the type of the array
+    const chunks: string[] = [];
     let currentChunk = "";
 
     for (const sentence of sentences) {
