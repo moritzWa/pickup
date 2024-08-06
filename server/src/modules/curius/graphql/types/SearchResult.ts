@@ -31,6 +31,6 @@ export const SearchResult = objectType({
         t.nonNull.list.nonNull.int("userIds");
         t.nonNull.int("readCount");
         t.nonNull.float("averageDistance");
-        t.nonNull.int("chunkMatchesForLink");
+        t.nonNull.float("minDistance");
     },
 });

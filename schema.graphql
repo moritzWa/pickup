@@ -226,13 +226,13 @@ type RespondResponse {
 
 type SearchResult {
   averageDistance: Float!
-  chunkMatchesForLink: Int!
   createdDate: Date!
   fullText: String
   id: Int!
   lastCrawled: Date
   link: String!
   metadata: Metadata
+  minDistance: Float!
   modifiedDate: Date!
   readCount: Int!
   snippet: String

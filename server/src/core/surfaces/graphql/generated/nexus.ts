@@ -121,13 +121,13 @@ export interface NexusGenObjects {
   }
   SearchResult: { // root type
     averageDistance: number; // Float!
-    chunkMatchesForLink: number; // Int!
     createdDate: NexusGenScalars['Date']; // Date!
     fullText?: string | null; // String
     id: number; // Int!
     lastCrawled?: NexusGenScalars['Date'] | null; // Date
     link: string; // String!
     metadata?: NexusGenRootTypes['Metadata'] | null; // Metadata
+    minDistance: number; // Float!
     modifiedDate: NexusGenScalars['Date']; // Date!
     readCount: number; // Int!
     snippet?: string | null; // String
@@ -324,13 +324,13 @@ export interface NexusGenFieldTypes {
   }
   SearchResult: { // field return type
     averageDistance: number; // Float!
-    chunkMatchesForLink: number; // Int!
     createdDate: NexusGenScalars['Date']; // Date!
     fullText: string | null; // String
     id: number; // Int!
     lastCrawled: NexusGenScalars['Date'] | null; // Date
     link: string; // String!
     metadata: NexusGenRootTypes['Metadata'] | null; // Metadata
+    minDistance: number; // Float!
     modifiedDate: NexusGenScalars['Date']; // Date!
     readCount: number; // Int!
     snippet: string | null; // String
@@ -541,13 +541,13 @@ export interface NexusGenFieldTypeNames {
   }
   SearchResult: { // field return type name
     averageDistance: 'Float'
-    chunkMatchesForLink: 'Int'
     createdDate: 'Date'
     fullText: 'String'
     id: 'Int'
     lastCrawled: 'Date'
     link: 'String'
     metadata: 'Metadata'
+    minDistance: 'Float'
     modifiedDate: 'Date'
     readCount: 'Int'
     snippet: 'String'

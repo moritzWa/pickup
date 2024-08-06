@@ -13,7 +13,7 @@ type LinksResponse = FailureOrSuccess<DefaultErrors, CuriusLink[]>;
 
 type LinkWithDistance = CuriusLink & {
     averageDistance: number;
-    chunkMatchesForLink: number;
+    minDistance: number;
 };
 type LinksWithDistanceResponse = FailureOrSuccess<
     DefaultErrors,
@@ -65,10 +65,13 @@ export class PostgresCuriusLinkRepository {
             const result = await this.repo
                 .createQueryBuilder("curius_links")
                 .select("curius_links")
-                .addSelect("COUNT(chunks.id)", "chunkMatchesForLink")
                 .addSelect(
                     "AVG(chunks.embedding <-> :embedding)",
-                    "averageDistance"
+                    "average_distance"
+                )
+                .addSelect(
+                    "MIN(chunks.embedding <-> :embedding)",
+                    "min_distance"
                 )
                 .innerJoin(
                     CuriusLinkChunk,
@@ -77,18 +80,14 @@ export class PostgresCuriusLinkRepository {
                 )
                 .setParameter("embedding", pgvector.toSql(vector))
                 .groupBy("curius_links.id")
-                .orderBy("chunkMatchesForLink", "DESC")
-                .addOrderBy("averageDistance")
+                .orderBy("min_distance", "ASC")
                 .limit(limit)
                 .getRawAndEntities();
 
             const linksWithDistance = result.entities.map((entity, index) => ({
                 ...entity,
-                chunkMatchesForLink: parseInt(
-                    result.raw[index].chunkMatchesForLink,
-                    10
-                ),
-                averageDistance: parseFloat(result.raw[index].averageDistance),
+                averageDistance: parseFloat(result.raw[index].average_distance),
+                minDistance: parseFloat(result.raw[index].min_distance),
             }));
 
             return success(linksWithDistance);

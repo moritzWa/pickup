@@ -26,7 +26,7 @@ export const searchSimilarLinks = queryField("searchSimilarLinks", {
         return similarLinksResponse.value.map((link) => ({
             ...link,
             averageDistance: link.averageDistance,
-            chunkMatchesForLink: link.chunkMatchesForLink,
+            minDistance: link.minDistance,
         }));
     },
 });
