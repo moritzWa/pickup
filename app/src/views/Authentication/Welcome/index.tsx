@@ -9,6 +9,7 @@ import { colors } from "src/components";
 import { Text } from "src/components/Text";
 import FastImage from "react-native-fast-image";
 import { IS_IPAD } from "src/config";
+import { useTheme } from "src/hooks";
 
 const Welcome = () => {
   const insets = useSafeAreaInsets();
@@ -22,26 +23,29 @@ const Welcome = () => {
   const signUp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("Signup");
+    // navigation.navigate("Interests");
   };
+
+  const theme = useTheme();
 
   return (
     <View
       style={{
-        backgroundColor: "#fdfdfd",
+        backgroundColor: theme.background,
         flexDirection: "column",
         display: "flex",
         height: "100%",
         alignItems: "center",
       }}
     >
-      <View
+      {/* <View
         style={{
           position: "absolute",
           backgroundColor: colors.gray10,
           width: "100%",
           height: "100%",
         }}
-      />
+      /> */}
 
       {/* <FastImage
         style={[
@@ -60,7 +64,7 @@ const Welcome = () => {
       /> */}
       {/* black overlay */}
 
-      <View
+      {/* <View
         style={{
           position: "absolute",
           backgroundColor: "rgba(0,0,0,0.25)",
@@ -68,7 +72,7 @@ const Welcome = () => {
           height: "100%",
           // blur
         }}
-      />
+      /> */}
 
       <View
         style={{
@@ -83,13 +87,25 @@ const Welcome = () => {
         >
           <Text
             style={{
-              fontSize: IS_IPAD ? 48 : 26,
+              fontSize: IS_IPAD ? 48 : 32,
               textAlign: "center",
-              fontFamily: "Raleway-Semibold",
-              color: colors.white,
+              fontFamily: "Raleway-Bold",
+              color: theme.header,
             }}
           >
-            pickup
+            What topics are you interested in?
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 20,
+              marginTop: 15,
+              textAlign: "center",
+              fontFamily: "Raleway-Medium",
+              color: theme.text,
+            }}
+          >
+            Endless audio content, tailored to your tastes. Just press play 🎧
           </Text>
         </View>
 
@@ -112,22 +128,22 @@ const Welcome = () => {
             }}
             textProps={{
               style: {
-                fontFamily: "Raleway-Semibold",
+                // fontFamily: "Raleway-Semibold",
               },
             }}
             onPress={signUp}
-            label="Sign up"
+            label="Create an account"
           />
 
           <Button
             style={{
-              backgroundColor: colors.white,
+              backgroundColor: theme.secondaryBackground,
               marginBottom: 15,
             }}
             textProps={{
               style: {
                 color: colors.black,
-                fontFamily: "Raleway-Semibold",
+                // fontFamily: "Raleway-Semibold",
               },
             }}
             onPress={signIn}

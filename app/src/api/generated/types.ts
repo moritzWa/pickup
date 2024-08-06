@@ -23,6 +23,28 @@ export enum ActivityFilter {
   Unread = 'unread'
 }
 
+export enum CategoryEnum {
+  Comedy = 'Comedy',
+  Entrepreneurship = 'Entrepreneurship',
+  Hiring = 'Hiring',
+  History = 'History',
+  Language = 'Language',
+  Negotiation = 'Negotiation',
+  Philosophy = 'Philosophy',
+  Product = 'Product',
+  PublicSpeaking = 'PublicSpeaking',
+  Science = 'Science'
+}
+
+export type CategoryInfo = {
+  __typename?: 'CategoryInfo';
+  backgroundColor?: Maybe<Scalars['String']['output']>;
+  emoji: Scalars['String']['output'];
+  label: Scalars['String']['output'];
+  textColor?: Maybe<Scalars['String']['output']>;
+  value: CategoryEnum;
+};
+
 export type Content = {
   __typename?: 'Content';
   audioUrl: Scalars['String']['output'];
@@ -155,6 +177,8 @@ export type Mutation = {
   respond: RespondResponse;
   respondToContent: ContentRespondResponse;
   sendVerification: Scalars['String']['output'];
+  setCommuteTime: User;
+  setInterests: User;
   startContent: ContentSession;
   startCourse: Course;
   startLesson: LessonSession;
@@ -189,6 +213,18 @@ export type MutationRespondToContentArgs = {
 
 export type MutationSendVerificationArgs = {
   phoneNumber: Scalars['String']['input'];
+};
+
+
+export type MutationSetCommuteTimeArgs = {
+  commuteTime?: InputMaybe<Scalars['String']['input']>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationSetInterestsArgs = {
+  interestCategories: Array<Scalars['String']['input']>;
+  interestDescription?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -261,6 +297,7 @@ export type Query = {
   checkCode: Scalars['Boolean']['output'];
   getActivity: Array<Content>;
   getBookmarks: Array<Content>;
+  getCategories: Array<CategoryInfo>;
   getContent: Content;
   getContentFeed: Array<Content>;
   getContentSession: ContentSession;

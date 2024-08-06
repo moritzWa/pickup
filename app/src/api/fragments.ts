@@ -162,7 +162,19 @@ export type BaseContentFields = Pick<
   | "categories"
   | "thumbnailImageUrl"
   | "sourceImageUrl"
->;
+> & {
+  contentSession?: Pick<
+    ContentSession,
+    | "id"
+    | "currentMs"
+    | "durationMs"
+    | "percentFinished"
+    | "isBookmarked"
+    | "bookmarkedAt"
+    | "createdAt"
+    | "updatedAt"
+  >;
+};
 
 export const BaseContentFields = gql`
   fragment BaseContentFields on Content {
@@ -183,6 +195,18 @@ export const BaseContentFields = gql`
     categories
     thumbnailImageUrl
     sourceImageUrl
+    contentSession {
+      id
+      currentMs
+      durationMs
+      contentId
+      userId
+      percentFinished
+      isBookmarked
+      bookmarkedAt
+      createdAt
+      updatedAt
+    }
   }
 `;
 

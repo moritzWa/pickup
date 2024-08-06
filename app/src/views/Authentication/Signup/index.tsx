@@ -65,6 +65,7 @@ const Signup = () => {
         variables,
       });
 
+      const user = response.data?.createUser?.user;
       const token = response.data?.createUser?.token;
 
       if (!token) return;
@@ -73,7 +74,11 @@ const Signup = () => {
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      return navigation.navigate("Main");
+      if (!user?.name) {
+        return navigation.navigate("FullName");
+      }
+
+      return navigation.navigate("Interests");
     } catch (err) {
       console.log("=== error ===");
       console.log(err);
@@ -99,23 +104,31 @@ const Signup = () => {
 
       // if already has a user -> just go to the home page
       if (me) {
-        return navigation.navigate("Main");
-      }
+        if (!me?.name) {
+          return navigation.navigate("FullName");
+        }
 
-      console.log(u.user);
+        return navigation.navigate("Interests");
+      }
 
       const variables: MutationCreateUserArgs = {
         email: u.user?.email || "",
         name: u.user?.displayName || "",
       };
 
-      await createUser({
+      const response = await createUser({
         variables,
       });
 
+      const user = response.data?.createUser?.user;
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      return navigation.navigate("Main");
+      if (!user?.name) {
+        return navigation.navigate("FullName");
+      }
+
+      return navigation.navigate("Interests");
     } catch (err) {
       console.log("=== error ===");
       console.log(err);
@@ -139,10 +152,12 @@ const Signup = () => {
 
       // if already has a user -> just go to the home page
       if (me) {
-        return navigation.navigate("Main");
-      }
+        if (!me?.name) {
+          return navigation.navigate("FullName");
+        }
 
-      console.log(u.user);
+        return navigation.navigate("Interests");
+      }
 
       const nameFromApple =
         appleData && appleData.fullName
@@ -156,13 +171,19 @@ const Signup = () => {
         name: nameFromApple ? nameFromApple || "" : u.user?.displayName || "",
       };
 
-      await createUser({
+      const response = await createUser({
         variables,
       });
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      return navigation.navigate("Main");
+      const newUser = response.data?.createUser;
+
+      if (!newUser?.user.name) {
+        return navigation.navigate("FullName");
+      }
+
+      return navigation.navigate("Interests");
     } catch (err) {
       console.log("=== error ===");
       console.log(err);
@@ -200,7 +221,7 @@ const Signup = () => {
         <Text
           style={{
             fontSize: 28,
-            fontFamily: "Raleway-Regular",
+            fontFamily: "Raleway-Bold",
             textAlign: "left",
             width: "100%",
             marginTop: 25,
@@ -208,12 +229,13 @@ const Signup = () => {
             color: header,
           }}
         >
-          Sign Up
+          Create your account
         </Text>
 
         <Input
           autoComplete="name"
           label="Full name"
+          autoFocus
           placeholder="Full name"
           textContentType="name"
           value={fullName}

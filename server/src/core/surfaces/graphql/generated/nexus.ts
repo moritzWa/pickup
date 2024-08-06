@@ -34,6 +34,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
+  CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
   ContentFeedFilter: "for_you" | "new" | "popular"
   LessonTypeEnum: "game" | "role_play" | "vocabulary"
   UserAuthProviderEnum: "firebase"
@@ -50,6 +51,13 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  CategoryInfo: { // root type
+    backgroundColor?: string | null; // String
+    emoji: string; // String!
+    label: string; // String!
+    textColor?: string | null; // String
+    value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
+  }
   Content: entities.Content ;
   ContentRespondResponse: { // root type
     responseAudioUrl: string; // String!
@@ -116,6 +124,13 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  CategoryInfo: { // field return type
+    backgroundColor: string | null; // String
+    emoji: string; // String!
+    label: string; // String!
+    textColor: string | null; // String
+    value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
+  }
   Content: { // field return type
     audioUrl: string; // String!
     authorImageUrl: string | null; // String
@@ -213,6 +228,8 @@ export interface NexusGenFieldTypes {
     respond: NexusGenRootTypes['RespondResponse']; // RespondResponse!
     respondToContent: NexusGenRootTypes['ContentRespondResponse']; // ContentRespondResponse!
     sendVerification: string; // String!
+    setCommuteTime: NexusGenRootTypes['User']; // User!
+    setInterests: NexusGenRootTypes['User']; // User!
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startCourse: NexusGenRootTypes['Course']; // Course!
     startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
@@ -241,6 +258,7 @@ export interface NexusGenFieldTypes {
     checkCode: boolean; // Boolean!
     getActivity: NexusGenRootTypes['Content'][]; // [Content!]!
     getBookmarks: NexusGenRootTypes['Content'][]; // [Content!]!
+    getCategories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
     getContent: NexusGenRootTypes['Content']; // Content!
     getContentFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
@@ -295,6 +313,13 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  CategoryInfo: { // field return type name
+    backgroundColor: 'String'
+    emoji: 'String'
+    label: 'String'
+    textColor: 'String'
+    value: 'CategoryEnum'
+  }
   Content: { // field return type name
     audioUrl: 'String'
     authorImageUrl: 'String'
@@ -392,6 +417,8 @@ export interface NexusGenFieldTypeNames {
     respond: 'RespondResponse'
     respondToContent: 'ContentRespondResponse'
     sendVerification: 'String'
+    setCommuteTime: 'User'
+    setInterests: 'User'
     startContent: 'ContentSession'
     startCourse: 'Course'
     startLesson: 'LessonSession'
@@ -420,6 +447,7 @@ export interface NexusGenFieldTypeNames {
     checkCode: 'Boolean'
     getActivity: 'Content'
     getBookmarks: 'Content'
+    getCategories: 'CategoryInfo'
     getContent: 'Content'
     getContentFeed: 'Content'
     getContentSession: 'ContentSession'
@@ -492,6 +520,14 @@ export interface NexusGenArgTypes {
     }
     sendVerification: { // args
       phoneNumber: string; // String!
+    }
+    setCommuteTime: { // args
+      commuteTime?: string | null; // String
+      timezone?: string | null; // String
+    }
+    setInterests: { // args
+      interestCategories: string[]; // [String!]!
+      interestDescription?: string | null; // String
     }
     startContent: { // args
       contentId: string; // ID!

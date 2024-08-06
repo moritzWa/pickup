@@ -62,8 +62,12 @@ export const createFullUser = async ({
     const userResponse = await UserService.create({
         id: uuidv4(),
         username: username,
+        timezone: null,
+        commuteTime: null,
         currentContentSessionId: null,
         hasTwoFactorAuth: false,
+        interestCategories: [],
+        interestDescription: null,
         isInfluencer: false,
         authProvider: UserAuthProvider.Firebase,
         authProviderId: fbUser.uid,

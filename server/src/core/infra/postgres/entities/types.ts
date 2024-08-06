@@ -16,4 +16,6 @@ export enum Category {
     PublicSpeaking = "public_speaking",
     Negotiation = "negotiation",
     Product = "product",
+    Hiring = "hiring",
+    Comedy = "comedy",
 }

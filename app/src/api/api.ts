@@ -62,6 +62,21 @@ const UpdateUser = gql`
   }
 `;
 
+const SetInterests = gql`
+  ${BaseUserFields}
+  mutation SetInterests(
+    $interestCategories: [String!]!
+    $interestDescription: String
+  ) {
+    setInterests(
+      interestCategories: $interestCategories
+      interestDescription: $interestDescription
+    ) {
+      ...BaseUserFields
+    }
+  }
+`;
+
 const VerifyBiometric = gql`
   mutation VerifyBiometric($signature: String!, $payload: String!) {
     verifyBiometric(signature: $signature, payload: $payload) {
@@ -265,12 +280,25 @@ const GetBookmarks = gql`
   }
 `;
 
+const GetCategories = gql`
+  query GetCategories {
+    getCategories {
+      label
+      value
+      emoji
+      backgroundColor
+      textColor
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
     create: CreateUser,
     getIntercomHash: GetIntercomMobileToken,
     update: UpdateUser,
+    setInterests: SetInterests,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
     getProfile: GetProfile,
@@ -298,5 +326,8 @@ export const api = {
     start: StartLesson,
     progress: GetLessonProgress,
     get: GetLesson,
+  },
+  categories: {
+    list: GetCategories,
   },
 };

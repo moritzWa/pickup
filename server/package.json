@@ -39,7 +39,7 @@
         "migrate:create": "./node_modules/.bin/ts-node --transpile-only -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create",
         "migrate:generate": "npm run typeorm -- migration:generate",
         "migrate:run": "npm run typeorm -- migration:run && npm run ensure-vector-type",
-        "ensure-vector-type": "ts-node --transpile-only -r tsconfig-paths/register src/migrations/1721583692348-vector-migration.ts",
+        "ensure-vector-type": "ts-node --transpile-only -r tsconfig-paths/register src/migrations/1722830444438-vector-migration.ts",
         "migrate:revert": "npm run typeorm -- migration:revert",
         "/// tests ///": "",
         "test": "NODE_ENV=test node ./node_modules/.bin/jest --runInBand --config src/__tests__/config/jest.config.json --passWithNoTests --logHeapUsage --detectOpenHandles --collectCoverage"

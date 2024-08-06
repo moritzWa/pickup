@@ -207,7 +207,6 @@ const Login = () => {
         name: appleData.fullName
           ? nameFromApple || ""
           : u.user?.displayName || "",
-        isMobile: true,
       };
 
       const response = await createUser({
@@ -270,14 +269,16 @@ const Login = () => {
             marginTop: 25,
             marginBottom: 25,
             color: header,
+            fontFamily: "Raleway-Bold",
           }}
         >
-          Log in
+          Welcome back 👋
         </Text>
 
         <Input
           autoComplete="email"
           label="Email"
+          autoFocus
           placeholder="Email"
           keyboardType="email-address"
           autoCapitalize="none"

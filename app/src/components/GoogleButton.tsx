@@ -10,8 +10,9 @@ import * as Haptics from "expo-haptics";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import FastImage from "react-native-fast-image";
 import { auth } from "src/utils/firebase";
+import { useTheme } from "src/hooks";
 
-const GoogleImage = require("src/assets/social/google.png");
+const GoogleImage = require("src/assets/social/google-2.png");
 
 GoogleSignin.configure({
   webClientId: constants.firebase.webClientId,
@@ -25,6 +26,7 @@ type GoogleProps = {
 
 export const GoogleButton = ({ label, onSuccess, onError }: GoogleProps) => {
   const [isLoading, setLoading] = React.useState(false);
+  const theme = useTheme();
 
   const loginGoogle = async () => {
     try {
@@ -58,13 +60,11 @@ export const GoogleButton = ({ label, onSuccess, onError }: GoogleProps) => {
   return (
     <TouchableOpacity
       style={{
-        backgroundColor: colors.white,
-        borderWidth: 2,
+        backgroundColor: theme.secondaryBackground,
         marginTop: 10,
-        borderColor: colors.gray80,
         paddingVertical: IS_IPAD ? 20 : 15,
         paddingHorizontal: 25,
-        borderRadius: 50,
+        borderRadius: 10,
         alignItems: "center",
         marginBottom: 5,
         display: "flex",
@@ -100,12 +100,12 @@ export const GoogleButton = ({ label, onSuccess, onError }: GoogleProps) => {
           <Text
             style={{
               color: colors.black,
-              fontFamily: "Raleway-Semibold",
+              fontFamily: "Raleway-Bold",
               textAlign: "center",
               fontSize: IS_IPAD ? 24 : 16,
             }}
           >
-            {label || "Sign up"} with Google
+            {label || "Continue"} with Google
           </Text>
         )}
       </View>

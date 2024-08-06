@@ -61,7 +61,7 @@ const Button = ({
         {
           height: 45,
           paddingHorizontal: 25,
-          borderRadius: 100,
+          borderRadius: 10,
           backgroundColor: theme.header,
           alignItems: "center",
           marginBottom: 5,
@@ -97,7 +97,7 @@ const Button = ({
                 {
                   color: theme.background,
                   textAlign: "center",
-                  fontFamily: "Raleway-Semibold",
+                  fontFamily: "Raleway-Bold",
                   width: "100%",
                   fontSize: IS_IPAD ? 24 : 16,
                 },
