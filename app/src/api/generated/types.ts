@@ -45,6 +45,13 @@ export type CategoryInfo = {
   value: CategoryEnum;
 };
 
+export type CategorySection = {
+  __typename?: 'CategorySection';
+  categories: Array<CategoryInfo>;
+  label: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
 export type Content = {
   __typename?: 'Content';
   audioUrl: Scalars['String']['output'];
@@ -297,7 +304,7 @@ export type Query = {
   checkCode: Scalars['Boolean']['output'];
   getActivity: Array<Content>;
   getBookmarks: Array<Content>;
-  getCategories: Array<CategoryInfo>;
+  getCategories: Array<CategorySection>;
   getContent: Content;
   getContentFeed: Array<Content>;
   getContentSession: ContentSession;

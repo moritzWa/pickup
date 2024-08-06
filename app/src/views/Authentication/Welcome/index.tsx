@@ -22,8 +22,8 @@ const Welcome = () => {
 
   const signUp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Signup");
-    // navigation.navigate("Interests");
+    // navigation.navigate("Signup");
+    navigation.navigate("Interests");
   };
 
   const theme = useTheme();

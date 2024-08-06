@@ -1088,6 +1088,8 @@ PODS:
     - React-Core
   - react-native-get-random-values (1.11.0):
     - React-Core
+  - react-native-hash (3.0.3):
+    - React
   - react-native-in-app-review (4.3.3):
     - React-Core
   - react-native-onesignal (5.2.2):
@@ -1358,6 +1360,8 @@ PODS:
     - Firebase/Storage (= 10.29.0)
     - React-Core
     - RNFBApp
+  - RNFS (2.20.0):
+    - React-Core
   - RNGestureHandler (2.17.1):
     - DoubleConversion
     - glog
@@ -1501,6 +1505,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-airplay-button (from `../node_modules/react-native-airplay-button`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
+  - react-native-hash (from `../node_modules/react-native-hash`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
   - react-native-onesignal (from `../node_modules/react-native-onesignal`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -1538,6 +1543,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
+  - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
@@ -1661,6 +1667,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-airplay-button"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
+  react-native-hash:
+    :path: "../node_modules/react-native-hash"
   react-native-in-app-review:
     :path: "../node_modules/react-native-in-app-review"
   react-native-onesignal:
@@ -1735,6 +1743,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/auth"
   RNFBStorage:
     :path: "../node_modules/@react-native-firebase/storage"
+  RNFS:
+    :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
@@ -1815,6 +1825,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 70da5955150a58732e9336a0c7e71cd49e909f25
   react-native-airplay-button: 90c7ba52402c8e92342003b8a1ff78dfb4357a9e
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
+  react-native-hash: 4664516df1834e1293b30e711c63f61f7f801b6a
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-onesignal: 592184d34780d04ebbea2b9844d5b6088606cb30
   react-native-safe-area-context: b7daa1a8df36095a032dff095a1ea8963cb48371
@@ -1853,6 +1864,7 @@ SPEC CHECKSUMS:
   RNFBApp: 793adb33298db7e67dc365dc1ec0dc8a55a7a044
   RNFBAuth: e923d3f87088009ac8505140599ec1e784d77bd0
   RNFBStorage: a86f59a4adae00b3061e55257d6c3d70851a1810
+  RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: b8c806db5b0fc1e8033463f3fcc1d7789e09d925
   RNGoogleSignin: 08dc4ba7eac2096c7fecfe109f0950fa4683c803
   RNImageCropPicker: 771e2ca319d2cf92e04ebf334ece892ee9a6728f

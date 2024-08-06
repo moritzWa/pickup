@@ -140,7 +140,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               style={{
                 color: theme.header,
                 fontSize: 18,
-                marginRight: 20,
+                // marginRight: 20,
                 fontFamily: "Raleway-SemiBold",
               }}
             >
@@ -148,7 +148,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             </Text>
           </View>
 
-          <Animated.View
+          {/* <Animated.View
             style={{
               width: 40,
               height: 40,
@@ -175,7 +175,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                 style={{ position: "relative", right: -2 }}
               />
             </TouchableOpacity>
-          </Animated.View>
+          </Animated.View> */}
         </View>
 
         <View style={{}}>

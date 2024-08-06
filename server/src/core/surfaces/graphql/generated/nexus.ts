@@ -58,6 +58,11 @@ export interface NexusGenObjects {
     textColor?: string | null; // String
     value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
   }
+  CategorySection: { // root type
+    categories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
+    label: string; // String!
+    value: string; // String!
+  }
   Content: entities.Content ;
   ContentRespondResponse: { // root type
     responseAudioUrl: string; // String!
@@ -130,6 +135,11 @@ export interface NexusGenFieldTypes {
     label: string; // String!
     textColor: string | null; // String
     value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
+  }
+  CategorySection: { // field return type
+    categories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
+    label: string; // String!
+    value: string; // String!
   }
   Content: { // field return type
     audioUrl: string; // String!
@@ -258,7 +268,7 @@ export interface NexusGenFieldTypes {
     checkCode: boolean; // Boolean!
     getActivity: NexusGenRootTypes['Content'][]; // [Content!]!
     getBookmarks: NexusGenRootTypes['Content'][]; // [Content!]!
-    getCategories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
+    getCategories: NexusGenRootTypes['CategorySection'][]; // [CategorySection!]!
     getContent: NexusGenRootTypes['Content']; // Content!
     getContentFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
@@ -319,6 +329,11 @@ export interface NexusGenFieldTypeNames {
     label: 'String'
     textColor: 'String'
     value: 'CategoryEnum'
+  }
+  CategorySection: { // field return type name
+    categories: 'CategoryInfo'
+    label: 'String'
+    value: 'String'
   }
   Content: { // field return type name
     audioUrl: 'String'
@@ -447,7 +462,7 @@ export interface NexusGenFieldTypeNames {
     checkCode: 'Boolean'
     getActivity: 'Content'
     getBookmarks: 'Content'
-    getCategories: 'CategoryInfo'
+    getCategories: 'CategorySection'
     getContent: 'Content'
     getContentFeed: 'Content'
     getContentSession: 'ContentSession'

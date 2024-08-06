@@ -58,6 +58,7 @@ import { auth } from "src/utils/firebase";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { getAudioUrl } from "src/redux/reducers/audio";
+import { useAudio } from "src/hooks/useAudio";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -188,6 +189,8 @@ function App() {
     _loadInitialState();
   }, []);
 
+  const { download } = useAudio();
+
   const _loadSound = async (audioUrl: string) => {
     try {
       console.log("loading sound : " + audioUrl);
@@ -202,15 +205,8 @@ function App() {
         playThroughEarpieceAndroid: false,
       });
 
-      await sound.current.loadAsync(
-        {
-          uri: audioUrl,
-        },
-        {
-          shouldPlay: false,
-        },
-        true
-      );
+      // load the audio url content to local file storage
+      const audio = await download(audioUrl);
 
       console.log("loaded sound : " + sound);
     } catch (error) {

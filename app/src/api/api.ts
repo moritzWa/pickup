@@ -285,9 +285,13 @@ const GetCategories = gql`
     getCategories {
       label
       value
-      emoji
-      backgroundColor
-      textColor
+      categories {
+        label
+        value
+        emoji
+        backgroundColor
+        textColor
+      }
     }
   }
 `;

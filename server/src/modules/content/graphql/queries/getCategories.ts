@@ -19,7 +19,7 @@ import { omit } from "lodash";
 import { CATEGORIES } from "../../services/categories";
 
 export const getCategories = queryField("getCategories", {
-    type: nonNull(list(nonNull("CategoryInfo"))),
+    type: nonNull(list(nonNull("CategorySection"))),
     resolve: async (_parent, args, ctx: Context) => {
         return CATEGORIES;
     },

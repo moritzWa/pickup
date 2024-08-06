@@ -148,35 +148,47 @@ const Interests = () => {
           onChangeText={(text) => setDescription(text)}
         />
 
-        <Text
-          style={{
-            fontSize: 16,
-            marginTop: 20,
-            textAlign: "left",
-            fontFamily: "Raleway-Medium",
-            color: text,
-          }}
-        >
-          Suggestions:
-        </Text>
-
         <View
           style={{
             marginVertical: 25,
-            marginTop: 10,
             // just display flex and wrap
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "flex-start",
-            alignItems: "center",
           }}
         >
-          {categories.map((category) => (
-            <Category
-              category={category}
-              isActive={selected.has(category.value)}
-              onPress={() => addOrRemove(category.value)}
-            />
+          {categories.map((section) => (
+            <View
+              style={{
+                marginBottom: 20,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontFamily: "Raleway-Bold",
+                  color: text,
+                  marginBottom: 10,
+                  textTransform: "uppercase",
+                }}
+              >
+                {section.label}
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                }}
+              >
+                {section.categories.map((category) => (
+                  <Category
+                    category={category}
+                    isActive={selected.has(category.value)}
+                    onPress={() => addOrRemove(category.value)}
+                  />
+                ))}
+              </View>
+            </View>
           ))}
         </View>
 
