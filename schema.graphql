@@ -7,6 +7,27 @@ enum ActivityFilter {
   unread
 }
 
+enum CategoryEnum {
+  Comedy
+  Entrepreneurship
+  Hiring
+  History
+  Language
+  Negotiation
+  Philosophy
+  Product
+  PublicSpeaking
+  Science
+}
+
+type CategoryInfo {
+  backgroundColor: String
+  emoji: String!
+  label: String!
+  textColor: String
+  value: CategoryEnum!
+}
+
 type Content {
   audioUrl: String!
   authorImageUrl: String
@@ -161,6 +182,7 @@ type Query {
   checkCode(referralCode: String!): Boolean!
   getActivity(filter: ActivityFilter): [Content!]!
   getBookmarks(limit: Int, page: Int): [Content!]!
+  getCategories: [CategoryInfo!]!
   getContent(contentId: ID!): Content!
   getContentFeed(filter: ContentFeedFilter, limit: Int): [Content!]!
   getContentSession(contentId: ID!): ContentSession!

@@ -65,6 +65,7 @@ const Signup = () => {
         variables,
       });
 
+      const user = response.data?.createUser?.user;
       const token = response.data?.createUser?.token;
 
       if (!token) return;
@@ -72,6 +73,10 @@ const Signup = () => {
       await auth().signInWithCustomToken(token);
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      if (!user?.name) {
+        return navigation.navigate("FullName");
+      }
 
       return navigation.navigate("Main");
     } catch (err) {
@@ -99,21 +104,29 @@ const Signup = () => {
 
       // if already has a user -> just go to the home page
       if (me) {
+        if (!me?.name) {
+          return navigation.navigate("FullName");
+        }
+
         return navigation.navigate("Main");
       }
-
-      console.log(u.user);
 
       const variables: MutationCreateUserArgs = {
         email: u.user?.email || "",
         name: u.user?.displayName || "",
       };
 
-      await createUser({
+      const response = await createUser({
         variables,
       });
 
+      const user = response.data?.createUser?.user;
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      if (!user?.name) {
+        return navigation.navigate("FullName");
+      }
 
       return navigation.navigate("Main");
     } catch (err) {
@@ -142,8 +155,6 @@ const Signup = () => {
         return navigation.navigate("Main");
       }
 
-      console.log(u.user);
-
       const nameFromApple =
         appleData && appleData.fullName
           ? `${appleData.fullName?.givenName || ""} ${
@@ -156,11 +167,17 @@ const Signup = () => {
         name: nameFromApple ? nameFromApple || "" : u.user?.displayName || "",
       };
 
-      await createUser({
+      const response = await createUser({
         variables,
       });
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      const newUser = response.data?.createUser;
+
+      if (!newUser?.user.name) {
+        return navigation.navigate("FullName");
+      }
 
       return navigation.navigate("Main");
     } catch (err) {
@@ -200,7 +217,7 @@ const Signup = () => {
         <Text
           style={{
             fontSize: 28,
-            fontFamily: "Raleway-Regular",
+            fontFamily: "Raleway-Bold",
             textAlign: "left",
             width: "100%",
             marginTop: 25,
@@ -208,12 +225,13 @@ const Signup = () => {
             color: header,
           }}
         >
-          Sign Up
+          Create your account
         </Text>
 
         <Input
           autoComplete="name"
           label="Full name"
+          autoFocus
           placeholder="Full name"
           textContentType="name"
           value={fullName}

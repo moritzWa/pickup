@@ -81,12 +81,12 @@ export const AppleButton = ({
     <TouchableOpacity
       style={{
         backgroundColor: colors.black,
-        borderWidth: 2,
-        marginTop: 10,
-        borderColor: colors.gray20,
+        // borderWidth: 2,
+        marginTop: 15,
+        // borderColor: colors.gray20,
         paddingVertical: 15,
         paddingHorizontal: 25,
-        borderRadius: 50,
+        borderRadius: 10,
         alignItems: "center",
         marginBottom: 5,
         display: "flex",
@@ -123,12 +123,12 @@ export const AppleButton = ({
           <Text
             style={{
               color: colors.white,
-              fontFamily: "Raleway-Semibold",
+              fontFamily: "Raleway-Bold",
               textAlign: "center",
               fontSize: 16,
             }}
           >
-            {label || "Sign up"} with Apple
+            {label || "Continue"} with Apple
           </Text>
         )}
       </View>

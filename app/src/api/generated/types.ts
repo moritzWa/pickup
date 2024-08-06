@@ -23,6 +23,28 @@ export enum ActivityFilter {
   Unread = 'unread'
 }
 
+export enum CategoryEnum {
+  Comedy = 'Comedy',
+  Entrepreneurship = 'Entrepreneurship',
+  Hiring = 'Hiring',
+  History = 'History',
+  Language = 'Language',
+  Negotiation = 'Negotiation',
+  Philosophy = 'Philosophy',
+  Product = 'Product',
+  PublicSpeaking = 'PublicSpeaking',
+  Science = 'Science'
+}
+
+export type CategoryInfo = {
+  __typename?: 'CategoryInfo';
+  backgroundColor?: Maybe<Scalars['String']['output']>;
+  emoji: Scalars['String']['output'];
+  label: Scalars['String']['output'];
+  textColor?: Maybe<Scalars['String']['output']>;
+  value: CategoryEnum;
+};
+
 export type Content = {
   __typename?: 'Content';
   audioUrl: Scalars['String']['output'];
@@ -261,6 +283,7 @@ export type Query = {
   checkCode: Scalars['Boolean']['output'];
   getActivity: Array<Content>;
   getBookmarks: Array<Content>;
+  getCategories: Array<CategoryInfo>;
   getContent: Content;
   getContentFeed: Array<Content>;
   getContentSession: ContentSession;

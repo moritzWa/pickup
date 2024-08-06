@@ -39,6 +39,9 @@ import LessonSession from "src/views/Main/LessonSession";
 import Activity from "src/views/Main/Activity";
 import ContentSession from "src/views/Main/ContentSession";
 import { UserProfile } from "src/views/Main/Profile";
+import EnablePushNotifications from "src/views/Authentication/EnablePushNotifications";
+import Interests from "src/views/Authentication/Interests";
+import FullName from "src/views/Authentication/FullName";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -101,6 +104,8 @@ export type RootStackParamList = {
   UserProfile?: { username: string };
   ClaimCode?: undefined;
   Authentication: undefined;
+  Interests?: undefined;
+  FullName?: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
@@ -126,6 +131,30 @@ const AuthenticationNavigationStack = () => {
       <Stack.Screen
         name="Signup"
         component={Signup}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="EnablePushNotifications"
+        component={EnablePushNotifications}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="FullName"
+        component={FullName}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="Interests"
+        component={Interests}
         options={{
           headerShown: false,
         }}

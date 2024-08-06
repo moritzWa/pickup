@@ -5,3 +5,4 @@ export * from "./getActivity";
 export * from "./getCurrentContentSession";
 export * from "./getBookmarks";
 export * from "./getLikes";
+export * from "./getCategories";

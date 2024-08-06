@@ -74,6 +74,9 @@ function App() {
   const insets = useSafeAreaInsets();
   const { me, refetchMe } = useMe("network-only");
 
+  // just cache this on app load so this info is faster elsewhere
+  useQuery(api.categories.list);
+
   useEffect(() => {
     store.dispatch(setUserAuthStateChanged("LOADING"));
 

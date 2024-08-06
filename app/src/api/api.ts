@@ -265,6 +265,18 @@ const GetBookmarks = gql`
   }
 `;
 
+const GetCategories = gql`
+  query GetCategories {
+    getCategories {
+      label
+      value
+      emoji
+      backgroundColor
+      textColor
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
@@ -298,5 +310,8 @@ export const api = {
     start: StartLesson,
     progress: GetLessonProgress,
     get: GetLesson,
+  },
+  categories: {
+    list: GetCategories,
   },
 };
