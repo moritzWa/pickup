@@ -43,6 +43,7 @@ import {
   setActivityFilter,
 } from "src/redux/reducers/globalState";
 import * as Haptics from "expo-haptics";
+import { CurrentAudio } from "src/components/CurrentAudio";
 
 const Activity = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -94,7 +95,7 @@ const Activity = () => {
         renderItem={({ item: c }) => <ContentRow content={c} />}
       />
 
-      {/* <CurrentAudio content={content} /> */}
+      <CurrentAudio content={content} />
     </SafeAreaView>
   );
 };
@@ -219,7 +220,7 @@ const Options = () => {
   );
 };
 
-const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
+const old__CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 

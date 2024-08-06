@@ -58,7 +58,12 @@ const startInngest = async () => {
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json({ limit: "50mb" }));
     app.use(cors());
-    app.use(helmet());
+    app.use(
+        helmet({
+            contentSecurityPolicy:
+                process.env.NODE_ENV === "production" ? undefined : false,
+        })
+    );
 
     app.get("/", (_req, res) => {
         return res.status(200).send("Welcome to pickup 🚗!");
@@ -116,7 +121,12 @@ const startServer = async () => {
     app.use(express.json());
     app.use(cors());
     app.use(limiter);
-    app.use(helmet());
+    app.use(
+        helmet({
+            contentSecurityPolicy:
+                process.env.NODE_ENV === "production" ? undefined : false,
+        })
+    );
 
     app.get("/", (_req, res) => {
         console.log("pid", process.pid, "handler start, blocking CPU");

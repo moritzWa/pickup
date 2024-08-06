@@ -1,5 +1,5 @@
 import "react-native-get-random-values";
-import React, { useMemo } from "react";
+import React, { createContext, useMemo, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   Appearance,
@@ -56,6 +56,8 @@ import {
 import { colors } from "src/components";
 import { auth } from "src/utils/firebase";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
+import { getAudioUrl } from "src/redux/reducers/audio";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -66,6 +68,12 @@ LogBox.ignoreAllLogs(); //Ignore all log notifications
 //   loadErrorMessages();
 // }
 
+export const AppContext = createContext<{ sound: Audio.Sound | null }>({
+  sound: null,
+});
+
+const SOUND_INSTANCE = new Audio.Sound();
+
 function App() {
   const [isLoaded] = Font.useFonts({});
 
@@ -73,6 +81,9 @@ function App() {
   const { theme, header, background, secondaryBackground } = useTheme();
   const insets = useSafeAreaInsets();
   const { me, refetchMe } = useMe("network-only");
+
+  const sound = useRef(SOUND_INSTANCE);
+  const audioUrl = useSelector(getAudioUrl);
 
   // just cache this on app load so this info is faster elsewhere
   useQuery(api.categories.list);
@@ -97,17 +108,6 @@ function App() {
       }
     });
   }, []);
-
-  // requestPermission will show the native iOS or Android notification permission prompt.
-  // We recommend removing the following code and instead using an In-App Message to prompt for notification permission
-  // OneSignal.Notifications.requestPermission(true);
-
-  // Method for listening for notification clicks
-  // TODO(seankwalker): This is crashing android. Fix and add back
-  // 'Could not invoke OneSignal.addNotificationClickListener' Java exception
-  // OneSignal.Notifications.addEventListener("click", (event) => {
-  // console.log("OneSignal: notification clicked:", event);
-  // });
 
   useEffect(() => {
     async function prepare() {
@@ -161,18 +161,6 @@ function App() {
     // branch.setIdentity(me.id);
   };
 
-  // const onLayoutRootView = useCallback(async () => {
-  //   if ( authStatus !== "NOT_LOADED") {
-  //     // if logged in, check for face ID and enforce it if it exists
-
-  //     setHasClearedBiometric(true);
-  //   }
-  // }, [ authStatus]);
-
-  // useEffect(() => {
-  //   onLayoutRootView();
-  // }, [onLayoutRootView]);
-
   useEffect(() => {
     _initIntercom();
     _initOneSignal();
@@ -199,6 +187,46 @@ function App() {
   useEffect(() => {
     _loadInitialState();
   }, []);
+
+  const _loadSound = async (audioUrl: string) => {
+    try {
+      console.log("loading sound : " + audioUrl);
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+
+      await sound.current.loadAsync(
+        {
+          uri: audioUrl,
+        },
+        {
+          shouldPlay: false,
+        },
+        true
+      );
+
+      console.log("loaded sound : " + sound);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!audioUrl) return;
+
+    _loadSound(audioUrl);
+
+    return () => {
+      sound.current?.unloadAsync();
+    };
+  }, [audioUrl]);
 
   const toastConfig: ToastConfig = {
     success: (props) => (
@@ -245,13 +273,13 @@ function App() {
   }
 
   return (
-    <>
+    <AppContext.Provider value={{ sound: sound.current }}>
       <BottomSheetModalProvider>
         <MainNavigationStack />
       </BottomSheetModalProvider>
 
       <Toast config={toastConfig} />
-    </>
+    </AppContext.Provider>
   );
 }
 

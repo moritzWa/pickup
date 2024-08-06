@@ -59,8 +59,6 @@ const SIZE = 125;
 const ContentSession = () => {
   const route = useRoute<RouteProp<RootStackParamList, "ContentSession">>();
   const contentId = route.params?.contentId || "";
-  const isCarMode =
-    route.params?.isCarMode || false || route.name === "CarMode";
 
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
@@ -72,7 +70,7 @@ const ContentSession = () => {
   // >(api.lessons.respond);
 
   const [recording, setRecording] = useState<Audio.Recording>();
-  const [sound, setSound] = useState<Audio.Sound>();
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -349,23 +347,30 @@ const ContentSession = () => {
           playThroughEarpieceAndroid: false,
         });
 
-        console.log("LOADING SOUND");
+        const audioUrl =
+          "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // content?.audioUrl;
+
+        console.log(`[loading]: ${audioUrl}`);
 
         const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: content?.audioUrl },
-          { shouldPlay: false }
+          {
+            uri: audioUrl,
+          },
+          { shouldPlay: false },
+          updateStatus,
+          false
         );
 
         console.log("NEW SOUND " + newSound);
 
         setSound(newSound);
-        newSound.setOnPlaybackStatusUpdate(updateStatus);
 
         return newSound;
       }
 
       return null;
     } catch (err) {
+      console.log("==== error ====");
       console.log(err);
     }
   };

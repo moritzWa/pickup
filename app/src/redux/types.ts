@@ -21,6 +21,7 @@ export type AudioState = {
   audioUrl: string | null;
   currentMs: number | null;
   durationMs: number | null;
+  isPlaying: boolean;
 };
 
 export enum ProfileTabFilter {

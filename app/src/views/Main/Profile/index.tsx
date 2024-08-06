@@ -69,6 +69,7 @@ import {
   setProfileFilter,
 } from "src/redux/reducers/globalState";
 import { ProfileTabFilter } from "src/redux/types";
+import { CurrentAudio } from "src/components/CurrentAudio";
 
 export const UserProfile = () => {
   const { me } = useMe();
@@ -295,6 +296,8 @@ export const UserProfile = () => {
         }
         sections={sections}
       />
+
+      <CurrentAudio content={content} />
     </View>
   );
 };

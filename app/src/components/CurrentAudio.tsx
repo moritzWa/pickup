@@ -9,7 +9,7 @@ import {
   Image,
   Animated,
 } from "react-native";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
@@ -25,18 +25,30 @@ import {
   faCarBolt,
   faHeadphones,
   faHeadphonesAlt,
+  faPause,
   faPlay,
 } from "@fortawesome/pro-solid-svg-icons";
-import { Impressions } from "./Github";
-import { ContentRow } from "../../../components/Content/ContentRow";
+import { Impressions } from "../views/Main/Home/Github";
+import { ContentRow } from "./Content/ContentRow";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "src/components/Header";
 import FastImage from "react-native-fast-image";
 import { BlurView } from "expo-blur";
+import { AppContext } from "App";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getIsPlaying,
+  setAudioUrl,
+  setIsPlaying,
+} from "src/redux/reducers/audio";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 
 export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
+
+  const { sound } = useContext(AppContext);
+  const isPlaying = useSelector(getIsPlaying);
 
   const { data: contentData, refetch } = useQuery<
     Pick<Query, "getCurrentContentSession">
@@ -45,6 +57,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+  const dispatch = useDispatch();
 
   const color = colors.purple90;
   const [startContent, { error }] = useMutation(api.content.start);
@@ -88,6 +101,64 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
       );
     }
   };
+
+  const playContent = async () => {
+    if (!activeContent?.content?.audioUrl) {
+      return;
+    }
+
+    dispatch(setAudioUrl(activeContent?.content?.audioUrl));
+  };
+
+  const playOrPause = async () => {
+    try {
+      if (!sound) {
+        return;
+      }
+
+      const audioUrl = activeContent?.content?.audioUrl || "";
+      const status = await sound.getStatusAsync();
+
+      console.log(status);
+
+      if (status.isLoaded) {
+        // if playing -> pause
+        if (status.isPlaying) {
+          await sound.pauseAsync();
+          dispatch(setIsPlaying(false));
+          return;
+        }
+
+        // if paused -> play
+        await sound.playAsync();
+        dispatch(setIsPlaying(true));
+        return;
+      }
+
+      // load it in
+
+      await sound.unloadAsync();
+
+      console.log(`[loading: ${audioUrl}]`);
+
+      await sound.loadAsync(
+        {
+          uri: audioUrl,
+        },
+        {
+          shouldPlay: true,
+        }
+      );
+
+      dispatch(setIsPlaying(true));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    playContent();
+  }, [activeContent?.content?.audioUrl]);
 
   const bg = theme.theme === "light" ? "#DFDCFB" : "#050129";
   const title = activeContent?.content?.title;
@@ -206,7 +277,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         <TouchableOpacity
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          onPress={() => Alert.alert("pause")}
+          onPress={playOrPause}
           activeOpacity={1}
         >
           <Animated.View
@@ -224,7 +295,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
             }}
           >
             <FontAwesomeIcon
-              icon={faPlay}
+              icon={isPlaying ? faPause : faPlay}
               color={colors.white}
               size={18}
               style={{ position: "relative", right: -2 }}

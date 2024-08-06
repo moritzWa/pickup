@@ -1,17 +1,25 @@
 import * as http from "http";
 import { ApolloServer } from "apollo-server-express";
 import { Express } from "express";
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import {
+    ApolloServerPluginDrainHttpServer,
+    ApolloServerPluginLandingPageGraphQLPlayground,
+    ApolloServerPluginLandingPageLocalDefault,
+} from "apollo-server-core";
 import { schema } from "./schema";
 import { createContext as context } from "./context";
 import * as graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.js";
+import { config } from "src/config";
+import { hasValue } from "src/core/logic";
 
 const startApolloServer = async (app: Express) => {
     const httpServer = http.createServer(app);
 
     const server = new ApolloServer({
         schema,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })].filter(
+            hasValue
+        ),
         context,
     });
 
