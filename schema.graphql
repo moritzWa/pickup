@@ -150,6 +150,19 @@ enum LessonTypeEnum {
   Vocabulary
 }
 
+type Metadata {
+  author: String
+  byline: String
+  dir: String
+  excerpt: String
+  full_text: String
+  lang: String
+  length: Int
+  page_type: String
+  publishedTime: String
+  siteName: String
+}
+
 type Mutation {
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
@@ -209,11 +222,28 @@ type Query {
   me: User
   myCourses: [Course!]!
   mySessions: [LessonSession!]!
+  searchSimilarLinks(limit: Int = 3, query: String!): [SearchResult!]!
 }
 
 type RespondResponse {
   responseAudioUrl: String!
   transcription: String!
+}
+
+type SearchResult {
+  averageDistance: Float!
+  createdDate: Date!
+  fullText: String
+  id: Int!
+  lastCrawled: Date
+  link: String!
+  metadata: Metadata
+  minDistance: Float!
+  modifiedDate: Date!
+  readCount: Int!
+  snippet: String
+  title: String!
+  userIds: [Int!]!
 }
 
 type TranscribeResponse {

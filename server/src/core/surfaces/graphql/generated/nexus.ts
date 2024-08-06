@@ -91,6 +91,18 @@ export interface NexusGenObjects {
     type: string; // String!
   }
   LessonSession: entities.LessonSession ;
+  Metadata: { // root type
+    author?: string | null; // String
+    byline?: string | null; // String
+    dir?: string | null; // String
+    excerpt?: string | null; // String
+    full_text?: string | null; // String
+    lang?: string | null; // String
+    length?: number | null; // Int
+    page_type?: string | null; // String
+    publishedTime?: string | null; // String
+    siteName?: string | null; // String
+  }
   Mutation: {};
   PaymentMethod: { // root type
     last4: string; // String!
@@ -111,6 +123,21 @@ export interface NexusGenObjects {
   RespondResponse: { // root type
     responseAudioUrl: string; // String!
     transcription: string; // String!
+  }
+  SearchResult: { // root type
+    averageDistance: number; // Float!
+    createdDate: NexusGenScalars['Date']; // Date!
+    fullText?: string | null; // String
+    id: number; // Int!
+    lastCrawled?: NexusGenScalars['Date'] | null; // Date
+    link: string; // String!
+    metadata?: NexusGenRootTypes['Metadata'] | null; // Metadata
+    minDistance: number; // Float!
+    modifiedDate: NexusGenScalars['Date']; // Date!
+    readCount: number; // Int!
+    snippet?: string | null; // String
+    title: string; // String!
+    userIds: number[]; // [Int!]!
   }
   TranscribeResponse: { // root type
     transcription: string; // String!
@@ -231,6 +258,18 @@ export interface NexusGenFieldTypes {
     id: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
   }
+  Metadata: { // field return type
+    author: string | null; // String
+    byline: string | null; // String
+    dir: string | null; // String
+    excerpt: string | null; // String
+    full_text: string | null; // String
+    lang: string | null; // String
+    length: number | null; // Int
+    page_type: string | null; // String
+    publishedTime: string | null; // String
+    siteName: string | null; // String
+  }
   Mutation: { // field return type
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
@@ -287,10 +326,26 @@ export interface NexusGenFieldTypes {
     me: NexusGenRootTypes['User'] | null; // User
     myCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     mySessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
+    searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
   }
   RespondResponse: { // field return type
     responseAudioUrl: string; // String!
     transcription: string; // String!
+  }
+  SearchResult: { // field return type
+    averageDistance: number; // Float!
+    createdDate: NexusGenScalars['Date']; // Date!
+    fullText: string | null; // String
+    id: number; // Int!
+    lastCrawled: NexusGenScalars['Date'] | null; // Date
+    link: string; // String!
+    metadata: NexusGenRootTypes['Metadata'] | null; // Metadata
+    minDistance: number; // Float!
+    modifiedDate: NexusGenScalars['Date']; // Date!
+    readCount: number; // Int!
+    snippet: string | null; // String
+    title: string; // String!
+    userIds: number[]; // [Int!]!
   }
   TranscribeResponse: { // field return type
     transcription: string; // String!
@@ -425,6 +480,18 @@ export interface NexusGenFieldTypeNames {
     id: 'String'
     updatedAt: 'Date'
   }
+  Metadata: { // field return type name
+    author: 'String'
+    byline: 'String'
+    dir: 'String'
+    excerpt: 'String'
+    full_text: 'String'
+    lang: 'String'
+    length: 'Int'
+    page_type: 'String'
+    publishedTime: 'String'
+    siteName: 'String'
+  }
   Mutation: { // field return type name
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
@@ -481,10 +548,26 @@ export interface NexusGenFieldTypeNames {
     me: 'User'
     myCourses: 'Course'
     mySessions: 'LessonSession'
+    searchSimilarLinks: 'SearchResult'
   }
   RespondResponse: { // field return type name
     responseAudioUrl: 'String'
     transcription: 'String'
+  }
+  SearchResult: { // field return type name
+    averageDistance: 'Float'
+    createdDate: 'Date'
+    fullText: 'String'
+    id: 'Int'
+    lastCrawled: 'Date'
+    link: 'String'
+    metadata: 'Metadata'
+    minDistance: 'Float'
+    modifiedDate: 'Date'
+    readCount: 'Int'
+    snippet: 'String'
+    title: 'String'
+    userIds: 'Int'
   }
   TranscribeResponse: { // field return type name
     transcription: 'String'
@@ -622,6 +705,10 @@ export interface NexusGenArgTypes {
     }
     getProfile: { // args
       userId?: string | null; // ID
+    }
+    searchSimilarLinks: { // args
+      limit: number | null; // Int
+      query: string; // String!
     }
   }
 }
