@@ -9,12 +9,16 @@ import {
   Image,
   Animated,
 } from "react-native";
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
-import { Query } from "src/api/generated/types";
+import {
+  ActivityFilter,
+  Query,
+  QueryGetActivityArgs,
+} from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
 import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
@@ -28,34 +32,33 @@ import {
   faPlay,
   faPlus,
 } from "@fortawesome/pro-solid-svg-icons";
-import { Impressions } from "./Github";
 import { ContentRow } from "../../../components/Content/ContentRow";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "src/components/Header";
 import FastImage from "react-native-fast-image";
 import { BlurView } from "expo-blur";
-
-const generateImpressionsData = () => {
-  const impressions = [];
-  for (let i = 0; i < 365; i++) {
-    impressions.push({ completed: Math.random() > 0.5 });
-  }
-  return impressions;
-};
-
-const impressionsData = generateImpressionsData();
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getActivityFilter,
+  setActivityFilter,
+} from "src/redux/reducers/globalState";
+import * as Haptics from "expo-haptics";
 
 const Activity = () => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
 
-  const { data, refetch, error } = useQuery<Pick<Query, "getContentFeed">>(
-    api.content.feed
+  const filter = useSelector(getActivityFilter);
+
+  const variables = useMemo((): QueryGetActivityArgs => ({}), [filter]);
+
+  const { data, refetch, error } = useQuery<Pick<Query, "getActivity">>(
+    api.content.activity
   );
 
   const [startCourse] = useMutation(api.courses.start);
 
-  const content = (data?.getContentFeed ?? []) as BaseContentFields[];
+  const content = (data?.getActivity ?? []) as BaseContentFields[];
 
   const onRefresh = async () => {
     await refetch();
@@ -134,8 +137,9 @@ export enum DiscoveryTab {
 
 const Options = () => {
   const theme = useTheme();
-  const activeTab = DiscoveryTab.All;
+  const activeTab = useSelector(getActivityFilter);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+  const dispatch = useDispatch();
 
   const onPressIn = () => {
     Animated.spring(animation, {
@@ -153,8 +157,9 @@ const Options = () => {
     }).start();
   };
 
-  const onPress = () => {
-    // TODO:
+  const onPress = (tab: ActivityFilter) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    dispatch(setActivityFilter(tab));
   };
 
   return (
@@ -177,20 +182,20 @@ const Options = () => {
         }}
       >
         <SingleFilter
-          onPress={onPress}
-          isActive={DiscoveryTab.All === activeTab}
+          onPress={() => onPress(ActivityFilter.New)}
+          isActive={ActivityFilter.New === activeTab}
           label="New"
         />
 
         <SingleFilter
-          onPress={onPress}
-          isActive={DiscoveryTab.Popular === activeTab}
+          onPress={() => onPress(ActivityFilter.Unread)}
+          isActive={ActivityFilter.Unread === activeTab}
           label="Unread only"
         />
       </View>
 
       <TouchableOpacity
-        onPress={onPress}
+        onPress={() => Alert.alert("hi")}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         activeOpacity={0.9}

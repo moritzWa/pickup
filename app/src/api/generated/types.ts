@@ -18,6 +18,11 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export enum ActivityFilter {
+  New = 'new',
+  Unread = 'unread'
+}
+
 export type Content = {
   __typename?: 'Content';
   audioUrl: Scalars['String']['output'];
@@ -39,6 +44,12 @@ export type Content = {
   websiteUrl: Scalars['String']['output'];
 };
 
+export enum ContentFeedFilter {
+  ForYou = 'for_you',
+  New = 'new',
+  Popular = 'popular'
+}
+
 export type ContentRespondResponse = {
   __typename?: 'ContentRespondResponse';
   responseAudioUrl: Scalars['String']['output'];
@@ -47,12 +58,14 @@ export type ContentRespondResponse = {
 
 export type ContentSession = {
   __typename?: 'ContentSession';
+  bookmarkedAt?: Maybe<Scalars['Date']['output']>;
   content?: Maybe<Content>;
   contentId: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
   currentMs?: Maybe<Scalars['Float']['output']>;
   durationMs?: Maybe<Scalars['Float']['output']>;
   id: Scalars['String']['output'];
+  isBookmarked?: Maybe<Scalars['Boolean']['output']>;
   percentFinished?: Maybe<Scalars['Float']['output']>;
   timestampCursor?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['Date']['output'];
@@ -246,7 +259,8 @@ export type Profile = {
 export type Query = {
   __typename?: 'Query';
   checkCode: Scalars['Boolean']['output'];
-  getActivity: Array<ContentSession>;
+  getActivity: Array<Content>;
+  getBookmarks: Array<Content>;
   getContent: Content;
   getContentFeed: Array<Content>;
   getContentSession: ContentSession;
@@ -258,6 +272,7 @@ export type Query = {
   getLesson: Lesson;
   getLessonProgress: LessonProgress;
   getLessonSessions: Array<LessonSession>;
+  getLikes: Array<ContentSession>;
   getMobileUpdate: GetMobileUpdateResponse;
   getPaymentMethods: Array<PaymentMethod>;
   getProfile: Profile;
@@ -272,12 +287,24 @@ export type QueryCheckCodeArgs = {
 };
 
 
+export type QueryGetActivityArgs = {
+  filter?: InputMaybe<ActivityFilter>;
+};
+
+
+export type QueryGetBookmarksArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryGetContentArgs = {
   contentId: Scalars['ID']['input'];
 };
 
 
 export type QueryGetContentFeedArgs = {
+  filter?: InputMaybe<ContentFeedFilter>;
   limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -314,6 +341,12 @@ export type QueryGetLessonProgressArgs = {
 
 export type QueryGetLessonSessionsArgs = {
   lessonId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetLikesArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

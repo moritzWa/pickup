@@ -32,6 +32,8 @@ export const getContentFeed = queryField("getContentFeed", {
     resolve: async (_parent, args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);
 
+        // console.log(args);
+
         const { limit } = args;
         const user = ctx.me!;
 

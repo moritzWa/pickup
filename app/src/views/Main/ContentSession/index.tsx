@@ -42,7 +42,7 @@ import {
   QueryGetContentArgs,
   QueryGetLessonArgs,
 } from "src/api/generated/types";
-import { api } from "src/api";
+import { api, apolloClient } from "src/api";
 import Back from "src/components/Back";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Voice from "@react-native-voice/voice";
@@ -109,6 +109,12 @@ const ContentSession = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const estimatedLen = Math.ceil((content?.lengthSeconds || 0) / 60);
+
+  // useEffect(() => {
+  //   apolloClient.refetchQueries({
+
+  //   })
+  // }, [content]);
 
   useEffect(() => {
     return () => {

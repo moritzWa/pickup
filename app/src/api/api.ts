@@ -231,8 +231,17 @@ const GetLesson = gql`
 
 const GetContentFeed = gql`
   ${BaseContentFields}
-  query GetContentFeed($limit: Int) {
-    getContentFeed(limit: $limit) {
+  query GetContentFeed($limit: Int, $filter: ContentFeedFilter) {
+    getContentFeed(limit: $limit, filter: $filter) {
+      ...BaseContentFields
+    }
+  }
+`;
+
+const GetActivity = gql`
+  ${BaseContentFields}
+  query GetActivity($filter: ActivityFilter) {
+    getActivity(limit: $limit, filter: $filter) {
       ...BaseContentFields
     }
   }
@@ -243,6 +252,15 @@ const GetContent = gql`
   query GetContent($contentId: ID!) {
     getContent(contentId: $contentId) {
       ...BaseContentFields
+    }
+  }
+`;
+
+const GetBookmarks = gql`
+  ${BaseContentSessionFields}
+  query GetBookmarks($limit: Int, $page: Int) {
+    getBookmarks(limit: $limit, page: $page) {
+      ...BaseContentSessionFields
     }
   }
 `;
@@ -263,8 +281,10 @@ export const api = {
     current: GetCurrentContentSession,
     start: StartContent,
     feed: GetContentFeed,
+    activity: GetActivity,
     get: GetContent,
     startListening: StartListening,
+    bookmarks: GetBookmarks,
   },
   courses: {
     start: StartCourse,
