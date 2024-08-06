@@ -4,6 +4,7 @@ import { Express } from "express";
 import {
     ApolloServerPluginDrainHttpServer,
     ApolloServerPluginLandingPageGraphQLPlayground,
+    ApolloServerPluginLandingPageLocalDefault,
 } from "apollo-server-core";
 import { schema } from "./schema";
 import { createContext as context } from "./context";
@@ -16,12 +17,9 @@ const startApolloServer = async (app: Express) => {
 
     const server = new ApolloServer({
         schema,
-        plugins: [
-            ApolloServerPluginDrainHttpServer({ httpServer }),
-            config.env !== "production"
-                ? ApolloServerPluginLandingPageGraphQLPlayground()
-                : null,
-        ].filter(hasValue),
+        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })].filter(
+            hasValue
+        ),
         context,
     });
 
