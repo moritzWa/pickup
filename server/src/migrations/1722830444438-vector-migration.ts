@@ -4,10 +4,8 @@ export class AddEmbeddingColumn1722801464849 implements MigrationInterface {
     name = "AddEmbeddingColumn1722801464849";
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        // if no exist CREATE EXTENSION vector;
-        await queryRunner.query(`
-            CREATE EXTENSION IF NOT EXISTS vector;
-        `);
+        await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS vector;`);
+
         await queryRunner.query(`
             ALTER TABLE "curius_links"
             ADD COLUMN "embedding" VECTOR(256);
@@ -17,7 +15,7 @@ export class AddEmbeddingColumn1722801464849 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
             ALTER TABLE "curius_links"
-            DROP COLUMN "embedding";
+            DROP COLUMN IF EXISTS "embedding";
         `);
     }
 }

@@ -26,14 +26,19 @@ const addFullTextToLinks = async () => {
     const linksResponse = await curiusLinkRepo.find();
 
     if (!isSuccess(linksResponse)) {
-        console.error("Failed to fetch links:", linksResponse.error);
+        console.error(
+            "addFullTextColumn.ts:Failed to fetch links:",
+            linksResponse.error
+        );
         await dataSource.destroy();
         return;
     }
 
     const links = linksResponse.value;
     const totalLinks = links.length;
-    console.log(`Starting to process ${totalLinks} links...`);
+    console.log(
+        `addFullTextColumn.ts: Starting to process ${totalLinks} links...`
+    );
 
     for (let i = 0; i < links.length; i++) {
         const link = links[i];
@@ -41,11 +46,22 @@ const addFullTextToLinks = async () => {
             let result;
 
             if (link.link.endsWith(".pdf")) {
-                const pdfBuffer = await fetch(link.link).then((res) =>
-                    res.arrayBuffer()
-                );
-                const parsedPDF = await pdf(Buffer.from(pdfBuffer));
-                link.fullText = sanitizeText(parsedPDF.text);
+                const response = await fetch(link.link);
+
+                // Check if the response is successful and the content type is PDF
+                if (
+                    response.ok &&
+                    response.headers
+                        .get("content-type")
+                        ?.includes("application/pdf")
+                ) {
+                    const pdfBuffer = await response.arrayBuffer();
+                    const parsedPDF = await pdf(Buffer.from(pdfBuffer));
+                    link.fullText = sanitizeText(parsedPDF.text);
+                } else {
+                    console.log(`Skipping inaccessible PDF: ${link.link}`);
+                    continue; // Skip to the next link
+                }
             } else {
                 const { window } = new JSDOM(
                     await fetch(link.link).then((res) => res.text())
@@ -71,7 +87,11 @@ const addFullTextToLinks = async () => {
 
             const saveResponse = await curiusLinkRepo.save(link);
             if (isSuccess(saveResponse)) {
-                console.log(`Updated link ${link.id} (${i + 1}/${totalLinks})`);
+                console.log(
+                    `addFullTextColumn.ts: Updated link ${link.id} (${
+                        i + 1
+                    }/${totalLinks})`
+                );
             } else {
                 console.error(
                     `Failed to update link ${link.id} (${
@@ -82,18 +102,27 @@ const addFullTextToLinks = async () => {
             }
         } catch (error) {
             console.error(
-                `Error processing link ${link.id} (${i + 1}/${totalLinks}):`,
+                `addFullTextColumn.ts: Error processing link ${link.id} (${
+                    i + 1
+                }/${totalLinks}):`,
                 error
             );
+            continue; // Skip to the next link on error
         }
 
         // Log progress every 10 links
         if ((i + 1) % 10 === 0 || i === links.length - 1) {
-            console.log(`Processed ${i + 1} of ${totalLinks} links`);
+            console.log(
+                `addFullTextColumn.ts: Processed ${
+                    i + 1
+                } of ${totalLinks} links`
+            );
         }
     }
 
-    console.log(`Finished processing ${totalLinks} links`);
+    console.log(
+        `addFullTextColumn.ts: Finished processing ${totalLinks} links`
+    );
     await dataSource.destroy();
 };
 
