@@ -24,9 +24,7 @@ await queryRunner.query(
 
 ### Docker & Server
 
-Start Docker locally
-
-go to deployments/learning and edit docker-compose.yml
+We use pgvector for vector storage. For that we need to use a custom docker image.
 
 Pull the [pgvector PostgreSQL Docker image](https://hub.docker.com/r/pgvector/pgvector):
 
@@ -34,16 +32,18 @@ Pull the [pgvector PostgreSQL Docker image](https://hub.docker.com/r/pgvector/pg
 docker pull pgvector/pgvector:pg16
 ```
 
-run:
+Start Docker locally
 
-```
-docker compose up
+Run the following command from the root directory:
+
+```console
+docker compose -f deployments/pickup/docker-compose.yml up
 ```
 
-If you want to kill the postgres container
+If you want to stop and remove the containers:
 
-```
-docker compose down
+```console
+docker compose -f deployments/pickup/docker-compose.yml down
 ```
 
 go back to the server directory and run the migrations now that postgres is up (in the docker container)
