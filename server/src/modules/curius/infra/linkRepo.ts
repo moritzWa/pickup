@@ -3,7 +3,7 @@ import { Repository } from "typeorm";
 import { OpenAI } from "openai";
 import * as pgvector from "pgvector/pg";
 import { dataSource } from "src/core/infra/postgres";
-import { CuriusLink } from "src/core/infra/postgres/entities";
+import { CuriusLink, CuriusLinkChunk } from "src/core/infra/postgres/entities";
 import { failure, FailureOrSuccess, success } from "src/core/logic";
 import { UnexpectedError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
@@ -56,21 +56,30 @@ export class PostgresCuriusLinkRepository {
                 encoding_format: "float",
             });
 
-            const vector = pgvector.toSql(embedding.data[0].embedding);
+            const vector = embedding.data[0].embedding;
 
-            const result = await this.repo.query(
-                `
-                SELECT DISTINCT ON (cl.id) cl.*, 
-                       clc.embedding <-> $1 as distance
-                FROM curius_links cl
-                JOIN curius_link_chunks clc ON cl.id = clc.link_id
-                ORDER BY cl.id, distance
-                LIMIT $2
-            `,
-                [vector, limit]
-            );
+            const result = await this.repo
+                .createQueryBuilder("curiusLinks")
+                .select("curiusLinks")
+                .addSelect("chunks.embedding <-> :embedding", "distance")
+                .innerJoin(
+                    CuriusLinkChunk,
+                    "chunks",
+                    "curiusLinks.id = chunks.linkId"
+                )
+                .orderBy("curiusLinks.id")
+                .addOrderBy("distance")
+                .setParameter("embedding", pgvector.toSql(vector))
+                .limit(limit)
+                .distinctOn(["curiusLinks.id"])
+                .getRawAndEntities();
 
-            return success(result as LinkWithDistance[]);
+            const linksWithDistance = result.raw.map((raw, index) => ({
+                ...result.entities[index],
+                distance: parseFloat(raw.distance),
+            }));
+
+            return success(linksWithDistance);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }
