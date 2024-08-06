@@ -59,19 +59,19 @@ export class PostgresCuriusLinkRepository {
             const vector = embedding.data[0].embedding;
 
             const result = await this.repo
-                .createQueryBuilder("curiusLinks")
-                .select("curiusLinks")
+                .createQueryBuilder("curius_links")
+                .select("curius_links")
                 .addSelect("chunks.embedding <-> :embedding", "distance")
                 .innerJoin(
                     CuriusLinkChunk,
                     "chunks",
-                    "curiusLinks.id = chunks.linkId"
+                    "curius_links.id = chunks.linkId"
                 )
-                .orderBy("curiusLinks.id")
+                .orderBy("curius_links.id")
                 .addOrderBy("distance")
                 .setParameter("embedding", pgvector.toSql(vector))
                 .limit(limit)
-                .distinctOn(["curiusLinks.id"])
+                .distinctOn(["curius_links.id"])
                 .getRawAndEntities();
 
             const linksWithDistance = result.raw.map((raw, index) => ({
