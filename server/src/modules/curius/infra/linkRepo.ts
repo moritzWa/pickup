@@ -10,7 +10,11 @@ import { DefaultErrors } from "src/core/logic/errors/default";
 
 type LinkResponse = FailureOrSuccess<DefaultErrors, CuriusLink>;
 type LinksResponse = FailureOrSuccess<DefaultErrors, CuriusLink[]>;
-type LinkWithDistance = CuriusLink & { distance: number };
+
+type LinkWithDistance = CuriusLink & {
+    averageDistance: number;
+    chunkMatchesForLink: number;
+};
 type LinksWithDistanceResponse = FailureOrSuccess<
     DefaultErrors,
     LinkWithDistance[]
@@ -61,22 +65,30 @@ export class PostgresCuriusLinkRepository {
             const result = await this.repo
                 .createQueryBuilder("curius_links")
                 .select("curius_links")
-                .addSelect("chunks.embedding <-> :embedding", "distance")
+                .addSelect("COUNT(chunks.id)", "chunkMatchesForLink")
+                .addSelect(
+                    "AVG(chunks.embedding <-> :embedding)",
+                    "averageDistance"
+                )
                 .innerJoin(
                     CuriusLinkChunk,
                     "chunks",
                     "curius_links.id = chunks.linkId"
                 )
-                .orderBy("curius_links.id")
-                .addOrderBy("distance")
                 .setParameter("embedding", pgvector.toSql(vector))
+                .groupBy("curius_links.id")
+                .orderBy("chunkMatchesForLink", "DESC")
+                .addOrderBy("averageDistance")
                 .limit(limit)
-                .distinctOn(["curius_links.id"])
                 .getRawAndEntities();
 
-            const linksWithDistance = result.raw.map((raw, index) => ({
-                ...result.entities[index],
-                distance: parseFloat(raw.distance),
+            const linksWithDistance = result.entities.map((entity, index) => ({
+                ...entity,
+                chunkMatchesForLink: parseInt(
+                    result.raw[index].chunkMatchesForLink,
+                    10
+                ),
+                averageDistance: parseFloat(result.raw[index].averageDistance),
             }));
 
             return success(linksWithDistance);
