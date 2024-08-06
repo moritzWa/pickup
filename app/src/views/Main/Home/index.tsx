@@ -27,7 +27,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPlay } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "./Github";
 import { ContentRow } from "../../../components/Content/ContentRow";
-import { CurrentAudio } from "./CurrentAudio";
+import { CurrentAudio } from "../../../components/CurrentAudio";
 import { useDispatch, useSelector } from "react-redux";
 import { getHomeFilter, setHomeFilter } from "src/redux/reducers/globalState";
 import * as Haptics from "expo-haptics";
