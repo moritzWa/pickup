@@ -69,10 +69,6 @@ LogBox.ignoreAllLogs(); //Ignore all log notifications
 //   loadErrorMessages();
 // }
 
-export const AppContext = createContext<{ sound: Audio.Sound | null }>({
-  sound: null,
-});
-
 const SOUND_INSTANCE = new Audio.Sound();
 
 function App() {
@@ -82,9 +78,6 @@ function App() {
   const { theme, header, background, secondaryBackground } = useTheme();
   const insets = useSafeAreaInsets();
   const { me, refetchMe } = useMe("network-only");
-
-  const sound = useRef(SOUND_INSTANCE);
-  const audioUrl = useSelector(getAudioUrl);
 
   // just cache this on app load so this info is faster elsewhere
   useQuery(api.categories.list);
@@ -189,41 +182,6 @@ function App() {
     _loadInitialState();
   }, []);
 
-  const { download } = useAudio();
-
-  const _loadSound = async (audioUrl: string) => {
-    try {
-      console.log("loading sound : " + audioUrl);
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-      });
-
-      // load the audio url content to local file storage
-      const audio = await download(audioUrl);
-
-      console.log("loaded sound : " + sound);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (!audioUrl) return;
-
-    _loadSound(audioUrl);
-
-    return () => {
-      sound.current?.unloadAsync();
-    };
-  }, [audioUrl]);
-
   const toastConfig: ToastConfig = {
     success: (props) => (
       <BaseToast
@@ -269,13 +227,13 @@ function App() {
   }
 
   return (
-    <AppContext.Provider value={{ sound: sound.current }}>
+    <>
       <BottomSheetModalProvider>
         <MainNavigationStack />
       </BottomSheetModalProvider>
 
       <Toast config={toastConfig} />
-    </AppContext.Provider>
+    </>
   );
 }
 

@@ -278,7 +278,6 @@ const Login = () => {
         <Input
           autoComplete="email"
           label="Email"
-          autoFocus
           placeholder="Email"
           keyboardType="email-address"
           autoCapitalize="none"

@@ -235,7 +235,6 @@ const Signup = () => {
         <Input
           autoComplete="name"
           label="Full name"
-          autoFocus
           placeholder="Full name"
           textContentType="name"
           value={fullName}

@@ -11,9 +11,25 @@ export const useAudio = () => {
     return `audio-${hash}.${fileType}`;
   };
 
+  const getStoredFiles = async () => {
+    // Path to the documents directory
+    const documentsPath = FileSystem.documentDirectory;
+
+    if (!documentsPath) {
+      return;
+    }
+
+    // List files in the documents directory
+    const result = await FileSystem.readDirectoryAsync(documentsPath);
+
+    console.log("Cached files: ", result.length);
+  };
+
   const getAudio = async (url: string) => {
     try {
-      const fileName = getFileName(url);
+      await getStoredFiles();
+
+      const fileName = await getFileName(url);
       const fileUri = (FileSystem.documentDirectory || "") + fileName;
 
       const { sound } = await Audio.Sound.createAsync(
@@ -34,27 +50,35 @@ export const useAudio = () => {
   };
 
   const downloadAndPlayAudio = async (url: string) => {
-    const fileName = getFileName(url);
+    // await getStoredFiles();
+
+    const fileName = await getFileName(url);
     const fileUri = (FileSystem.documentDirectory || "") + fileName;
 
-    console.log(fileUri);
-
     try {
-      const { uri } = await FileSystem.downloadAsync(url, fileUri);
+      const { uri } = await FileSystem.downloadAsync(url, fileUri, {
+        sessionType: FileSystem.FileSystemSessionType.BACKGROUND,
+      });
 
       console.log("File downloaded to:", uri);
 
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: uri },
-        { shouldPlay: true }
+      const sound = new Audio.Sound();
+
+      //   console.log(sound);
+
+      sound.setOnPlaybackStatusUpdate(console.log);
+
+      // read file from memory
+      await sound.loadAsync(
+        {
+          uri: url,
+        },
+        {
+          shouldPlay: true,
+        }
       );
 
-      sound.setOnPlaybackStatusUpdate((playbackStatus) => {
-        if (playbackStatus.isLoaded) {
-          //   setStatus('Playback finished.');
-          sound.unloadAsync(); // Cleanup sound instance
-        }
-      });
+      console.log("done loading sound");
     } catch (error) {
       console.error(error);
       //   setStatus('Error occurred while downloading or playing audio.');

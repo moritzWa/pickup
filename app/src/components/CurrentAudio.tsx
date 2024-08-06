@@ -42,18 +42,19 @@ import {
   setIsPlaying,
 } from "src/redux/reducers/audio";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
+import { useAudio } from "src/hooks/useAudio";
 
 export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 
-  const { sound } = useContext(AppContext);
   const isPlaying = useSelector(getIsPlaying);
 
   const { data: contentData, refetch } = useQuery<
     Pick<Query, "getCurrentContentSession">
   >(api.content.current, {});
 
+  const { download } = useAudio();
   const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
@@ -112,43 +113,25 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
 
   const playOrPause = async () => {
     try {
-      if (!sound) {
-        return;
-      }
-
       const audioUrl = activeContent?.content?.audioUrl || "";
-      const status = await sound.getStatusAsync();
 
-      console.log(status);
+      await download(audioUrl);
 
-      if (status.isLoaded) {
-        // if playing -> pause
-        if (status.isPlaying) {
-          await sound.pauseAsync();
-          dispatch(setIsPlaying(false));
-          return;
-        }
+      // if (status.isLoaded) {
+      //   // if playing -> pause
+      //   if (status.isPlaying) {
+      //     await sound.pauseAsync();
+      //     dispatch(setIsPlaying(false));
+      //     return;
+      //   }
 
-        // if paused -> play
-        await sound.playAsync();
-        dispatch(setIsPlaying(true));
-        return;
-      }
+      //   // if paused -> play
+      //   await sound.playAsync();
+      //   dispatch(setIsPlaying(true));
+      //   return;
+      // }
 
       // load it in
-
-      await sound.unloadAsync();
-
-      console.log(`[loading: ${audioUrl}]`);
-
-      await sound.loadAsync(
-        {
-          uri: audioUrl,
-        },
-        {
-          shouldPlay: true,
-        }
-      );
 
       dispatch(setIsPlaying(true));
     } catch (error) {

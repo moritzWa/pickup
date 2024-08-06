@@ -93,7 +93,7 @@ const Welcome = () => {
               color: theme.header,
             }}
           >
-            What topics are you interested in?
+            Welcome to Quest
           </Text>
 
           <Text
