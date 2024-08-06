@@ -25,11 +25,14 @@ import {
   faCircle0,
   faCircleNotch,
   faClock,
+  faHeadSide,
   faHourglass,
   faHourglass1,
   faHourglass3,
   faHourglassClock,
+  faPerson,
   faPlay,
+  faTypewriter,
   faVolumeMedium,
 } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "../../views/Main/Home/Github";
@@ -84,8 +87,6 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
   return (
     <TouchableOpacity
       activeOpacity={1}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
       onPress={start}
       style={{
         padding: 15,
@@ -115,19 +116,6 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             flex: 1,
           }}
         >
-          <Text
-            numberOfLines={1}
-            style={{
-              color: theme.header,
-              fontSize: 18,
-              flex: 1,
-              marginRight: 20,
-              fontFamily: "Raleway-SemiBold",
-            }}
-          >
-            {c.title}
-          </Text>
-
           <FastImage
             source={{
               uri: c.thumbnailImageUrl,
@@ -138,9 +126,59 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               borderRadius: 5,
             }}
           />
+
+          <View
+            style={{
+              marginLeft: 10,
+              flex: 1,
+              alignItems: "flex-start",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              numberOfLines={1}
+              style={{
+                color: theme.header,
+                fontSize: 18,
+                marginRight: 20,
+                fontFamily: "Raleway-SemiBold",
+              }}
+            >
+              {c.title}
+            </Text>
+          </View>
+
+          <Animated.View
+            style={{
+              width: 40,
+              height: 40,
+              marginRight: 0,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 100,
+              backgroundColor: colors.primary,
+              alignSelf: "center",
+              transform: [{ scale: animation }],
+            }}
+          >
+            <TouchableOpacity
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              onPress={start}
+              activeOpacity={1}
+            >
+              <FontAwesomeIcon
+                icon={faPlay}
+                color={colors.white}
+                size={18}
+                style={{ position: "relative", right: -2 }}
+              />
+            </TouchableOpacity>
+          </Animated.View>
         </View>
 
-        <View>
+        <View style={{}}>
           <View
             style={{
               flexDirection: "row",
@@ -152,6 +190,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                 style={{
                   color: theme.text,
                   fontSize: 14,
+                  marginRight: 50,
                   fontFamily: "Raleway-Medium",
                 }}
                 numberOfLines={2}
@@ -167,21 +206,48 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                   alignItems: "center",
                 }}
               >
-                <Text
+                {/* <Text
                   style={{
                     flex: 1,
-                    color: theme.header,
+                    color: theme.text,
                     fontSize: 14,
                     fontFamily: "Raleway-Medium",
                   }}
                 >
-                  By {c.authorName}
-                </Text>
+                  {c.authorName}
+                </Text> */}
 
                 <View
                   style={{
                     display: "flex",
-                    marginRight: 15,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginRight: 30,
+                    flex: 1,
+                  }}
+                >
+                  {/* <FontAwesomeIcon
+                    icon={faHeadSide}
+                    color={theme.text}
+                    size={14}
+                    style={{ marginRight: 5 }}
+                  /> */}
+
+                  <Text
+                    style={{
+                      color: theme.text,
+                      fontSize: 14,
+                      fontFamily: "Raleway-Medium",
+                    }}
+                  >
+                    By {c.authorName}
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    display: "flex",
+                    marginLeft: 15,
                     flexDirection: "row",
                     alignItems: "center",
                   }}
@@ -197,83 +263,43 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                     style={{
                       color: theme.text,
                       fontSize: 14,
-                      fontFamily: "Raleway-Medium",
+                      fontFamily: "Raleway-SemiBold",
                     }}
                   >
                     {estimatedLen}m
                   </Text>
                 </View>
 
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faCircleNotch}
-                    color={theme.text}
-                    size={14}
-                    style={{ marginRight: 5 }}
-                  />
-
-                  <Text
+                {c.contentSession?.percentFinished ? (
+                  <View
                     style={{
-                      color: theme.text,
-                      fontSize: 14,
-                      fontFamily: "Raleway-Medium",
+                      display: "flex",
+                      marginLeft: 15,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      // marginRight: 15,
                     }}
                   >
-                    21%
-                  </Text>
-                </View>
-              </View>
+                    <FontAwesomeIcon
+                      icon={faCircleNotch}
+                      color={theme.text}
+                      size={14}
+                      style={{ marginRight: 5 }}
+                    />
 
-              {/* {(c.categories ?? []).length > 0 ? (
-              <View
-                style={{
-                  marginTop: 8,
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: colors.primary,
-                    fontSize: 12,
-                    fontFamily: "Raleway-Bold",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {(c.categories || []).join(" • ")}
-                </Text>
+                    <Text
+                      style={{
+                        color: theme.text,
+                        fontSize: 14,
+                        fontFamily: "Raleway-SemiBold",
+                      }}
+                    >
+                      {c.contentSession?.percentFinished}%
+                    </Text>
+                  </View>
+                ) : null}
               </View>
-            ) : null} */}
             </View>
-
-            {/* <Animated.View
-            style={{
-              marginLeft: 5,
-              width: 55,
-              height: 55,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 100,
-              backgroundColor: colors.primary,
-              alignSelf: "center",
-              transform: [{ scale: animation }],
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faPlay}
-              color={colors.white}
-              size={24}
-              style={{ position: "relative", right: -2 }}
-            />
-          </Animated.View> */}
           </View>
         </View>
       </View>

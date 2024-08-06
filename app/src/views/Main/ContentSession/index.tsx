@@ -288,6 +288,9 @@ const ContentSession = () => {
 
   const play = async () => {
     try {
+      // console.log("[play] " + soundStatus);
+      // console.log("[has sound] " + sound);
+
       if (soundStatus === "paused" && sound) {
         // unpause and set to not paused
         await sound.playAsync();
@@ -323,6 +326,7 @@ const ContentSession = () => {
   };
 
   const playOrPause = async () => {
+    console.log(soundStatus);
     if (soundStatus === "playing") {
       await pause();
       setSoundStatus("paused");
@@ -345,10 +349,14 @@ const ContentSession = () => {
           playThroughEarpieceAndroid: false,
         });
 
+        console.log("LOADING SOUND");
+
         const { sound: newSound } = await Audio.Sound.createAsync(
           { uri: content?.audioUrl },
           { shouldPlay: false }
         );
+
+        console.log("NEW SOUND " + newSound);
 
         setSound(newSound);
         newSound.setOnPlaybackStatusUpdate(updateStatus);
@@ -527,55 +535,6 @@ const ContentSession = () => {
           </View>
         </View>
       </View>
-
-      {/* {isRecording ? (
-        <View
-          style={{
-            paddingVertical: 10,
-            position: "absolute",
-            top: insets.top + 15,
-            right: 15,
-            width: 130,
-            backgroundColor: colors.red100,
-            borderRadius: 100,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: colors.red50,
-              width: 10,
-              height: 10,
-              borderRadius: 100,
-              marginRight: 10,
-            }}
-          />
-          <Text style={{ color: colors.red, fontSize: 16 }}>
-            {new Date(timer * 1000).toISOString().substr(11, 8)}
-          </Text>
-        </View>
-      ) : (
-        <View
-          style={{
-            paddingVertical: 10,
-            position: "absolute",
-            top: insets.top + 15,
-            width: 130,
-            justifyContent: "center",
-            right: 15,
-            backgroundColor: theme.secondaryBackground,
-            borderRadius: 100,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: theme.text, fontSize: 16 }}>Not Recording</Text>
-        </View>
-      )} */}
 
       <View
         style={{
