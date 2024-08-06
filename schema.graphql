@@ -151,6 +151,8 @@ type Mutation {
   respond(audioFileUrl: String!, lessonId: ID!): RespondResponse!
   respondToContent(audioFileUrl: String!, contentId: ID!): ContentRespondResponse!
   sendVerification(phoneNumber: String!): String!
+  setCommuteTime(commuteTime: String, timezone: String): User!
+  setInterests(interestCategories: [String!]!, interestDescription: String): User!
   startContent(contentId: ID!): ContentSession!
   startCourse(courseId: ID!): Course!
   startLesson(lessonId: String!): LessonSession!

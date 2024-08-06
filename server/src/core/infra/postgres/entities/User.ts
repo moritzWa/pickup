@@ -190,6 +190,38 @@ export class User {
     stripeCustomerId!: Maybe<string>;
 
     @Column({
+        nullable: true,
+        type: "text",
+        name: "interest_description",
+    })
+    interestDescription!: Maybe<string>;
+
+    // interest categories, a list of category emails
+    @Column({
+        nullable: false,
+        type: "jsonb",
+        name: "interest_categories",
+        default: "[]",
+    })
+    interestCategories!: string[];
+
+    // timezone column
+    @Column({
+        nullable: true,
+        type: "text",
+        name: "timezone",
+    })
+    timezone!: Maybe<string>;
+
+    // 00:00 - 24:00
+    @Column({
+        nullable: true,
+        type: "text",
+        name: "commute_time",
+    })
+    commuteTime!: Maybe<string>;
+
+    @Column({
         nullable: false,
         type: "boolean",
         name: "is_influencer",

@@ -62,6 +62,21 @@ const UpdateUser = gql`
   }
 `;
 
+const SetInterests = gql`
+  ${BaseUserFields}
+  mutation SetInterests(
+    $interestCategories: [String!]!
+    $interestDescription: String
+  ) {
+    setInterests(
+      interestCategories: $interestCategories
+      interestDescription: $interestDescription
+    ) {
+      ...BaseUserFields
+    }
+  }
+`;
+
 const VerifyBiometric = gql`
   mutation VerifyBiometric($signature: String!, $payload: String!) {
     verifyBiometric(signature: $signature, payload: $payload) {
@@ -283,6 +298,7 @@ export const api = {
     create: CreateUser,
     getIntercomHash: GetIntercomMobileToken,
     update: UpdateUser,
+    setInterests: SetInterests,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
     getProfile: GetProfile,

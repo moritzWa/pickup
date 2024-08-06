@@ -78,7 +78,7 @@ const Signup = () => {
         return navigation.navigate("FullName");
       }
 
-      return navigation.navigate("Main");
+      return navigation.navigate("Interests");
     } catch (err) {
       console.log("=== error ===");
       console.log(err);
@@ -108,7 +108,7 @@ const Signup = () => {
           return navigation.navigate("FullName");
         }
 
-        return navigation.navigate("Main");
+        return navigation.navigate("Interests");
       }
 
       const variables: MutationCreateUserArgs = {
@@ -128,7 +128,7 @@ const Signup = () => {
         return navigation.navigate("FullName");
       }
 
-      return navigation.navigate("Main");
+      return navigation.navigate("Interests");
     } catch (err) {
       console.log("=== error ===");
       console.log(err);
@@ -152,7 +152,11 @@ const Signup = () => {
 
       // if already has a user -> just go to the home page
       if (me) {
-        return navigation.navigate("Main");
+        if (!me?.name) {
+          return navigation.navigate("FullName");
+        }
+
+        return navigation.navigate("Interests");
       }
 
       const nameFromApple =
@@ -179,7 +183,7 @@ const Signup = () => {
         return navigation.navigate("FullName");
       }
 
-      return navigation.navigate("Main");
+      return navigation.navigate("Interests");
     } catch (err) {
       console.log("=== error ===");
       console.log(err);

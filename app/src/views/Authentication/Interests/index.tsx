@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Input, colors } from "src/components";
 import Button from "src/components/Button";
@@ -21,8 +21,10 @@ import {
 } from "@apollo/client";
 import { api } from "src/api";
 import {
+  CategoryInfo,
   Mutation,
   MutationCreateUserArgs,
+  MutationSetInterestsArgs,
   Query,
 } from "src/api/generated/types";
 import * as Haptics from "expo-haptics";
@@ -38,12 +40,13 @@ import { useIsFocused } from "@react-navigation/native";
 const Interests = () => {
   const navigation = useNavigation<NavigationProps>();
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [fullName, setFullName] = React.useState("");
-  const [showPassword, setShowPassword] = React.useState(false);
+
+  const [description, setDescription] = React.useState("");
+
   const fullTheme = useTheme();
   const { background, text, header } = fullTheme;
+
+  const [selected, setSelected] = useState<Set<string>>(new Set([]));
 
   const isFocused = useIsFocused();
   const {
@@ -52,12 +55,10 @@ const Interests = () => {
     refetch,
   } = useQuery<Pick<Query, "getCategories">>(api.categories.list);
 
-  const [createUser, { loading, error }] = useMutation<
-    Pick<Mutation, "createUser">,
-    MutationCreateUserArgs
-  >(api.users.create);
-
-  const [getMe] = useLazyQuery<Pick<Query, "me">>(api.users.me);
+  const [setInterests, { loading, error }] = useMutation<
+    Pick<Mutation, "setInterests">,
+    MutationSetInterestsArgs
+  >(api.users.setInterests);
 
   const categories = categoriesData?.getCategories || [];
 
@@ -65,7 +66,15 @@ const Interests = () => {
 
   const _continue = async () => {
     try {
-      // TODO:
+      const variables: MutationSetInterestsArgs = {
+        interestDescription: description,
+        interestCategories: Array.from(selected),
+      };
+
+      await setInterests({
+        variables,
+      });
+
       return navigation.navigate("Main");
     } catch (err) {
       console.log("=== error ===");
@@ -77,6 +86,16 @@ const Interests = () => {
         Alert.alert("Error", err.message);
       }
     }
+  };
+
+  const addOrRemove = (value: string) => {
+    if (selected.has(value)) {
+      selected.delete(value);
+    } else {
+      selected.add(value);
+    }
+
+    setSelected(new Set(selected));
   };
 
   return (
@@ -118,7 +137,7 @@ const Interests = () => {
         <Input
           placeholder="Type here..."
           textContentType="name"
-          value={fullName}
+          value={description}
           numberOfLines={4}
           multiline
           style={{
@@ -126,7 +145,7 @@ const Interests = () => {
             alignItems: "flex-start",
           }}
           returnKeyType="next"
-          onChangeText={(text) => setFullName(text)}
+          onChangeText={(text) => setDescription(text)}
         />
 
         <Text
@@ -153,43 +172,11 @@ const Interests = () => {
           }}
         >
           {categories.map((category) => (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={{
-                padding: 10,
-                paddingHorizontal: 15,
-                marginRight: 5,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 5,
-                borderRadius: 100,
-                backgroundColor:
-                  category?.backgroundColor || fullTheme.secondaryBackground,
-              }}
-              key={category.value}
-            >
-              <Text
-                style={{
-                  fontFamily: "Raleway-Medium",
-                  fontSize: 12,
-                  color: category?.textColor || text,
-                }}
-              >
-                {category.emoji}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: "Raleway-Medium",
-                  fontSize: 16,
-                  marginLeft: 10,
-                  color: category?.textColor || text,
-                }}
-              >
-                {category.label}
-              </Text>
-            </TouchableOpacity>
+            <Category
+              category={category}
+              isActive={selected.has(category.value)}
+              onPress={() => addOrRemove(category.value)}
+            />
           ))}
         </View>
 
@@ -203,6 +190,62 @@ const Interests = () => {
         />
       </KeyboardAwareScrollView>
     </View>
+  );
+};
+
+const Category = ({
+  category,
+  isActive,
+  onPress,
+}: {
+  category: CategoryInfo;
+  isActive: boolean;
+  onPress: () => void;
+}) => {
+  const fullTheme = useTheme();
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={onPress}
+      style={{
+        padding: 10,
+        paddingHorizontal: 15,
+        marginRight: 5,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 5,
+        borderRadius: 100,
+        backgroundColor: isActive
+          ? colors.primary
+          : category?.backgroundColor || fullTheme.secondaryBackground,
+      }}
+      key={category.value}
+    >
+      <Text
+        style={{
+          fontFamily: "Raleway-Medium",
+          fontSize: 12,
+          color: category?.textColor || fullTheme.text,
+        }}
+      >
+        {category.emoji}
+      </Text>
+      <Text
+        style={{
+          fontFamily: isActive ? "Raleway-Bold" : "Raleway-SemiBold",
+          fontSize: 16,
+          marginLeft: 10,
+          color: isActive
+            ? colors.white
+            : category?.textColor || fullTheme.text,
+        }}
+      >
+        {category.label}
+      </Text>
+    </TouchableOpacity>
   );
 };
 

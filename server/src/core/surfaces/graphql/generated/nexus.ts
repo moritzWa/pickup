@@ -228,6 +228,8 @@ export interface NexusGenFieldTypes {
     respond: NexusGenRootTypes['RespondResponse']; // RespondResponse!
     respondToContent: NexusGenRootTypes['ContentRespondResponse']; // ContentRespondResponse!
     sendVerification: string; // String!
+    setCommuteTime: NexusGenRootTypes['User']; // User!
+    setInterests: NexusGenRootTypes['User']; // User!
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startCourse: NexusGenRootTypes['Course']; // Course!
     startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
@@ -415,6 +417,8 @@ export interface NexusGenFieldTypeNames {
     respond: 'RespondResponse'
     respondToContent: 'ContentRespondResponse'
     sendVerification: 'String'
+    setCommuteTime: 'User'
+    setInterests: 'User'
     startContent: 'ContentSession'
     startCourse: 'Course'
     startLesson: 'LessonSession'
@@ -516,6 +520,14 @@ export interface NexusGenArgTypes {
     }
     sendVerification: { // args
       phoneNumber: string; // String!
+    }
+    setCommuteTime: { // args
+      commuteTime?: string | null; // String
+      timezone?: string | null; // String
+    }
+    setInterests: { // args
+      interestCategories: string[]; // [String!]!
+      interestDescription?: string | null; // String
     }
     startContent: { // args
       contentId: string; // ID!
