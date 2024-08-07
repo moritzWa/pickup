@@ -147,7 +147,9 @@ const Login = () => {
 
   const _onGoogleAuthSuccess = async (u: FirebaseAuthTypes.UserCredential) => {
     try {
-      const meResponse = await getMe();
+      const meResponse = await getMe({
+        fetchPolicy: "network-only",
+      });
 
       const me = meResponse.data?.me;
 
@@ -186,7 +188,9 @@ const Login = () => {
     appleData: AppleRequestResponse
   ) => {
     try {
-      const meResponse = await getMe();
+      const meResponse = await getMe({
+        fetchPolicy: "network-only",
+      });
 
       const me = meResponse.data?.me;
 
