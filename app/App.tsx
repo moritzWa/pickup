@@ -96,6 +96,7 @@ function App() {
     await TrackPlayer.setupPlayer();
 
     TrackPlayer.updateOptions({
+      progressUpdateEventInterval: 1,
       capabilities: [
         Capability.Play,
         Capability.Pause,

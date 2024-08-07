@@ -48,6 +48,7 @@ import {
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { useAudio } from "src/hooks/useAudio";
 import BigNumber from "bignumber.js";
+import { Track } from "react-native-track-player";
 
 export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const theme = useTheme();
@@ -60,20 +61,12 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   >(api.content.current, {});
 
   const currentAudioUrl = useSelector(getCurrentAudioUrl);
-  const { sound: globalSound } = useContext(AppContext);
 
   const { downloadAndPlay, toggle, percentFinished, leftMinutes } = useAudio();
 
   const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
-  const dispatch = useDispatch();
-
-  const currentMs = useSelector(getCurrentMs);
-  const durationMs = useSelector(getDurationMs);
-
-  const color = colors.purple90;
-  const [startContent, { error }] = useMutation(api.content.start);
 
   useEffect(() => {
     refetch();
@@ -103,7 +96,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         return;
       }
 
-      navigation.navigate("AudioPlayer", { contentId, isCarMode: false });
+      navigation.navigate("AudioPlayer", { contentId });
     } catch (err) {
       console.log(err);
       Alert.alert(
@@ -116,19 +109,22 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const playOrPause = async () => {
     try {
       const audioUrl = activeContent?.content?.audioUrl || "";
-      const sound = globalSound?.current || null;
-
-      if (!sound) {
-        return;
-      }
 
       // this will set it on the ref
       if (currentAudioUrl !== audioUrl) {
-        await downloadAndPlay(audioUrl);
+        const track: Track = {
+          url: "",
+          title: activeContent?.content?.title || "",
+          artist: activeContent?.content?.authorName || "",
+          artwork: activeContent?.content?.thumbnailImageUrl || "",
+        };
+
+        await downloadAndPlay(audioUrl, track);
+
         return;
       }
 
-      await toggle(sound);
+      await toggle();
     } catch (error) {
       console.log(error);
     }
@@ -137,10 +133,6 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const bg = theme.theme === "light" ? "#DFDCFB" : "#050129";
   const title = activeContent?.content?.title;
   const thumbnailImageUrl = activeContent?.content?.thumbnailImageUrl;
-
-  // console.log("current: " + currentMs);
-  // console.log("duration: " + durationMs);
-  // console.log("finished: " + percentFinished);
 
   if (!activeContent) {
     return null;
@@ -163,7 +155,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        width: "97%",
+        width: "95%",
         borderWidth: 1,
         borderColor: theme.medBackground,
         // shadow
@@ -243,7 +235,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
               }}
               numberOfLines={1}
             >
-              {leftMinutes}min left
+              {leftMinutes === 0 ? "<1" : leftMinutes}min left
             </Text>
           </View>
         </View>

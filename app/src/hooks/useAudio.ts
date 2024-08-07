@@ -4,6 +4,7 @@ import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import { useContext, useMemo } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
+import TrackPlayer, { AddTrack, State, Track } from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DefaultErrors,
@@ -13,8 +14,10 @@ import {
   UnexpectedError,
 } from "src/core";
 import {
+  getCurrentAudioUrl,
   getCurrentMs,
   getDurationMs,
+  getIsPlaying,
   setAudioUrl,
   setCurrentMs,
   setDurationMs,
@@ -27,6 +30,8 @@ export const useAudio = () => {
 
   const currentMs = useSelector(getCurrentMs);
   const durationMs = useSelector(getDurationMs);
+  const isPlaying = useSelector(getIsPlaying);
+  const audioUrl = useSelector(getCurrentAudioUrl);
 
   const getFileName = async (url: string): Promise<string> => {
     const hash = await JSHash("message", CONSTANTS.HashAlgorithms.sha256);
@@ -49,7 +54,8 @@ export const useAudio = () => {
   };
 
   const downloadAndPlayAudio = async (
-    url: string
+    url: string,
+    other: Omit<Track, "url">
   ): Promise<FailureOrSuccess<DefaultErrors, Audio.Sound>> => {
     // await getStoredFiles();
 
@@ -64,8 +70,6 @@ export const useAudio = () => {
       const { uri } = await FileSystem.downloadAsync(url, fileUri, {
         sessionType: FileSystem.FileSystemSessionType.BACKGROUND,
       });
-
-      console.log("File downloaded to:", uri);
 
       const sound = new Audio.Sound();
 
@@ -84,25 +88,16 @@ export const useAudio = () => {
         playThroughEarpieceAndroid: false,
       });
 
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          //   console.log(status);
-          dispatch(setCurrentMs(status.positionMillis));
-          dispatch(setDurationMs(status.durationMillis ?? 0));
-        }
-      });
+      const track: AddTrack = {
+        ...other,
+        url: uri,
+      };
 
-      // read file from memory
-      await sound.loadAsync(
-        {
-          uri: uri,
-        },
-        {
-          shouldPlay: false,
-        }
-      );
+      await TrackPlayer.add([track]);
 
-      await sound.playAsync();
+      await TrackPlayer.play();
+
+      //   await sound.playAsync();
       dispatch(setIsPlaying(true));
 
       return success(sound);
@@ -112,27 +107,26 @@ export const useAudio = () => {
     }
   };
 
-  const toggle = async (sound: Audio.Sound) => {
+  const toggle = async () => {
     try {
-      const status = await sound.getStatusAsync();
-
-      if (status.isLoaded) {
-        // if playing -> pause
-        if (status.isPlaying) {
-          await sound.pauseAsync();
-          dispatch(setIsPlaying(false));
-          console.log("paused");
-          return;
-        }
-
-        // if paused -> play
-        await sound.playAsync();
-        dispatch(setIsPlaying(true));
-        console.log("playing");
+      const sound = globalSound?.current;
+      if (!sound) {
         return;
       }
 
-      await sound.playAsync();
+      const state = await TrackPlayer.getPlaybackState();
+
+      // if playing -> pause
+      if (state.state === State.Playing) {
+        //   await sound.pauseAsync();
+        await TrackPlayer.pause();
+        dispatch(setIsPlaying(false));
+        return;
+      }
+
+      // if paused -> play
+      // await sound.playAsync();
+      await TrackPlayer.play();
       dispatch(setIsPlaying(true));
     } catch (error) {
       console.log(error);
@@ -155,6 +149,34 @@ export const useAudio = () => {
     [currentMs, durationMs]
   );
 
+  const skip = async (seconds: number) => {
+    // track player to skip
+    const state = await TrackPlayer.getPlaybackState();
+
+    if (state.state === State.Playing) {
+      const currentTime = await TrackPlayer.getProgress();
+      await TrackPlayer.seekTo(currentTime.position + seconds);
+    }
+
+    // if (globalSound) {
+    //   const currentPosition = await globalSound.current.getStatusAsync();
+    //   if (currentPosition.isLoaded) {
+    //     const newPosition = currentPosition.positionMillis + seconds * 1000;
+    //     globalSound.current.setPositionAsync(newPosition);
+    //   }
+    // }
+  };
+
+  const setPosition = async (value: number) => {
+    // track player to skip
+
+    await TrackPlayer.seekTo(Math.floor(value / 1_000));
+
+    // if (globalSound) {
+    //   await globalSound.current.setPositionAsync(value);
+    // }
+  };
+
   return {
     downloadAndPlay: downloadAndPlayAudio,
     toggle,
@@ -162,5 +184,9 @@ export const useAudio = () => {
     leftMinutes,
     currentMs,
     durationMs,
+    isPlaying,
+    audioUrl,
+    skip,
+    setPosition,
   };
 };

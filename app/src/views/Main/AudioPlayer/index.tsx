@@ -62,6 +62,7 @@ import {
   getIsPlaying,
 } from "src/redux/reducers/audio";
 import { AppContext } from "App";
+import { Track } from "react-native-track-player";
 
 const SIZE = 125;
 
@@ -73,23 +74,16 @@ const AudioPlayer = () => {
 
   const { width } = Dimensions.get("window");
 
-  const { me } = useMe();
-  // const [respond, { error: respondError, data: respondData }] = useMutation<
-  //   Pick<Mutation, "respond">
-  // >(api.lessons.respond);
-
-  const [recording, setRecording] = useState<Audio.Recording>();
-
-  const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-
-  const { downloadAndPlay, toggle, currentMs, durationMs } = useAudio();
-
-  const isPlaying = useSelector(getIsPlaying);
-  const audioUrl = useSelector(getCurrentAudioUrl);
-  const { sound: globalSound } = useContext(AppContext);
-
-  const silenceTimer = useRef<NodeJS.Timeout | null>(null);
+  const {
+    downloadAndPlay,
+    setPosition,
+    toggle,
+    currentMs,
+    durationMs,
+    isPlaying,
+    audioUrl,
+    skip,
+  } = useAudio();
 
   const contentVariables = useMemo(
     (): QueryGetContentArgs => ({
@@ -109,22 +103,28 @@ const AudioPlayer = () => {
   const theme = useTheme();
   const content = contentData?.getContent;
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
-  const estimatedLen = Math.ceil((content?.lengthSeconds || 0) / 60);
+  const estimatedLen = Math.ceil((durationMs || 0) / 60_000);
 
   const playOrPause = async () => {
-    if (!globalSound || !content) {
+    if (!content) {
       return;
     }
 
     if (audioUrl !== content?.audioUrl) {
-      const response = await downloadAndPlay(content.audioUrl);
+      const track: Track = {
+        url: "",
+        title: content?.title || "",
+        artist: content?.authorName || "",
+        artwork: content?.thumbnailImageUrl || "",
+      };
+
+      const response = await downloadAndPlay(content.audioUrl, track);
 
       console.log(response);
       return;
     }
 
-    await toggle(globalSound.current);
+    await toggle();
   };
 
   const handlePressIn = () => {
@@ -144,13 +144,7 @@ const AudioPlayer = () => {
   };
 
   const onSlidingComplete = async (value: number) => {
-    if (sound) {
-      await sound.setPositionAsync(value);
-      if (soundStatus !== "playing") {
-        await sound.playAsync();
-        setSoundStatus("playing");
-      }
-    }
+    await setPosition(value);
   };
 
   const formatTime = (timeMillis: number) => {
@@ -184,27 +178,6 @@ const AudioPlayer = () => {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    // void listenForSpeech();
-    // return () => {
-    //   console.log("destroying voice");
-    //   Voice.destroy();
-    // };
-  }, []);
-
-  const skip = async (seconds: number) => {
-    // skip this number of seconds
-    if (globalSound) {
-      const currentPosition = await globalSound.current.getStatusAsync();
-      if (currentPosition.isLoaded) {
-        const newPosition = currentPosition.positionMillis + seconds * 1000;
-        globalSound.current.setPositionAsync(newPosition);
-      }
-    }
-  };
-
-  // console.log(position, duration);
 
   return (
     <View
@@ -367,38 +340,6 @@ const AudioPlayer = () => {
             source={require("src/assets/icons/forward-15.png")}
           />
         </TouchableOpacity>
-
-        {/* <TouchableOpacity
-          activeOpacity={0.8}
-          style={{
-            padding: 10,
-            marginTop: 15,
-            paddingHorizontal: 15,
-            alignSelf: "center",
-            backgroundColor: theme.header,
-            borderRadius: 100,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-          onPress={_playRecordingUri}
-        >
-          <FontAwesomeIcon
-            icon={faRedo}
-            color={theme.background}
-            size={24}
-            style={{ marginRight: 10 }}
-          />
-          <Text
-            style={{
-              color: theme.background,
-              fontSize: 18,
-              fontFamily: "Raleway-Medium",
-            }}
-          >
-            Play Recording
-          </Text>
-        </TouchableOpacity> */}
       </View>
 
       <View
