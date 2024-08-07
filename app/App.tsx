@@ -59,6 +59,10 @@ import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { getCurrentAudioUrl } from "src/redux/reducers/audio";
 import { useAudio } from "src/hooks/useAudio";
+import TrackPlayer, {
+  AppKilledPlaybackBehavior,
+  Capability,
+} from "react-native-track-player";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -87,6 +91,26 @@ function App() {
 
   // just cache this on app load so this info is faster elsewhere
   useQuery(api.categories.list);
+
+  const setupPlayer = async () => {
+    await TrackPlayer.setupPlayer();
+
+    TrackPlayer.updateOptions({
+      capabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.JumpForward,
+        Capability.JumpBackward,
+      ],
+      android: {
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
+      },
+    });
+  };
+
+  useEffect(() => {
+    setupPlayer();
+  }, []);
 
   useEffect(() => {
     store.dispatch(setUserAuthStateChanged("LOADING"));
@@ -187,8 +211,6 @@ function App() {
   useEffect(() => {
     _loadInitialState();
   }, []);
-
-  const { download } = useAudio();
 
   const toastConfig: ToastConfig = {
     success: (props) => (

@@ -70,6 +70,8 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
           style={{
             paddingTop: 20,
             paddingHorizontal: 20,
+            maxWidth: 325,
+            alignSelf: "center",
             flexDirection: "row",
             paddingBottom: 0,
           }}

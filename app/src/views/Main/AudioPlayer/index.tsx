@@ -9,7 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import * as FileSystem from "expo-file-system";
 import {
   AVPlaybackStatus,
@@ -53,11 +53,20 @@ import FastImage from "react-native-fast-image";
 import Slider from "@react-native-community/slider";
 import { useSpeech } from "./useSpeech";
 import Close from "src/components/Close";
+import { useAudio } from "src/hooks/useAudio";
+import { useSelector } from "react-redux";
+import {
+  getCurrentAudioUrl,
+  getCurrentMs,
+  getDurationMs,
+  getIsPlaying,
+} from "src/redux/reducers/audio";
+import { AppContext } from "App";
 
 const SIZE = 125;
 
-const ContentSession = () => {
-  const route = useRoute<RouteProp<RootStackParamList, "ContentSession">>();
+const AudioPlayer = () => {
+  const route = useRoute<RouteProp<RootStackParamList, "AudioPlayer">>();
   const contentId = route.params?.contentId || "";
 
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
@@ -70,22 +79,17 @@ const ContentSession = () => {
   // >(api.lessons.respond);
 
   const [recording, setRecording] = useState<Audio.Recording>();
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
 
-  const [soundStatus, setSoundStatus] = useState<"none" | "paused" | "playing">(
-    "none"
-  );
-  const [duration, setDuration] = useState(0);
-  const [position, setPosition] = useState(0);
+  const { downloadAndPlay, toggle, currentMs, durationMs } = useAudio();
+
+  const isPlaying = useSelector(getIsPlaying);
+  const audioUrl = useSelector(getCurrentAudioUrl);
+  const { sound: globalSound } = useContext(AppContext);
 
   const silenceTimer = useRef<NodeJS.Timeout | null>(null);
-  const audioAnalyzer = useRef(null);
-  const levelCheckInterval = useRef(null);
-  const [timer, setTimer] = useState(0);
-  const { startSpeech } = useSpeech();
 
   const contentVariables = useMemo(
     (): QueryGetContentArgs => ({
@@ -108,283 +112,20 @@ const ContentSession = () => {
   const navigation = useNavigation();
   const estimatedLen = Math.ceil((content?.lengthSeconds || 0) / 60);
 
-  // useEffect(() => {
-  //   apolloClient.refetchQueries({
-
-  //   })
-  // }, [content]);
-
-  useEffect(() => {
-    return () => {
-      if (recording) {
-        stopRecording();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer + 1);
-      }, 1000);
-    } else {
-      if (interval) {
-        clearInterval(interval);
-      }
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isRecording]);
-
-  const updateStatus = (status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
-      setPosition(status.positionMillis);
-      setDuration(status.durationMillis || 0);
-    } else {
-      if (status.error) {
-        console.log(`FATAL PLAYER ERROR: ${status.error}`);
-      }
-    }
-  };
-
-  async function startRecording() {
-    try {
-      // _detectSpeech();
-      // await stopRecording(); // Stop any existing recording
-      // await Audio.requestPermissionsAsync();
-      // await Audio.setAudioModeAsync({
-      //   allowsRecordingIOS: true,
-      //   playsInSilentModeIOS: true,
-      // });
-      // const recordingObject = new Audio.Recording();
-      // setRecording(recordingObject);
-      // await recordingObject.prepareToRecordAsync(
-      //   Audio.RecordingOptionsPresets.LOW_QUALITY
-      // );
-      // await recordingObject.startAsync();
-      // recordingObject.setOnRecordingStatusUpdate((status) => {
-      //   console.log("db: " + status.metering);
-      // });
-      // // Your state management here (if using React)
-      // setIsRecording(true);
-      // setTimer(0);
-      // console.log(recordingObject);
-      // Start monitoring audio levels
-      // startAudioLevelMonitoring(recordingObject);
-    } catch (err) {
-      console.error("Failed to start recording", err);
-      console.log(recording);
-
-      // stop the recording
-      if (recording) {
-        await stopRecording();
-      }
-    }
-  }
-
-  const pause = async () => {
-    if (sound) {
-      await sound.pauseAsync();
-      setSoundStatus("paused");
-
-      // set the position to be the correct one
-      const status = await sound.getStatusAsync();
-      if (status.isLoaded) {
-        setPosition(status.positionMillis);
-      }
-    }
-  };
-
-  async function stopRecording() {
-    setIsRecording(false);
-    setTimer(0);
-
-    try {
-      if (!recording) {
-        return;
-      }
-
-      try {
-        await recording.stopAndUnloadAsync();
-
-        const uri = recording.getURI();
-
-        // const { transcription } = await Speech.speak(uri);
-        if (uri) {
-          setLastRecordingUri(uri);
-
-          const fileData = await FileSystem.readAsStringAsync(uri, {
-            encoding: "base64",
-          });
-
-          // log the size of the file data
-          console.log("File size:", fileData.length);
-
-          // await transcribe({
-          //   variables: {
-          //     lessonId,
-          //     audioFileUrl: "",
-          //   },
-          // });
-        }
-      } catch (error) {
-        console.error("Failed to stop recording", error);
-      }
-
-      if (silenceTimer.current) {
-        clearTimeout(silenceTimer.current);
-        silenceTimer.current = null;
-      }
-    } catch (error) {
-      console.error("Failed to unload recording", error);
-    }
-  }
-
-  const _playRecordingUri = async () => {
-    try {
-      if (lastRecordingUri) {
-        const fileName = lastRecordingUri.split("/").pop();
-
-        console.log(fileName);
-
-        const fileRef = storage().ref(
-          `users/${me?.authProviderId}/recordings/${Date.now()}-${fileName}`
-        );
-
-        const upload = fileRef.putFile(lastRecordingUri);
-
-        await upload.then(async () => {
-          const url = await fileRef.getDownloadURL();
-
-          console.log(`audio url: ${url}`);
-
-          // await respond({
-          //   variables: {
-          //     lessonId,
-          //     audioFileUrl: url,
-          //   },
-          // });
-        });
-
-        // const fileObj = {
-        //   uri: lastRecordingUri,
-        //   name: "audio.aac",
-        //   type: "audio/aac",
-        // };
-
-        // upload it to server
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const play = async () => {
-    try {
-      // console.log("[play] " + soundStatus);
-      // console.log("[has sound] " + sound);
-
-      if (soundStatus === "paused" && sound) {
-        // unpause and set to not paused
-        await sound.playAsync();
-        setSoundStatus("playing");
-        return;
-      }
-
-      // we preload the sound (or try to)
-      if (sound) {
-        console.log(sound);
-        // play it and set playing
-        await sound.playAsync();
-        setSoundStatus("playing");
-        return;
-      }
-
-      if (!sound) {
-        const newSound = await _loadSound();
-
-        if (!newSound) {
-          return;
-        }
-
-        setSound(newSound);
-        setSoundStatus("playing");
-        return;
-      }
-
-      // otherwise play
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const playOrPause = async () => {
-    console.log(soundStatus);
-    if (soundStatus === "playing") {
-      await pause();
-      setSoundStatus("paused");
-    } else {
-      await play();
-      setSoundStatus("playing");
+    if (!globalSound || !content) {
+      return;
     }
+
+    if (audioUrl !== content?.audioUrl) {
+      const response = await downloadAndPlay(content.audioUrl);
+
+      console.log(response);
+      return;
+    }
+
+    await toggle(globalSound.current);
   };
-
-  const _loadSound = async () => {
-    try {
-      if (content?.audioUrl) {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: true,
-          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
-        });
-
-        const audioUrl =
-          "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // content?.audioUrl;
-
-        console.log(`[loading]: ${audioUrl}`);
-
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          {
-            uri: audioUrl,
-          },
-          { shouldPlay: false },
-          updateStatus,
-          false
-        );
-
-        console.log("NEW SOUND " + newSound);
-
-        setSound(newSound);
-
-        return newSound;
-      }
-
-      return null;
-    } catch (err) {
-      console.log("==== error ====");
-      console.log(err);
-    }
-  };
-
-  // useEffect(() => {
-  //   startSpeech();
-  // }, []);
-
-  // on page load try to load the sound
-  useEffect(() => {
-    if (content?.audioUrl) {
-      _loadSound();
-    }
-  }, [content?.audioUrl]);
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -445,28 +186,23 @@ const ContentSession = () => {
   };
 
   useEffect(() => {
-    void listenForSpeech();
-
-    return () => {
-      console.log("destroying voice");
-      Voice.destroy();
-    };
+    // void listenForSpeech();
+    // return () => {
+    //   console.log("destroying voice");
+    //   Voice.destroy();
+    // };
   }, []);
 
   const skip = async (seconds: number) => {
     // skip this number of seconds
-    if (sound) {
-      const currentPosition = await sound.getStatusAsync();
+    if (globalSound) {
+      const currentPosition = await globalSound.current.getStatusAsync();
       if (currentPosition.isLoaded) {
         const newPosition = currentPosition.positionMillis + seconds * 1000;
-        sound.setPositionAsync(newPosition);
-        setPosition(newPosition);
+        globalSound.current.setPositionAsync(newPosition);
       }
     }
   };
-
-  // get the time we are in the audio and the time left for the audio
-  const currentTime = formatTime(position);
 
   // console.log(position, duration);
 
@@ -604,14 +340,9 @@ const ContentSession = () => {
               <FontAwesomeIcon
                 style={{
                   position: "relative",
-                  right:
-                    soundStatus === "none" || soundStatus === "paused" ? -5 : 0,
+                  right: isPlaying ? 0 : -5,
                 }}
-                icon={
-                  soundStatus === "none" || soundStatus === "paused"
-                    ? faPlay
-                    : faPause
-                }
+                icon={isPlaying ? faPause : faPlay}
                 color={colors.white}
                 size={SIZE / 2}
               />
@@ -668,49 +399,6 @@ const ContentSession = () => {
             Play Recording
           </Text>
         </TouchableOpacity> */}
-
-        {lastRecordingUri && (
-          <View
-            style={{
-              padding: 15,
-              marginTop: 15,
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={{
-                padding: 10,
-                paddingHorizontal: 15,
-                backgroundColor: theme.header,
-                borderRadius: 100,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-              onPress={_playRecordingUri}
-            >
-              <FontAwesomeIcon
-                icon={faRedo}
-                color={theme.background}
-                size={24}
-                style={{ marginRight: 10 }}
-              />
-              <Text
-                style={{
-                  color: theme.background,
-                  fontSize: 18,
-                  fontFamily: "Raleway-Medium",
-                }}
-              >
-                Play Recording
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
 
       <View
@@ -729,8 +417,8 @@ const ContentSession = () => {
             transform: [{ scaleX: 0.5 }, { scaleY: 0.5 }],
           }}
           minimumValue={0}
-          maximumValue={duration}
-          value={position}
+          maximumValue={durationMs ?? 0}
+          value={currentMs ?? 0}
           onSlidingComplete={onSlidingComplete}
           minimumTrackTintColor={theme.text}
           maximumTrackTintColor={theme.secondaryBackground2}
@@ -754,7 +442,7 @@ const ContentSession = () => {
               fontFamily: "Raleway-Medium",
             }}
           >
-            {formatTime(position)}
+            {currentMs ? formatTime(currentMs) : "-"}
           </Text>
 
           <Text
@@ -764,7 +452,7 @@ const ContentSession = () => {
               fontFamily: "Raleway-Medium",
             }}
           >
-            -{formatTime(duration - position)}
+            {durationMs ? formatTime(durationMs) : "-"}
           </Text>
         </View>
       </View>
@@ -857,4 +545,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ContentSession;
+export default AudioPlayer;

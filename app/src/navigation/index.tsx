@@ -37,7 +37,7 @@ import CourseDetails from "src/views/Main/CourseDetails";
 import LessonDetails from "src/views/Main/LessonDetails";
 import LessonSession from "src/views/Main/LessonSession";
 import Activity from "src/views/Main/Activity";
-import ContentSession from "src/views/Main/ContentSession";
+import AudioPlayer from "src/views/Main/AudioPlayer";
 import { UserProfile } from "src/views/Main/Profile";
 import EnablePushNotifications from "src/views/Authentication/EnablePushNotifications";
 import Interests from "src/views/Authentication/Interests";
@@ -57,7 +57,7 @@ export type RootStackParamList = {
   Welcome: undefined;
   CarMode?: { contentId: string; isCarMode: boolean };
   Main: undefined;
-  ContentSession?: { contentId: string; isCarMode: boolean };
+  AudioPlayer?: { contentId: string };
   LessonDetails?: { lessonId: string };
   LessonSession?: { lessonId: string };
   Update?: undefined;
@@ -191,13 +191,13 @@ const MainTabNavigation = () => {
         component={ContentSession}
       /> */}
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="Activity"
         options={{
           headerShown: false,
         }}
         component={Activity}
-      />
+      /> */}
 
       <Tabs.Screen
         name="Profile"
@@ -339,11 +339,11 @@ export const MainNavigationStack = () => {
             }}
           >
             <Stack.Screen
-              name="ContentSession"
+              name="AudioPlayer"
               options={{
                 headerShown: false,
               }}
-              component={ContentSession}
+              component={AudioPlayer}
             />
           </Stack.Group>
         </Stack.Navigator>

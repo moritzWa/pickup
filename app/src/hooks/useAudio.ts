@@ -1,9 +1,10 @@
 import { AppContext } from "App";
+import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   DefaultErrors,
   failure,
@@ -12,6 +13,8 @@ import {
   UnexpectedError,
 } from "src/core";
 import {
+  getCurrentMs,
+  getDurationMs,
   setAudioUrl,
   setCurrentMs,
   setDurationMs,
@@ -21,6 +24,9 @@ import {
 export const useAudio = () => {
   const { sound: globalSound } = useContext(AppContext);
   const dispatch = useDispatch();
+
+  const currentMs = useSelector(getCurrentMs);
+  const durationMs = useSelector(getDurationMs);
 
   const getFileName = async (url: string): Promise<string> => {
     const hash = await JSHash("message", CONSTANTS.HashAlgorithms.sha256);
@@ -133,8 +139,28 @@ export const useAudio = () => {
     }
   };
 
+  const leftMs = (durationMs ?? 0) - (currentMs ?? 0);
+
+  const leftMinutes = Math.floor(leftMs / 60_000);
+
+  const percentFinished = useMemo(
+    () =>
+      Math.max(
+        2,
+        new BigNumber(currentMs ?? 0)
+          .div(durationMs ?? Infinity)
+          .multipliedBy(100)
+          .toNumber()
+      ),
+    [currentMs, durationMs]
+  );
+
   return {
     downloadAndPlay: downloadAndPlayAudio,
     toggle,
+    percentFinished,
+    leftMinutes,
+    currentMs,
+    durationMs,
   };
 };

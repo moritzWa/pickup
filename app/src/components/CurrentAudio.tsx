@@ -8,6 +8,7 @@ import {
   Alert,
   Image,
   Animated,
+  DimensionValue,
 } from "react-native";
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
@@ -60,7 +61,9 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
 
   const currentAudioUrl = useSelector(getCurrentAudioUrl);
   const { sound: globalSound } = useContext(AppContext);
-  const { downloadAndPlay, toggle } = useAudio();
+
+  const { downloadAndPlay, toggle, percentFinished, leftMinutes } = useAudio();
+
   const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
@@ -94,13 +97,13 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
 
   const openContent = async () => {
     try {
-      const contentId = activeContent?.id || "";
+      const contentId = activeContent?.content?.id || "";
 
       if (!contentId) {
         return;
       }
 
-      navigation.navigate("ContentSession", { contentId, isCarMode: false });
+      navigation.navigate("AudioPlayer", { contentId, isCarMode: false });
     } catch (err) {
       console.log(err);
       Alert.alert(
@@ -134,22 +137,6 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   const bg = theme.theme === "light" ? "#DFDCFB" : "#050129";
   const title = activeContent?.content?.title;
   const thumbnailImageUrl = activeContent?.content?.thumbnailImageUrl;
-
-  const leftMs = (durationMs ?? 0) - (currentMs ?? 0);
-
-  const leftMinutes = Math.floor(leftMs / 60_000);
-
-  const percentFinished = useMemo(
-    () =>
-      Math.max(
-        2,
-        new BigNumber(currentMs ?? 0)
-          .div(durationMs ?? Infinity)
-          .multipliedBy(100)
-          .toNumber()
-      ),
-    [currentMs, durationMs]
-  );
 
   // console.log("current: " + currentMs);
   // console.log("duration: " + durationMs);
@@ -310,7 +297,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{
-            width: percentFinished.toString() + "%",
+            width: (percentFinished.toString() + "%") as DimensionValue,
             height: 4,
             borderTopRightRadius: 10,
             borderBottomRightRadius: 10,

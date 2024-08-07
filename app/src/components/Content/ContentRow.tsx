@@ -69,7 +69,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
         refetchQueries: [api.content.current],
       });
 
-      navigation.navigate("ContentSession", {
+      navigation.navigate("AudioPlayer", {
         contentId: c.id,
         isCarMode: false,
       });

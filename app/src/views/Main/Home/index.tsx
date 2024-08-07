@@ -182,7 +182,7 @@ const Options = () => {
       return;
     }
 
-    navigation.navigate("ContentSession", {
+    navigation.navigate("AudioPlayer", {
       contentId: session.contentId,
       isCarMode: false,
     });
