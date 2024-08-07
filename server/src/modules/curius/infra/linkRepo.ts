@@ -20,6 +20,8 @@ type LinksWithDistanceResponse = FailureOrSuccess<
     LinkWithDistance[]
 >;
 
+export const DEFAULT_LINKS_RETURN = 8;
+
 export class PostgresCuriusLinkRepository {
     constructor(private model: typeof CuriusLink) {}
 
@@ -46,7 +48,7 @@ export class PostgresCuriusLinkRepository {
 
     async findSimilarLinks(
         query: string,
-        limit: number = 3
+        limit: number = DEFAULT_LINKS_RETURN
     ): Promise<LinksWithDistanceResponse> {
         try {
             const openai = new OpenAI({
