@@ -20,6 +20,7 @@ import {
   Linking,
   Platform,
   RefreshControl,
+  ScrollView,
   SectionList,
   SectionListData,
   Share,
@@ -189,7 +190,7 @@ export const UserProfile = () => {
   const tabs = useMemo(() => {
     return [
       {
-        name: "All",
+        name: "Activity",
         onClick: () => _onPressTab(ProfileTabFilter.All),
         isActive: profileFilter === ProfileTabFilter.All,
       },
@@ -243,35 +244,35 @@ export const UserProfile = () => {
   //   );
   // }
 
-  //   if (!profile) {
-  //     return (
-  //       <View
-  //         style={{
-  //           flex: 1,
-  //           backgroundColor: background,
-  //           alignItems: "center",
-  //           display: "flex",
-  //           flexDirection: "column",
-  //           justifyContent: "center",
-  //         }}
-  //       >
-  //         <Header hasBackButton />
-
-  //         <Text
-  //           style={{
-  //             color: textPrimary,
-  //             fontSize: 18,
-  //             flex: 1,
-  //             alignSelf: "center",
-  //             marginTop: 100,
-  //             fontFamily: "Mona-Sans-Regular",
-  //           }}
-  //         >
-  //           Profile not found.
-  //         </Text>
-  //       </View>
-  //     );
-  //   }
+  if (!profile && !loadingProfile) {
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={_onRefresh}
+            tintColor={activityIndicator}
+          />
+        }
+        style={{
+          backgroundColor: background,
+        }}
+      >
+        <Text
+          style={{
+            color: textPrimary,
+            fontSize: 18,
+            flex: 1,
+            alignSelf: "center",
+            marginTop: 100,
+            fontFamily: "Mona-Sans-Regular",
+          }}
+        >
+          Profile not found.
+        </Text>
+      </ScrollView>
+    );
+  }
 
   return (
     <View
@@ -474,7 +475,7 @@ const Profile = ({ username }: { username: string | null }) => {
           </View>
         </View>
 
-        {/* <FollowersInfo
+        <FollowersInfo
           containerStyle={{
             alignSelf: "flex-start",
             padding: 5,
@@ -483,7 +484,7 @@ const Profile = ({ username }: { username: string | null }) => {
             paddingTop: 0,
           }}
           username={username ?? null}
-        /> */}
+        />
       </View>
       {isME ? (
         <View
