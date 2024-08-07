@@ -116,20 +116,9 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             flex: 1,
           }}
         >
-          <FastImage
-            source={{
-              uri: c.thumbnailImageUrl,
-            }}
-            style={{
-              width: 25,
-              height: 25,
-              borderRadius: 5,
-            }}
-          />
-
           <View
             style={{
-              marginLeft: 10,
+              marginRight: 10,
               flex: 1,
               alignItems: "flex-start",
               justifyContent: "center",
@@ -147,6 +136,19 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
               {c.title}
             </Text>
           </View>
+
+          {c.thumbnailImageUrl ? (
+            <FastImage
+              source={{
+                uri: c.thumbnailImageUrl,
+              }}
+              style={{
+                width: 25,
+                height: 25,
+                borderRadius: 5,
+              }}
+            />
+          ) : null}
 
           {/* <Animated.View
             style={{
