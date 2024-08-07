@@ -10,16 +10,6 @@ const hasLogging = process.env.TYPEORM_LOGGING === "true";
 const ENTITIES = [
     entities.User,
     entities.Notification,
-    entities.Character,
-    entities.Participant,
-    entities.Message,
-    // lesson
-    entities.Lesson,
-    entities.LessonProgress,
-    entities.LessonSession,
-    // course
-    entities.Course,
-    entities.CourseProgress,
     // content
     entities.Content,
     entities.ContentSession,

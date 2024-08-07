@@ -36,7 +36,6 @@ export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
-  LessonTypeEnum: "game" | "role_play" | "vocabulary"
   UserAuthProviderEnum: "firebase"
 }
 
@@ -69,7 +68,6 @@ export interface NexusGenObjects {
     transcription: string; // String!
   }
   ContentSession: entities.ContentSession ;
-  Course: entities.Course ;
   CreateUserResponse: { // root type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
@@ -84,13 +82,6 @@ export interface NexusGenObjects {
     shouldUpdate: boolean; // Boolean!
     userVersion?: string | null; // String
   }
-  Lesson: entities.Lesson ;
-  LessonProgress: entities.LessonProgress ;
-  LessonRole: { // root type
-    context: string; // String!
-    type: string; // String!
-  }
-  LessonSession: entities.LessonSession ;
   Metadata: { // root type
     author?: string | null; // String
     byline?: string | null; // String
@@ -120,10 +111,6 @@ export interface NexusGenObjects {
     username: string; // String!
   }
   Query: {};
-  RespondResponse: { // root type
-    responseAudioUrl: string; // String!
-    transcription: string; // String!
-  }
   SearchResult: { // root type
     averageDistance: number; // Float!
     createdDate: NexusGenScalars['Date']; // Date!
@@ -138,9 +125,6 @@ export interface NexusGenObjects {
     snippet?: string | null; // String
     title: string; // String!
     userIds: number[]; // [Int!]!
-  }
-  TranscribeResponse: { // root type
-    transcription: string; // String!
   }
   User: entities.User ;
 }
@@ -205,18 +189,6 @@ export interface NexusGenFieldTypes {
     updatedAt: NexusGenScalars['Date']; // Date!
     userId: string; // String!
   }
-  Course: { // field return type
-    backgroundColor: string; // String!
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // String!
-    imageUrl: string; // String!
-    isStarted: boolean | null; // Boolean
-    mostRecentLesson: NexusGenRootTypes['Lesson'] | null; // Lesson
-    subtitle: string; // String!
-    textColor: string; // String!
-    title: string; // String!
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
   CreateUserResponse: { // field return type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
@@ -230,33 +202,6 @@ export interface NexusGenFieldTypes {
     latestVersion: string | null; // String
     shouldUpdate: boolean; // Boolean!
     userVersion: string | null; // String
-  }
-  Lesson: { // field return type
-    content: string; // String!
-    courseId: string; // String!
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // String!
-    progress: NexusGenRootTypes['LessonProgress'] | null; // LessonProgress
-    roles: NexusGenRootTypes['LessonRole'][]; // [LessonRole!]!
-    sessions: NexusGenRootTypes['LessonSession'][] | null; // [LessonSession!]
-    subtitle: string; // String!
-    title: string; // String!
-    type: NexusGenEnums['LessonTypeEnum']; // LessonTypeEnum!
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
-  LessonProgress: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // String!
-    updatedAt: NexusGenScalars['Date']; // Date!
-  }
-  LessonRole: { // field return type
-    context: string; // String!
-    type: string; // String!
-  }
-  LessonSession: { // field return type
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // String!
-    updatedAt: NexusGenScalars['Date']; // Date!
   }
   Metadata: { // field return type
     author: string | null; // String
@@ -274,16 +219,12 @@ export interface NexusGenFieldTypes {
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
-    respond: NexusGenRootTypes['RespondResponse']; // RespondResponse!
     respondToContent: NexusGenRootTypes['ContentRespondResponse']; // ContentRespondResponse!
     sendVerification: string; // String!
     setCommuteTime: NexusGenRootTypes['User']; // User!
     setInterests: NexusGenRootTypes['User']; // User!
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
-    startCourse: NexusGenRootTypes['Course']; // Course!
-    startLesson: NexusGenRootTypes['LessonSession']; // LessonSession!
     startListening: NexusGenRootTypes['ContentSession']; // ContentSession!
-    transcribe: NexusGenRootTypes['TranscribeResponse']; // TranscribeResponse!
     updateContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
@@ -311,26 +252,14 @@ export interface NexusGenFieldTypes {
     getContent: NexusGenRootTypes['Content']; // Content!
     getContentFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
-    getCourse: NexusGenRootTypes['Course']; // Course!
-    getCourseLessons: NexusGenRootTypes['Lesson'][]; // [Lesson!]!
-    getCourses: NexusGenRootTypes['Course'][]; // [Course!]!
     getCurrentContentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     getIntercomMobileToken: string; // String!
-    getLesson: NexusGenRootTypes['Lesson']; // Lesson!
-    getLessonProgress: NexusGenRootTypes['LessonProgress']; // LessonProgress!
-    getLessonSessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
     getProfile: NexusGenRootTypes['Profile']; // Profile!
     me: NexusGenRootTypes['User'] | null; // User
-    myCourses: NexusGenRootTypes['Course'][]; // [Course!]!
-    mySessions: NexusGenRootTypes['LessonSession'][]; // [LessonSession!]!
     searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
-  }
-  RespondResponse: { // field return type
-    responseAudioUrl: string; // String!
-    transcription: string; // String!
   }
   SearchResult: { // field return type
     averageDistance: number; // Float!
@@ -346,9 +275,6 @@ export interface NexusGenFieldTypes {
     snippet: string | null; // String
     title: string; // String!
     userIds: number[]; // [Int!]!
-  }
-  TranscribeResponse: { // field return type
-    transcription: string; // String!
   }
   User: { // field return type
     authProvider: NexusGenEnums['UserAuthProviderEnum']; // UserAuthProviderEnum!
@@ -427,18 +353,6 @@ export interface NexusGenFieldTypeNames {
     updatedAt: 'Date'
     userId: 'String'
   }
-  Course: { // field return type name
-    backgroundColor: 'String'
-    createdAt: 'Date'
-    id: 'String'
-    imageUrl: 'String'
-    isStarted: 'Boolean'
-    mostRecentLesson: 'Lesson'
-    subtitle: 'String'
-    textColor: 'String'
-    title: 'String'
-    updatedAt: 'Date'
-  }
   CreateUserResponse: { // field return type name
     token: 'String'
     user: 'User'
@@ -452,33 +366,6 @@ export interface NexusGenFieldTypeNames {
     latestVersion: 'String'
     shouldUpdate: 'Boolean'
     userVersion: 'String'
-  }
-  Lesson: { // field return type name
-    content: 'String'
-    courseId: 'String'
-    createdAt: 'Date'
-    id: 'String'
-    progress: 'LessonProgress'
-    roles: 'LessonRole'
-    sessions: 'LessonSession'
-    subtitle: 'String'
-    title: 'String'
-    type: 'LessonTypeEnum'
-    updatedAt: 'Date'
-  }
-  LessonProgress: { // field return type name
-    createdAt: 'Date'
-    id: 'String'
-    updatedAt: 'Date'
-  }
-  LessonRole: { // field return type name
-    context: 'String'
-    type: 'String'
-  }
-  LessonSession: { // field return type name
-    createdAt: 'Date'
-    id: 'String'
-    updatedAt: 'Date'
   }
   Metadata: { // field return type name
     author: 'String'
@@ -496,16 +383,12 @@ export interface NexusGenFieldTypeNames {
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
-    respond: 'RespondResponse'
     respondToContent: 'ContentRespondResponse'
     sendVerification: 'String'
     setCommuteTime: 'User'
     setInterests: 'User'
     startContent: 'ContentSession'
-    startCourse: 'Course'
-    startLesson: 'LessonSession'
     startListening: 'ContentSession'
-    transcribe: 'TranscribeResponse'
     updateContentSession: 'ContentSession'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
@@ -533,26 +416,14 @@ export interface NexusGenFieldTypeNames {
     getContent: 'Content'
     getContentFeed: 'Content'
     getContentSession: 'ContentSession'
-    getCourse: 'Course'
-    getCourseLessons: 'Lesson'
-    getCourses: 'Course'
     getCurrentContentSession: 'ContentSession'
     getIntercomMobileToken: 'String'
-    getLesson: 'Lesson'
-    getLessonProgress: 'LessonProgress'
-    getLessonSessions: 'LessonSession'
     getLikes: 'ContentSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
     getPaymentMethods: 'PaymentMethod'
     getProfile: 'Profile'
     me: 'User'
-    myCourses: 'Course'
-    mySessions: 'LessonSession'
     searchSimilarLinks: 'SearchResult'
-  }
-  RespondResponse: { // field return type name
-    responseAudioUrl: 'String'
-    transcription: 'String'
   }
   SearchResult: { // field return type name
     averageDistance: 'Float'
@@ -568,9 +439,6 @@ export interface NexusGenFieldTypeNames {
     snippet: 'String'
     title: 'String'
     userIds: 'Int'
-  }
-  TranscribeResponse: { // field return type name
-    transcription: 'String'
   }
   User: { // field return type name
     authProvider: 'UserAuthProviderEnum'
@@ -608,10 +476,6 @@ export interface NexusGenArgTypes {
       referralCode?: string | null; // String
       username?: string | null; // String
     }
-    respond: { // args
-      audioFileUrl: string; // String!
-      lessonId: string; // ID!
-    }
     respondToContent: { // args
       audioFileUrl: string; // String!
       contentId: string; // ID!
@@ -629,16 +493,6 @@ export interface NexusGenArgTypes {
     }
     startContent: { // args
       contentId: string; // ID!
-    }
-    startCourse: { // args
-      courseId: string; // ID!
-    }
-    startLesson: { // args
-      lessonId: string; // String!
-    }
-    transcribe: { // args
-      audioFileUrl: string; // String!
-      lessonId: string; // ID!
     }
     updateContentSession: { // args
       contentSessionId: string; // ID!
@@ -681,23 +535,8 @@ export interface NexusGenArgTypes {
     getContentSession: { // args
       contentId: string; // ID!
     }
-    getCourse: { // args
-      courseId: string; // ID!
-    }
-    getCourseLessons: { // args
-      courseId: string; // ID!
-    }
     getIntercomMobileToken: { // args
       platform?: string | null; // String
-    }
-    getLesson: { // args
-      lessonId: string; // ID!
-    }
-    getLessonProgress: { // args
-      lessonId: string; // ID!
-    }
-    getLessonSessions: { // args
-      lessonId: string; // ID!
     }
     getLikes: { // args
       limit?: number | null; // Int
