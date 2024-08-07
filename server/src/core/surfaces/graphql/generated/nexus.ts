@@ -35,7 +35,7 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
-  ContentFeedFilter: "for_you" | "new" | "popular"
+  ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
   LessonTypeEnum: "game" | "role_play" | "vocabulary"
   UserAuthProviderEnum: "firebase"
 }

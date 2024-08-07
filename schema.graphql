@@ -58,6 +58,8 @@ enum ContentFeedFilter {
   for_you
   new
   popular
+  queue
+  unread
 }
 
 type ContentRespondResponse {

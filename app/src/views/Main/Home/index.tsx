@@ -217,6 +217,12 @@ const Options = () => {
           isActive={filter === ContentFeedFilter.Popular}
           label="Popular"
         />
+
+        <SingleFilter
+          onPress={() => onPress(ContentFeedFilter.Queue)}
+          isActive={filter === ContentFeedFilter.Queue}
+          label="Queue"
+        />
       </View>
 
       <Animated.View
@@ -226,8 +232,6 @@ const Options = () => {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 100,
-          paddingHorizontal: 10,
-          paddingVertical: 5,
           backgroundColor: colors.primary,
           alignSelf: "center",
           transform: [{ scale: animation }],
@@ -242,11 +246,14 @@ const Options = () => {
             display: "flex",
             alignItems: "center",
             flexDirection: "row",
-            padding: 5,
+            justifyContent: "center",
+            // padding: 5,
+            height: 35,
+            width: 35,
             borderRadius: 100,
           }}
         >
-          <Text
+          {/* <Text
             style={{
               color: colors.white,
               fontFamily: "Raleway-Bold",
@@ -255,13 +262,13 @@ const Options = () => {
             }}
           >
             Start
-          </Text>
+          </Text> */}
 
           <FontAwesomeIcon
             icon={faPlay}
             color={colors.white}
-            size={14}
-            style={{ position: "relative", right: -2 }}
+            size={16}
+            style={{ position: "relative", right: -1 }}
           />
         </TouchableOpacity>
       </Animated.View>

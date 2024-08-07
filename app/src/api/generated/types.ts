@@ -76,7 +76,9 @@ export type Content = {
 export enum ContentFeedFilter {
   ForYou = 'for_you',
   New = 'new',
-  Popular = 'popular'
+  Popular = 'popular',
+  Queue = 'queue',
+  Unread = 'unread'
 }
 
 export type ContentRespondResponse = {
@@ -175,6 +177,20 @@ export enum LessonTypeEnum {
   RolePlay = 'RolePlay',
   Vocabulary = 'Vocabulary'
 }
+
+export type Metadata = {
+  __typename?: 'Metadata';
+  author?: Maybe<Scalars['String']['output']>;
+  byline?: Maybe<Scalars['String']['output']>;
+  dir?: Maybe<Scalars['String']['output']>;
+  excerpt?: Maybe<Scalars['String']['output']>;
+  full_text?: Maybe<Scalars['String']['output']>;
+  lang?: Maybe<Scalars['String']['output']>;
+  length?: Maybe<Scalars['Int']['output']>;
+  page_type?: Maybe<Scalars['String']['output']>;
+  publishedTime?: Maybe<Scalars['String']['output']>;
+  siteName?: Maybe<Scalars['String']['output']>;
+};
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -323,6 +339,7 @@ export type Query = {
   me?: Maybe<User>;
   myCourses: Array<Course>;
   mySessions: Array<LessonSession>;
+  searchSimilarLinks: Array<SearchResult>;
 };
 
 
@@ -398,10 +415,33 @@ export type QueryGetProfileArgs = {
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+
+export type QuerySearchSimilarLinksArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
+};
+
 export type RespondResponse = {
   __typename?: 'RespondResponse';
   responseAudioUrl: Scalars['String']['output'];
   transcription: Scalars['String']['output'];
+};
+
+export type SearchResult = {
+  __typename?: 'SearchResult';
+  averageDistance: Scalars['Float']['output'];
+  createdDate: Scalars['Date']['output'];
+  fullText?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Int']['output'];
+  lastCrawled?: Maybe<Scalars['Date']['output']>;
+  link: Scalars['String']['output'];
+  metadata?: Maybe<Metadata>;
+  minDistance: Scalars['Float']['output'];
+  modifiedDate: Scalars['Date']['output'];
+  readCount: Scalars['Int']['output'];
+  snippet?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+  userIds: Array<Scalars['Int']['output']>;
 };
 
 export type TranscribeResponse = {

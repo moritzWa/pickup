@@ -20,7 +20,7 @@ import { keyBy } from "lodash";
 
 export const ContentFeedFilter = enumType({
     name: "ContentFeedFilter",
-    members: ["popular", "for_you", "new"],
+    members: ["popular", "for_you", "new", "unread", "queue"],
 });
 
 export const getContentFeed = queryField("getContentFeed", {
