@@ -14,7 +14,7 @@ import Button from "src/components/Button";
 import Back from "src/components/Back";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ApolloError, useLazyQuery, useMutation } from "@apollo/client";
-import { api } from "src/api";
+import { api, apolloClient } from "src/api";
 import {
   Mutation,
   MutationCreateUserArgs,
@@ -74,6 +74,10 @@ const Signup = () => {
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
+      void apolloClient.refetchQueries({
+        include: [api.users.me, api.users.getProfile],
+      });
+
       if (!user?.name) {
         return navigation.navigate("FullName");
       }
@@ -120,6 +124,7 @@ const Signup = () => {
 
       const response = await createUser({
         variables,
+        refetchQueries: [api.users.me, api.users.getProfile],
       });
 
       const user = response.data?.createUser?.user;
@@ -177,6 +182,7 @@ const Signup = () => {
 
       const response = await createUser({
         variables,
+        refetchQueries: [api.users.me, api.users.getProfile],
       });
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

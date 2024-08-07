@@ -119,14 +119,18 @@ function App() {
     store.dispatch(setUserAuthStateChanged("LOADING"));
 
     auth().onAuthStateChanged(async (u) => {
+      console.log("auth state changed");
+      console.log(u);
+
       try {
         if (u) {
-          const me = await refetchMe();
-          if (me) {
-            store.dispatch(setUserAuthStateChanged("LOGGED_IN"));
-          } else {
-            store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));
-          }
+          // const me = await refetchMe();
+
+          // if (me) {
+          store.dispatch(setUserAuthStateChanged("LOGGED_IN"));
+          // } else {
+          //   store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));
+          // }
         } else {
           store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));
         }

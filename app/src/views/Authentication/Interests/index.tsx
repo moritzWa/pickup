@@ -164,6 +164,7 @@ const Interests = () => {
               style={{
                 marginBottom: 20,
               }}
+              key={section.value}
             >
               <Text
                 style={{
@@ -187,6 +188,7 @@ const Interests = () => {
               >
                 {section.categories.map((category) => (
                   <Category
+                    key={category.value}
                     category={category}
                     isActive={selected.has(category.value)}
                     onPress={() => addOrRemove(category.value)}

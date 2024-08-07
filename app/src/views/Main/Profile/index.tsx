@@ -73,7 +73,10 @@ import { ProfileTabFilter } from "src/redux/types";
 import { CurrentAudio } from "src/components/CurrentAudio";
 
 export const UserProfile = () => {
-  const { me } = useMe("cache-and-network");
+  const { me, refetchMe } = useMe("network-only");
+
+  // console.log("ME: " + me);
+
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
   const username = params?.username ?? me?.id;
   const insets = useSafeAreaInsets();
@@ -112,6 +115,8 @@ export const UserProfile = () => {
   const profileFilter = useSelector(getProfileFilter);
   const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
+  useEffect(() => void refetchMe(), []);
+
   const { data, error } = useQuery<Pick<Query, "getContentFeed">>(
     api.content.feed
   );
@@ -119,8 +124,6 @@ export const UserProfile = () => {
   const { data: bookmarksData } = useQuery<Pick<Query, "getBookmarks">>(
     api.content.bookmarks
   );
-
-  const [startCourse] = useMutation(api.courses.start);
 
   const dispatch = useDispatch();
 
@@ -139,10 +142,13 @@ export const UserProfile = () => {
     setIsRefreshing(true);
     try {
       await Promise.all([
+        refetchMe(),
         apolloClient.refetchQueries({
           include: [api.users.getProfile, api.users.me],
         }),
       ]);
+    } catch (err) {
+      console.log("ERROR: " + err);
     } finally {
       setIsRefreshing(false);
     }
@@ -250,35 +256,37 @@ export const UserProfile = () => {
   //   );
   // }
 
-  if (!profile && !loadingProfile) {
-    return (
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={_onRefresh}
-            tintColor={activityIndicator}
-          />
-        }
-        style={{
-          backgroundColor: background,
-        }}
-      >
-        <Text
-          style={{
-            color: textPrimary,
-            fontSize: 18,
-            flex: 1,
-            alignSelf: "center",
-            marginTop: 100,
-            fontFamily: "Mona-Sans-Regular",
-          }}
-        >
-          Profile not found.
-        </Text>
-      </ScrollView>
-    );
-  }
+  // if (!profile && !loadingProfile) {
+  //   return (
+  //     <ScrollView
+  //       refreshControl={
+  //         <RefreshControl
+  //           refreshing={isRefreshing}
+  //           onRefresh={_onRefresh}
+  //           tintColor={activityIndicator}
+  //         />
+  //       }
+  //       style={{
+  //         backgroundColor: background,
+  //       }}
+  //     >
+  //       <Text
+  //         style={{
+  //           color: textPrimary,
+  //           fontSize: 18,
+  //           flex: 1,
+  //           alignSelf: "center",
+  //           marginTop: 100,
+  //           fontFamily: "Mona-Sans-Regular",
+  //         }}
+  //       >
+  //         Profile not found.
+  //       </Text>
+  //     </ScrollView>
+  //   );
+  // }
+
+  // console.log(me);
 
   return (
     <View
@@ -310,7 +318,7 @@ export const UserProfile = () => {
 };
 
 const Profile = ({ username }: { username: string | null }) => {
-  const { me } = useMe();
+  const { me } = useMe("network-only");
   const isME = username === me?.id;
 
   const navigation = useNavigation<NavigationProps>();
@@ -324,6 +332,13 @@ const Profile = ({ username }: { username: string | null }) => {
     textSecondary,
   } = fullTheme;
 
+  const variables = useMemo(
+    () => ({
+      userId: me?.id,
+    }),
+    [me?.id]
+  );
+
   const {
     data: getProfileData,
     loading: loadingProfile,
@@ -331,10 +346,8 @@ const Profile = ({ username }: { username: string | null }) => {
   } = useQuery<{
     getProfile: ProfileT;
   }>(api.users.getProfile, {
-    skip: !me,
-    variables: {
-      userId: me?.id || "",
-    },
+    skip: !variables.userId,
+    variables: variables,
   });
 
   const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
@@ -481,7 +494,7 @@ const Profile = ({ username }: { username: string | null }) => {
           </View>
         </View>
 
-        <FollowersInfo
+        {/* <FollowersInfo
           containerStyle={{
             alignSelf: "flex-start",
             padding: 5,
@@ -490,7 +503,7 @@ const Profile = ({ username }: { username: string | null }) => {
             paddingTop: 0,
           }}
           username={username ?? null}
-        />
+        /> */}
       </View>
       {isME ? (
         <View

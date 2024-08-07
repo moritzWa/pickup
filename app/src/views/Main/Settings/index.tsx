@@ -98,11 +98,7 @@ const Profile = () => {
 
   const _logout = async () => {
     try {
-      await Promise.all([
-        auth().signOut(),
-        // Intercom.logout(),
-        OneSignal.logout(),
-      ]);
+      await Promise.all([auth().signOut(), OneSignal.logout()]);
     } catch (err) {
       console.log(err);
     }

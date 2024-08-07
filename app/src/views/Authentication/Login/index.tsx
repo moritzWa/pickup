@@ -161,11 +161,11 @@ const Login = () => {
       const variables: MutationCreateUserArgs = {
         email: u.user?.email || "",
         name: u.user?.displayName || "",
-        isMobile: true,
       };
 
       const response = await createUser({
         variables,
+        refetchQueries: [api.users.me, api.users.getProfile],
       });
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -215,6 +215,7 @@ const Login = () => {
 
       const response = await createUser({
         variables,
+        refetchQueries: [api.users.me, api.users.getProfile],
       });
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

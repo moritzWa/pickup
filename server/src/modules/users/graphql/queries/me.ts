@@ -36,6 +36,8 @@ export const me = queryField("me", {
             return null;
         }
 
+        console.log(user);
+
         return user;
     },
 });

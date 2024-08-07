@@ -47,7 +47,7 @@ export const useMe = (
     me: BaseUserFields;
   }>(api.users.me, {
     fetchPolicy,
-    skip: authStatus !== "LOGGED_IN",
+    // skip: authStatus !== "LOGGED_IN",
   });
 
   const [_updateMe] = useMutation<{
@@ -72,8 +72,14 @@ export const useMe = (
 
   const _fetchUserInfo = async () => {
     try {
-      const data = await _refetchMe();
+      // console.log(`[refetching user]`);
+
+      const data = await _refetchMe({
+        fetchPolicy: "network-only",
+      });
       const me = data?.data?.me;
+      // console.log(data.data);
+      // console.log(data.error);
       return me;
     } catch (err) {
       console.log(JSON.stringify(err, null, 2));
@@ -95,6 +101,9 @@ export const useMe = (
   if (error && __DEV__) {
     console.log(JSON.stringify(error, null, 2));
   }
+
+  // console.log("AUTH STATUS: " + authStatus);
+  // console.log("MY DATA: ", myData);
 
   return {
     me,
