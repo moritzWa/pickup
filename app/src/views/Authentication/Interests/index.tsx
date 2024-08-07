@@ -66,6 +66,11 @@ const Interests = () => {
 
   const _continue = async () => {
     try {
+      if (selected.size < 3) {
+        Alert.alert("Error", "Please select at least 3 interests");
+        return;
+      }
+
       const variables: MutationSetInterestsArgs = {
         interestDescription: description,
         interestCategories: Array.from(selected),
@@ -75,7 +80,7 @@ const Interests = () => {
         variables,
       });
 
-      return navigation.navigate("Main");
+      return navigation.navigate("EnablePushNotifications");
     } catch (err) {
       console.log("=== error ===");
       console.log(err);

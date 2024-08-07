@@ -33,6 +33,8 @@ import { colors } from "src/components";
 import { OneSignal } from "react-native-onesignal";
 import Header from "src/components/Header";
 import Close from "src/components/Close";
+import { useMutation } from "@apollo/client";
+import { api } from "src/api";
 
 const EnablePushNotifications = () => {
   const { height } = Dimensions.get("window");
@@ -50,6 +52,7 @@ const EnablePushNotifications = () => {
   const onOverrideDeny = params?.onOverrideDeny ?? null;
   const onOverrideAccept = params?.onOverrideAccept ?? null;
   const hideHeader = params?.hideHeader ?? false;
+  const [updateUser] = useMutation(api.users.update);
 
   const _onAllow = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -61,11 +64,17 @@ const EnablePushNotifications = () => {
       // segment.track("Trading Push Notifications Enabled");
     }
 
+    void updateUser({
+      variables: { hasPushNotifications: permission },
+    });
+
     if (onOverrideAccept) {
       return onOverrideAccept();
     }
 
-    navigation.navigate("Main");
+    navigation.navigate("Main", {
+      screen: "Home",
+    });
 
     if (onAccept) {
       onAccept();
@@ -79,7 +88,9 @@ const EnablePushNotifications = () => {
       return onOverrideDeny();
     }
 
-    navigation.navigate("Main");
+    navigation.navigate("Main", {
+      screen: "Home",
+    });
 
     if (onDeny) {
       onDeny();
@@ -103,7 +114,7 @@ const EnablePushNotifications = () => {
           style={{
             zIndex: 100,
             right: 15,
-            top: 15,
+            top: insets.top + 15,
           }}
         />
       )}
@@ -135,7 +146,7 @@ const EnablePushNotifications = () => {
             <TouchableOpacity
               style={{
                 position: "absolute",
-                top: 5,
+                top: insets.top + 5,
                 right: 15,
                 zIndex: 100,
               }}
@@ -158,14 +169,14 @@ const EnablePushNotifications = () => {
             style={{
               width: "100%",
               position: "absolute",
-              top: isSignupFlow ? 125 : 50,
+              top: 125,
             }}
           >
             <Text
               style={{
                 color: header,
                 fontSize: 26,
-                fontFamily: "Mona-Sans-Expanded-SemiBold",
+                fontFamily: "Raleway-Bold",
               }}
             >
               Enable Notifications
@@ -176,11 +187,11 @@ const EnablePushNotifications = () => {
                 marginTop: 20,
                 color: text,
                 fontSize: 18,
-                fontFamily: "Mona-Sans-Regular",
+                fontFamily: "Raleway-Medium",
               }}
             >
               {subtitle ||
-                "We'll notify you if you have eligible airdrops or if someone follows you."}
+                "We'll send you curated audio content every morning."}
             </Text>
           </View>
 
@@ -200,7 +211,7 @@ const PushNotificationPrompt = ({
   onAllow: () => void;
   onDeny: () => void;
 }) => {
-  const { theme } = useTheme();
+  const { theme, text } = useTheme();
 
   return (
     <View style={[styles.container, {}]}>
@@ -219,7 +230,7 @@ const PushNotificationPrompt = ({
           style={[
             styles.title,
             {
-              fontFamily: "Mona-Sans-SemiBold",
+              fontFamily: "Raleway-SemiBold",
             },
           ]}
         >
@@ -230,7 +241,7 @@ const PushNotificationPrompt = ({
           style={[
             styles.message,
             {
-              fontFamily: "Mona-Sans-Regular",
+              fontFamily: "Raleway-Regular",
               paddingBottom: 20,
             },
           ]}
@@ -265,9 +276,9 @@ const PushNotificationPrompt = ({
           >
             <Text
               style={{
-                color: "#007bff",
+                color: text,
                 fontSize: 16,
-                fontFamily: "Mona-Sans-Regular",
+                fontFamily: "Raleway-SemiBold",
               }}
             >
               No Thanks
@@ -286,7 +297,7 @@ const PushNotificationPrompt = ({
               style={{
                 color: "#007bff",
                 fontSize: 16,
-                fontFamily: "Mona-Sans-SemiBold",
+                fontFamily: "Raleway-SemiBold",
               }}
             >
               Yes, Enable

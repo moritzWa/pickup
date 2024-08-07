@@ -316,6 +316,14 @@ export const MainNavigationStack = () => {
           />
 
           <Stack.Screen
+            name="EnablePushNotifications"
+            component={EnablePushNotifications}
+            options={{
+              headerShown: false,
+            }}
+          />
+
+          <Stack.Screen
             name="LessonDetails"
             options={{
               headerShown: false,

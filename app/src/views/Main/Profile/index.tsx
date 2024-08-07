@@ -73,7 +73,7 @@ import { ProfileTabFilter } from "src/redux/types";
 import { CurrentAudio } from "src/components/CurrentAudio";
 
 export const UserProfile = () => {
-  const { me } = useMe();
+  const { me } = useMe("cache-and-network");
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
   const username = params?.username ?? me?.id;
   const insets = useSafeAreaInsets();
@@ -89,6 +89,13 @@ export const UserProfile = () => {
     header,
   } = useTheme();
 
+  const variables = useMemo(
+    () => ({
+      userId: me?.id,
+    }),
+    [me?.id]
+  );
+
   const {
     data: getProfileData,
     loading: loadingProfile,
@@ -97,10 +104,9 @@ export const UserProfile = () => {
   } = useQuery<{
     getProfile: ProfileT;
   }>(api.users.getProfile, {
-    skip: !me,
-    variables: {
-      userId: me?.id || "",
-    },
+    skip: !variables.userId,
+    fetchPolicy: "cache-and-network",
+    variables: variables,
   });
 
   const profileFilter = useSelector(getProfileFilter);
