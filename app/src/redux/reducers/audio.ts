@@ -8,6 +8,7 @@ const initialState: AudioState = {
   currentMs: null,
   durationMs: null,
   isPlaying: false,
+  speed: 1,
 };
 
 // actions
@@ -19,6 +20,7 @@ export const setDurationMs =
   createAction<AudioState["durationMs"]>("SET_DURATION_MS");
 export const setIsPlaying =
   createAction<AudioState["isPlaying"]>("SET_IS_PLAYING");
+export const setSpeed = createAction<AudioState["speed"]>("SET_SPEED");
 
 // reducer
 export const audioReducer = createReducer(initialState, (builder) => {
@@ -34,6 +36,9 @@ export const audioReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setIsPlaying, (state, action) => {
       state.isPlaying = action.payload;
+    })
+    .addCase(setSpeed, (state, action) => {
+      state.speed = action.payload;
     });
 });
 
@@ -50,3 +55,6 @@ export const getDurationMs = (state: ReduxState): AudioState["durationMs"] =>
 
 export const getIsPlaying = (state: ReduxState): AudioState["isPlaying"] =>
   state.audio.isPlaying;
+
+export const getSpeed = (state: ReduxState): AudioState["speed"] =>
+  state.audio.speed;

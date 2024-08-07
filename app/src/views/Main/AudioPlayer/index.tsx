@@ -63,6 +63,7 @@ import {
 } from "src/redux/reducers/audio";
 import { AppContext } from "App";
 import { Track } from "react-native-track-player";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 const SIZE = 125;
 
@@ -77,6 +78,8 @@ const AudioPlayer = () => {
   const {
     downloadAndPlay,
     setPosition,
+    setSpeed,
+    speed,
     toggle,
     currentMs,
     durationMs,
@@ -147,6 +150,28 @@ const AudioPlayer = () => {
     await setPosition(value);
   };
 
+  const { showActionSheetWithOptions } = useActionSheet();
+
+  const setPlayerSpeed = () => {
+    const options = ["1x", "1.25x", "1.5x", "2x", "2.5x", "3x", "Cancel"];
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex: options.length - 1,
+      },
+      (selectedIndex?: number) => {
+        // if last, cancel
+        if (selectedIndex === options.length - 1) return;
+        const val = options[selectedIndex];
+        const speed = parseFloat(val.replace("x", ""));
+        console.log("SPEED: " + speed);
+        setSpeed(speed);
+        return speed;
+      }
+    );
+  };
+
   const formatTime = (timeMillis: number) => {
     const totalSeconds = Math.floor(timeMillis / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -210,17 +235,19 @@ const AudioPlayer = () => {
             padding: 10,
           }}
         >
-          <FastImage
-            source={{
-              uri: content?.thumbnailImageUrl,
-            }}
-            style={{
-              width: 50,
-              marginRight: 10,
-              height: 50,
-              borderRadius: 10,
-            }}
-          />
+          {content?.thumbnailImageUrl ? (
+            <FastImage
+              source={{
+                uri: content?.thumbnailImageUrl,
+              }}
+              style={{
+                width: 50,
+                marginRight: 10,
+                height: 50,
+                borderRadius: 10,
+              }}
+            />
+          ) : null}
 
           <View style={{ flex: 1 }}>
             <Text
@@ -350,6 +377,31 @@ const AudioPlayer = () => {
           },
         ]}
       >
+        <TouchableOpacity
+          style={{
+            padding: 10,
+            width: 60,
+            alignSelf: "flex-end",
+            marginRight: 20,
+            marginBottom: 10,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 50,
+            backgroundColor: theme.secondaryBackground,
+          }}
+          onPress={setPlayerSpeed}
+        >
+          <Text
+            style={{
+              color: theme.text,
+              fontSize: 14,
+              fontFamily: "Raleway-Bold",
+            }}
+          >
+            {speed}x
+          </Text>
+        </TouchableOpacity>
+
         <Slider
           style={{
             width: width * 1.75,

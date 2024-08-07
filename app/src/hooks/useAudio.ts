@@ -2,7 +2,7 @@ import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
 import TrackPlayer, { AddTrack, State, Track } from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,10 +18,12 @@ import {
   getCurrentMs,
   getDurationMs,
   getIsPlaying,
+  getSpeed,
   setAudioUrl,
   setCurrentMs,
   setDurationMs,
   setIsPlaying,
+  setSpeed,
 } from "src/redux/reducers/audio";
 
 export const useAudio = () => {
@@ -32,6 +34,7 @@ export const useAudio = () => {
   const durationMs = useSelector(getDurationMs);
   const isPlaying = useSelector(getIsPlaying);
   const audioUrl = useSelector(getCurrentAudioUrl);
+  const speed = useSelector(getSpeed);
 
   const getFileName = async (url: string): Promise<string> => {
     const hash = await JSHash("message", CONSTANTS.HashAlgorithms.sha256);
@@ -177,6 +180,11 @@ export const useAudio = () => {
     // }
   };
 
+  const setTrackSpeed = async (speed: number) => {
+    await TrackPlayer.setRate(speed);
+    dispatch(setSpeed(speed));
+  };
+
   return {
     downloadAndPlay: downloadAndPlayAudio,
     toggle,
@@ -188,5 +196,7 @@ export const useAudio = () => {
     audioUrl,
     skip,
     setPosition,
+    setSpeed: setTrackSpeed,
+    speed,
   };
 };

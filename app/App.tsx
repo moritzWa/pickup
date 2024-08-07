@@ -63,6 +63,7 @@ import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
 } from "react-native-track-player";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -102,6 +103,7 @@ function App() {
         Capability.Pause,
         Capability.JumpForward,
         Capability.JumpBackward,
+        Capability.SeekTo,
       ],
       android: {
         appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
@@ -270,17 +272,19 @@ function App() {
 
 const AppWithRedux = () => {
   return (
-    <SafeAreaProvider>
-      <Provider store={store}>
-        <ApolloProvider client={apolloClient}>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <PortalProvider>
-              <App />
-            </PortalProvider>
-          </GestureHandlerRootView>
-        </ApolloProvider>
-      </Provider>
-    </SafeAreaProvider>
+    <ActionSheetProvider useNativeDriver>
+      <SafeAreaProvider>
+        <Provider store={store}>
+          <ApolloProvider client={apolloClient}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <PortalProvider>
+                <App />
+              </PortalProvider>
+            </GestureHandlerRootView>
+          </ApolloProvider>
+        </Provider>
+      </SafeAreaProvider>
+    </ActionSheetProvider>
   );
 };
 

@@ -33,4 +33,9 @@ export const PlaybackService = async function () {
     store.dispatch(setCurrentMs(Math.ceil(e.position * 1_000)));
     store.dispatch(setDurationMs(Math.ceil(e.duration * 1_000)));
   });
+
+  TrackPlayer.addEventListener(Event.RemoteSeek, async (e) => {
+    store.dispatch(setCurrentMs(Math.ceil(e.position * 1_000)));
+    await TrackPlayer.seekTo(e.position);
+  });
 };

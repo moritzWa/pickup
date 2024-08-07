@@ -71,7 +71,6 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
 
       navigation.navigate("AudioPlayer", {
         contentId: c.id,
-        isCarMode: false,
       });
     } catch (err) {
       console.log(err);

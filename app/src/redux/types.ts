@@ -22,6 +22,7 @@ export type AudioState = {
   currentMs: number | null;
   durationMs: number | null;
   isPlaying: boolean;
+  speed: number;
 };
 
 export enum ProfileTabFilter {
