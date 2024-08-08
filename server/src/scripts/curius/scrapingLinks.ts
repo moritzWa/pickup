@@ -26,13 +26,16 @@ const BATCH_SIZE = 75;
 const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
-    const startLink = 25999;
-    const numLinks = 10000;
+    const startLink = 55998;
+    const numLinks = 40000;
     // latest as of 2024-08-03 is 127456
     // note we haven't fetched the metadata for 0-35863
 
+    const avgTimePerLink = 60.06655;
+
     console.log(
-        `Scraping ${numLinks} Curius Links in batches of ${BATCH_SIZE}...`
+        `Scraping ${numLinks} Curius Links in batches of ${BATCH_SIZE}...`,
+        `This will take ~${(numLinks * avgTimePerLink) / 1000} minutes`
     );
     const totalStartTime = Date.now();
     let totalProcessedLinks = 0;
