@@ -35,6 +35,9 @@ export class CuriusLink {
     skippedErrorFetchingFullText?: boolean;
 
     @Column({ nullable: true })
+    deadLink?: boolean;
+
+    @Column({ nullable: true })
     length?: number;
 
     @Column({ nullable: true })

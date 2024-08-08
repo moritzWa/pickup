@@ -7,10 +7,9 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
-import { CuriusLink } from "src/core/infra/postgres/entities";
-import { DefaultErrors, FailureOrSuccess, success } from "src/core/logic";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkResponse } from "src/modules/curius/infra/linkRepo";
+import { Logger } from "src/utils/logger";
 import { getErrorMessage, isSuccess } from "./utils";
 
 const sanitizeText = (text: string) => {
@@ -48,7 +47,7 @@ const addFullTextToLinks = async () => {
         // const linksResponse = await mockFindLinks();
 
         if (!isSuccess(linksResponse)) {
-            console.error(
+            Logger.error(
                 "Failed to fetch links without full text:",
                 linksResponse.error
             );
@@ -57,7 +56,7 @@ const addFullTextToLinks = async () => {
 
         const links = linksResponse.value;
         const totalLinks = links.length;
-        console.log(
+        Logger.info(
             `Starting to process ${totalLinks} links without full text...`
         );
 
@@ -72,20 +71,23 @@ const addFullTextToLinks = async () => {
                 } else {
                     await processHTMLLink(link);
                 }
-
-                if (link.fullText) {
-                    savePromises.push(curiusLinkRepo.save(link)); // Collect save promise
-                } else {
-                    console.log(
-                        `Skipped saving link ${link.id}: No full text extracted`
-                    );
-                }
             } catch (error) {
-                console.error(
+                Logger.error(
                     `Error processing link ${link.id}:`,
                     getErrorMessage(error)
                 );
                 link.skippedErrorFetchingFullText = true;
+            } finally {
+                // for some reason this is added wrongly sometimes
+                if (link.fullText) {
+                    link.skippedErrorFetchingFullText = false;
+                    link.skippedNotProbablyReadable = false;
+                    link.skippedInaccessiblePDF = false;
+                    link.deadLink = false;
+                }
+
+                // Always save the link, even if an error occurred
+                savePromises.push(curiusLinkRepo.save(link));
             }
         };
 
@@ -95,13 +97,13 @@ const addFullTextToLinks = async () => {
         await Promise.all(savePromises);
 
         const totalTime = (Date.now() - startTime) / 1000;
-        console.log(
+        Logger.info(
             `Finished processing ${totalLinks} links in ${totalTime.toFixed(
                 2
             )}s`
         );
     } catch (error) {
-        console.error("Unexpected error:", getErrorMessage(error));
+        Logger.error("Unexpected error:", getErrorMessage(error));
     } finally {
         if (dataSource.isInitialized) {
             await dataSource.destroy();
@@ -115,7 +117,7 @@ const processPDFLink = async (link) => {
         !response.ok ||
         !response.headers.get("content-type")?.includes("application/pdf")
     ) {
-        console.log(`Skipping inaccessible PDF: ${link.link}`);
+        Logger.info(`Skipping inaccessible PDF: ${link.link}`);
         link.skippedInaccessiblePDF = true;
         return;
     }
@@ -129,32 +131,39 @@ const processPDFLink = async (link) => {
 
 const processHTMLLink = async (link) => {
     try {
-        console.log(`Fetching link: ${link.link}`);
-        const response = await fetch(link.link);
+        Logger.info(`Fetching link: ${link.id} (${link.link})`);
+        const response = await fetch(link.link); // Add a timeout
+
         if (!response.ok) {
-            // console.log(
-            //     `Failed to fetch link: ${link.link}, status: ${response.status}`
-            // );
-            link.skippedErrorFetchingFullText = true; // Set the flag here
+            if (response.status === 404 || response.status === 410) {
+                link.deadLink = true;
+                Logger.info(`Dead link detected: ${link.id} (${link.link})`);
+            } else {
+                link.skippedErrorFetchingFullText = true;
+                Logger.info(
+                    `Error fetching link: ${link.id} (${link.link}), status: ${response.status}`
+                );
+            }
             return;
         }
 
         const html = await response.text();
-        console.log(
-            `Fetched HTML content for: ${link.link}, length: ${html.length}`
-        );
 
         const { window } = new JSDOM(html);
         if (!isProbablyReaderable(window.document)) {
-            // console.log(`Link not probably readable: ${link.link}`);
-            link.skippedNotProbablyReadable = true; // Set the flag here
+            link.skippedNotProbablyReadable = true;
+            Logger.info(
+                `Link not probably readable: ${link.id} (${link.link})`
+            );
             return;
         }
 
         const result = new Readability(window.document).parse();
         if (!result) {
-            // console.log(`Failed to parse content for: ${link.link}`);
-            link.skippedErrorFetchingFullText = true; // Set the flag here
+            link.skippedErrorFetchingFullText = true;
+            Logger.info(
+                `Failed to parse content for: ${link.id} (${link.link})`
+            );
             return;
         }
 
@@ -170,13 +179,13 @@ const processHTMLLink = async (link) => {
             title: result.title || link.title,
             fullText: NodeHtmlMarkdown.translate(result.content || ""),
         });
-        console.log(`Successfully processed link: ${link.link}`);
+        // Logger.info(`Successfully processed link: ${link.id} (${link.link})`);
     } catch (error) {
-        console.error(
+        Logger.error(
             `Error processing HTML link ${link.id}:`,
             getErrorMessage(error)
         );
-        link.skippedErrorFetchingFullText = true; // Set the flag here
+        link.skippedErrorFetchingFullText = true;
     }
 };
 
