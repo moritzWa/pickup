@@ -6,7 +6,7 @@ const truncateMessage = (message: string): string => {
     if (message.length <= MAX_MESSAGE_LENGTH) {
         return message;
     }
-    return message.slice(0, MAX_MESSAGE_LENGTH) + "...";
+    return message.slice(0, MAX_MESSAGE_LENGTH) + "...[truncated]";
 };
 
 const customFormat = winston.format.printf(({ level, message }) => {
