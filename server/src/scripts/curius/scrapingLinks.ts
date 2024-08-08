@@ -21,32 +21,67 @@ const headers = {
     Authorization: `Bearer ${token}`,
 };
 
+const BATCH_SIZE = 75;
+
 const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
-    const startLink = 200;
-    const numLinks = 1000;
+    const startLink = 25999;
+    const numLinks = 50000;
     // latest as of 2024-08-03 is 127456
 
-    console.log(`Scraping ${numLinks} Curius Links...`);
+    console.log(
+        `Scraping ${numLinks} Curius Links in batches of ${BATCH_SIZE}...`
+    );
     const totalStartTime = Date.now();
 
-    for (let i = startLink; i <= startLink + numLinks; i++) {
-        const linkStartTime = Date.now();
-        const linkViewUrl = `https://curius.app/api/linkview/${i}`;
+    for (
+        let batchStart = startLink;
+        batchStart < startLink + numLinks;
+        batchStart += BATCH_SIZE
+    ) {
+        const batchEnd = Math.min(
+            batchStart + BATCH_SIZE,
+            startLink + numLinks
+        );
+        const batchStartTime = Date.now();
 
-        try {
-            const response = await fetch(linkViewUrl, { headers });
-            const data: LinkViewResponse = await response.json();
+        const batchPromises: Promise<LinkViewResponse>[] = [];
 
-            await saveCuriusData(data);
-
-            const linkEndTime = Date.now();
-            const linkDuration = linkEndTime - linkStartTime;
-            console.log(`Link ${i} processed in ${linkDuration}ms`);
-        } catch (error) {
-            console.error(`Error processing link ${i}:`, error);
+        for (let i = batchStart; i < batchEnd; i++) {
+            const linkViewUrl = `https://curius.app/api/linkview/${i}`;
+            batchPromises.push(
+                fetch(linkViewUrl, { headers })
+                    .then((response) => response.json())
+                    .catch((error) => {
+                        console.error(`Error fetching link ${i}:`, error);
+                        return null;
+                    })
+            );
         }
+
+        const batchResults = await Promise.all(batchPromises);
+        const validResults = batchResults.filter(
+            (result): result is LinkViewResponse => result !== null
+        );
+
+        console.log(
+            `Fetched ${validResults.length} links. Saving to database...`
+        );
+
+        const saveStartTime = Date.now();
+        await Promise.all(validResults.map((data) => saveCuriusData(data)));
+        const saveEndTime = Date.now();
+
+        const batchEndTime = Date.now();
+        const batchDuration = batchEndTime - batchStartTime;
+        const saveDuration = saveEndTime - saveStartTime;
+
+        console.log(
+            `Batch ${batchStart}-${
+                batchEnd - 1
+            } processed in ${batchDuration}ms (Save time: ${saveDuration}ms)`
+        );
     }
 
     const totalEndTime = Date.now();
