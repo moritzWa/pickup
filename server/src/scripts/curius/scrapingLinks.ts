@@ -24,20 +24,35 @@ const headers = {
 const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
-    const startLink = 21;
-    const numLinks = 200;
+    const startLink = 200;
+    const numLinks = 1000;
     // latest as of 2024-08-03 is 127456
 
     console.log(`Scraping ${numLinks} Curius Links...`);
+    const totalStartTime = Date.now();
+
     for (let i = startLink; i <= startLink + numLinks; i++) {
+        const linkStartTime = Date.now();
         const linkViewUrl = `https://curius.app/api/linkview/${i}`;
-        const response = await fetch(linkViewUrl, { headers });
-        const data: LinkViewResponse = await response.json();
 
-        console.log("data in scrapingLinks", JSON.stringify(data, null, 2));
+        try {
+            const response = await fetch(linkViewUrl, { headers });
+            const data: LinkViewResponse = await response.json();
 
-        await saveCuriusData(data);
+            await saveCuriusData(data);
+
+            const linkEndTime = Date.now();
+            const linkDuration = linkEndTime - linkStartTime;
+            console.log(`Link ${i} processed in ${linkDuration}ms`);
+        } catch (error) {
+            console.error(`Error processing link ${i}:`, error);
+        }
     }
+
+    const totalEndTime = Date.now();
+    const totalDuration = totalEndTime - totalStartTime;
+    console.log(`Total scraping time: ${totalDuration}ms`);
+    console.log(`Average time per link: ${totalDuration / numLinks}ms`);
 
     await dataSource.destroy();
 };
