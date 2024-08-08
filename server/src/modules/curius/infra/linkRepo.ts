@@ -1,4 +1,4 @@
-import { IsNull, Repository } from "typeorm";
+import { IsNull, Raw, Repository } from "typeorm";
 
 import { OpenAI } from "openai";
 import * as pgvector from "pgvector/pg";
@@ -61,11 +61,21 @@ export class PostgresCuriusLinkRepository {
             const links = await this.repo.find({
                 where: {
                     fullText: IsNull(),
-                    skippedErrorFetchingFullText: IsNull(),
-                    skippedNotProbablyReadable: IsNull(),
-                    skippedInaccessiblePDF: IsNull(),
+                    skippedErrorFetchingFullText: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedNotProbablyReadable: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedInaccessiblePDF: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
                 },
                 take: limit,
+                order: {
+                    id: "ASC",
+                },
             });
             return success(links);
         } catch (err) {

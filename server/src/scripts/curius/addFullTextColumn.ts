@@ -16,92 +16,120 @@ const sanitizeText = (text: string) => {
     return text.replace(/\0/g, ""); // Remove null bytes
 };
 
+const BATCH_SIZE = 100;
+// const MAX_LINKS_TO_PROCESS = 200; // Temporary limit for testing
+
 const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        const linksResponse = await curiusLinkRepo.findFirst100Links();
-        // const mockFindLinks = (): Promise<
-        //     FailureOrSuccess<DefaultErrors, CuriusLink[]>
-        // > => {
-        //     const mockLinks = [
-        //         {
-        //             id: 1,
-        //             link: "https://mindbook.dev/shelf",
-        //         },
-        //         {
-        //             id: 2,
-        //             link: "xkcd.com",
-        //         },
-        //         {
-        //             id: 3,
-        //             link: "https://blog.samaltman.com/funding-for-covid-19-projects",
-        //         },
-        //         {
-        //             id: 4,
-        //             link: "https://en.wikipedia.org/wiki/Berlin_Wall",
-        //         },
-        //     ] as CuriusLink[];
-        //     return Promise.resolve(success(mockLinks));
-        // };
-        // const linksResponse = await mockFindLinks();
+        let hasMoreLinks = true;
+        // let totalProcessedLinks = 0;
 
-        if (!isSuccess(linksResponse)) {
-            Logger.error(
-                "Failed to fetch links without full text:",
-                linksResponse.error
+        while (hasMoreLinks) {
+            // while (hasMoreLinks && totalProcessedLinks < MAX_LINKS_TO_PROCESS) {
+            // const mockFindLinks = (): Promise<
+            //     FailureOrSuccess<DefaultErrors, CuriusLink[]>
+            // > => {
+            //     const mockLinks = [
+            //         {
+            //             id: 1,
+            //             link: "https://mindbook.dev/shelf",
+            //         },
+            //         {
+            //             id: 2,
+            //             link: "xkcd.com",
+            //         },
+            //         {
+            //             id: 3,
+            //             link: "https://blog.samaltman.com/funding-for-covid-19-projects",
+            //         },
+            //         {
+            //             id: 4,
+            //             link: "https://en.wikipedia.org/wiki/Berlin_Wall",
+            //         },
+            //     ] as CuriusLink[];
+            //     return Promise.resolve(success(mockLinks));
+            // };
+            // const linksResponse = await mockFindLinks()
+
+            const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
+                BATCH_SIZE
             );
-            return;
-        }
 
-        const links = linksResponse.value;
-        const totalLinks = links.length;
-        Logger.info(
-            `Starting to process ${totalLinks} links without full text...`
-        );
+            // log how many links were found
+            Logger.info(
+                `Found ${linksResponse.value.length} links without full text`
+            );
 
-        const startTime = Date.now();
-        let processedLinks = 0;
-        const savePromises: Promise<LinkResponse>[] = [];
-
-        const processLink = async (link) => {
-            try {
-                if (link.link.endsWith(".pdf")) {
-                    await processPDFLink(link);
-                } else {
-                    await processHTMLLink(link);
-                }
-            } catch (error) {
+            if (!isSuccess(linksResponse)) {
                 Logger.error(
-                    `Error processing link ${link.id}:`,
-                    getErrorMessage(error)
+                    "Failed to fetch links without full text:",
+                    linksResponse.error
                 );
-                link.skippedErrorFetchingFullText = true;
-            } finally {
-                // for some reason this is added wrongly sometimes
-                if (link.fullText) {
-                    link.skippedErrorFetchingFullText = false;
-                    link.skippedNotProbablyReadable = false;
-                    link.skippedInaccessiblePDF = false;
-                    link.deadLink = false;
-                }
-
-                // Always save the link, even if an error occurred
-                savePromises.push(curiusLinkRepo.save(link));
+                return;
             }
-        };
 
-        await Promise.all(links.map(processLink)); // Process links in parallel
+            const links = linksResponse.value;
+            const totalLinks = links.length;
 
-        // Save all processed links at once
-        await Promise.all(savePromises);
+            if (totalLinks === 0) {
+                hasMoreLinks = false;
+                break;
+            }
 
-        const totalTime = (Date.now() - startTime) / 1000;
-        Logger.info(
-            `Finished processing ${totalLinks} links in ${totalTime.toFixed(
-                2
-            )}s`
-        );
+            Logger.info(
+                `Starting to process ${totalLinks} links without full text...`
+            );
+
+            const startTime = Date.now();
+            const savePromises: Promise<LinkResponse>[] = [];
+
+            const processLink = async (link) => {
+                try {
+                    if (link.link.endsWith(".pdf")) {
+                        await processPDFLink(link);
+                    } else {
+                        await processHTMLLink(link);
+                    }
+                } catch (error) {
+                    Logger.error(
+                        `Error processing link ${link.id}:`,
+                        getErrorMessage(error)
+                    );
+                    link.skippedErrorFetchingFullText = true;
+                } finally {
+                    // for some reason this is added wrongly sometimes
+                    if (link.fullText) {
+                        link.skippedErrorFetchingFullText = false;
+                        link.skippedNotProbablyReadable = false;
+                        link.skippedInaccessiblePDF = false;
+                        link.deadLink = false;
+                    }
+
+                    // Always save the link, even if an error occurred
+                    savePromises.push(curiusLinkRepo.save(link));
+                }
+            };
+
+            await Promise.all(links.map(processLink)); // Process links in parallel
+
+            // Save all processed links at once
+            await Promise.all(savePromises);
+
+            // totalProcessedLinks += totalLinks;
+
+            const totalTime = (Date.now() - startTime) / 1000;
+            Logger.info(
+                `Finished processing ${totalLinks} links in ${totalTime.toFixed(
+                    2
+                )}s`
+            );
+
+            // if (totalProcessedLinks >= MAX_LINKS_TO_PROCESS) {
+            //     hasMoreLinks = false;
+            // }
+        }
     } catch (error) {
         Logger.error("Unexpected error:", getErrorMessage(error));
     } finally {
@@ -112,21 +140,33 @@ const addFullTextToLinks = async () => {
 };
 
 const processPDFLink = async (link) => {
-    const response = await fetch(link.link);
-    if (
-        !response.ok ||
-        !response.headers.get("content-type")?.includes("application/pdf")
-    ) {
-        Logger.info(`Skipping inaccessible PDF: ${link.link}`);
-        link.skippedInaccessiblePDF = true;
-        return;
-    }
+    try {
+        const response = await fetch(link.link);
+        if (
+            !response.ok ||
+            !response.headers.get("content-type")?.includes("application/pdf")
+        ) {
+            Logger.info(`Skipping inaccessible PDF: ${link.link}`);
+            link.skippedInaccessiblePDF = true;
+            return;
+        }
 
-    const pdfBuffer = await response.arrayBuffer();
-    const parsedPDF = await pdf(Buffer.from(pdfBuffer), { max: 20 });
-    link.fullText = sanitizeText(parsedPDF.text);
-    link.totalPagesIfPDF = parsedPDF.numpages;
-    link.fetchedPagesIfPDF = parsedPDF.numrender;
+        const pdfBuffer = await response.arrayBuffer();
+        const parsedPDF = await pdf(Buffer.from(pdfBuffer), { max: 20 });
+        link.fullText = sanitizeText(parsedPDF.text);
+        link.totalPagesIfPDF = parsedPDF.numpages;
+        link.fetchedPagesIfPDF = parsedPDF.numrender;
+    } catch (error) {
+        if (error.message.includes("Could not parse CSS stylesheet")) {
+            Logger.info(`Ignoring CSS parse error for PDF: ${link.link}`);
+        } else {
+            Logger.error(
+                `Error processing PDF link ${link.id}:`,
+                getErrorMessage(error)
+            );
+            link.skippedErrorFetchingFullText = true;
+        }
+    }
 };
 
 const processHTMLLink = async (link) => {
@@ -152,8 +192,8 @@ const processHTMLLink = async (link) => {
         const { window } = new JSDOM(html);
         if (
             !isProbablyReaderable(window.document, {
-                minScore: 10, // Decrease from default 20
-                minContentLength: 90, // Decrease from default 140
+                minScore: 5, // Decrease from default 20
+                minContentLength: 30, // Decrease from default 140
             })
         ) {
             link.skippedNotProbablyReadable = true;
