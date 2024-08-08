@@ -21,8 +21,8 @@ export class CuriusLink {
     @OneToMany(() => CuriusLinkChunk, (chunk) => chunk.link, { lazy: true })
     chunks!: Promise<CuriusLinkChunk[]>;
 
-    @Column()
-    snippet!: string;
+    @Column({ nullable: true })
+    snippet?: string;
 
     @Column({ type: "jsonb", nullable: true })
     metadata?: {

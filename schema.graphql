@@ -179,7 +179,7 @@ type Query {
   getPaymentMethods: [PaymentMethod!]!
   getProfile(userId: ID): Profile!
   me: User
-  searchSimilarLinks(limit: Int = 3, query: String!): [SearchResult!]!
+  searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
 }
 
 type SearchResult {
