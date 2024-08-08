@@ -16,50 +16,35 @@ const sanitizeText = (text: string) => {
     return text.replace(/\0/g, ""); // Remove null bytes
 };
 
-const BATCH_SIZE = 100;
-// const MAX_LINKS_TO_PROCESS = 200; // Temporary limit for testing
+const BATCH_SIZE = 50; // Reduced batch size
+
+// Save the original console.error method
+const originalConsoleError = console.error;
+
+// Override console.error to filter out specific error messages
+console.error = (...args) => {
+    if (args[0] && args[0].includes("Could not parse CSS stylesheet")) {
+        return;
+    }
+    originalConsoleError(...args);
+};
 
 const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
+        const totalLinksResponse =
+            await curiusLinkRepo.countLinksWithoutFullText();
+
+        const totalLinks = totalLinksResponse.value;
+        let processedLinks = 0;
         let hasMoreLinks = true;
-        // let totalProcessedLinks = 0;
+
+        Logger.info(`Total links to process: ${totalLinks}`);
 
         while (hasMoreLinks) {
-            // while (hasMoreLinks && totalProcessedLinks < MAX_LINKS_TO_PROCESS) {
-            // const mockFindLinks = (): Promise<
-            //     FailureOrSuccess<DefaultErrors, CuriusLink[]>
-            // > => {
-            //     const mockLinks = [
-            //         {
-            //             id: 1,
-            //             link: "https://mindbook.dev/shelf",
-            //         },
-            //         {
-            //             id: 2,
-            //             link: "xkcd.com",
-            //         },
-            //         {
-            //             id: 3,
-            //             link: "https://blog.samaltman.com/funding-for-covid-19-projects",
-            //         },
-            //         {
-            //             id: 4,
-            //             link: "https://en.wikipedia.org/wiki/Berlin_Wall",
-            //         },
-            //     ] as CuriusLink[];
-            //     return Promise.resolve(success(mockLinks));
-            // };
-            // const linksResponse = await mockFindLinks()
-
             const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
                 BATCH_SIZE
-            );
-
-            // log how many links were found
-            Logger.info(
-                `Found ${linksResponse.value.length} links without full text`
             );
 
             if (!isSuccess(linksResponse)) {
@@ -71,16 +56,14 @@ const addFullTextToLinks = async () => {
             }
 
             const links = linksResponse.value;
-            const totalLinks = links.length;
+            const batchSize = links.length;
 
-            if (totalLinks === 0) {
+            if (batchSize === 0) {
                 hasMoreLinks = false;
                 break;
             }
 
-            Logger.info(
-                `Starting to process ${totalLinks} links without full text...`
-            );
+            Logger.info(`Processing batch of ${batchSize} links...`);
 
             const startTime = Date.now();
             const savePromises: Promise<LinkResponse>[] = [];
@@ -93,13 +76,8 @@ const addFullTextToLinks = async () => {
                         await processHTMLLink(link);
                     }
                 } catch (error) {
-                    Logger.error(
-                        `Error processing link ${link.id}:`,
-                        getErrorMessage(error)
-                    );
                     link.skippedErrorFetchingFullText = true;
                 } finally {
-                    // for some reason this is added wrongly sometimes
                     if (link.fullText) {
                         link.skippedErrorFetchingFullText = false;
                         link.skippedNotProbablyReadable = false;
@@ -107,28 +85,25 @@ const addFullTextToLinks = async () => {
                         link.deadLink = false;
                     }
 
-                    // Always save the link, even if an error occurred
                     savePromises.push(curiusLinkRepo.save(link));
                 }
             };
 
-            await Promise.all(links.map(processLink)); // Process links in parallel
-
-            // Save all processed links at once
+            await Promise.all(links.map(processLink));
             await Promise.all(savePromises);
 
-            // totalProcessedLinks += totalLinks;
+            processedLinks += batchSize;
+            const progressPercentage = (
+                (processedLinks / totalLinks) *
+                100
+            ).toFixed(2);
 
             const totalTime = (Date.now() - startTime) / 1000;
             Logger.info(
-                `Finished processing ${totalLinks} links in ${totalTime.toFixed(
+                `Finished processing ${batchSize} links in ${totalTime.toFixed(
                     2
-                )}s`
+                )}s. Progress: ${progressPercentage}%`
             );
-
-            // if (totalProcessedLinks >= MAX_LINKS_TO_PROCESS) {
-            //     hasMoreLinks = false;
-            // }
         }
     } catch (error) {
         Logger.error("Unexpected error:", getErrorMessage(error));
@@ -146,7 +121,6 @@ const processPDFLink = async (link) => {
             !response.ok ||
             !response.headers.get("content-type")?.includes("application/pdf")
         ) {
-            Logger.info(`Skipping inaccessible PDF: ${link.link}`);
             link.skippedInaccessiblePDF = true;
             return;
         }
@@ -157,32 +131,19 @@ const processPDFLink = async (link) => {
         link.totalPagesIfPDF = parsedPDF.numpages;
         link.fetchedPagesIfPDF = parsedPDF.numrender;
     } catch (error) {
-        if (error.message.includes("Could not parse CSS stylesheet")) {
-            Logger.info(`Ignoring CSS parse error for PDF: ${link.link}`);
-        } else {
-            Logger.error(
-                `Error processing PDF link ${link.id}:`,
-                getErrorMessage(error)
-            );
-            link.skippedErrorFetchingFullText = true;
-        }
+        link.skippedErrorFetchingFullText = true;
     }
 };
 
 const processHTMLLink = async (link) => {
     try {
-        Logger.info(`Fetching link: ${link.id} (${link.link})`);
-        const response = await fetch(link.link); // Add a timeout
+        const response = await fetch(link.link);
 
         if (!response.ok) {
             if (response.status === 404 || response.status === 410) {
                 link.deadLink = true;
-                Logger.info(`Dead link detected: ${link.id} (${link.link})`);
             } else {
                 link.skippedErrorFetchingFullText = true;
-                Logger.info(
-                    `Error fetching link: ${link.id} (${link.link}), status: ${response.status}`
-                );
             }
             return;
         }
@@ -197,22 +158,15 @@ const processHTMLLink = async (link) => {
             })
         ) {
             link.skippedNotProbablyReadable = true;
-            Logger.info(
-                `Link not probably readable: ${link.id} (${link.link})`
-            );
             return;
         }
 
         const result = new Readability(window.document).parse();
         if (!result) {
             link.skippedErrorFetchingFullText = true;
-            Logger.info(
-                `Failed to parse content for: ${link.id} (${link.link})`
-            );
             return;
         }
 
-        // Assign properties if parsing is successful
         Object.assign(link, {
             length: result.length,
             excerpt: result.excerpt,
@@ -224,12 +178,7 @@ const processHTMLLink = async (link) => {
             title: result.title || link.title,
             fullText: NodeHtmlMarkdown.translate(result.content || ""),
         });
-        // Logger.info(`Successfully processed link: ${link.id} (${link.link})`);
     } catch (error) {
-        Logger.error(
-            `Error processing HTML link ${link.id}:`,
-            getErrorMessage(error)
-        );
         link.skippedErrorFetchingFullText = true;
     }
 };

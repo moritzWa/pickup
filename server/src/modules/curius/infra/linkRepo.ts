@@ -83,6 +83,31 @@ export class PostgresCuriusLinkRepository {
         }
     }
 
+    async countLinksWithoutFullText(): Promise<
+        FailureOrSuccess<DefaultErrors, number>
+    > {
+        try {
+            const count = await this.repo.count({
+                where: {
+                    fullText: IsNull(),
+                    skippedErrorFetchingFullText: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedNotProbablyReadable: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedInaccessiblePDF: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+                },
+            });
+            return success(count);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async findFirst100Links(): Promise<LinksResponse> {
         try {
             const links = await this.repo.find({
