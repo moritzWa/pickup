@@ -7,3 +7,5 @@ keys/**/*
 
 # no .DS_Store in any of the sub directories of the repo
 **/.DS_Store
+
+temp.log
