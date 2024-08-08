@@ -63,6 +63,8 @@ export const createFullUser = async ({
         id: uuidv4(),
         username: username,
         timezone: null,
+        currentQueue: null,
+        currentQueueId: null,
         commuteTime: null,
         currentContentSessionId: null,
         hasTwoFactorAuth: false,
