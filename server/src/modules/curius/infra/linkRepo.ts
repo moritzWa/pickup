@@ -8,7 +8,7 @@ import { failure, FailureOrSuccess, success } from "src/core/logic";
 import { UnexpectedError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
 
-type LinkResponse = FailureOrSuccess<DefaultErrors, CuriusLink>;
+export type LinkResponse = FailureOrSuccess<DefaultErrors, CuriusLink>;
 type LinksResponse = FailureOrSuccess<DefaultErrors, CuriusLink[]>;
 
 type LinkWithDistance = CuriusLink & {
@@ -38,6 +38,16 @@ export class PostgresCuriusLinkRepository {
         }
     }
 
+    async saveMany(
+        links: CuriusLink[]
+    ): Promise<FailureOrSuccess<DefaultErrors, CuriusLink[]>> {
+        try {
+            return success(await this.repo.save(links));
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async find(): Promise<LinksResponse> {
         try {
             return success(await this.repo.find());
@@ -46,11 +56,29 @@ export class PostgresCuriusLinkRepository {
         }
     }
 
-    async findLinksWithoutFullText(): Promise<LinksResponse> {
+    async findLinksWithoutFullText(limit: number): Promise<LinksResponse> {
         try {
             const links = await this.repo.find({
                 where: {
                     fullText: IsNull(),
+                    skippedErrorFetchingFullText: IsNull(),
+                    skippedNotProbablyReadable: IsNull(),
+                    skippedInaccessiblePDF: IsNull(),
+                },
+                take: limit,
+            });
+            return success(links);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async findFirst500Links(): Promise<LinksResponse> {
+        try {
+            const links = await this.repo.find({
+                take: 500,
+                order: {
+                    id: "ASC",
                 },
             });
             return success(links);
