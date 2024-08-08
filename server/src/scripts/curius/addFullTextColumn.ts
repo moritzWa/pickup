@@ -7,14 +7,8 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
-import { FailureOrSuccess, Success } from "src/core/logic/FailureOrSuccess";
 import { curiusLinkRepo } from "src/modules/curius/infra";
-
-export const isSuccess = <E, V>(
-    result: FailureOrSuccess<E, V>
-): result is Success<never, V> => {
-    return result.isSuccess();
-};
+import { isSuccess } from "./utils";
 
 const sanitizeText = (text: string) => {
     return text.replace(/\0/g, ""); // Remove null bytes
@@ -24,7 +18,7 @@ const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        const linksResponse = await curiusLinkRepo.findLinksWithoutFullText();
+        const linksResponse = await curiusLinkRepo.find();
 
         if (!isSuccess(linksResponse)) {
             console.error(
@@ -63,12 +57,9 @@ const addFullTextToLinks = async () => {
                         });
                         link.fullText = sanitizeText(parsedPDF.text);
 
-                        // Add metadata about PDF length
-                        link.metadata = {
-                            ...link.metadata,
-                            totalPagesIfPDF: parsedPDF.numpages,
-                            fetchedPagesIfPDF: parsedPDF.numrender,
-                        };
+                        // Store PDF length data directly in the new columns
+                        link.totalPagesIfPDF = parsedPDF.numpages;
+                        link.fetchedPagesIfPDF = parsedPDF.numrender;
                     } else {
                         console.log(`Skipping inaccessible PDF: ${link.link}`);
                         continue; // Skip to the next link
@@ -139,18 +130,13 @@ const addFullTextToLinks = async () => {
                         continue; // Skip to the next link on error
                     }
 
-                    // Update link metadata
-                    link.metadata = {
-                        ...link.metadata,
-                        length: result?.length,
-                        excerpt: result?.excerpt,
-                        byline: result?.byline,
-                        dir: result?.dir,
-                        siteName: result?.siteName,
-                        lang: result?.lang,
-                        publishedTime: result?.publishedTime,
-                    };
-
+                    link.length = result?.length;
+                    link.excerpt = result?.excerpt;
+                    link.byline = result?.byline;
+                    link.dir = result?.dir;
+                    link.siteName = result?.siteName;
+                    link.lang = result?.lang;
+                    link.publishedTime = result?.publishedTime;
                     link.title = result?.title || link.title;
                     link.fullText = NodeHtmlMarkdown.translate(
                         result?.content || ""

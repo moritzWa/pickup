@@ -24,26 +24,36 @@ export class CuriusLink {
     @Column({ nullable: true })
     snippet?: string;
 
-    @Column({ type: "jsonb", nullable: true })
-    metadata?: {
-        full_text?: string;
-        author?: string;
-        page_type?: string;
+    // mozilla/readability
+    @Column({ nullable: true })
+    length?: number;
 
-        // mozilla/readability
-        length?: number;
-        excerpt?: string;
-        byline?: string;
-        dir?: string;
-        siteName?: string;
-        lang?: string;
-        publishedTime?: string;
+    @Column({ nullable: true })
+    excerpt?: string;
 
-        // New PDF-specific fields
-        totalPagesIfPDF?: number;
-        fetchedPagesIfPDF?: number;
-    };
+    @Column({ nullable: true })
+    byline?: string;
 
+    @Column({ nullable: true })
+    dir?: string;
+
+    @Column({ nullable: true })
+    siteName?: string;
+
+    @Column({ nullable: true })
+    lang?: string;
+
+    @Column({ nullable: true })
+    publishedTime?: string;
+
+    // pdf
+    @Column({ nullable: true })
+    totalPagesIfPDF?: number;
+
+    @Column({ nullable: true })
+    fetchedPagesIfPDF?: number;
+
+    // other curius fields
     @Column({ type: "timestamp", nullable: true, name: "created_date" })
     createdDate!: Date | null;
 

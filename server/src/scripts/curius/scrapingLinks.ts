@@ -29,6 +29,7 @@ const scrapeCuriusLinks = async () => {
     const startLink = 25999;
     const numLinks = 10000;
     // latest as of 2024-08-03 is 127456
+    // note we haven't fetched the metadata for 0-35863
 
     console.log(
         `Scraping ${numLinks} Curius Links in batches of ${BATCH_SIZE}...`
@@ -110,6 +111,7 @@ const saveCuriusData = async (data: LinkViewResponse) => {
         title: link.title,
         favorite: link.favorite,
         snippet: link.snippet || null,
+        fullText: link.metadata?.full_text || null,
         metadata: link.metadata || null,
         createdDate: link.createdDate ? new Date(link.createdDate) : null,
         modifiedDate: link.modifiedDate ? new Date(link.modifiedDate) : null,
