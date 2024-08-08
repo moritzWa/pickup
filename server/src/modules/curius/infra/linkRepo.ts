@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { IsNull, Repository } from "typeorm";
 
 import { OpenAI } from "openai";
 import * as pgvector from "pgvector/pg";
@@ -41,6 +41,19 @@ export class PostgresCuriusLinkRepository {
     async find(): Promise<LinksResponse> {
         try {
             return success(await this.repo.find());
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async findLinksWithoutFullText(): Promise<LinksResponse> {
+        try {
+            const links = await this.repo.find({
+                where: {
+                    fullText: IsNull(),
+                },
+            });
+            return success(links);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }

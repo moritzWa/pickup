@@ -24,11 +24,11 @@ const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        const linksResponse = await curiusLinkRepo.find();
+        const linksResponse = await curiusLinkRepo.findLinksWithoutFullText();
 
         if (!isSuccess(linksResponse)) {
             console.error(
-                "addFullTextColumn.ts:Failed to fetch links:",
+                "addFullTextColumn.ts:Failed to fetch links without full text:",
                 linksResponse.error
             );
             await dataSource.destroy();
@@ -38,7 +38,7 @@ const addFullTextToLinks = async () => {
         const links = linksResponse.value;
         const totalLinks = links.length;
         console.log(
-            `addFullTextColumn.ts: Starting to process ${totalLinks} links...`
+            `addFullTextColumn.ts: Starting to process ${totalLinks} links without full text...`
         );
 
         for (let i = 0; i < links.length; i++) {
@@ -59,10 +59,7 @@ const addFullTextToLinks = async () => {
                     ) {
                         const pdfBuffer = await response.arrayBuffer();
                         const parsedPDF = await pdf(Buffer.from(pdfBuffer), {
-                            max: 20, // only first 20 pages
-                            pagerender: (pageData) => {
-                                return pageData.getTextContent();
-                            },
+                            max: 20, // Limit to first 20 pages
                         });
                         link.fullText = sanitizeText(parsedPDF.text);
 
@@ -70,7 +67,7 @@ const addFullTextToLinks = async () => {
                         link.metadata = {
                             ...link.metadata,
                             totalPagesIfPDF: parsedPDF.numpages,
-                            fetchedPagesIfPDF: Math.min(20, parsedPDF.numpages),
+                            fetchedPagesIfPDF: parsedPDF.numrender,
                         };
                     } else {
                         console.log(`Skipping inaccessible PDF: ${link.link}`);
