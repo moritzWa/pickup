@@ -38,6 +38,10 @@ export class CuriusLink {
         siteName?: string;
         lang?: string;
         publishedTime?: string;
+
+        // New PDF-specific fields
+        totalPagesIfPDF?: number;
+        fetchedPagesIfPDF?: number;
     };
 
     @Column({ type: "timestamp", nullable: true, name: "created_date" })

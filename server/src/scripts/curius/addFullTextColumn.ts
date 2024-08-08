@@ -58,8 +58,20 @@ const addFullTextToLinks = async () => {
                             ?.includes("application/pdf")
                     ) {
                         const pdfBuffer = await response.arrayBuffer();
-                        const parsedPDF = await pdf(Buffer.from(pdfBuffer));
+                        const parsedPDF = await pdf(Buffer.from(pdfBuffer), {
+                            max: 20, // only first 20 pages
+                            pagerender: (pageData) => {
+                                return pageData.getTextContent();
+                            },
+                        });
                         link.fullText = sanitizeText(parsedPDF.text);
+
+                        // Add metadata about PDF length
+                        link.metadata = {
+                            ...link.metadata,
+                            totalPagesIfPDF: parsedPDF.numpages,
+                            fetchedPagesIfPDF: Math.min(20, parsedPDF.numpages),
+                        };
                     } else {
                         console.log(`Skipping inaccessible PDF: ${link.link}`);
                         continue; // Skip to the next link
