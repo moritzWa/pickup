@@ -137,10 +137,8 @@ const processHTMLLink = async (link) => {
         console.log(`Processing HTML link: ${link.link}`);
         const response = await fetch(link.link);
         if (!response.ok) {
-            console.log(
-                `Failed to fetch link: ${link.link}, status: ${response.status}`
-            );
-            throw new Error(`Failed to fetch link: ${link.link}`);
+            link.skippedErrorFetchingFullText = true;
+            return;
         }
 
         const html = await response.text();
@@ -148,19 +146,15 @@ const processHTMLLink = async (link) => {
 
         const { window } = new JSDOM(html);
         if (!isProbablyReaderable(window.document)) {
-            console.log(`Link not probably readable: ${link.link}`);
             link.skippedNotProbablyReadable = true;
             return;
         }
 
         const result = new Readability(window.document).parse();
         if (!result) {
-            console.log(`Failed to parse content: ${link.link}`);
-            throw new Error(`Failed to parse content: ${link.link}`);
+            link.skippedErrorFetchingFullText = true;
+            return;
         }
-
-        console.log(`Successfully parsed content for: ${link.link}`);
-        console.log(`Content length: ${result.length}`);
 
         Object.assign(link, {
             length: result.length,
@@ -173,16 +167,12 @@ const processHTMLLink = async (link) => {
             title: result.title || link.title,
             fullText: NodeHtmlMarkdown.translate(result.content || ""),
         });
-
-        console.log(`Assigned properties to link: ${link.link}`);
-        console.log(`Full text length: ${link.fullText?.length}`);
     } catch (error) {
         console.error(
             `Error processing HTML link ${link.id}:`,
             getErrorMessage(error)
         );
         link.skippedErrorFetchingFullText = true;
-        // Don't re-throw the error, just return
     }
 };
 
