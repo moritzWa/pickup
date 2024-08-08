@@ -63,11 +63,18 @@ const addFullTextToLinks = async () => {
                     await processHTMLLink(link);
                 }
 
-                const saveResponse = await curiusLinkRepo.save(link);
-                if (!isSuccess(saveResponse)) {
-                    console.error(
-                        `Failed to update link ${link.id}:`,
-                        saveResponse.error
+                // Only save if the link was successfully processed
+                if (link.fullText) {
+                    const saveResponse = await curiusLinkRepo.save(link);
+                    if (!isSuccess(saveResponse)) {
+                        console.error(
+                            `Failed to update link ${link.id}:`,
+                            saveResponse.error
+                        );
+                    }
+                } else {
+                    console.log(
+                        `Skipped saving link ${link.id}: No full text extracted`
                     );
                 }
             } catch (error) {
@@ -175,7 +182,7 @@ const processHTMLLink = async (link) => {
             getErrorMessage(error)
         );
         link.skippedErrorFetchingFullText = true;
-        throw error; // Re-throw to be caught in the main loop
+        // Don't re-throw the error, just return
     }
 };
 
