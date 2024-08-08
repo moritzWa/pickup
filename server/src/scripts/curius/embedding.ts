@@ -3,8 +3,8 @@ import * as pgvector from "pgvector/pg";
 import { dataSource } from "src/core/infra/postgres";
 import { CuriusLinkChunk } from "src/core/infra/postgres/entities/Curius/CuriusLinkChunk";
 import { curiusLinkChunkRepo, curiusLinkRepo } from "src/modules/curius/infra";
-import { isSuccess } from "./addFullTextColumn";
 import { performance } from "perf_hooks";
+import { isSuccess } from "./utils";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,

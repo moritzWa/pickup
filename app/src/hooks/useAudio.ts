@@ -6,6 +6,7 @@ import { useContext, useMemo, useState } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
 import TrackPlayer, { AddTrack, State, Track } from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
+import { BaseContentFields } from "src/api/fragments";
 import {
   DefaultErrors,
   failure,
@@ -110,6 +111,16 @@ export const useAudio = () => {
     }
   };
 
+  const downloadAndPlayContent = async (
+    content: BaseContentFields
+  ): Promise<FailureOrSuccess<DefaultErrors, Audio.Sound>> => {
+    return downloadAndPlayAudio(content?.audioUrl || "", {
+      title: content?.title || "",
+      artist: content?.authorName || "",
+      artwork: content?.thumbnailImageUrl || "",
+    });
+  };
+
   const toggle = async () => {
     try {
       const sound = globalSound?.current;
@@ -185,8 +196,17 @@ export const useAudio = () => {
     dispatch(setSpeed(speed));
   };
 
+  const getQueue = async () => {
+    const result = await TrackPlayer.getQueue();
+  };
+
+  const syncQueue = async () => {};
+
+  // sync the queue. add to the queue. etc... (track player)
+
   return {
     downloadAndPlay: downloadAndPlayAudio,
+    downloadAndPlayContent,
     toggle,
     percentFinished,
     leftMinutes,

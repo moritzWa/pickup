@@ -1,4 +1,4 @@
-import { Queue, User } from "src/core/infra/postgres/entities";
+import { Content, Queue, User } from "src/core/infra/postgres/entities";
 import {
     DefaultErrors,
     failure,
@@ -57,26 +57,29 @@ const remove = async (
 
 const next = async (
     user: User,
-    contentId: string
+    content: Content
 ): Promise<FailureOrSuccess<DefaultErrors, Queue>> => {
-    const queueResponse = await queueRepo.findOne({
+    const currentQueueResponse = await queueRepo.findOne({
         where: {
             userId: user.id,
-            contentId,
+            contentId: content.id,
         },
     });
 
-    if (queueResponse.isFailure()) {
-        return failure(queueResponse.error);
+    if (currentQueueResponse.isFailure()) {
+        return failure(currentQueueResponse.error);
     }
+
+    const currentPos = currentQueueResponse.value.position;
 
     const nextItemResponse = await queueRepo.find({
         where: {
             userId: user.id,
-            position: MoreThan(queueResponse.value.position),
+            position: MoreThan(currentPos),
         },
         take: 1,
         order: { position: "asc" },
+        relations: { content: true },
     });
 
     throwIfError(nextItemResponse);
@@ -92,26 +95,29 @@ const next = async (
 
 const prev = async (
     user: User,
-    contentId: string
+    content: Content
 ): Promise<FailureOrSuccess<DefaultErrors, Queue>> => {
-    const queueResponse = await queueRepo.findOne({
+    const currentQueueResponse = await queueRepo.findOne({
         where: {
             userId: user.id,
-            contentId,
+            contentId: content.id,
         },
     });
 
-    if (queueResponse.isFailure()) {
-        return failure(queueResponse.error);
+    if (currentQueueResponse.isFailure()) {
+        return failure(currentQueueResponse.error);
     }
+
+    const currentPos = currentQueueResponse.value.position;
 
     const prevItemResponse = await queueRepo.find({
         where: {
             userId: user.id,
-            position: LessThan(queueResponse.value.position),
+            position: LessThan(currentPos),
         },
         take: 1,
-        order: { position: "desc" },
+        order: { position: "asc" },
+        relations: { content: true },
     });
 
     throwIfError(prevItemResponse);
@@ -140,7 +146,12 @@ const current = async (
 const list = async (
     user: User
 ): Promise<FailureOrSuccess<DefaultErrors, Queue[]>> => {
-    const queueResponse = await queueRepo.findForUser(user.id);
+    const queueResponse = await queueRepo.findForUser(user.id, {
+        order: {
+            position: "asc",
+        },
+        relations: { content: true },
+    });
 
     if (queueResponse.isFailure()) {
         return failure(queueResponse.error);

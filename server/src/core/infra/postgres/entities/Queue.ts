@@ -9,6 +9,8 @@ import {
     JoinColumn,
     Relation,
     Unique,
+    CreateDateColumn,
+    UpdateDateColumn,
 } from "typeorm";
 import { User } from "src/core/infra/postgres/entities/User";
 import { Content } from "./Content";
@@ -16,6 +18,11 @@ import { Content } from "./Content";
 @Entity({
     name: "queue",
 })
+@Unique(["userId", "contentId", "position"])
+// index for user and ascending position
+@Index("user_position_idx", ["userId", "position"])
+// index for user and descending created at
+@Index("user_created_at_idx", ["userId", "createdAt"])
 export class Queue {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
@@ -55,4 +62,14 @@ export class Queue {
     })
     @JoinColumn({ name: "content_id" })
     content!: Relation<Content>;
+
+    @CreateDateColumn({
+        name: "created_at",
+    })
+    createdAt!: Date;
+
+    @UpdateDateColumn({
+        name: "updated_at",
+    })
+    updatedAt!: Date;
 }
