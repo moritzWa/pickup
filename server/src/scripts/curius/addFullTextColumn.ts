@@ -7,6 +7,8 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
+import { CuriusLink } from "src/core/infra/postgres/entities";
+import { DefaultErrors, FailureOrSuccess, success } from "src/core/logic";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkResponse } from "src/modules/curius/infra/linkRepo";
 import { getErrorMessage, isSuccess } from "./utils";
@@ -19,18 +21,26 @@ const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        const linksResponse = await curiusLinkRepo.findFirst500Links();
+        const linksResponse = await curiusLinkRepo.findFirst100Links();
         // const mockFindLinks = (): Promise<
         //     FailureOrSuccess<DefaultErrors, CuriusLink[]>
         // > => {
         //     const mockLinks = [
         //         {
         //             id: 1,
-        //             link: "http://www.paulgraham.com/makersschedule.html",
+        //             link: "https://mindbook.dev/shelf",
         //         },
         //         {
         //             id: 2,
-        //             link: "https://www.biorxiv.org/content/10.1101/407007v2",
+        //             link: "xkcd.com",
+        //         },
+        //         {
+        //             id: 3,
+        //             link: "https://blog.samaltman.com/funding-for-covid-19-projects",
+        //         },
+        //         {
+        //             id: 4,
+        //             link: "https://en.wikipedia.org/wiki/Berlin_Wall",
         //         },
         //     ] as CuriusLink[];
         //     return Promise.resolve(success(mockLinks));
@@ -119,26 +129,36 @@ const processPDFLink = async (link) => {
 
 const processHTMLLink = async (link) => {
     try {
+        console.log(`Fetching link: ${link.link}`);
         const response = await fetch(link.link);
         if (!response.ok) {
-            link.skippedErrorFetchingFullText = true;
+            // console.log(
+            //     `Failed to fetch link: ${link.link}, status: ${response.status}`
+            // );
+            link.skippedErrorFetchingFullText = true; // Set the flag here
             return;
         }
 
         const html = await response.text();
+        console.log(
+            `Fetched HTML content for: ${link.link}, length: ${html.length}`
+        );
 
         const { window } = new JSDOM(html);
         if (!isProbablyReaderable(window.document)) {
-            link.skippedNotProbablyReadable = true;
+            // console.log(`Link not probably readable: ${link.link}`);
+            link.skippedNotProbablyReadable = true; // Set the flag here
             return;
         }
 
         const result = new Readability(window.document).parse();
         if (!result) {
-            link.skippedErrorFetchingFullText = true;
+            // console.log(`Failed to parse content for: ${link.link}`);
+            link.skippedErrorFetchingFullText = true; // Set the flag here
             return;
         }
 
+        // Assign properties if parsing is successful
         Object.assign(link, {
             length: result.length,
             excerpt: result.excerpt,
@@ -150,12 +170,13 @@ const processHTMLLink = async (link) => {
             title: result.title || link.title,
             fullText: NodeHtmlMarkdown.translate(result.content || ""),
         });
+        console.log(`Successfully processed link: ${link.link}`);
     } catch (error) {
         console.error(
             `Error processing HTML link ${link.id}:`,
             getErrorMessage(error)
         );
-        link.skippedErrorFetchingFullText = true;
+        link.skippedErrorFetchingFullText = true; // Set the flag here
     }
 };
 

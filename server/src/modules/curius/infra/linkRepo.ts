@@ -73,10 +73,10 @@ export class PostgresCuriusLinkRepository {
         }
     }
 
-    async findFirst500Links(): Promise<LinksResponse> {
+    async findFirst100Links(): Promise<LinksResponse> {
         try {
             const links = await this.repo.find({
-                take: 500,
+                take: 100,
                 order: {
                     id: "ASC",
                 },
