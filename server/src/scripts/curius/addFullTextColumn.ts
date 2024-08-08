@@ -29,6 +29,8 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
+const SLOW_LINK_THRESHOLD_MS = 10000; // 10 seconds
+
 const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
@@ -41,6 +43,15 @@ const addFullTextToLinks = async () => {
         let hasMoreLinks = true;
 
         Logger.info(`Total links to process: ${totalLinks}`);
+
+        // Estimate total processing time
+        const avgTimePerLink = 10; // Assume 10 seconds per link initially
+        const estimatedTime = ((totalLinks * avgTimePerLink) / 60).toFixed(2);
+        Logger.info(
+            `Estimated total processing time: ~${estimatedTime} minutes i.e. ~${(
+                Number(estimatedTime) / 60
+            ).toFixed(2)} hours`
+        );
 
         while (hasMoreLinks) {
             const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
@@ -69,6 +80,7 @@ const addFullTextToLinks = async () => {
             const savePromises: Promise<LinkResponse>[] = [];
 
             const processLink = async (link) => {
+                const linkStartTime = Date.now();
                 try {
                     if (link.link.endsWith(".pdf")) {
                         await processPDFLink(link);
@@ -78,6 +90,14 @@ const addFullTextToLinks = async () => {
                 } catch (error) {
                     link.skippedErrorFetchingFullText = true;
                 } finally {
+                    const linkEndTime = Date.now();
+                    const linkProcessingTime = linkEndTime - linkStartTime;
+                    if (linkProcessingTime > SLOW_LINK_THRESHOLD_MS) {
+                        Logger.warn(
+                            `Link ${link.link} took ${linkProcessingTime}ms to process`
+                        );
+                    }
+
                     if (link.fullText) {
                         link.skippedErrorFetchingFullText = false;
                         link.skippedNotProbablyReadable = false;
