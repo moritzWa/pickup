@@ -7,6 +7,8 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
+import { CuriusLink } from "src/core/infra/postgres/entities";
+import { DefaultErrors, FailureOrSuccess, success } from "src/core/logic";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { getErrorMessage, isSuccess } from "./utils";
 
@@ -18,7 +20,24 @@ const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        const linksResponse = await curiusLinkRepo.findFirst100Links();
+        // const linksResponse = await curiusLinkRepo.findFirst100Links();
+        const mockFindLinks = (): Promise<
+            FailureOrSuccess<DefaultErrors, CuriusLink[]>
+        > => {
+            const mockLinks = [
+                {
+                    id: 1,
+                    link: "http://www.paulgraham.com/makersschedule.html",
+                },
+                {
+                    id: 2,
+                    link: "https://www.biorxiv.org/content/10.1101/407007v2",
+                },
+            ] as CuriusLink[];
+            return Promise.resolve(success(mockLinks));
+        };
+        const linksResponse = await mockFindLinks();
+
         if (!isSuccess(linksResponse)) {
             console.error(
                 "Failed to fetch links without full text:",
@@ -107,34 +126,57 @@ const processPDFLink = async (link) => {
 };
 
 const processHTMLLink = async (link) => {
-    const response = await fetch(link.link);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch link: ${link.link}`);
-    }
+    try {
+        console.log(`Processing HTML link: ${link.link}`);
+        const response = await fetch(link.link);
+        if (!response.ok) {
+            console.log(
+                `Failed to fetch link: ${link.link}, status: ${response.status}`
+            );
+            throw new Error(`Failed to fetch link: ${link.link}`);
+        }
 
-    const { window } = new JSDOM(await response.text());
-    if (!isProbablyReaderable(window.document)) {
-        console.log(`Skipping non-readable link: ${link.link}`);
-        link.skippedNotProbablyReadable = true;
-        return;
-    }
+        const html = await response.text();
+        console.log(`Fetched HTML content length: ${html.length}`);
 
-    const result = new Readability(window.document).parse();
-    if (!result) {
-        throw new Error(`Failed to parse content: ${link.link}`);
-    }
+        const { window } = new JSDOM(html);
+        if (!isProbablyReaderable(window.document)) {
+            console.log(`Link not probably readable: ${link.link}`);
+            link.skippedNotProbablyReadable = true;
+            return;
+        }
 
-    Object.assign(link, {
-        length: result.length,
-        excerpt: result.excerpt,
-        byline: result.byline,
-        dir: result.dir,
-        siteName: result.siteName,
-        lang: result.lang,
-        publishedTime: result.publishedTime,
-        title: result.title || link.title,
-        fullText: NodeHtmlMarkdown.translate(result.content || ""),
-    });
+        const result = new Readability(window.document).parse();
+        if (!result) {
+            console.log(`Failed to parse content: ${link.link}`);
+            throw new Error(`Failed to parse content: ${link.link}`);
+        }
+
+        console.log(`Successfully parsed content for: ${link.link}`);
+        console.log(`Content length: ${result.length}`);
+
+        Object.assign(link, {
+            length: result.length,
+            excerpt: result.excerpt,
+            byline: result.byline,
+            dir: result.dir,
+            siteName: result.siteName,
+            lang: result.lang,
+            publishedTime: result.publishedTime,
+            title: result.title || link.title,
+            fullText: NodeHtmlMarkdown.translate(result.content || ""),
+        });
+
+        console.log(`Assigned properties to link: ${link.link}`);
+        console.log(`Full text length: ${link.fullText?.length}`);
+    } catch (error) {
+        console.error(
+            `Error processing HTML link ${link.id}:`,
+            getErrorMessage(error)
+        );
+        link.skippedErrorFetchingFullText = true;
+        throw error; // Re-throw to be caught in the main loop
+    }
 };
 
 addFullTextToLinks().catch(console.error);
