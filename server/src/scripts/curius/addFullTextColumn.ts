@@ -7,8 +7,6 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
-import { CuriusLink } from "src/core/infra/postgres/entities";
-import { DefaultErrors, FailureOrSuccess, success } from "src/core/logic";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { getErrorMessage, isSuccess } from "./utils";
 
@@ -20,23 +18,23 @@ const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        // const linksResponse = await curiusLinkRepo.findFirst100Links();
-        const mockFindLinks = (): Promise<
-            FailureOrSuccess<DefaultErrors, CuriusLink[]>
-        > => {
-            const mockLinks = [
-                {
-                    id: 1,
-                    link: "http://www.paulgraham.com/makersschedule.html",
-                },
-                {
-                    id: 2,
-                    link: "https://www.biorxiv.org/content/10.1101/407007v2",
-                },
-            ] as CuriusLink[];
-            return Promise.resolve(success(mockLinks));
-        };
-        const linksResponse = await mockFindLinks();
+        const linksResponse = await curiusLinkRepo.findFirst100Links();
+        // const mockFindLinks = (): Promise<
+        //     FailureOrSuccess<DefaultErrors, CuriusLink[]>
+        // > => {
+        //     const mockLinks = [
+        //         {
+        //             id: 1,
+        //             link: "http://www.paulgraham.com/makersschedule.html",
+        //         },
+        //         {
+        //             id: 2,
+        //             link: "https://www.biorxiv.org/content/10.1101/407007v2",
+        //         },
+        //     ] as CuriusLink[];
+        //     return Promise.resolve(success(mockLinks));
+        // };
+        // const linksResponse = await mockFindLinks();
 
         if (!isSuccess(linksResponse)) {
             console.error(
@@ -134,7 +132,6 @@ const processPDFLink = async (link) => {
 
 const processHTMLLink = async (link) => {
     try {
-        console.log(`Processing HTML link: ${link.link}`);
         const response = await fetch(link.link);
         if (!response.ok) {
             link.skippedErrorFetchingFullText = true;
@@ -142,7 +139,6 @@ const processHTMLLink = async (link) => {
         }
 
         const html = await response.text();
-        console.log(`Fetched HTML content length: ${html.length}`);
 
         const { window } = new JSDOM(html);
         if (!isProbablyReaderable(window.document)) {
