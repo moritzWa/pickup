@@ -21,6 +21,7 @@ const ENTITIES = [
     entities.CuriusHighlight,
     entities.CuriusMention,
     entities.Relationship,
+    entities.Interaction,
 ];
 
 function getMigrationDirectory() {

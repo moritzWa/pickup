@@ -102,6 +102,22 @@ type GetMobileUpdateResponse {
   userVersion: String
 }
 
+type Interaction {
+  contentId: ID!
+  createdAt: Date!
+  id: ID!
+  type: InteractionTypeEnum!
+  updatedAt: Date!
+}
+
+enum InteractionTypeEnum {
+  Bookmarked
+  LeftInProgress
+  Likes
+  ScrolledPast
+  Skipped
+}
+
 type Metadata {
   author: String
   byline: String
@@ -119,6 +135,7 @@ type Mutation {
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
+  recordInteraction(contentId: ID!, eventType: InteractionTypeEnum!): Interaction!
   respondToContent(audioFileUrl: String!, contentId: ID!): ContentRespondResponse!
   sendVerification(phoneNumber: String!): String!
   setCommuteTime(commuteTime: String, timezone: String): User!
