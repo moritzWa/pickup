@@ -2,10 +2,7 @@ import { gql } from "@apollo/client";
 import {
   BaseContentFields,
   BaseContentSessionFields,
-  BaseCourseFields,
-  BaseLessonFields,
-  BaseLessonProgressFields,
-  BaseLessonSessionFields,
+  BaseQueueFields,
   BaseUserFields,
 } from "./fragments";
 
@@ -144,42 +141,6 @@ const GetCurrentContentSession = gql`
   }
 `;
 
-const GetCourses = gql`
-  ${BaseCourseFields}
-  query GetCourses {
-    getCourses {
-      ...BaseCourseFields
-    }
-  }
-`;
-
-const GetCourse = gql`
-  ${BaseCourseFields}
-  query GetCourse($courseId: ID!) {
-    getCourse(courseId: $courseId) {
-      ...BaseCourseFields
-    }
-  }
-`;
-
-const GetCourseLessons = gql`
-  ${BaseLessonFields}
-  query GetCourseLessons($courseId: ID!) {
-    getCourseLessons(courseId: $courseId) {
-      ...BaseLessonFields
-    }
-  }
-`;
-
-const StartLesson = gql`
-  ${BaseLessonSessionFields}
-  mutation StartLesson($lessonId: ID!) {
-    startLesson(lessonId: $lessonId) {
-      ...BaseLessonSessionFields
-    }
-  }
-`;
-
 const Transcribe = gql`
   mutation Transcribe($lessonId: ID!, $audioFileUrl: String!) {
     transcribe(lessonId: $lessonId, audioFileUrl: $audioFileUrl) {
@@ -193,15 +154,6 @@ const Respond = gql`
     respond(lessonId: $lessonId, audioFileUrl: $audioFileUrl) {
       transcription
       responseAudioUrl
-    }
-  }
-`;
-
-const StartCourse = gql`
-  ${BaseCourseFields}
-  mutation StartCourse($courseId: ID!) {
-    startCourse(courseId: $courseId) {
-      ...BaseCourseFields
     }
   }
 `;
@@ -223,25 +175,6 @@ const StartListening = gql`
     }
   }
 `;
-
-const GetLessonProgress = gql`
-  ${BaseLessonProgressFields}
-  query GetLessonProgress($lessonId: ID!) {
-    getLessonProgress(lessonId: $lessonId) {
-      ...BaseLessonProgressFields
-    }
-  }
-`;
-
-const GetLesson = gql`
-  ${BaseLessonFields}
-  query GetLesson($lessonId: ID!) {
-    getLesson(lessonId: $lessonId) {
-      ...BaseLessonFields
-    }
-  }
-`;
-
 // content
 
 const GetContentFeed = gql`
@@ -296,6 +229,33 @@ const GetCategories = gql`
   }
 `;
 
+const GetNextContent = gql`
+  ${BaseQueueFields}
+  query GetNextContent($contentId: ID!) {
+    getNextContent(contentId: $contentId) {
+      ...BaseQueueFields
+    }
+  }
+`;
+
+const GetPrevContent = gql`
+  ${BaseQueueFields}
+  query GetPrevContent($contentId: ID!) {
+    getPrevContent(contentId: $contentId) {
+      ...BaseQueueFields
+    }
+  }
+`;
+
+const GetQueue = gql`
+  ${BaseContentFields}
+  query GetPrevContent {
+    getPrevContent {
+      ...BaseContentFields
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
@@ -309,6 +269,11 @@ export const api = {
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,
   },
+  queue: {
+    next: GetNextContent,
+    prev: GetPrevContent,
+    list: GetQueue,
+  },
   content: {
     current: GetCurrentContentSession,
     start: StartContent,
@@ -317,19 +282,6 @@ export const api = {
     get: GetContent,
     startListening: StartListening,
     bookmarks: GetBookmarks,
-  },
-  courses: {
-    start: StartCourse,
-    get: GetCourse,
-    list: GetCourses,
-    lessons: GetCourseLessons,
-  },
-  lessons: {
-    transcribe: Transcribe,
-    respond: Respond,
-    start: StartLesson,
-    progress: GetLessonProgress,
-    get: GetLesson,
   },
   categories: {
     list: GetCategories,

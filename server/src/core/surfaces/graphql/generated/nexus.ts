@@ -113,6 +113,7 @@ export interface NexusGenObjects {
     username: string; // String!
   }
   Query: {};
+  Queue: entities.Queue ;
   SearchResult: { // root type
     averageDistance: number; // Float!
     createdDate: NexusGenScalars['Date']; // Date!
@@ -266,10 +267,23 @@ export interface NexusGenFieldTypes {
     getIntercomMobileToken: string; // String!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
+    getNextContent: NexusGenRootTypes['Queue']; // Queue!
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
+    getPrevContent: NexusGenRootTypes['Queue']; // Queue!
     getProfile: NexusGenRootTypes['Profile']; // Profile!
+    getQueue: NexusGenRootTypes['Queue'][]; // [Queue!]!
     me: NexusGenRootTypes['User'] | null; // User
     searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
+  }
+  Queue: { // field return type
+    content: NexusGenRootTypes['Content'] | null; // Content
+    contentId: string; // ID!
+    contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    position: number; // Float!
+    updatedAt: NexusGenScalars['Date']; // Date!
+    userId: string; // ID!
   }
   SearchResult: { // field return type
     averageDistance: number; // Float!
@@ -438,10 +452,23 @@ export interface NexusGenFieldTypeNames {
     getIntercomMobileToken: 'String'
     getLikes: 'ContentSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
+    getNextContent: 'Queue'
     getPaymentMethods: 'PaymentMethod'
+    getPrevContent: 'Queue'
     getProfile: 'Profile'
+    getQueue: 'Queue'
     me: 'User'
     searchSimilarLinks: 'SearchResult'
+  }
+  Queue: { // field return type name
+    content: 'Content'
+    contentId: 'ID'
+    contentSession: 'ContentSession'
+    createdAt: 'Date'
+    id: 'ID'
+    position: 'Float'
+    updatedAt: 'Date'
+    userId: 'ID'
   }
   SearchResult: { // field return type name
     averageDistance: 'Float'
@@ -563,6 +590,12 @@ export interface NexusGenArgTypes {
     getLikes: { // args
       limit?: number | null; // Int
       page?: number | null; // Int
+    }
+    getNextContent: { // args
+      afterContentId: string; // ID!
+    }
+    getPrevContent: { // args
+      beforeContentId: string; // ID!
     }
     getProfile: { // args
       userId?: string | null; // ID

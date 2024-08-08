@@ -34,13 +34,14 @@ import {
   faTree,
 } from "@fortawesome/pro-solid-svg-icons";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { RootStackParamList } from "src/navigation";
-import { useMutation, useQuery } from "@apollo/client";
+import { NavigationProps, RootStackParamList } from "src/navigation";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
   Mutation,
   Query,
   QueryGetContentArgs,
-  QueryGetLessonArgs,
+  QueryGetNextContentArgs,
+  QueryGetPrevContentArgs,
 } from "src/api/generated/types";
 import { api, apolloClient } from "src/api";
 import Back from "src/components/Back";
@@ -54,16 +55,10 @@ import Slider from "@react-native-community/slider";
 import { useSpeech } from "./useSpeech";
 import Close from "src/components/Close";
 import { useAudio } from "src/hooks/useAudio";
-import { useSelector } from "react-redux";
-import {
-  getCurrentAudioUrl,
-  getCurrentMs,
-  getDurationMs,
-  getIsPlaying,
-} from "src/redux/reducers/audio";
 import { AppContext } from "App";
 import { Track } from "react-native-track-player";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { BaseContentFields } from "src/api/fragments";
 
 const SIZE = 125;
 
@@ -104,7 +99,7 @@ const AudioPlayer = () => {
   );
 
   const theme = useTheme();
-  const content = contentData?.getContent;
+  const content = contentData?.getContent as BaseContentFields | null;
   const insets = useSafeAreaInsets();
   const estimatedLen = Math.ceil((durationMs || 0) / 60_000);
 
@@ -450,64 +445,148 @@ const AudioPlayer = () => {
         </View>
       </View>
 
-      <View
-        style={{
-          paddingBottom: insets.bottom + 15,
-          display: "flex",
-          flexDirection: "row",
-          paddingHorizontal: 10,
-          // space between button
-          justifyContent: "space-between",
-        }}
-      >
-        <Button
-          label="Previous"
-          style={{
-            flex: 1,
-            marginRight: 5,
-            backgroundColor: theme.medBackground,
-          }}
-          onPress={() => {
-            skip(15);
-          }}
-          labelStyle={{
-            color: theme.text,
-          }}
-          iconPosition="left"
-          icon={
-            <FontAwesomeIcon
-              icon={faBackward}
-              color={theme.text}
-              size={18}
-              style={{ position: "absolute", left: 15 }}
-            />
-          }
-        />
+      <NextOrPrevButtons skip={skip} content={content ?? null} />
+    </View>
+  );
+};
 
-        <Button
-          label="Next"
-          style={{
-            flex: 1,
-            marginLeft: 5,
-            backgroundColor: theme.medBackground,
-          }}
-          onPress={() => {
-            skip(15);
-          }}
-          iconPosition="right"
-          labelStyle={{
-            color: theme.text,
-          }}
-          icon={
-            <FontAwesomeIcon
-              icon={faForward}
-              color={theme.text}
-              size={18}
-              style={{ position: "absolute", right: 15 }}
-            />
-          }
-        />
-      </View>
+const NextOrPrevButtons = ({
+  content,
+  skip,
+}: {
+  content: BaseContentFields | null;
+  skip: (seconds: number) => void;
+}) => {
+  const { downloadAndPlayContent } = useAudio();
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProps>();
+
+  const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
+    api.queue.next
+  );
+
+  const [getPrevContent] = useLazyQuery<Pick<Query, "getPrevContent">>(
+    api.queue.prev
+  );
+
+  const _onClickPrev = async () => {
+    try {
+      if (!content) return;
+
+      const variables: QueryGetPrevContentArgs = {
+        beforeContentId: content.id,
+      };
+
+      const response = await getPrevContent({
+        variables,
+      });
+
+      const prevContentQueued = response.data?.getPrevContent;
+
+      if (!prevContentQueued?.content) {
+        return;
+      }
+
+      const prevContentId = prevContentQueued?.content?.id || "";
+
+      // update the route params
+      navigation.setParams({ contentId: prevContentId });
+
+      downloadAndPlayContent(prevContentQueued.content as BaseContentFields);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const _onClickNext = async () => {
+    try {
+      if (!content) return;
+
+      const variables: QueryGetNextContentArgs = {
+        afterContentId: content.id,
+      };
+
+      console.log(variables);
+
+      const response = await getPrevContent({
+        variables,
+      });
+
+      const nextContentQueued = response.data?.getPrevContent;
+      console.log(nextContentQueued);
+
+      if (!nextContentQueued?.content) {
+        return;
+      }
+
+      const nextContentId = nextContentQueued?.content?.id || "";
+
+      // update the route params
+      navigation.setParams({ contentId: nextContentId });
+
+      downloadAndPlayContent(nextContentQueued.content as BaseContentFields);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
+    <View
+      style={{
+        paddingBottom: insets.bottom + 15,
+        display: "flex",
+        flexDirection: "row",
+        paddingHorizontal: 10,
+        // space between button
+        justifyContent: "space-between",
+      }}
+    >
+      <Button
+        label="Previous"
+        style={{
+          flex: 1,
+          marginRight: 5,
+          backgroundColor: theme.medBackground,
+        }}
+        onPress={_onClickPrev}
+        activityColor={theme.text}
+        labelStyle={{
+          color: theme.text,
+        }}
+        iconPosition="left"
+        icon={
+          <FontAwesomeIcon
+            icon={faBackward}
+            color={theme.text}
+            size={18}
+            style={{ position: "absolute", left: 15 }}
+          />
+        }
+      />
+
+      <Button
+        label="Next"
+        style={{
+          flex: 1,
+          marginLeft: 5,
+          backgroundColor: theme.medBackground,
+        }}
+        activityColor={theme.text}
+        onPress={_onClickNext}
+        iconPosition="right"
+        labelStyle={{
+          color: theme.text,
+        }}
+        icon={
+          <FontAwesomeIcon
+            icon={faForward}
+            color={theme.text}
+            size={18}
+            style={{ position: "absolute", right: 15 }}
+          />
+        }
+      />
     </View>
   );
 };

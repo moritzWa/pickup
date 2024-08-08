@@ -103,20 +103,6 @@ export type ContentSession = {
   userId: Scalars['String']['output'];
 };
 
-export type Course = {
-  __typename?: 'Course';
-  backgroundColor: Scalars['String']['output'];
-  createdAt: Scalars['Date']['output'];
-  id: Scalars['String']['output'];
-  imageUrl: Scalars['String']['output'];
-  isStarted?: Maybe<Scalars['Boolean']['output']>;
-  mostRecentLesson?: Maybe<Lesson>;
-  subtitle: Scalars['String']['output'];
-  textColor: Scalars['String']['output'];
-  title: Scalars['String']['output'];
-  updatedAt: Scalars['Date']['output'];
-};
-
 export type CreateUserResponse = {
   __typename?: 'CreateUserResponse';
   token: Scalars['String']['output'];
@@ -137,45 +123,21 @@ export type GetMobileUpdateResponse = {
   userVersion?: Maybe<Scalars['String']['output']>;
 };
 
-export type Lesson = {
-  __typename?: 'Lesson';
-  content: Scalars['String']['output'];
-  courseId: Scalars['String']['output'];
+export type Interaction = {
+  __typename?: 'Interaction';
+  contentId: Scalars['ID']['output'];
   createdAt: Scalars['Date']['output'];
-  id: Scalars['String']['output'];
-  progress?: Maybe<LessonProgress>;
-  roles: Array<LessonRole>;
-  sessions?: Maybe<Array<LessonSession>>;
-  subtitle: Scalars['String']['output'];
-  title: Scalars['String']['output'];
-  type: LessonTypeEnum;
+  id: Scalars['ID']['output'];
+  type: InteractionTypeEnum;
   updatedAt: Scalars['Date']['output'];
 };
 
-export type LessonProgress = {
-  __typename?: 'LessonProgress';
-  createdAt: Scalars['Date']['output'];
-  id: Scalars['String']['output'];
-  updatedAt: Scalars['Date']['output'];
-};
-
-export type LessonRole = {
-  __typename?: 'LessonRole';
-  context: Scalars['String']['output'];
-  type: Scalars['String']['output'];
-};
-
-export type LessonSession = {
-  __typename?: 'LessonSession';
-  createdAt: Scalars['Date']['output'];
-  id: Scalars['String']['output'];
-  updatedAt: Scalars['Date']['output'];
-};
-
-export enum LessonTypeEnum {
-  Game = 'Game',
-  RolePlay = 'RolePlay',
-  Vocabulary = 'Vocabulary'
+export enum InteractionTypeEnum {
+  Bookmarked = 'Bookmarked',
+  LeftInProgress = 'LeftInProgress',
+  Likes = 'Likes',
+  ScrolledPast = 'ScrolledPast',
+  Skipped = 'Skipped'
 }
 
 export type Metadata = {
@@ -197,16 +159,13 @@ export type Mutation = {
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
-  respond: RespondResponse;
+  recordInteraction: Interaction;
   respondToContent: ContentRespondResponse;
   sendVerification: Scalars['String']['output'];
   setCommuteTime: User;
   setInterests: User;
   startContent: ContentSession;
-  startCourse: Course;
-  startLesson: LessonSession;
   startListening: ContentSession;
-  transcribe: TranscribeResponse;
   updateContentSession: ContentSession;
   updateUser: User;
   verifyPhoneNumber: User;
@@ -222,9 +181,9 @@ export type MutationCreateUserArgs = {
 };
 
 
-export type MutationRespondArgs = {
-  audioFileUrl: Scalars['String']['input'];
-  lessonId: Scalars['ID']['input'];
+export type MutationRecordInteractionArgs = {
+  contentId: Scalars['ID']['input'];
+  eventType: InteractionTypeEnum;
 };
 
 
@@ -253,22 +212,6 @@ export type MutationSetInterestsArgs = {
 
 export type MutationStartContentArgs = {
   contentId: Scalars['ID']['input'];
-};
-
-
-export type MutationStartCourseArgs = {
-  courseId: Scalars['ID']['input'];
-};
-
-
-export type MutationStartLessonArgs = {
-  lessonId: Scalars['String']['input'];
-};
-
-
-export type MutationTranscribeArgs = {
-  audioFileUrl: Scalars['String']['input'];
-  lessonId: Scalars['ID']['input'];
 };
 
 
@@ -324,21 +267,16 @@ export type Query = {
   getContent: Content;
   getContentFeed: Array<Content>;
   getContentSession: ContentSession;
-  getCourse: Course;
-  getCourseLessons: Array<Lesson>;
-  getCourses: Array<Course>;
   getCurrentContentSession?: Maybe<ContentSession>;
   getIntercomMobileToken: Scalars['String']['output'];
-  getLesson: Lesson;
-  getLessonProgress: LessonProgress;
-  getLessonSessions: Array<LessonSession>;
   getLikes: Array<ContentSession>;
   getMobileUpdate: GetMobileUpdateResponse;
+  getNextContent: Queue;
   getPaymentMethods: Array<PaymentMethod>;
+  getPrevContent: Queue;
   getProfile: Profile;
+  getQueue: Array<Queue>;
   me?: Maybe<User>;
-  myCourses: Array<Course>;
-  mySessions: Array<LessonSession>;
   searchSimilarLinks: Array<SearchResult>;
 };
 
@@ -375,39 +313,24 @@ export type QueryGetContentSessionArgs = {
 };
 
 
-export type QueryGetCourseArgs = {
-  courseId: Scalars['ID']['input'];
-};
-
-
-export type QueryGetCourseLessonsArgs = {
-  courseId: Scalars['ID']['input'];
-};
-
-
 export type QueryGetIntercomMobileTokenArgs = {
   platform?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type QueryGetLessonArgs = {
-  lessonId: Scalars['ID']['input'];
-};
-
-
-export type QueryGetLessonProgressArgs = {
-  lessonId: Scalars['ID']['input'];
-};
-
-
-export type QueryGetLessonSessionsArgs = {
-  lessonId: Scalars['ID']['input'];
 };
 
 
 export type QueryGetLikesArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryGetNextContentArgs = {
+  afterContentId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetPrevContentArgs = {
+  beforeContentId: Scalars['ID']['input'];
 };
 
 
@@ -421,10 +344,16 @@ export type QuerySearchSimilarLinksArgs = {
   query: Scalars['String']['input'];
 };
 
-export type RespondResponse = {
-  __typename?: 'RespondResponse';
-  responseAudioUrl: Scalars['String']['output'];
-  transcription: Scalars['String']['output'];
+export type Queue = {
+  __typename?: 'Queue';
+  content?: Maybe<Content>;
+  contentId: Scalars['ID']['output'];
+  contentSession?: Maybe<ContentSession>;
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['ID']['output'];
+  position: Scalars['Float']['output'];
+  updatedAt: Scalars['Date']['output'];
+  userId: Scalars['ID']['output'];
 };
 
 export type SearchResult = {
@@ -442,11 +371,6 @@ export type SearchResult = {
   snippet?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   userIds: Array<Scalars['Int']['output']>;
-};
-
-export type TranscribeResponse = {
-  __typename?: 'TranscribeResponse';
-  transcription: Scalars['String']['output'];
 };
 
 export type User = {

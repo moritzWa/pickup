@@ -9,6 +9,7 @@ import {
     Relation,
 } from "typeorm";
 import { ContentSession } from "./Content";
+import { Queue } from "./Queue";
 
 export enum UserRole {
     User = "user",
@@ -231,6 +232,13 @@ export class User {
 
     @Column({
         nullable: true,
+        name: "current_queue_id",
+        type: "uuid",
+    })
+    currentQueueId!: Maybe<string>;
+
+    @Column({
+        nullable: true,
         name: "current_content_session_id",
         type: "uuid",
     })
@@ -243,6 +251,14 @@ export class User {
     })
     @JoinColumn({ name: "current_content_session_id" })
     currentContentSession!: Maybe<Relation<ContentSession>>;
+
+    @ManyToOne(() => Queue, (t) => t.id, {
+        nullable: true,
+        eager: false,
+        onDelete: "CASCADE",
+    })
+    @JoinColumn({ name: "current_queue_id" })
+    currentQueue!: Maybe<Relation<Queue>>;
 
     @Column({
         nullable: false,

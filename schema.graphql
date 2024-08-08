@@ -176,10 +176,24 @@ type Query {
   getIntercomMobileToken(platform: String): String!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
+  getNextContent(afterContentId: ID!): Queue!
   getPaymentMethods: [PaymentMethod!]!
+  getPrevContent(beforeContentId: ID!): Queue!
   getProfile(userId: ID): Profile!
+  getQueue: [Queue!]!
   me: User
   searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
+}
+
+type Queue {
+  content: Content
+  contentId: ID!
+  contentSession: ContentSession
+  createdAt: Date!
+  id: ID!
+  position: Float!
+  updatedAt: Date!
+  userId: ID!
 }
 
 type SearchResult {

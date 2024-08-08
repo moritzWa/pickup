@@ -1,14 +1,6 @@
 import { gql } from "@apollo/client";
 import { Maybe } from "src/core";
-import {
-  Content,
-  ContentSession,
-  Course,
-  Lesson,
-  LessonProgress,
-  LessonSession,
-  User,
-} from "./generated/types";
+import { Content, ContentSession, Queue, User } from "./generated/types";
 
 export type BaseUserFields = Pick<
   User,
@@ -57,93 +49,6 @@ export const BaseUserFields = gql`
     description
     referralCode
     authProviderId
-  }
-`;
-
-export type BaseLessonSessionFields = Pick<LessonSession, "id" | "createdAt">;
-
-export const BaseLessonSessionFields = gql`
-  fragment BaseLessonSessionFields on LessonSession {
-    id
-    createdAt
-  }
-`;
-
-export type BaseLessonProgressFields = Pick<LessonProgress, "id" | "createdAt">;
-
-export const BaseLessonProgressFields = gql`
-  fragment BaseLessonProgressFields on LessonProgress {
-    id
-    createdAt
-  }
-`;
-
-export type BaseLessonFields = Pick<
-  Lesson,
-  | "id"
-  | "createdAt"
-  | "title"
-  | "content"
-  | "courseId"
-  | "progress"
-  | "subtitle"
-  | "roles"
-  | "type"
-> & {
-  progress?: Maybe<BaseLessonProgressFields>;
-  sessions?: Maybe<BaseLessonSessionFields>;
-};
-
-export const BaseLessonFields = gql`
-  ${BaseLessonSessionFields}
-  ${BaseLessonProgressFields}
-  fragment BaseLessonFields on Lesson {
-    id
-    createdAt
-    title
-    subtitle
-    content
-    roles {
-      type
-      context
-    }
-    courseId
-    type
-    progress {
-      ...BaseLessonProgressFields
-    }
-    sessions {
-      ...BaseLessonSessionFields
-    }
-  }
-`;
-
-export type BaseCourseFields = Pick<
-  Course,
-  | "id"
-  | "imageUrl"
-  | "title"
-  | "backgroundColor"
-  | "textColor"
-  | "subtitle"
-  | "isStarted"
-> & {
-  mostRecentLesson?: Maybe<BaseLessonFields>;
-};
-
-export const BaseCourseFields = gql`
-  ${BaseLessonFields}
-  fragment BaseCourseFields on Course {
-    id
-    imageUrl
-    title
-    backgroundColor
-    textColor
-    subtitle
-    isStarted
-    mostRecentLesson {
-      ...BaseLessonFields
-    }
   }
 `;
 
@@ -226,6 +131,22 @@ export const BaseContentSessionFields = gql`
     percentFinished
     isBookmarked
     bookmarkedAt
+    createdAt
+    updatedAt
+    content {
+      ...BaseContentFields
+    }
+  }
+`;
+
+export type BaseQueueFields = Pick<Queue, "id" | "createdAt" | "updatedAt"> & {
+  content: BaseContentFields | null;
+};
+
+export const BaseQueueFields = gql`
+  ${BaseContentFields}
+  fragment BaseQueueFields on Queue {
+    id
     createdAt
     updatedAt
     content {

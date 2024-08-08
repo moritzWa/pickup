@@ -10,10 +10,8 @@ const hasLogging = process.env.TYPEORM_LOGGING === "true";
 const ENTITIES = [
     entities.User,
     entities.Notification,
-    // content
     entities.Content,
     entities.ContentSession,
-    // curius
     entities.CuriusLink,
     entities.CuriusLinkChunk,
     entities.CuriusUser,
@@ -22,6 +20,7 @@ const ENTITIES = [
     entities.CuriusMention,
     entities.Relationship,
     entities.Interaction,
+    entities.Queue,
 ];
 
 function getMigrationDirectory() {

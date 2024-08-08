@@ -20,6 +20,8 @@ type ButtonProps = {
   onPress: (event: GestureResponderEvent) => void;
   style?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
+  activityColor?: string;
+  activityStyle?: StyleProp<ViewStyle>;
   icon?: JSX.Element;
   iconPosition?: "left" | "right";
   textProps?: TextProps;
@@ -33,8 +35,10 @@ const Button = ({
   icon,
   iconPosition,
   textProps,
+  activityStyle,
   loading,
   labelStyle,
+  activityColor,
   ...other
 }: ButtonProps) => {
   const [_isLoading, setLoading] = React.useState(false);
@@ -77,9 +81,10 @@ const Button = ({
     >
       {isLoading ? (
         <ActivityIndicator
-          color={theme.background}
+          color={activityColor ?? theme.background}
           size={16}
           style={{
+            ...activityStyle,
             alignSelf: "center",
             justifyContent: "center",
             flex: 1,
