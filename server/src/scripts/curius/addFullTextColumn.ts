@@ -8,6 +8,7 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
 import { curiusLinkRepo } from "src/modules/curius/infra";
+import { LinkResponse } from "src/modules/curius/infra/linkRepo";
 import { getErrorMessage, isSuccess } from "./utils";
 
 const sanitizeText = (text: string) => {
@@ -18,7 +19,7 @@ const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        const linksResponse = await curiusLinkRepo.findFirst100Links();
+        const linksResponse = await curiusLinkRepo.findFirst500Links();
         // const mockFindLinks = (): Promise<
         //     FailureOrSuccess<DefaultErrors, CuriusLink[]>
         // > => {
@@ -52,8 +53,9 @@ const addFullTextToLinks = async () => {
 
         const startTime = Date.now();
         let processedLinks = 0;
+        const savePromises: Promise<LinkResponse>[] = [];
 
-        for (const link of links) {
+        const processLink = async (link) => {
             try {
                 if (link.link.endsWith(".pdf")) {
                     await processPDFLink(link);
@@ -61,15 +63,8 @@ const addFullTextToLinks = async () => {
                     await processHTMLLink(link);
                 }
 
-                // Only save if the link was successfully processed
                 if (link.fullText) {
-                    const saveResponse = await curiusLinkRepo.save(link);
-                    if (!isSuccess(saveResponse)) {
-                        console.error(
-                            `Failed to update link ${link.id}:`,
-                            saveResponse.error
-                        );
-                    }
+                    savePromises.push(curiusLinkRepo.save(link)); // Collect save promise
                 } else {
                     console.log(
                         `Skipped saving link ${link.id}: No full text extracted`
@@ -82,20 +77,12 @@ const addFullTextToLinks = async () => {
                 );
                 link.skippedErrorFetchingFullText = true;
             }
+        };
 
-            processedLinks++;
-            if (processedLinks % 10 === 0 || processedLinks === totalLinks) {
-                const progress = ((processedLinks / totalLinks) * 100).toFixed(
-                    2
-                );
-                const elapsedTime = (Date.now() - startTime) / 1000;
-                const avgTimePerLink = elapsedTime / processedLinks;
-                console.log(
-                    `Progress: ${progress}% (${processedLinks}/${totalLinks})`
-                );
-                console.log(`Avg time per link: ${avgTimePerLink.toFixed(2)}s`);
-            }
-        }
+        await Promise.all(links.map(processLink)); // Process links in parallel
+
+        // Save all processed links at once
+        await Promise.all(savePromises);
 
         const totalTime = (Date.now() - startTime) / 1000;
         console.log(
