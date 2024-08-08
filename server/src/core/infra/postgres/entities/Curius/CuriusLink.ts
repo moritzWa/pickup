@@ -26,6 +26,15 @@ export class CuriusLink {
 
     // mozilla/readability
     @Column({ nullable: true })
+    skippedNotProbablyReadable?: boolean;
+
+    @Column({ nullable: true })
+    skippedInaccessiblePDF?: boolean;
+
+    @Column({ nullable: true })
+    skippedErrorFetchingFullText?: boolean;
+
+    @Column({ nullable: true })
     length?: number;
 
     @Column({ nullable: true })

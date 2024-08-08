@@ -59,6 +59,20 @@ export class PostgresCuriusLinkRepository {
         }
     }
 
+    async findFirst100Links(): Promise<LinksResponse> {
+        try {
+            const links = await this.repo.find({
+                take: 100,
+                order: {
+                    id: "ASC",
+                },
+            });
+            return success(links);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async findSimilarLinks(
         query: string,
         limit: number = DEFAULT_LINKS_RETURN
