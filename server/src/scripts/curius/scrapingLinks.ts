@@ -27,13 +27,14 @@ const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
     const startLink = 25999;
-    const numLinks = 50000;
+    const numLinks = 10000;
     // latest as of 2024-08-03 is 127456
 
     console.log(
         `Scraping ${numLinks} Curius Links in batches of ${BATCH_SIZE}...`
     );
     const totalStartTime = Date.now();
+    let totalProcessedLinks = 0;
 
     for (
         let batchStart = startLink;
@@ -65,8 +66,14 @@ const scrapeCuriusLinks = async () => {
             (result): result is LinkViewResponse => result !== null
         );
 
+        totalProcessedLinks += validResults.length;
+        const progressPercentage = (
+            (totalProcessedLinks / numLinks) *
+            100
+        ).toFixed(2);
+
         console.log(
-            `Fetched ${validResults.length} links. Saving to database...`
+            `Fetched ${validResults.length} links. Progress: ${progressPercentage}%. Saving to database...`
         );
 
         const saveStartTime = Date.now();
