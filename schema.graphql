@@ -224,7 +224,7 @@ type Query {
   me: User
   myCourses: [Course!]!
   mySessions: [LessonSession!]!
-  searchSimilarLinks(limit: Int = 3, query: String!): [SearchResult!]!
+  searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
 }
 
 type RespondResponse {
