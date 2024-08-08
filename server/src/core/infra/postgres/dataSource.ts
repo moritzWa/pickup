@@ -68,6 +68,7 @@ const dataSourceConfig: DataSourceOptions = {
 
 export const makeDataSource = (params?: Partial<DataSourceOptions>) => {
     const ds = new DataSource(merge(params, dataSourceConfig));
+    // typeorm doesn't support vector type so we add it manually
     ds.driver.supportedDataTypes.push("vector" as ColumnType);
     ds.driver.withLengthColumnTypes.push("vector" as ColumnType);
     return ds;
