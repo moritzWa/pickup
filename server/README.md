@@ -78,7 +78,7 @@ npm run inngest:dev
 run the inngest
 
 ```console
-npx inngest-cli@latest dev -u http://localhost:8000/inngest
+npx inngest-cli@latest dev -u http://localhost:8001/inngest
 ```
 
 ### App

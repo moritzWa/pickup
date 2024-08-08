@@ -231,8 +231,8 @@ const GetCategories = gql`
 
 const GetNextContent = gql`
   ${BaseQueueFields}
-  query GetNextContent($contentId: ID!) {
-    getNextContent(contentId: $contentId) {
+  query GetNextContent($afterContentId: ID!) {
+    getNextContent(afterContentId: $afterContentId) {
       ...BaseQueueFields
     }
   }
@@ -240,8 +240,8 @@ const GetNextContent = gql`
 
 const GetPrevContent = gql`
   ${BaseQueueFields}
-  query GetPrevContent($contentId: ID!) {
-    getPrevContent(contentId: $contentId) {
+  query GetPrevContent($beforeContentId: ID!) {
+    getPrevContent(beforeContentId: $beforeContentId) {
       ...BaseQueueFields
     }
   }
@@ -253,6 +253,12 @@ const GetQueue = gql`
     getQueue {
       ...BaseQueueFields
     }
+  }
+`;
+
+const ShowMore = gql`
+  mutation ShowMore {
+    showMore
   }
 `;
 
@@ -275,6 +281,7 @@ export const api = {
     list: GetQueue,
   },
   content: {
+    showMore: ShowMore,
     current: GetCurrentContentSession,
     start: StartContent,
     feed: GetContentFeed,

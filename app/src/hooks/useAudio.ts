@@ -240,7 +240,7 @@ export const useAudio = () => {
 
   const logQueue = async () => {
     const queue = await TrackPlayer.getQueue();
-    console.log(queue.map((q) => q.title));
+    // console.log(queue.map((q) => q.title));
   };
 
   useEffect(() => {

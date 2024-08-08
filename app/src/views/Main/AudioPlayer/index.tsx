@@ -484,7 +484,7 @@ const NextOrPrevButtons = ({
 
       const prevContentQueued = response.data?.getPrevContent;
 
-      console.log(prevContentQueued);
+      // console.log(prevContentQueued);
 
       if (!prevContentQueued?.content) {
         return;
@@ -509,17 +509,19 @@ const NextOrPrevButtons = ({
         afterContentId: content.id,
       };
 
-      console.log(variables);
-
-      const response = await getPrevContent({
+      const response = await getNextContent({
         variables,
       });
 
-      const nextContentQueued = response.data?.getPrevContent;
+      // console.log(JSON.stringify(response.error, null, 2));
+
+      const nextContentQueued = response.data?.getNextContent;
 
       if (!nextContentQueued?.content) {
         return;
       }
+
+      // console.log(nextContentQueued);
 
       const nextContentId = nextContentQueued?.content?.id || "";
 

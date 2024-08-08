@@ -12,7 +12,7 @@ import {
 import React, { useMemo, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
-import { useMutation, useQuery } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import { api, apolloClient } from "src/api";
 import {
   ContentFeedFilter,
@@ -24,7 +24,7 @@ import { NavigationProps } from "src/navigation";
 import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPlay } from "@fortawesome/pro-solid-svg-icons";
+import { faArrowRight, faPlay } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "./Github";
 import { ContentRow } from "../../../components/Content/ContentRow";
 import { CurrentAudio } from "../../../components/CurrentAudio";
@@ -36,6 +36,8 @@ const Home = () => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
   const filter = useSelector(getHomeFilter);
+
+  const [showMore] = useMutation(api.content.showMore);
 
   const variables = useMemo(
     (): QueryGetContentFeedArgs => ({
@@ -52,6 +54,10 @@ const Home = () => {
       fetchPolicy: "cache-and-network",
     }
   );
+
+  const onShowMorePress = async () => {
+    await showMore();
+  };
 
   const content = (data?.getContentFeed ?? []) as BaseContentFields[];
 
@@ -90,6 +96,32 @@ const Home = () => {
           paddingBottom: 150,
         }}
         renderItem={({ item: c }) => <ContentRow content={c} />}
+        ListFooterComponent={
+          // Show more
+          <TouchableOpacity
+            style={{
+              padding: 10,
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            activeOpacity={0.8}
+            onPress={onShowMorePress}
+          >
+            <Text
+              style={{
+                color: theme.text,
+                fontFamily: "Raleway-Bold",
+                fontSize: 16,
+                textAlign: "center",
+                padding: 10,
+              }}
+            >
+              Show more
+            </Text>
+            <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} />
+          </TouchableOpacity>
+        }
       />
 
       <CurrentAudio content={content} />
@@ -184,7 +216,6 @@ const Options = () => {
 
     navigation.navigate("AudioPlayer", {
       contentId: session.contentId,
-      isCarMode: false,
     });
   };
 
@@ -212,17 +243,17 @@ const Options = () => {
           label="For you"
         />
 
-        <SingleFilter
+        {/* <SingleFilter
           onPress={() => onPress(ContentFeedFilter.Popular)}
           isActive={filter === ContentFeedFilter.Popular}
           label="Popular"
-        />
+        /> */}
 
-        <SingleFilter
+        {/* <SingleFilter
           onPress={() => onPress(ContentFeedFilter.Queue)}
           isActive={filter === ContentFeedFilter.Queue}
           label="Queue"
-        />
+        /> */}
       </View>
 
       <Animated.View
