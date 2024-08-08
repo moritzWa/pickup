@@ -6,7 +6,7 @@ import {
     NotFoundError,
     success,
 } from "src/core/logic";
-import { queueRepo } from "../infra";
+import { queueRepo } from "../../infra";
 import { v4 as uuidv4 } from "uuid";
 import { LessThan, MoreThan } from "typeorm";
 import { throwIfError } from "src/core/surfaces/graphql/common";
@@ -30,6 +30,8 @@ const enqueue = async (
         position: nextPosition,
         userId: user.id,
         contentId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
     });
 
     return queueResponse;

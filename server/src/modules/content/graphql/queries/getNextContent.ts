@@ -5,6 +5,7 @@ import {
     idArg,
     mutationField,
     nonNull,
+    nullable,
     queryField,
     stringArg,
 } from "nexus";
@@ -19,10 +20,10 @@ import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo, queueRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
-import { QueueService } from "../../services/queueService";
+import { QueueService } from "../../services/queueService/queueService";
 
 export const getNextContent = queryField("getNextContent", {
-    type: nonNull("Queue"),
+    type: nullable("Queue"),
     args: {
         afterContentId: nonNull(idArg()),
     },

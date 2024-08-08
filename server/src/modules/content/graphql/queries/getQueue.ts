@@ -20,7 +20,7 @@ import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo, queueRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
-import { QueueService } from "../../services/queueService";
+import { QueueService } from "../../services/queueService/queueService";
 
 export const getQueue = queryField("getQueue", {
     type: nonNull(list(nonNull("Queue"))),

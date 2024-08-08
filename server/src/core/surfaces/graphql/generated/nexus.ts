@@ -234,6 +234,7 @@ export interface NexusGenFieldTypes {
     sendVerification: string; // String!
     setCommuteTime: NexusGenRootTypes['User']; // User!
     setInterests: NexusGenRootTypes['User']; // User!
+    showMore: string; // String!
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startListening: NexusGenRootTypes['ContentSession']; // ContentSession!
     updateContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
@@ -267,9 +268,9 @@ export interface NexusGenFieldTypes {
     getIntercomMobileToken: string; // String!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
-    getNextContent: NexusGenRootTypes['Queue']; // Queue!
+    getNextContent: NexusGenRootTypes['Queue'] | null; // Queue
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
-    getPrevContent: NexusGenRootTypes['Queue']; // Queue!
+    getPrevContent: NexusGenRootTypes['Queue'] | null; // Queue
     getProfile: NexusGenRootTypes['Profile']; // Profile!
     getQueue: NexusGenRootTypes['Queue'][]; // [Queue!]!
     me: NexusGenRootTypes['User'] | null; // User
@@ -419,6 +420,7 @@ export interface NexusGenFieldTypeNames {
     sendVerification: 'String'
     setCommuteTime: 'User'
     setInterests: 'User'
+    showMore: 'String'
     startContent: 'ContentSession'
     startListening: 'ContentSession'
     updateContentSession: 'ContentSession'

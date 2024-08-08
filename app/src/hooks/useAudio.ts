@@ -1,12 +1,15 @@
+import { useQuery } from "@apollo/client";
 import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
 import TrackPlayer, { AddTrack, State, Track } from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
-import { BaseContentFields } from "src/api/fragments";
+import { api } from "src/api";
+import { BaseContentFields, BaseQueueFields } from "src/api/fragments";
+import { Query } from "src/api/generated/types";
 import {
   DefaultErrors,
   failure,
@@ -30,6 +33,12 @@ import {
 export const useAudio = () => {
   const { sound: globalSound } = useContext(AppContext);
   const dispatch = useDispatch();
+
+  const { data: queueData, error: queueError } = useQuery<
+    Pick<Query, "getQueue">
+  >(api.queue.list);
+
+  const queue = (queueData?.getQueue ?? []) as BaseQueueFields[];
 
   const currentMs = useSelector(getCurrentMs);
   const durationMs = useSelector(getDurationMs);
@@ -200,7 +209,48 @@ export const useAudio = () => {
     const result = await TrackPlayer.getQueue();
   };
 
-  const syncQueue = async () => {};
+  // ehhh might need to adjust this more...
+  const syncQueue = async (queue: BaseQueueFields[]) => {
+    console.log(`[syncing queue ${queue.length}]`);
+
+    const activeTrack = await TrackPlayer.getActiveTrack();
+
+    await TrackPlayer.removeUpcomingTracks();
+
+    for (const q of queue) {
+      const content = q.content!;
+      // don't add the track if it is already the active one
+      if (
+        activeTrack?.url === content.audioUrl &&
+        activeTrack.title === content.title
+      ) {
+        continue;
+      }
+
+      await TrackPlayer.add({
+        url: content.audioUrl || "",
+        title: content.title || "",
+        artist: content.authorName || "",
+        artwork: content.thumbnailImageUrl || "",
+      });
+    }
+
+    logQueue();
+  };
+
+  const logQueue = async () => {
+    const queue = await TrackPlayer.getQueue();
+    console.log(queue.map((q) => q.title));
+  };
+
+  useEffect(() => {
+    syncQueue(queue);
+    // sync the queue.
+  }, [JSON.stringify(queue)]);
+
+  useEffect(() => {
+    logQueue();
+  }, [queue]);
 
   // sync the queue. add to the queue. etc... (track player)
 

@@ -248,10 +248,10 @@ const GetPrevContent = gql`
 `;
 
 const GetQueue = gql`
-  ${BaseContentFields}
-  query GetPrevContent {
-    getPrevContent {
-      ...BaseContentFields
+  ${BaseQueueFields}
+  query getQueue {
+    getQueue {
+      ...BaseQueueFields
     }
   }
 `;

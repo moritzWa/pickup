@@ -484,6 +484,8 @@ const NextOrPrevButtons = ({
 
       const prevContentQueued = response.data?.getPrevContent;
 
+      console.log(prevContentQueued);
+
       if (!prevContentQueued?.content) {
         return;
       }
@@ -514,7 +516,6 @@ const NextOrPrevButtons = ({
       });
 
       const nextContentQueued = response.data?.getPrevContent;
-      console.log(nextContentQueued);
 
       if (!nextContentQueued?.content) {
         return;
