@@ -6,13 +6,6 @@ import {
     CuriusMention,
     CuriusUser,
 } from "src/core/infra/postgres/entities/";
-import {
-    curiusCommentRepo,
-    curiusHighlightRepo,
-    curiusLinkRepo,
-    curiusMentionRepo,
-    curiusUserRepo,
-} from "src/modules/curius/infra";
 import { LinkViewResponse } from "./types";
 
 const token =
@@ -21,28 +14,43 @@ const headers = {
     Authorization: `Bearer ${token}`,
 };
 
+const BATCH_SIZE = 50; // Increased batch size
+
 const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
-    const startLink = 615;
-    const numLinks = 60;
+    const startLink = 21;
+    const numLinks = 179;
     // latest as of 2024-08-03 is 127456
 
     console.log(`Scraping ${numLinks} Curius Links...`);
-    for (let i = startLink; i <= startLink + numLinks; i++) {
+
+    const promises: Promise<LinkViewResponse>[] = [];
+    for (let i = startLink; i < startLink + numLinks; i++) {
         const linkViewUrl = `https://curius.app/api/linkview/${i}`;
-        const response = await fetch(linkViewUrl, { headers });
-        const data: LinkViewResponse = await response.json();
+        promises.push(
+            fetch(linkViewUrl, { headers }).then((res) => res.json())
+        );
 
-        console.log("data in scrapingLinks", JSON.stringify(data, null, 2));
-
-        await saveCuriusData(data);
+        if (promises.length === BATCH_SIZE || i === startLink + numLinks - 1) {
+            const results = await Promise.all(promises);
+            console.log(`Saving ${results.length} links...`);
+            await dataSource.transaction(async (transactionalEntityManager) => {
+                for (const data of results) {
+                    await saveCuriusData(data, transactionalEntityManager);
+                }
+            });
+            promises.length = 0; // Clear the array
+        }
     }
 
     await dataSource.destroy();
 };
 
-const saveCuriusData = async (data: LinkViewResponse) => {
+const saveCuriusData = async (
+    data: LinkViewResponse,
+    transactionalEntityManager
+) => {
     const { link } = data;
 
     // Save CuriusLink
@@ -61,11 +69,11 @@ const saveCuriusData = async (data: LinkViewResponse) => {
         readCount: link.readCount || 0,
     });
 
-    await curiusLinkRepo.save(curiusLink);
+    await transactionalEntityManager.save(CuriusLink, curiusLink);
 
     // Save CuriusUsers
     if (Array.isArray(link.users)) {
-        for (const user of link.users) {
+        const curiusUsers = link.users.map((user) => {
             const curiusUser = new CuriusUser();
             Object.assign(curiusUser, {
                 id: user.id,
@@ -75,90 +83,114 @@ const saveCuriusData = async (data: LinkViewResponse) => {
                 lastOnline: new Date(user.lastOnline),
             });
             curiusUser.link = Promise.resolve(curiusLink);
-            await curiusUserRepo.save(curiusUser);
-        }
+            return curiusUser;
+        });
+        await transactionalEntityManager.save(CuriusUser, curiusUsers);
     }
 
     // Save CuriusComments
     if (Array.isArray(link.comments)) {
-        for (const comment of link.comments) {
-            await saveCuriusComment(comment, curiusLink);
-        }
+        await saveCuriusComments(
+            link.comments,
+            curiusLink,
+            transactionalEntityManager
+        );
     }
 
     // Save CuriusHighlights
     if (Array.isArray(link.highlights)) {
-        for (const highlightGroup of link.highlights) {
-            for (const highlight of highlightGroup) {
-                await saveCuriusHighlight(highlight, curiusLink);
-            }
+        const highlights = link.highlights.flat();
+        await saveCuriusHighlights(
+            highlights,
+            curiusLink,
+            transactionalEntityManager
+        );
+    }
+};
+
+const saveCuriusComments = async (
+    comments,
+    curiusLink,
+    transactionalEntityManager
+) => {
+    const curiusComments = comments.map((comment) => {
+        const curiusComment = new CuriusComment();
+        Object.assign(curiusComment, {
+            id: comment.id,
+            userId: comment.userId,
+            parentId: comment.parentId,
+            text: comment.text,
+            createdDate: new Date(comment.createdDate),
+            modifiedDate: new Date(comment.modifiedDate),
+        });
+        curiusComment.link = Promise.resolve(curiusLink);
+        return curiusComment;
+    });
+
+    await transactionalEntityManager.save(CuriusComment, curiusComments);
+
+    for (const comment of comments) {
+        if (Array.isArray(comment.replies)) {
+            await saveCuriusComments(
+                comment.replies,
+                curiusLink,
+                transactionalEntityManager
+            );
         }
     }
 };
 
-const saveCuriusComment = async (comment, curiusLink) => {
-    const curiusComment = new CuriusComment();
-    Object.assign(curiusComment, {
-        id: comment.id,
-        userId: comment.userId,
-        parentId: comment.parentId,
-        text: comment.text,
-        createdDate: new Date(comment.createdDate),
-        modifiedDate: new Date(comment.modifiedDate),
+const saveCuriusHighlights = async (
+    highlights,
+    curiusLink,
+    transactionalEntityManager
+) => {
+    const curiusHighlights = highlights.map((highlight) => {
+        const curiusHighlight = new CuriusHighlight();
+        Object.assign(curiusHighlight, {
+            id: highlight.id,
+            userId: highlight.userId,
+            linkId: highlight.linkId,
+            highlight: highlight.highlight,
+            createdDate: new Date(highlight.createdDate),
+            position: highlight.position,
+            verified: highlight.verified,
+            leftContext: highlight.leftContext,
+            rightContext: highlight.rightContext,
+            rawHighlight: highlight.rawHighlight,
+        });
+        curiusHighlight.link = Promise.resolve(curiusLink);
+        return curiusHighlight;
     });
-    // const user = await curiusUserRepo.findOne({
-    //     where: { id: comment.userId },
-    // });
-    const user = await dataSource.query(
-        `SELECT * FROM "curius_users" WHERE id = ${comment.userId}`
-    );
 
-    if (user) {
-        curiusComment.user = user;
-    }
+    await transactionalEntityManager.save(CuriusHighlight, curiusHighlights);
 
-    await curiusCommentRepo.save(curiusComment);
-
-    if (Array.isArray(comment.replies)) {
-        for (const reply of comment.replies) {
-            await saveCuriusComment(reply, curiusLink);
+    for (const highlight of highlights) {
+        if (highlight.comment) {
+            await saveCuriusComments(
+                [highlight.comment],
+                curiusLink,
+                transactionalEntityManager
+            );
         }
-    }
-};
 
-const saveCuriusHighlight = async (highlight, curiusLink) => {
-    const curiusHighlight = new CuriusHighlight();
-    Object.assign(curiusHighlight, {
-        id: highlight.id,
-        userId: highlight.userId,
-        linkId: highlight.linkId,
-        highlight: highlight.highlight,
-        createdDate: new Date(highlight.createdDate),
-        position: highlight.position,
-        verified: highlight.verified,
-        leftContext: highlight.leftContext,
-        rightContext: highlight.rightContext,
-        rawHighlight: highlight.rawHighlight,
-    });
-    curiusHighlight.link = Promise.resolve(curiusLink);
-    await curiusHighlightRepo.save(curiusHighlight);
-
-    if (highlight.comment) {
-        await saveCuriusComment(highlight.comment, curiusLink);
-    }
-
-    if (Array.isArray(highlight.mentions)) {
-        for (const mention of highlight.mentions) {
-            const curiusMention = new CuriusMention();
-            Object.assign(curiusMention, {
-                fromUid: mention.fromUid,
-                toUid: mention.toUid,
-                createdDate: new Date(mention.createdDate),
+        if (Array.isArray(highlight.mentions)) {
+            const curiusMentions = highlight.mentions.map((mention) => {
+                const curiusMention = new CuriusMention();
+                Object.assign(curiusMention, {
+                    fromUid: mention.fromUid,
+                    toUid: mention.toUid,
+                    createdDate: new Date(mention.createdDate),
+                });
+                curiusMention.link = Promise.resolve(curiusLink);
+                curiusMention.user = { id: mention.user.id } as CuriusUser;
+                curiusMention.highlight = Promise.resolve(curiusHighlights);
+                return curiusMention;
             });
-            curiusMention.link = Promise.resolve(curiusLink);
-            curiusMention.user = { id: mention.user.id } as CuriusUser;
-            curiusMention.highlight = Promise.resolve(curiusHighlight);
-            await curiusMentionRepo.save(curiusMention);
+            await transactionalEntityManager.save(
+                CuriusMention,
+                curiusMentions
+            );
         }
     }
 };
