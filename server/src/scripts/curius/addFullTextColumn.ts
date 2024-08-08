@@ -150,7 +150,12 @@ const processHTMLLink = async (link) => {
         const html = await response.text();
 
         const { window } = new JSDOM(html);
-        if (!isProbablyReaderable(window.document)) {
+        if (
+            !isProbablyReaderable(window.document, {
+                minScore: 10, // Decrease from default 20
+                minContentLength: 90, // Decrease from default 140
+            })
+        ) {
             link.skippedNotProbablyReadable = true;
             Logger.info(
                 `Link not probably readable: ${link.id} (${link.link})`
