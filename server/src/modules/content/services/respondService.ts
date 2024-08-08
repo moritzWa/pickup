@@ -1,4 +1,4 @@
-import { Content, Lesson, User } from "src/core/infra/postgres/entities";
+import { Content, User } from "src/core/infra/postgres/entities";
 import { TranscribeService } from "./transcribeService";
 import {
     DefaultErrors,
@@ -18,7 +18,7 @@ export type RespondData = {
 };
 
 const respond = async (
-    lesson: Lesson,
+    lesson: any,
     audioFileUrl: string
 ): Promise<FailureOrSuccess<DefaultErrors, RespondData>> => {
     const transcriptionResponse = await TranscribeService.transcribeAudioUrl(

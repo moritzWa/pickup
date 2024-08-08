@@ -2,7 +2,7 @@ import { merge } from "lodash/fp";
 import { join } from "path";
 import { config } from "src/config";
 import { SlowQueryLogger } from "src/utils/typeormLogger";
-import { DataSource, DataSourceOptions } from "typeorm";
+import { ColumnType, DataSource, DataSourceOptions } from "typeorm";
 import * as entities from "./entities";
 
 const hasLogging = process.env.TYPEORM_LOGGING === "true";
@@ -10,16 +10,6 @@ const hasLogging = process.env.TYPEORM_LOGGING === "true";
 const ENTITIES = [
     entities.User,
     entities.Notification,
-    entities.Character,
-    entities.Participant,
-    entities.Message,
-    // lesson
-    entities.Lesson,
-    entities.LessonProgress,
-    entities.LessonSession,
-    // course
-    entities.Course,
-    entities.CourseProgress,
     // content
     entities.Content,
     entities.ContentSession,
@@ -76,5 +66,9 @@ const dataSourceConfig: DataSourceOptions = {
     // },
 };
 
-export const makeDataSource = (params?: Partial<DataSourceOptions>) =>
-    new DataSource(merge(params, dataSourceConfig));
+export const makeDataSource = (params?: Partial<DataSourceOptions>) => {
+    const ds = new DataSource(merge(params, dataSourceConfig));
+    ds.driver.supportedDataTypes.push("vector" as ColumnType);
+    ds.driver.withLengthColumnTypes.push("vector" as ColumnType);
+    return ds;
+};

@@ -1,6 +1,5 @@
 import BigNumber from "bignumber.js";
 import { enumType, list, nonNull, nullable, objectType } from "nexus";
-import { LessonType } from "src/core/infra/postgres/entities/Lesson";
 
 export const FollowUpQuestion = objectType({
     name: "FollowUpQuestion",

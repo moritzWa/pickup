@@ -5,9 +5,7 @@ import { DateScalar } from "./base";
 
 // resolvers
 import * as content from "src/modules/content/graphql";
-import * as courses from "src/modules/courses/graphql";
 import * as curius from "src/modules/curius/graphql";
-import * as lessons from "src/modules/lessons/graphql";
 import * as users from "src/modules/users/graphql";
 import * as schemas from "src/shared/schemas";
 
@@ -16,8 +14,6 @@ const types = {
     Upload: GraphQLUpload,
     ...schemas,
     ...users,
-    ...courses,
-    ...lessons,
     ...content,
     ...curius,
 };

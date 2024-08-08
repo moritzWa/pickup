@@ -10,7 +10,6 @@ import { loops } from "src/utils/loops";
 import { auth } from "firebase-admin";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
-import { courseProgressRepo } from "src/modules/courses/infra";
 import { contentRepo, contentSessionRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 

@@ -5,7 +5,6 @@ import {
 } from "src/core/surfaces/graphql/context";
 import { stripe } from "src/utils";
 import { throwIfError } from "src/core/surfaces/graphql/common";
-import { lessonRepo } from "src/modules/lessons/infra";
 import { contentRepo, contentSessionRepo } from "../../infra";
 
 export const getContent = queryField("getContent", {

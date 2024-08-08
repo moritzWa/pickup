@@ -10,7 +10,6 @@ import {
     failure,
     success,
 } from "src/core/logic";
-import { Lesson } from "src/core/infra/postgres/entities";
 
 const transcribeAudioUrl = async (
     url: string

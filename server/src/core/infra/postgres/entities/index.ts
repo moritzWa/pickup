@@ -1,15 +1,5 @@
-export { Character } from "./Character";
-export { Message } from "./Message";
 export { Notification } from "./Notification";
-export { Participant } from "./Participant";
 export { User } from "./User";
-// lessons
-export { Lesson } from "./Lesson/Lesson";
-export { LessonProgress } from "./Lesson/LessonProgress";
-export { LessonSession } from "./Lesson/LessonSession";
-// courses
-export { Course } from "./Course/Course";
-export { CourseProgress } from "./Course/CourseProgress";
 // content
 export { Content } from "./Content/Content";
 export { ContentSession } from "./Content/ContentSession";
