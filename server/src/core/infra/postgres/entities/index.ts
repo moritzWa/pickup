@@ -12,5 +12,6 @@ export { CuriusMention } from "./Curius/CuriusMention";
 export { CuriusUser } from "./Curius/CuriusUser";
 // relationships
 export { Relationship } from "./Relationship";
+export { Interaction } from "./Interaction";
 
 export * from "./types";

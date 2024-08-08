@@ -36,6 +36,7 @@ export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
+  InteractionTypeEnum: "bookmarked" | "left_in_progress" | "likes" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
 }
 
@@ -82,6 +83,7 @@ export interface NexusGenObjects {
     shouldUpdate: boolean; // Boolean!
     userVersion?: string | null; // String
   }
+  Interaction: entities.Interaction ;
   Metadata: { // root type
     author?: string | null; // String
     byline?: string | null; // String
@@ -203,6 +205,13 @@ export interface NexusGenFieldTypes {
     shouldUpdate: boolean; // Boolean!
     userVersion: string | null; // String
   }
+  Interaction: { // field return type
+    contentId: string; // ID!
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    type: NexusGenEnums['InteractionTypeEnum']; // InteractionTypeEnum!
+    updatedAt: NexusGenScalars['Date']; // Date!
+  }
   Metadata: { // field return type
     author: string | null; // String
     byline: string | null; // String
@@ -219,6 +228,7 @@ export interface NexusGenFieldTypes {
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
+    recordInteraction: NexusGenRootTypes['Interaction']; // Interaction!
     respondToContent: NexusGenRootTypes['ContentRespondResponse']; // ContentRespondResponse!
     sendVerification: string; // String!
     setCommuteTime: NexusGenRootTypes['User']; // User!
@@ -367,6 +377,13 @@ export interface NexusGenFieldTypeNames {
     shouldUpdate: 'Boolean'
     userVersion: 'String'
   }
+  Interaction: { // field return type name
+    contentId: 'ID'
+    createdAt: 'Date'
+    id: 'ID'
+    type: 'InteractionTypeEnum'
+    updatedAt: 'Date'
+  }
   Metadata: { // field return type name
     author: 'String'
     byline: 'String'
@@ -383,6 +400,7 @@ export interface NexusGenFieldTypeNames {
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
+    recordInteraction: 'Interaction'
     respondToContent: 'ContentRespondResponse'
     sendVerification: 'String'
     setCommuteTime: 'User'
@@ -475,6 +493,10 @@ export interface NexusGenArgTypes {
       password?: string | null; // String
       referralCode?: string | null; // String
       username?: string | null; // String
+    }
+    recordInteraction: { // args
+      contentId: string; // ID!
+      eventType: NexusGenEnums['InteractionTypeEnum']; // InteractionTypeEnum!
     }
     respondToContent: { // args
       audioFileUrl: string; // String!
