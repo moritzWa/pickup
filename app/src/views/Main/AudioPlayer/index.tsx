@@ -34,7 +34,12 @@ import {
   faReplyAll,
   faTree,
 } from "@fortawesome/pro-solid-svg-icons";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  useIsFocused,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { NavigationProps, RootStackParamList } from "src/navigation";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
@@ -67,6 +72,7 @@ const AudioPlayer = () => {
   const route = useRoute<RouteProp<RootStackParamList, "AudioPlayer">>();
   const contentId = route.params?.contentId || "";
 
+  const isFocused = useIsFocused();
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const { width } = Dimensions.get("window");
@@ -93,13 +99,15 @@ const AudioPlayer = () => {
 
   const [bookmark] = useMutation(api.content.bookmark);
 
-  const { data: contentData, error } = useQuery<Pick<Query, "getContent">>(
-    api.content.get,
-    {
-      skip: !contentVariables.contentId,
-      variables: contentVariables,
-    }
-  );
+  const {
+    data: contentData,
+    error,
+    refetch: refetchContent,
+  } = useQuery<Pick<Query, "getContent">>(api.content.get, {
+    skip: !contentVariables.contentId,
+    variables: contentVariables,
+    fetchPolicy: "cache-and-network",
+  });
 
   const theme = useTheme();
   const content = contentData?.getContent as BaseContentFields | null;
@@ -107,6 +115,8 @@ const AudioPlayer = () => {
 
   const insets = useSafeAreaInsets();
   const estimatedLen = Math.ceil((durationMs || 0) / 60_000);
+
+  useEffect(() => void refetchContent(), [isFocused, contentId]);
 
   const bookmarkContent = async () => {
     try {
@@ -221,7 +231,7 @@ const AudioPlayer = () => {
     }
   };
 
-  // console.log(session);
+  console.log(session);
 
   return (
     <View
