@@ -4,7 +4,7 @@ import { curiusLinkRepo } from "src/modules/curius/infra";
 import { isSuccess } from "src/scripts/curius/utils";
 import { Logger } from "src/utils/logger";
 
-const LINKS_TO_EXPORT = 4000;
+const LINKS_TO_EXPORT = 200;
 
 const exportTopLinks = async () => {
     await dataSource.initialize();
@@ -26,22 +26,26 @@ const exportTopLinks = async () => {
         );
 
         const exportData = await Promise.all(
-            links.map(async (link) => ({
-                id: link.id,
-                link: link.link,
-                title: link.title,
-                fullText: link.fullText,
-                readCount: link.readCount,
-                userIds: link.userIds,
-                publishedTime: link.publishedTime,
-                chunks: (
-                    await link.chunks
-                ).map((chunk) => ({
-                    chunkIndex: chunk.chunkIndex,
-                    text: chunk.text,
-                    embedding: chunk.embedding,
-                })),
-            }))
+            links.map(async (link) => {
+                const chunks = await link.chunks;
+                return {
+                    id: link.id,
+                    link: link.link,
+                    title: link.title,
+                    fullText: link.fullText,
+                    readCount: link.readCount,
+                    userIds: link.userIds,
+                    publishedTime: link.publishedTime,
+                    createdDate: link.createdDate,
+                    modifiedDate: link.modifiedDate,
+                    lastCrawled: link.lastCrawled,
+                    chunks: chunks.map((chunk) => ({
+                        chunkIndex: chunk.chunkIndex,
+                        text: chunk.text,
+                        embedding: chunk.embedding,
+                    })),
+                };
+            })
         );
 
         fs.writeFileSync("topLinks.json", JSON.stringify(exportData, null, 2));
