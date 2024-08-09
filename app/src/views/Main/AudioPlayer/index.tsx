@@ -71,7 +71,7 @@ const AudioPlayer = () => {
   const { width } = Dimensions.get("window");
 
   const {
-    downloadAndPlay,
+    downloadAndPlayContent,
     setPosition,
     setSpeed,
     speed,
@@ -116,7 +116,7 @@ const AudioPlayer = () => {
         artwork: content?.thumbnailImageUrl || "",
       };
 
-      const response = await downloadAndPlay(content.audioUrl, track);
+      const response = await downloadAndPlayContent(content);
 
       console.log(response);
       return;
@@ -430,7 +430,7 @@ const AudioPlayer = () => {
               fontFamily: "Raleway-Medium",
             }}
           >
-            {currentMs ? formatTime(currentMs) : "-"}
+            {currentMs ? formatTime(currentMs) : "00:00"}
           </Text>
 
           <Text
@@ -524,6 +524,8 @@ const NextOrPrevButtons = ({
       // console.log(nextContentQueued);
 
       const nextContentId = nextContentQueued?.content?.id || "";
+
+      console.log(`[starting ${nextContentQueued.content?.title}]`);
 
       // update the route params
       navigation.setParams({ contentId: nextContentId });

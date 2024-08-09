@@ -62,7 +62,8 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
 
   const currentAudioUrl = useSelector(getCurrentAudioUrl);
 
-  const { downloadAndPlay, toggle, percentFinished, leftMinutes } = useAudio();
+  const { downloadAndPlayContent, toggle, percentFinished, leftMinutes } =
+    useAudio();
 
   const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
@@ -112,14 +113,9 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
 
       // this will set it on the ref
       if (currentAudioUrl !== audioUrl) {
-        const track: Track = {
-          url: "",
-          title: activeContent?.content?.title || "",
-          artist: activeContent?.content?.authorName || "",
-          artwork: activeContent?.content?.thumbnailImageUrl || "",
-        };
+        const content = activeContent?.content as BaseContentFields;
 
-        await downloadAndPlay(audioUrl, track);
+        await downloadAndPlayContent(content);
 
         return;
       }

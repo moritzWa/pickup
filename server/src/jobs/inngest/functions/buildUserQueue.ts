@@ -34,6 +34,8 @@ const buildUserQueue = inngest.createFunction(
         const userId = event.data.userId;
 
         await step.run("build-queue", async () => {
+            console.log(`[building queue for ${userId}]`);
+
             const userResponse = await pgUserRepo.findById(userId);
             if (userResponse.isFailure()) throw userResponse.error;
             const user = userResponse.value;

@@ -21,7 +21,7 @@ import {
   QueryGetContentFeedArgs,
 } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
-import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
+import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowRight, faPlay } from "@fortawesome/pro-solid-svg-icons";

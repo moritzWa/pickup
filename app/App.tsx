@@ -104,6 +104,8 @@ function App() {
         Capability.JumpForward,
         Capability.JumpBackward,
         Capability.SeekTo,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
       ],
       android: {
         appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,

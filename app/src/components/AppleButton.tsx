@@ -1,5 +1,11 @@
 import React from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { colors } from ".";
 import {
   GoogleSignin,
@@ -14,6 +20,7 @@ import {
   AppleRequestResponse,
   appleAuth,
 } from "@invertase/react-native-apple-authentication";
+import { useTheme } from "src/hooks";
 
 const AppleImage = require("src/assets/social/white-apple.png");
 
@@ -32,6 +39,7 @@ export const AppleButton = ({
   onError,
 }: AppleButtonProps) => {
   const [isLoading, setLoading] = React.useState(false);
+  const theme = useTheme();
 
   const loginWithApple = async () => {
     try {
@@ -80,7 +88,7 @@ export const AppleButton = ({
   return (
     <TouchableOpacity
       style={{
-        backgroundColor: colors.black,
+        backgroundColor: theme.header,
         // borderWidth: 2,
         marginTop: 15,
         // borderColor: colors.gray20,
@@ -105,8 +113,9 @@ export const AppleButton = ({
           width: "100%",
         }}
       >
-        <FastImage
+        <Image
           source={AppleImage}
+          tintColor={theme.background}
           resizeMode="contain"
           style={{
             width: 20,
@@ -118,11 +127,11 @@ export const AppleButton = ({
         />
 
         {isLoading ? (
-          <ActivityIndicator color={colors.white} />
+          <ActivityIndicator color={theme.background} />
         ) : (
           <Text
             style={{
-              color: colors.white,
+              color: theme.background,
               fontFamily: "Raleway-Bold",
               textAlign: "center",
               fontSize: 16,

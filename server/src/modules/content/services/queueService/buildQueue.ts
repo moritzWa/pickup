@@ -25,6 +25,8 @@ export const buildQueue = async (
     const description = user.interestDescription;
     const query = `${categories} ${description}`;
 
+    console.log(`finding links similar to ${query}`);
+
     const similarLinksResponse = await curiusLinkRepo.findSimilarLinks(
         query,
         limit ?? DEFAULT_LINKS_RETURN
@@ -47,6 +49,10 @@ export const buildQueue = async (
     }
 
     const contentIds = contentIdsResponse.map((r) => r.value);
+
+    if (!contentIds.length) {
+        return success([]);
+    }
 
     const contentResponse = await contentRepo.findByIds(contentIds);
 
