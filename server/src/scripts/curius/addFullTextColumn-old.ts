@@ -141,8 +141,6 @@ type SkipType =
     | "deadLink";
 
 const markSkip = (link, skipType: SkipType, message?: string) => {
-    console.log("marking skip", skipType);
-
     link[skipType] = true;
     Logger.info(
         `Marking link as skipped: ${link.id} (${link.link}) ${
@@ -151,14 +149,22 @@ const markSkip = (link, skipType: SkipType, message?: string) => {
     );
 };
 
+const handleNonOkResponse = (link, response) => {
+    if (response.status === 404 || response.status === 410) {
+        markSkip(link, "deadLink");
+    } else {
+        markSkip(
+            link,
+            "skippedErrorFetchingFullText",
+            `status: ${response.status}`
+        );
+    }
+};
+
 const FETCH_TIMEOUT = 30000; // 30 seconds
 const processHTMLLink = async (link) => {
     // mark this link as skippedErrorFetchingFullText: https://theanarchistlibrary.org/library/the-anarchist-faq-editorial-collective-an-anarchist-faq-full or https://www.sparknotes.com/lit/pride/section4/
-    if (
-        link.link.includes("theanarchistlibrary.org") ||
-        link.link.includes("sparknotes.com") ||
-        link.id == 18011
-    ) {
+    if (link.link.includes("theanarchistlibrary.org")) {
         markSkip(link, "skippedErrorFetchingFullText");
         return;
     }
@@ -177,15 +183,7 @@ const processHTMLLink = async (link) => {
         ])) as Response;
 
         if (!response.ok) {
-            if (response.status === 404 || response.status === 410) {
-                markSkip(link, "deadLink");
-            } else {
-                markSkip(
-                    link,
-                    "skippedErrorFetchingFullText",
-                    `status: ${response.status}`
-                );
-            }
+            handleNonOkResponse(link, response);
             return;
         }
 
