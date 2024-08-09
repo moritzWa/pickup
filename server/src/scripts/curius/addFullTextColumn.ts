@@ -3,6 +3,7 @@
 // - https://www.npmjs.com/package/@mozilla/readability <- current pick
 
 import { isProbablyReaderable, Readability } from "@mozilla/readability";
+import { EventEmitter } from "events";
 import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
@@ -11,6 +12,7 @@ import { CuriusLink } from "src/core/infra/postgres/entities";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { Logger } from "src/utils/logger";
 import { isSuccess } from "./utils";
+EventEmitter.defaultMaxListeners = 100;
 
 const sanitizeText = (text: string) => {
     return text.replace(/\0/g, ""); // Remove null bytes
@@ -31,7 +33,7 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
-const BATCH_SIZE = 50; // Increased batch size
+const BATCH_SIZE = 60; // Increased batch size
 const CONCURRENCY_LIMIT = 20; // Number of links to process concurrently
 
 const addFullTextToLinks = async () => {
