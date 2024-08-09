@@ -7,24 +7,16 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
-import { failure } from "src/core/logic";
-import { UnexpectedError } from "src/core/logic/errors";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkResponse } from "src/modules/curius/infra/linkRepo";
 import { Logger } from "src/utils/logger";
-import { setTimeout } from "timers/promises";
 import { getErrorMessage, isSuccess } from "./utils";
 
 const sanitizeText = (text: string) => {
-    return text.replace(/\0/g, "").replace(/[\uD800-\uDFFF]/g, "");
+    return text.replace(/\0/g, ""); // Remove null bytes
 };
 
-const BATCH_SIZE = 50; // Reduced batch size
-
-// Save the original console.error method
 const originalConsoleError = console.error;
-
-// Override console.error to filter out specific error messages
 console.error = (...args) => {
     if (args[0] && args[0].includes("Could not parse CSS stylesheet")) {
         return;
@@ -32,36 +24,19 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
-const LINK_TIMEOUT = 60000; // 60 seconds timeout for processing each link
-const BATCH_TIMEOUT = 120000; // 10 minutes timeout for processing each batch
+const BATCH_SIZE = 10;
 
 const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        const totalLinksResponse =
-            await curiusLinkRepo.countLinksWithoutFullText();
-        if (!isSuccess(totalLinksResponse)) {
-            Logger.error(
-                "Failed to fetch total number of links without full text:",
-                totalLinksResponse.error
-            );
-            return;
-        }
+        let processedCount = 0;
+        let totalProcessed = 0;
 
-        const totalLinks = totalLinksResponse.value;
-        let processedLinks = 0;
-        let hasMoreLinks = true;
-
-        Logger.info(`Total links to process: ${totalLinks}`);
-
-        while (hasMoreLinks) {
-            const batchStartTime = Date.now();
-
+        while (true) {
             const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
                 BATCH_SIZE
             );
-
             if (!isSuccess(linksResponse)) {
                 Logger.error(
                     "Failed to fetch links without full text:",
@@ -71,121 +46,34 @@ const addFullTextToLinks = async () => {
             }
 
             const links = linksResponse.value;
-            const batchSize = links.length;
-
-            if (batchSize === 0) {
-                hasMoreLinks = false;
+            if (links.length === 0) {
+                Logger.info("No more links to process. Exiting.");
                 break;
             }
 
-            Logger.info(`Processing batch of ${batchSize} links...`);
+            const totalLinks = links.length;
+            Logger.info(`Processing batch of ${totalLinks} links...`);
 
             const startTime = Date.now();
             const savePromises: Promise<LinkResponse>[] = [];
 
-            const processLink = async (link) => {
-                const linkStartTime = Date.now();
-                Logger.info(
-                    `Started processing link ${
-                        link.id
-                    } at ${new Date().toISOString()}`
-                );
-
-                try {
-                    await Promise.race([
-                        (async () => {
-                            if (link.link && link.link.endsWith(".pdf")) {
-                                await processPDFLink(link);
-                            } else {
-                                await processHTMLLink(link);
-                            }
-                            Logger.info(
-                                `Finished processing content for link ${link.id}`
-                            );
-                        })(),
-                        setTimeout(
-                            LINK_TIMEOUT,
-                            `Timeout processing link ${link.id}`
-                        ),
-                    ]);
-                } catch (error) {
-                    Logger.error(
-                        `Error processing link ${link.id}:`,
-                        getErrorMessage(error)
-                    );
-                    link.skippedErrorFetchingFullText = true;
-                } finally {
-                    if (link.fullText) {
-                        link.skippedErrorFetchingFullText = false;
-                        link.skippedNotProbablyReadable = false;
-                        link.skippedInaccessiblePDF = false;
-                        link.deadLink = false;
-                        link.fullText = sanitizeText(link.fullText);
-                    }
-
-                    Logger.info(`Saving link ${link.id} to database...`);
-                    savePromises.push(
-                        curiusLinkRepo.save(link).then(
-                            (result) => {
-                                Logger.info(
-                                    `Successfully saved link ${link.id}`
-                                );
-                                return result;
-                            },
-                            (error) => {
-                                Logger.error(
-                                    `Error saving link ${link.id}:`,
-                                    getErrorMessage(error)
-                                );
-                                return failure(new UnexpectedError(error));
-                            }
-                        )
-                    );
-
-                    const linkEndTime = Date.now();
-                    Logger.info(
-                        `Finished processing link ${link.id} in ${
-                            linkEndTime - linkStartTime
-                        }ms`
-                    );
-                }
-            };
-
-            try {
-                await Promise.race([
-                    Promise.all(links.map(processLink)),
-                    setTimeout(BATCH_TIMEOUT, "Batch processing timeout"),
-                ]);
-            } catch (error) {
-                Logger.error(
-                    `Batch processing error or timeout: ${getErrorMessage(
-                        error
-                    )}`
-                );
+            for (const link of links) {
+                await processLink(link);
+                savePromises.push(curiusLinkRepo.save(link));
+                processedCount++;
+                totalProcessed++;
             }
 
             await Promise.all(savePromises);
 
-            processedLinks += batchSize;
-            const progressPercentage = (
-                (processedLinks / totalLinks) *
-                100
-            ).toFixed(2);
-
-            const totalTime = (Date.now() - startTime) / 1000;
+            const batchTime = (Date.now() - startTime) / 1000;
             Logger.info(
-                `Finished processing ${batchSize} links in ${totalTime.toFixed(
-                    2
-                )}s. Progress: ${progressPercentage}%`
+                `Processed ${processedCount} links in ${batchTime.toFixed(2)}s`
             );
-
-            const batchEndTime = Date.now();
-            Logger.info(
-                `Batch processing completed in ${
-                    batchEndTime - batchStartTime
-                }ms`
-            );
+            processedCount = 0;
         }
+
+        Logger.info(`Finished processing ${totalProcessed} links in total.`);
     } catch (error) {
         Logger.error("Unexpected error:", getErrorMessage(error));
     } finally {
@@ -195,51 +83,140 @@ const addFullTextToLinks = async () => {
     }
 };
 
-const processPDFLink = async (link) => {
-    try {
-        const response = await fetch(link.link);
-        if (
-            !response.ok ||
-            !response.headers.get("content-type")?.includes("application/pdf")
-        ) {
-            Logger.info(
-                `Skipping inaccessible PDF w id: ${link.id} (${link.link})`
-            );
-            link.skippedInaccessiblePDF = true;
-            return;
-        }
+const CONTENT_TYPE_TIMEOUT = 10000; // 10 seconds
 
-        const pdfBuffer = await response.arrayBuffer();
-        const parsedPDF = await pdf(Buffer.from(pdfBuffer), { max: 20 });
-        link.fullText = sanitizeText(parsedPDF.text);
-        link.totalPagesIfPDF = parsedPDF.numpages;
-        link.fetchedPagesIfPDF = parsedPDF.numrender;
+const getContentType = async (url: string): Promise<string | null> => {
+    try {
+        const controller = new AbortController();
+        const timeoutId = globalThis.setTimeout(
+            () => controller.abort(),
+            CONTENT_TYPE_TIMEOUT
+        );
+
+        const response = await fetch(url, {
+            method: "HEAD",
+            signal: controller.signal,
+        });
+
+        globalThis.clearTimeout(timeoutId);
+
+        return response.headers.get("content-type");
     } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        if (errorMessage.includes("Could not parse CSS stylesheet")) {
-            Logger.info(`Ignoring CSS parse error for PDF: ${link.link}`);
+        if (error instanceof Error && error.name === "AbortError") {
+            Logger.info(`Timeout fetching content type for ${url}`);
         } else {
-            Logger.error(`Error processing PDF link ${link.id}:`, errorMessage);
+            Logger.error(
+                `Error fetching content type for ${url}:`,
+                getErrorMessage(error)
+            );
         }
+        return null;
+    }
+};
+
+const processLink = async (link) => {
+    try {
+        Logger.info(`Starting to process link: ${link.id} (${link.link})`);
+        const contentType = await getContentType(link.link);
+
+        if (contentType?.includes("application/pdf")) {
+            await processPDFLink(link);
+        } else {
+            await processHTMLLink(link);
+        }
+        Logger.info(`Finished processing link: ${link.id} (${link.link})`);
+    } catch (error) {
+        Logger.error(
+            `Error processing link ${link.id}:`,
+            error instanceof Error ? error.message : String(error)
+        );
         link.skippedErrorFetchingFullText = true;
     }
 };
 
+type SkipType =
+    | "skippedErrorFetchingFullText"
+    | "skippedNotProbablyReadable"
+    | "skippedInaccessiblePDF"
+    | "deadLink";
+
+const markSkip = (link, skipType: SkipType, message?: string) => {
+    link[skipType] = true;
+    Logger.info(
+        `Marking link as skipped: ${link.id} (${link.link}) ${
+            message ? `(${message})` : ""
+        }`
+    );
+};
+
+const handleNonOkResponse = (link, response) => {
+    if (response.status === 404 || response.status === 410) {
+        markSkip(link, "deadLink");
+    } else {
+        markSkip(
+            link,
+            "skippedErrorFetchingFullText",
+            `status: ${response.status}`
+        );
+    }
+};
+
+const handleHTMLLinkProcessingError = (link, error) => {
+    if (error instanceof Error) {
+        if (error.message === "Fetch timeout") {
+            Logger.info(`Timeout fetching link: ${link.id} (${link.link})`);
+        } else {
+            Logger.error(
+                `Error processing HTML link ${link.id}:`,
+                getErrorMessage(error)
+            );
+        }
+    } else {
+        Logger.error(
+            `Unknown error processing HTML link ${link.id}:`,
+            String(error)
+        );
+    }
+    markSkip(link, "skippedErrorFetchingFullText");
+};
+
+const updateLinkWithParsedContent = (link, result) => {
+    Object.assign(link, {
+        length: result.length,
+        excerpt: result.excerpt,
+        byline: result.byline,
+        dir: result.dir,
+        siteName: result.siteName,
+        lang: result.lang,
+        publishedTime: result.publishedTime,
+        title: result.title || link.title,
+        fullText: NodeHtmlMarkdown.translate(result.content || ""),
+    });
+};
+
+const FETCH_TIMEOUT = 30000; // 30 seconds
 const processHTMLLink = async (link) => {
+    // mark this link as skippedErrorFetchingFullText: https://theanarchistlibrary.org/library/the-anarchist-faq-editorial-collective-an-anarchist-faq-full or https://www.sparknotes.com/lit/pride/section4/
+    if (link.link.includes("theanarchistlibrary.org")) {
+        markSkip(link, "skippedErrorFetchingFullText");
+        return;
+    }
+
     try {
         Logger.info(`Fetching link: ${link.id} (${link.link})`);
-        const response = await fetch(link.link);
+
+        const fetchPromise = fetch(link.link);
+        const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Fetch timeout")), FETCH_TIMEOUT)
+        );
+
+        const response = (await Promise.race([
+            fetchPromise,
+            timeoutPromise,
+        ])) as Response;
 
         if (!response.ok) {
-            if (response.status === 404 || response.status === 410) {
-                link.deadLink = true;
-                Logger.info(`Dead link detected: ${link.id} (${link.link})`);
-            } else {
-                link.skippedErrorFetchingFullText = true;
-                Logger.info(
-                    `Error fetching link: ${link.id} (${link.link}), status: ${response.status}`
-                );
-            }
+            handleNonOkResponse(link, response);
             return;
         }
 
@@ -248,44 +225,43 @@ const processHTMLLink = async (link) => {
         const { window } = new JSDOM(html);
         if (
             !isProbablyReaderable(window.document, {
-                minScore: 5, // Decrease from default 20
-                minContentLength: 30, // Decrease from default 140
+                minScore: 10,
+                minContentLength: 90,
             })
         ) {
-            link.skippedNotProbablyReadable = true;
-            Logger.info(
-                `Link not probably readable: ${link.id} (${link.link})`
-            );
+            markSkip(link, "skippedNotProbablyReadable");
             return;
         }
 
         const result = new Readability(window.document).parse();
         if (!result) {
-            link.skippedErrorFetchingFullText = true;
-            Logger.info(
-                `Failed to parse content for: ${link.id} (${link.link})`
-            );
+            markSkip(link, "skippedErrorFetchingFullText");
             return;
         }
 
-        Object.assign(link, {
-            length: result.length,
-            excerpt: result.excerpt,
-            byline: result.byline,
-            dir: result.dir,
-            siteName: result.siteName,
-            lang: result.lang,
-            publishedTime: result.publishedTime,
-            title: result.title || link.title,
-            fullText: NodeHtmlMarkdown.translate(result.content || ""),
-        });
+        updateLinkWithParsedContent(link, result);
+        Logger.info(`Successfully processed link: ${link.id} (${link.link})`);
     } catch (error) {
-        Logger.error(
-            `Error processing HTML link ${link.id}:`,
-            getErrorMessage(error)
-        );
-        link.skippedErrorFetchingFullText = true;
+        handleHTMLLinkProcessingError(link, error);
     }
+};
+
+const processPDFLink = async (link) => {
+    const response = await fetch(link.link);
+    if (
+        !response.ok ||
+        !response.headers.get("content-type")?.includes("application/pdf")
+    ) {
+        Logger.info(`Skipping inaccessible PDF: ${link.link}`);
+        link.skippedInaccessiblePDF = true;
+        return;
+    }
+
+    const pdfBuffer = await response.arrayBuffer();
+    const parsedPDF = await pdf(Buffer.from(pdfBuffer), { max: 20 });
+    link.fullText = sanitizeText(parsedPDF.text);
+    link.totalPagesIfPDF = parsedPDF.numpages;
+    link.fetchedPagesIfPDF = parsedPDF.numrender;
 };
 
 addFullTextToLinks().catch(console.error);
