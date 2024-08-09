@@ -161,6 +161,39 @@ const handleNonOkResponse = (link, response) => {
     }
 };
 
+const handleHTMLLinkProcessingError = (link, error) => {
+    if (error instanceof Error) {
+        if (error.message === "Fetch timeout") {
+            Logger.info(`Timeout fetching link: ${link.id} (${link.link})`);
+        } else {
+            Logger.error(
+                `Error processing HTML link ${link.id}:`,
+                getErrorMessage(error)
+            );
+        }
+    } else {
+        Logger.error(
+            `Unknown error processing HTML link ${link.id}:`,
+            String(error)
+        );
+    }
+    markSkip(link, "skippedErrorFetchingFullText");
+};
+
+const updateLinkWithParsedContent = (link, result) => {
+    Object.assign(link, {
+        length: result.length,
+        excerpt: result.excerpt,
+        byline: result.byline,
+        dir: result.dir,
+        siteName: result.siteName,
+        lang: result.lang,
+        publishedTime: result.publishedTime,
+        title: result.title || link.title,
+        fullText: NodeHtmlMarkdown.translate(result.content || ""),
+    });
+};
+
 const FETCH_TIMEOUT = 30000; // 30 seconds
 const processHTMLLink = async (link) => {
     // mark this link as skippedErrorFetchingFullText: https://theanarchistlibrary.org/library/the-anarchist-faq-editorial-collective-an-anarchist-faq-full or https://www.sparknotes.com/lit/pride/section4/
@@ -206,36 +239,10 @@ const processHTMLLink = async (link) => {
             return;
         }
 
-        // Assign properties if parsing is successful
-        Object.assign(link, {
-            length: result.length,
-            excerpt: result.excerpt,
-            byline: result.byline,
-            dir: result.dir,
-            siteName: result.siteName,
-            lang: result.lang,
-            publishedTime: result.publishedTime,
-            title: result.title || link.title,
-            fullText: NodeHtmlMarkdown.translate(result.content || ""),
-        });
+        updateLinkWithParsedContent(link, result);
         Logger.info(`Successfully processed link: ${link.id} (${link.link})`);
     } catch (error) {
-        if (error instanceof Error) {
-            if (error.message === "Fetch timeout") {
-                Logger.info(`Timeout fetching link: ${link.id} (${link.link})`);
-            } else {
-                Logger.error(
-                    `Error processing HTML link ${link.id}:`,
-                    getErrorMessage(error)
-                );
-            }
-        } else {
-            Logger.error(
-                `Unknown error processing HTML link ${link.id}:`,
-                String(error)
-            );
-        }
-        link.skippedErrorFetchingFullText = true;
+        handleHTMLLinkProcessingError(link, error);
     }
 };
 
