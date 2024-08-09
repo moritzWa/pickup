@@ -83,15 +83,33 @@ const addFullTextToLinks = async () => {
     }
 };
 
+const CONTENT_TYPE_TIMEOUT = 10000; // 10 seconds
+
 const getContentType = async (url: string): Promise<string | null> => {
     try {
-        const response = await fetch(url, { method: "HEAD" });
+        const controller = new AbortController();
+        const timeoutId = globalThis.setTimeout(
+            () => controller.abort(),
+            CONTENT_TYPE_TIMEOUT
+        );
+
+        const response = await fetch(url, {
+            method: "HEAD",
+            signal: controller.signal,
+        });
+
+        globalThis.clearTimeout(timeoutId);
+
         return response.headers.get("content-type");
     } catch (error) {
-        Logger.error(
-            `Error fetching content type for ${url}:`,
-            getErrorMessage(error)
-        );
+        if (error instanceof Error && error.name === "AbortError") {
+            Logger.info(`Timeout fetching content type for ${url}`);
+        } else {
+            Logger.error(
+                `Error fetching content type for ${url}:`,
+                getErrorMessage(error)
+            );
+        }
         return null;
     }
 };
@@ -116,12 +134,32 @@ const processLink = async (link) => {
     }
 };
 
-const FETCH_TIMEOUT = 30000; // 30 seconds
+type SkipType =
+    | "skippedErrorFetchingFullText"
+    | "skippedNotProbablyReadable"
+    | "skippedInaccessiblePDF"
+    | "deadLink";
 
+const markSkip = (link, skipType: SkipType, message?: string) => {
+    console.log("marking skip", skipType);
+
+    link[skipType] = true;
+    Logger.info(
+        `Marking link as skipped: ${link.id} (${link.link}) ${
+            message ? `(${message})` : ""
+        }`
+    );
+};
+
+const FETCH_TIMEOUT = 30000; // 30 seconds
 const processHTMLLink = async (link) => {
-    // mark this link as skippedErrorFetchingFullText: https://theanarchistlibrary.org/library/the-anarchist-faq-editorial-collective-an-anarchist-faq-full
-    if (link.link.includes("theanarchistlibrary.org")) {
-        link.skippedErrorFetchingFullText = true;
+    // mark this link as skippedErrorFetchingFullText: https://theanarchistlibrary.org/library/the-anarchist-faq-editorial-collective-an-anarchist-faq-full or https://www.sparknotes.com/lit/pride/section4/
+    if (
+        link.link.includes("theanarchistlibrary.org") ||
+        link.link.includes("sparknotes.com") ||
+        link.id == 18011
+    ) {
+        markSkip(link, "skippedErrorFetchingFullText");
         return;
     }
 
@@ -140,12 +178,12 @@ const processHTMLLink = async (link) => {
 
         if (!response.ok) {
             if (response.status === 404 || response.status === 410) {
-                link.deadLink = true;
-                Logger.info(`Dead link detected: ${link.id} (${link.link})`);
+                markSkip(link, "deadLink");
             } else {
-                link.skippedErrorFetchingFullText = true;
-                Logger.info(
-                    `Error fetching link: ${link.id} (${link.link}), status: ${response.status}`
+                markSkip(
+                    link,
+                    "skippedErrorFetchingFullText",
+                    `status: ${response.status}`
                 );
             }
             return;
@@ -160,19 +198,13 @@ const processHTMLLink = async (link) => {
                 minContentLength: 90,
             })
         ) {
-            link.skippedNotProbablyReadable = true;
-            Logger.info(
-                `Link not probably readable: ${link.id} (${link.link})`
-            );
+            markSkip(link, "skippedNotProbablyReadable");
             return;
         }
 
         const result = new Readability(window.document).parse();
         if (!result) {
-            link.skippedErrorFetchingFullText = true;
-            Logger.info(
-                `Failed to parse content for: ${link.id} (${link.link})`
-            );
+            markSkip(link, "skippedErrorFetchingFullText");
             return;
         }
 
