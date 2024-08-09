@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import {
     booleanArg,
     idArg,
+    intArg,
     mutationField,
     nonNull,
     nullable,
@@ -26,6 +27,7 @@ export const getPrevContent = queryField("getPrevContent", {
     type: nullable("Queue"),
     args: {
         beforeContentId: nonNull(idArg()),
+        currentMs: nullable(intArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);

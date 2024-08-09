@@ -110,16 +110,16 @@ const Home = () => {
           >
             <Text
               style={{
-                color: theme.text,
+                color: colors.primary,
                 fontFamily: "Raleway-Bold",
                 fontSize: 16,
                 textAlign: "center",
                 padding: 10,
               }}
             >
-              Show more
+              Show more 👀
             </Text>
-            <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} />
+            {/* <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} /> */}
           </TouchableOpacity>
         }
       />
@@ -256,7 +256,7 @@ const Options = () => {
         /> */}
       </View>
 
-      <Animated.View
+      {/* <Animated.View
         style={{
           marginRight: 10,
           flexDirection: "row",
@@ -284,16 +284,6 @@ const Options = () => {
             borderRadius: 100,
           }}
         >
-          {/* <Text
-            style={{
-              color: colors.white,
-              fontFamily: "Raleway-Bold",
-              fontSize: 16,
-              marginRight: 5,
-            }}
-          >
-            Start
-          </Text> */}
 
           <FontAwesomeIcon
             icon={faPlay}
@@ -302,7 +292,7 @@ const Options = () => {
             style={{ position: "relative", right: -1 }}
           />
         </TouchableOpacity>
-      </Animated.View>
+      </Animated.View> */}
     </View>
   );
 };

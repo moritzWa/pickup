@@ -36,7 +36,7 @@ export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
-  InteractionTypeEnum: "bookmarked" | "left_in_progress" | "likes" | "scrolled_past" | "skipped"
+  InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
 }
 
@@ -595,9 +595,11 @@ export interface NexusGenArgTypes {
     }
     getNextContent: { // args
       afterContentId: string; // ID!
+      currentMs?: number | null; // Int
     }
     getPrevContent: { // args
       beforeContentId: string; // ID!
+      currentMs?: number | null; // Int
     }
     getProfile: { // args
       userId?: string | null; // ID

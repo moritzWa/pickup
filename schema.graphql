@@ -112,8 +112,10 @@ type Interaction {
 
 enum InteractionTypeEnum {
   Bookmarked
+  Finished
   LeftInProgress
   Likes
+  ListenedToBeginning
   ScrolledPast
   Skipped
 }
@@ -177,9 +179,9 @@ type Query {
   getIntercomMobileToken(platform: String): String!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
-  getNextContent(afterContentId: ID!): Queue
+  getNextContent(afterContentId: ID!, currentMs: Int): Queue
   getPaymentMethods: [PaymentMethod!]!
-  getPrevContent(beforeContentId: ID!): Queue
+  getPrevContent(beforeContentId: ID!, currentMs: Int): Queue
   getProfile(userId: ID): Profile!
   getQueue: [Queue!]!
   me: User
