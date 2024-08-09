@@ -93,7 +93,7 @@ const Welcome = () => {
               color: theme.header,
             }}
           >
-            Welcome to Quest
+            Welcome to Pickup
           </Text>
 
           <Text
@@ -142,7 +142,7 @@ const Welcome = () => {
             }}
             textProps={{
               style: {
-                color: colors.black,
+                color: theme.text,
                 // fontFamily: "Raleway-Semibold",
               },
             }}

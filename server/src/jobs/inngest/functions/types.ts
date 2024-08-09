@@ -40,4 +40,8 @@ export type EmailJobData = {
     fromEmail?: string;
 };
 
+export type BuildUserQueueData = {
+    userId: string;
+};
+
 export type NotificationData = SlackJobData | EmailJobData | OnesignalJobData;

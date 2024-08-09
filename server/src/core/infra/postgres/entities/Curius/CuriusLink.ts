@@ -1,8 +1,17 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import {
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    PrimaryColumn,
+    Relation,
+} from "typeorm";
 import type { CuriusComment } from "./CuriusComment";
 import { CuriusHighlight } from "./CuriusHighlight";
 import { CuriusLinkChunk } from "./CuriusLinkChunk";
 import { CuriusUser } from "./CuriusUser";
+import { Content } from "../Content";
 
 @Entity({ name: "curius_links" })
 export class CuriusLink {
@@ -91,4 +100,19 @@ export class CuriusLink {
         lazy: true,
     })
     highlights!: Promise<CuriusHighlight[]>;
+
+    @Column({
+        nullable: true,
+        name: "content_id",
+        type: "uuid",
+    })
+    contentId!: string | null;
+
+    @ManyToOne(() => Content, (t) => t.id, {
+        nullable: false,
+        eager: false,
+        onDelete: "SET NULL",
+    })
+    @JoinColumn({ name: "content_id" })
+    content!: Relation<Content | null>;
 }

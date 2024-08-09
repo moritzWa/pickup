@@ -21,6 +21,8 @@ export enum InteractionType {
     ScrolledPast = "scrolled_past",
     Skipped = "skipped",
     LeftInProgress = "left_in_progress",
+    ListenedToBeginning = "listened_to_beginning",
+    Finished = "finished",
 }
 
 @Entity({

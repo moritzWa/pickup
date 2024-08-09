@@ -22,6 +22,7 @@ import { Button, colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBackward,
+  faBookmark,
   faCaretLeft,
   faCaretRight,
   faChevronLeft,
@@ -33,7 +34,12 @@ import {
   faReplyAll,
   faTree,
 } from "@fortawesome/pro-solid-svg-icons";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  useIsFocused,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { NavigationProps, RootStackParamList } from "src/navigation";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
@@ -66,12 +72,13 @@ const AudioPlayer = () => {
   const route = useRoute<RouteProp<RootStackParamList, "AudioPlayer">>();
   const contentId = route.params?.contentId || "";
 
+  const isFocused = useIsFocused();
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const { width } = Dimensions.get("window");
 
   const {
-    downloadAndPlay,
+    downloadAndPlayContent,
     setPosition,
     setSpeed,
     speed,
@@ -90,18 +97,43 @@ const AudioPlayer = () => {
     [contentId]
   );
 
-  const { data: contentData, error } = useQuery<Pick<Query, "getContent">>(
-    api.content.get,
-    {
-      skip: !contentVariables.contentId,
-      variables: contentVariables,
-    }
-  );
+  const [bookmark] = useMutation(api.content.bookmark);
+
+  const {
+    data: contentData,
+    error,
+    refetch: refetchContent,
+  } = useQuery<Pick<Query, "getContent">>(api.content.get, {
+    skip: !contentVariables.contentId,
+    variables: contentVariables,
+    fetchPolicy: "cache-and-network",
+  });
 
   const theme = useTheme();
   const content = contentData?.getContent as BaseContentFields | null;
+  const session = contentData?.getContent?.contentSession ?? null;
+
   const insets = useSafeAreaInsets();
   const estimatedLen = Math.ceil((durationMs || 0) / 60_000);
+
+  useEffect(() => void refetchContent(), [isFocused, contentId]);
+
+  const bookmarkContent = async () => {
+    try {
+      const response = await bookmark({
+        variables: {
+          contentId: content?.id || "",
+        },
+        refetchQueries: [api.content.get, api.content.bookmarks],
+      });
+
+      const data = response.errors;
+      // console.log(response.data);
+      // console.log(JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
+  };
 
   const playOrPause = async () => {
     if (!content) {
@@ -116,7 +148,7 @@ const AudioPlayer = () => {
         artwork: content?.thumbnailImageUrl || "",
       };
 
-      const response = await downloadAndPlay(content.audioUrl, track);
+      const response = await downloadAndPlayContent(content);
 
       console.log(response);
       return;
@@ -198,6 +230,8 @@ const AudioPlayer = () => {
       console.error(err);
     }
   };
+
+  console.log(session);
 
   return (
     <View
@@ -372,30 +406,76 @@ const AudioPlayer = () => {
           },
         ]}
       >
-        <TouchableOpacity
+        <View
           style={{
-            padding: 10,
-            width: 60,
-            alignSelf: "flex-end",
-            marginRight: 20,
-            marginBottom: 10,
+            display: "flex",
+            flexDirection: "row",
             alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 50,
-            backgroundColor: theme.secondaryBackground,
+            width: "100%",
           }}
-          onPress={setPlayerSpeed}
         >
-          <Text
+          <View style={{ flex: 1 }}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={{
+                padding: 10,
+                alignSelf: "flex-start",
+                marginLeft: 20,
+                marginBottom: 10,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 50,
+                backgroundColor: session?.isBookmarked
+                  ? colors.primary
+                  : theme.secondaryBackground,
+              }}
+              onPress={bookmarkContent}
+            >
+              <FontAwesomeIcon
+                icon={faBookmark}
+                color={session?.isBookmarked ? colors.white : theme.text}
+                size={14}
+              />
+
+              <Text
+                style={{
+                  color: session?.isBookmarked ? colors.white : theme.text,
+                  fontSize: 14,
+                  fontFamily: "Raleway-Bold",
+                  marginLeft: 5,
+                }}
+              >
+                Bookmark
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
             style={{
-              color: theme.text,
-              fontSize: 14,
-              fontFamily: "Raleway-Bold",
+              padding: 10,
+              width: 60,
+              alignSelf: "flex-end",
+              marginRight: 20,
+              marginBottom: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 50,
+              backgroundColor: theme.secondaryBackground,
             }}
+            onPress={setPlayerSpeed}
           >
-            {speed}x
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: 14,
+                fontFamily: "Raleway-Bold",
+              }}
+            >
+              {speed}x
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <Slider
           style={{
@@ -430,7 +510,7 @@ const AudioPlayer = () => {
               fontFamily: "Raleway-Medium",
             }}
           >
-            {currentMs ? formatTime(currentMs) : "-"}
+            {currentMs ? formatTime(currentMs) : "00:00"}
           </Text>
 
           <Text
@@ -484,6 +564,8 @@ const NextOrPrevButtons = ({
 
       const prevContentQueued = response.data?.getPrevContent;
 
+      // console.log(prevContentQueued);
+
       if (!prevContentQueued?.content) {
         return;
       }
@@ -507,20 +589,23 @@ const NextOrPrevButtons = ({
         afterContentId: content.id,
       };
 
-      console.log(variables);
-
-      const response = await getPrevContent({
+      const response = await getNextContent({
         variables,
       });
 
-      const nextContentQueued = response.data?.getPrevContent;
-      console.log(nextContentQueued);
+      // console.log(JSON.stringify(response.error, null, 2));
+
+      const nextContentQueued = response.data?.getNextContent;
 
       if (!nextContentQueued?.content) {
         return;
       }
 
+      // console.log(nextContentQueued);
+
       const nextContentId = nextContentQueued?.content?.id || "";
+
+      console.log(`[starting ${nextContentQueued.content?.title}]`);
 
       // update the route params
       navigation.setParams({ contentId: nextContentId });

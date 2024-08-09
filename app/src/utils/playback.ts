@@ -38,4 +38,12 @@ export const PlaybackService = async function () {
     store.dispatch(setCurrentMs(Math.ceil(e.position * 1_000)));
     await TrackPlayer.seekTo(e.position);
   });
+
+  TrackPlayer.addEventListener(Event.RemoteNext, async () => {
+    await TrackPlayer.skipToNext();
+  });
+
+  TrackPlayer.addEventListener(Event.RemotePrevious, async () => {
+    await TrackPlayer.skipToPrevious();
+  });
 };

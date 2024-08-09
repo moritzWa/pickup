@@ -26,6 +26,7 @@ export const getBookmarks = queryField("getBookmarks", {
                 take: limit ?? 20,
                 skip: page ?? 0,
                 order: { bookmarkedAt: "desc" },
+                relations: { content: true },
             }
         );
 
@@ -33,7 +34,7 @@ export const getBookmarks = queryField("getBookmarks", {
 
         const content = contentSessionsResponse.value.map((cs) => ({
             ...cs.content,
-            session: omit(cs, ["content"]),
+            contentSession: omit(cs, ["content"]),
         }));
 
         return content;

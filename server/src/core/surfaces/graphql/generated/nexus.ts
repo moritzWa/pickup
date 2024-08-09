@@ -36,7 +36,7 @@ export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
-  InteractionTypeEnum: "bookmarked" | "left_in_progress" | "likes" | "scrolled_past" | "skipped"
+  InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
 }
 
@@ -226,6 +226,7 @@ export interface NexusGenFieldTypes {
     siteName: string | null; // String
   }
   Mutation: { // field return type
+    bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
@@ -234,6 +235,7 @@ export interface NexusGenFieldTypes {
     sendVerification: string; // String!
     setCommuteTime: NexusGenRootTypes['User']; // User!
     setInterests: NexusGenRootTypes['User']; // User!
+    showMore: string; // String!
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startListening: NexusGenRootTypes['ContentSession']; // ContentSession!
     updateContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
@@ -267,9 +269,9 @@ export interface NexusGenFieldTypes {
     getIntercomMobileToken: string; // String!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
-    getNextContent: NexusGenRootTypes['Queue']; // Queue!
+    getNextContent: NexusGenRootTypes['Queue'] | null; // Queue
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
-    getPrevContent: NexusGenRootTypes['Queue']; // Queue!
+    getPrevContent: NexusGenRootTypes['Queue'] | null; // Queue
     getProfile: NexusGenRootTypes['Profile']; // Profile!
     getQueue: NexusGenRootTypes['Queue'][]; // [Queue!]!
     me: NexusGenRootTypes['User'] | null; // User
@@ -411,6 +413,7 @@ export interface NexusGenFieldTypeNames {
     siteName: 'String'
   }
   Mutation: { // field return type name
+    bookmarkContent: 'ContentSession'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
@@ -419,6 +422,7 @@ export interface NexusGenFieldTypeNames {
     sendVerification: 'String'
     setCommuteTime: 'User'
     setInterests: 'User'
+    showMore: 'String'
     startContent: 'ContentSession'
     startListening: 'ContentSession'
     updateContentSession: 'ContentSession'
@@ -514,6 +518,9 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    bookmarkContent: { // args
+      contentId: string; // ID!
+    }
     createUser: { // args
       email: string; // String!
       name?: string | null; // String
@@ -593,9 +600,11 @@ export interface NexusGenArgTypes {
     }
     getNextContent: { // args
       afterContentId: string; // ID!
+      currentMs?: number | null; // Int
     }
     getPrevContent: { // args
       beforeContentId: string; // ID!
+      currentMs?: number | null; // Int
     }
     getProfile: { // args
       userId?: string | null; // ID

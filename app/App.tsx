@@ -104,6 +104,8 @@ function App() {
         Capability.JumpForward,
         Capability.JumpBackward,
         Capability.SeekTo,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
       ],
       android: {
         appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
@@ -124,13 +126,13 @@ function App() {
 
       try {
         if (u) {
-          // const me = await refetchMe();
+          const me = await refetchMe();
 
-          // if (me) {
-          store.dispatch(setUserAuthStateChanged("LOGGED_IN"));
-          // } else {
-          //   store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));
-          // }
+          if (me) {
+            store.dispatch(setUserAuthStateChanged("LOGGED_IN"));
+          } else {
+            store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));
+          }
         } else {
           store.dispatch(setUserAuthStateChanged("NOT_LOGGED_IN"));
         }

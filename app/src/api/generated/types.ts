@@ -134,8 +134,10 @@ export type Interaction = {
 
 export enum InteractionTypeEnum {
   Bookmarked = 'Bookmarked',
+  Finished = 'Finished',
   LeftInProgress = 'LeftInProgress',
   Likes = 'Likes',
+  ListenedToBeginning = 'ListenedToBeginning',
   ScrolledPast = 'ScrolledPast',
   Skipped = 'Skipped'
 }
@@ -164,6 +166,7 @@ export type Mutation = {
   sendVerification: Scalars['String']['output'];
   setCommuteTime: User;
   setInterests: User;
+  showMore: Scalars['String']['output'];
   startContent: ContentSession;
   startListening: ContentSession;
   updateContentSession: ContentSession;
@@ -271,9 +274,9 @@ export type Query = {
   getIntercomMobileToken: Scalars['String']['output'];
   getLikes: Array<ContentSession>;
   getMobileUpdate: GetMobileUpdateResponse;
-  getNextContent: Queue;
+  getNextContent?: Maybe<Queue>;
   getPaymentMethods: Array<PaymentMethod>;
-  getPrevContent: Queue;
+  getPrevContent?: Maybe<Queue>;
   getProfile: Profile;
   getQueue: Array<Queue>;
   me?: Maybe<User>;
@@ -326,11 +329,13 @@ export type QueryGetLikesArgs = {
 
 export type QueryGetNextContentArgs = {
   afterContentId: Scalars['ID']['input'];
+  currentMs?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
 export type QueryGetPrevContentArgs = {
   beforeContentId: Scalars['ID']['input'];
+  currentMs?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

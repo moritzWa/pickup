@@ -1,12 +1,16 @@
+import { useQuery } from "@apollo/client";
 import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
-import { useContext, useMemo, useState } from "react";
+import { isNil } from "lodash";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
 import TrackPlayer, { AddTrack, State, Track } from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
-import { BaseContentFields } from "src/api/fragments";
+import { api } from "src/api";
+import { BaseContentFields, BaseQueueFields } from "src/api/fragments";
+import { Query } from "src/api/generated/types";
 import {
   DefaultErrors,
   failure,
@@ -30,6 +34,12 @@ import {
 export const useAudio = () => {
   const { sound: globalSound } = useContext(AppContext);
   const dispatch = useDispatch();
+
+  const { data: queueData, error: queueError } = useQuery<
+    Pick<Query, "getQueue">
+  >(api.queue.list);
+
+  const queue = (queueData?.getQueue ?? []) as BaseQueueFields[];
 
   const currentMs = useSelector(getCurrentMs);
   const durationMs = useSelector(getDurationMs);
@@ -57,11 +67,10 @@ export const useAudio = () => {
     console.log("Cached files: ", result.length);
   };
 
-  const downloadAndPlayAudio = async (
-    url: string,
-    other: Omit<Track, "url">
+  const downloadAndPlayContent = async (
+    content: BaseContentFields
   ): Promise<FailureOrSuccess<DefaultErrors, Audio.Sound>> => {
-    // await getStoredFiles();
+    const url = content.audioUrl;
 
     if (!globalSound) {
       return failure(new UnexpectedError("No sound object found"));
@@ -92,12 +101,28 @@ export const useAudio = () => {
         playThroughEarpieceAndroid: false,
       });
 
+      const currentTrackIndex = await TrackPlayer.getActiveTrackIndex();
+
+      if (!isNil(currentTrackIndex)) {
+        await TrackPlayer.remove(currentTrackIndex);
+      }
+
+      // await TrackPlayer.skip;
       const track: AddTrack = {
-        ...other,
         url: uri,
+        title: content?.title || "",
+        artist: content?.authorName || "",
+        artwork: content?.thumbnailImageUrl || "",
+        metadata: {
+          contentId: content.id,
+        },
       };
 
-      await TrackPlayer.add([track]);
+      console.log(`[added ${track.title} to front of the queue]`);
+
+      await TrackPlayer.add([track], 0);
+
+      await logQueue();
 
       await TrackPlayer.play();
 
@@ -109,16 +134,6 @@ export const useAudio = () => {
       console.error(error);
       return failure(new UnexpectedError(error));
     }
-  };
-
-  const downloadAndPlayContent = async (
-    content: BaseContentFields
-  ): Promise<FailureOrSuccess<DefaultErrors, Audio.Sound>> => {
-    return downloadAndPlayAudio(content?.audioUrl || "", {
-      title: content?.title || "",
-      artist: content?.authorName || "",
-      artwork: content?.thumbnailImageUrl || "",
-    });
   };
 
   const toggle = async () => {
@@ -196,16 +211,44 @@ export const useAudio = () => {
     dispatch(setSpeed(speed));
   };
 
-  const getQueue = async () => {
-    const result = await TrackPlayer.getQueue();
+  // ehhh might need to adjust this more...
+  const syncQueue = async (queue: BaseQueueFields[]) => {
+    console.log(`[syncing queue ${queue.length}]`);
+
+    const activeTrack = await TrackPlayer.getActiveTrack();
+    const currentContentId = activeTrack?.metadata?.contentId;
+
+    await TrackPlayer.removeUpcomingTracks();
+    await TrackPlayer.remove(0);
+
+    await logQueue();
+
+    for (const q of queue) {
+      const content = q.content!;
+
+      // don't add the track if it is already the active one
+      // if (cus
+
+      await TrackPlayer.add({
+        url: content.audioUrl || "",
+        title: content.title || "",
+        artist: content.authorName || "",
+        artwork: content.thumbnailImageUrl || "",
+        metadata: { contentId: content.id },
+      });
+    }
+
+    logQueue();
   };
 
-  const syncQueue = async () => {};
+  const logQueue = async () => {
+    const queue = await TrackPlayer.getQueue();
+    console.log(queue.map((q) => q.title));
+  };
 
   // sync the queue. add to the queue. etc... (track player)
 
   return {
-    downloadAndPlay: downloadAndPlayAudio,
     downloadAndPlayContent,
     toggle,
     percentFinished,
@@ -218,5 +261,6 @@ export const useAudio = () => {
     setPosition,
     setSpeed: setTrackSpeed,
     speed,
+    syncQueue,
   };
 };

@@ -11,7 +11,7 @@ import { DefaultErrors } from "src/core/logic/errors/default";
 export type LinkResponse = FailureOrSuccess<DefaultErrors, CuriusLink>;
 type LinksResponse = FailureOrSuccess<DefaultErrors, CuriusLink[]>;
 
-type LinkWithDistance = CuriusLink & {
+export type LinkWithDistance = CuriusLink & {
     averageDistance: number;
     minDistance: number;
 };
@@ -55,6 +55,25 @@ export class PostgresCuriusLinkRepository {
             return failure(new UnexpectedError(err));
         }
     }
+
+    update = async (
+        id: number,
+        update: Partial<CuriusLink>
+    ): Promise<LinkResponse> => {
+        try {
+            const link = await this.repo.findOne({ where: { id } });
+
+            if (!link) {
+                return failure(new UnexpectedError("Link not found"));
+            }
+
+            await this.repo.update(id, update);
+
+            return success(link);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
 
     async findLinksWithoutFullText(limit: number): Promise<LinksResponse> {
         try {

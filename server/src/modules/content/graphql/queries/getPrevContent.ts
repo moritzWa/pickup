@@ -3,8 +3,10 @@ import { StatusCodes } from "http-status-codes";
 import {
     booleanArg,
     idArg,
+    intArg,
     mutationField,
     nonNull,
+    nullable,
     queryField,
     stringArg,
 } from "nexus";
@@ -19,12 +21,13 @@ import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo, queueRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
-import { QueueService } from "../../services/queueService";
+import { QueueService } from "../../services/queueService/queueService";
 
 export const getPrevContent = queryField("getPrevContent", {
-    type: nonNull("Queue"),
+    type: nullable("Queue"),
     args: {
         beforeContentId: nonNull(idArg()),
+        currentMs: nullable(intArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);

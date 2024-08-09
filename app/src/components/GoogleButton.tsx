@@ -95,11 +95,11 @@ export const GoogleButton = ({ label, onSuccess, onError }: GoogleProps) => {
         />
 
         {isLoading ? (
-          <ActivityIndicator color={colors.black} />
+          <ActivityIndicator color={theme.text} />
         ) : (
           <Text
             style={{
-              color: colors.black,
+              color: theme.text,
               fontFamily: "Raleway-Bold",
               textAlign: "center",
               fontSize: IS_IPAD ? 24 : 16,
