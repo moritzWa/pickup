@@ -15,6 +15,9 @@ import { v4 as uuidv4 } from "uuid";
 import { firebase, openai } from "src/utils";
 import { storage } from "firebase-admin";
 import moment = require("moment");
+import { connect } from "src/core/infra/postgres";
+import { UserIdentityResponse } from "@onesignal/node-onesignal";
+import { pgUserRepo } from "src/modules/users/infra/postgres";
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -23,12 +26,35 @@ export const buildQueue = async (
 ): Promise<FailureOrSuccess<DefaultErrors, Queue[]>> => {
     const categories = user.interestCategories.join(" ");
     const description = user.interestDescription;
-    const query = `${categories} ${description}`;
+    const rawQuery = `${categories} ${description}`;
 
-    console.log(`finding links similar to ${query}`);
+    console.log(`finding links similar to ${rawQuery}`);
+
+    const openPromptResponse = await openai.chat.completions.create([
+        {
+            role: "system",
+            content:
+                "You are a librarian that helps users find content that they will enjoy. You are tasked with finding content that is similar to the user's interests.",
+        },
+        {
+            role: "user",
+            content: `My interests are: ${rawQuery}. Write a sentence prompt about my interests that I would give to a librarian to find content I like.`,
+        },
+    ]);
+
+    if (openPromptResponse.isFailure()) {
+        return failure(openPromptResponse.error);
+    }
+
+    const openPrompt = openPromptResponse.value;
+    const prompt = openPrompt.choices[0].message.content;
+
+    if (!prompt) {
+        return failure(new Error("Prompt was empty"));
+    }
 
     const similarLinksResponse = await curiusLinkRepo.findSimilarLinks(
-        query,
+        prompt,
         limit ?? DEFAULT_LINKS_RETURN
     );
 
@@ -160,3 +186,18 @@ const convertCuriusToContent = async (
 
     return success(content.id);
 };
+
+// test the build queue
+if (require.main === module) {
+    void connect()
+        .then(async () => {
+            const userResponse = await pgUserRepo.findByEmail(
+                "andrew.j.duca@gmail.com"
+            );
+
+            const queue = await buildQueue(userResponse.value, 10);
+
+            debugger;
+        })
+        .then(() => process.exit(0));
+}

@@ -42,6 +42,8 @@ const seedTopLinks = async () => {
             await dataSource.destroy();
         }
     }
+
+    debugger;
 };
 
 seedTopLinks().catch(console.error);
