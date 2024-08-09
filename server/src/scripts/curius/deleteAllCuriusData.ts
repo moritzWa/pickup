@@ -1,6 +1,15 @@
 import { dataSource } from "src/core/infra/postgres";
 
 const deleteAllCuriusData = async () => {
+    // Safety check: Ensure we're only running on localhost
+    const dbHost = process.env.POSTGRES_URI?.split("@")[1]?.split(":")[0];
+    if (dbHost !== "localhost") {
+        console.error(
+            "Error: This script can only be run on a localhost database."
+        );
+        process.exit(1);
+    }
+
     await dataSource.initialize();
 
     console.log("Deleting all Curius data...");
