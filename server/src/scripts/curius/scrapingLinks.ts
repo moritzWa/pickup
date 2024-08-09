@@ -26,8 +26,8 @@ const BATCH_SIZE = 75;
 const scrapeCuriusLinks = async () => {
     await dataSource.initialize();
 
-    const startLink = 55998;
-    const numLinks = 40000;
+    const startLink = 95997;
+    const numLinks = 31459;
     // latest as of 2024-08-03 is 127456
     // note we haven't fetched the metadata for 0-35863
 
@@ -114,9 +114,10 @@ const saveCuriusData = async (data: LinkViewResponse) => {
         title: link.title,
         favorite: link.favorite,
         snippet: link.snippet || null,
-        fullText: link.link.endsWith(".pdf")
-            ? null
-            : link.metadata?.full_text || null,
+        fullText:
+            link.link && link.link.endsWith(".pdf")
+                ? null
+                : link.metadata?.full_text || null,
         metadata: link.metadata || null,
         createdDate: link.createdDate ? new Date(link.createdDate) : null,
         modifiedDate: link.modifiedDate ? new Date(link.modifiedDate) : null,

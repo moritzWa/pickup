@@ -29,29 +29,25 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
-const SLOW_LINK_THRESHOLD_MS = 10000; // 10 seconds
-
 const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
         const totalLinksResponse =
             await curiusLinkRepo.countLinksWithoutFullText();
+        if (!isSuccess(totalLinksResponse)) {
+            Logger.error(
+                "Failed to fetch total number of links without full text:",
+                totalLinksResponse.error
+            );
+            return;
+        }
 
         const totalLinks = totalLinksResponse.value;
         let processedLinks = 0;
         let hasMoreLinks = true;
 
         Logger.info(`Total links to process: ${totalLinks}`);
-
-        // Estimate total processing time
-        const avgTimePerLink = 10; // Assume 10 seconds per link initially
-        const estimatedTime = ((totalLinks * avgTimePerLink) / 60).toFixed(2);
-        Logger.info(
-            `Estimated total processing time: ~${estimatedTime} minutes i.e. ~${(
-                Number(estimatedTime) / 60
-            ).toFixed(2)} hours`
-        );
 
         while (hasMoreLinks) {
             const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
@@ -80,24 +76,19 @@ const addFullTextToLinks = async () => {
             const savePromises: Promise<LinkResponse>[] = [];
 
             const processLink = async (link) => {
-                const linkStartTime = Date.now();
                 try {
-                    if (link.link.endsWith(".pdf")) {
+                    if (link.link && link.link.endsWith(".pdf")) {
                         await processPDFLink(link);
                     } else {
                         await processHTMLLink(link);
                     }
                 } catch (error) {
+                    Logger.error(
+                        `Error processing link ${link.id}:`,
+                        getErrorMessage(error)
+                    );
                     link.skippedErrorFetchingFullText = true;
                 } finally {
-                    const linkEndTime = Date.now();
-                    const linkProcessingTime = linkEndTime - linkStartTime;
-                    if (linkProcessingTime > SLOW_LINK_THRESHOLD_MS) {
-                        Logger.warn(
-                            `Link ${link.link} took ${linkProcessingTime}ms to process`
-                        );
-                    }
-
                     if (link.fullText) {
                         link.skippedErrorFetchingFullText = false;
                         link.skippedNotProbablyReadable = false;
@@ -141,6 +132,9 @@ const processPDFLink = async (link) => {
             !response.ok ||
             !response.headers.get("content-type")?.includes("application/pdf")
         ) {
+            Logger.info(
+                `Skipping inaccessible PDF w id: ${link.id} (${link.link})`
+            );
             link.skippedInaccessiblePDF = true;
             return;
         }
@@ -151,19 +145,30 @@ const processPDFLink = async (link) => {
         link.totalPagesIfPDF = parsedPDF.numpages;
         link.fetchedPagesIfPDF = parsedPDF.numrender;
     } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        if (errorMessage.includes("Could not parse CSS stylesheet")) {
+            Logger.info(`Ignoring CSS parse error for PDF: ${link.link}`);
+        } else {
+            Logger.error(`Error processing PDF link ${link.id}:`, errorMessage);
+        }
         link.skippedErrorFetchingFullText = true;
     }
 };
 
 const processHTMLLink = async (link) => {
     try {
+        Logger.info(`Fetching link: ${link.id} (${link.link})`);
         const response = await fetch(link.link);
 
         if (!response.ok) {
             if (response.status === 404 || response.status === 410) {
                 link.deadLink = true;
+                Logger.info(`Dead link detected: ${link.id} (${link.link})`);
             } else {
                 link.skippedErrorFetchingFullText = true;
+                Logger.info(
+                    `Error fetching link: ${link.id} (${link.link}), status: ${response.status}`
+                );
             }
             return;
         }
@@ -178,12 +183,18 @@ const processHTMLLink = async (link) => {
             })
         ) {
             link.skippedNotProbablyReadable = true;
+            Logger.info(
+                `Link not probably readable: ${link.id} (${link.link})`
+            );
             return;
         }
 
         const result = new Readability(window.document).parse();
         if (!result) {
             link.skippedErrorFetchingFullText = true;
+            Logger.info(
+                `Failed to parse content for: ${link.id} (${link.link})`
+            );
             return;
         }
 
@@ -199,6 +210,10 @@ const processHTMLLink = async (link) => {
             fullText: NodeHtmlMarkdown.translate(result.content || ""),
         });
     } catch (error) {
+        Logger.error(
+            `Error processing HTML link ${link.id}:`,
+            getErrorMessage(error)
+        );
         link.skippedErrorFetchingFullText = true;
     }
 };
