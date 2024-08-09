@@ -158,6 +158,36 @@ export class PostgresCuriusLinkRepository {
         }
     }
 
+    // for seeder
+    async filterBestLinksWithFullTextAndChunks(
+        limit: number
+    ): Promise<LinksResponse> {
+        try {
+            const links = await this.repo
+                .createQueryBuilder("link")
+                .leftJoinAndSelect("link.chunks", "chunks")
+                .where("link.fullText IS NOT NULL")
+                .andWhere((qb) => {
+                    const subQuery = qb
+                        .subQuery()
+                        .select("1")
+                        .from(CuriusLinkChunk, "chunk")
+                        .where("chunk.linkId = link.id")
+                        .getQuery();
+                    return "EXISTS (" + subQuery + ")";
+                })
+                .orderBy("link.readCount", "DESC")
+                .addOrderBy("link.userIds", "DESC")
+                .addOrderBy("link.publishedTime", "DESC")
+                .take(limit)
+                .getMany();
+
+            return success(links);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async countLinksWithoutFullText(): Promise<
         FailureOrSuccess<DefaultErrors, number>
     > {
