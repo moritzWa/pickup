@@ -7,8 +7,8 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
+import { CuriusLink } from "src/core/infra/postgres/entities";
 import { curiusLinkRepo } from "src/modules/curius/infra";
-import { LinkResponse } from "src/modules/curius/infra/linkRepo";
 import { Logger } from "src/utils/logger";
 import { isSuccess } from "./utils";
 
@@ -18,20 +18,34 @@ const sanitizeText = (text: string) => {
 
 const originalConsoleError = console.error;
 console.error = (...args) => {
-    if (args[0] && args[0].includes("Could not parse CSS stylesheet")) {
-        return;
+    const errorMessages = [
+        "Could not parse CSS stylesheet",
+        "Could not parse CSS @import URL",
+        "Could not load link:",
+        "Error: Could not load link:",
+    ];
+
+    if (args[0] && errorMessages.some((msg) => args[0].includes(msg))) {
+        return; // Suppress these specific errors
     }
     originalConsoleError(...args);
 };
 
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 50; // Increased batch size
+const CONCURRENCY_LIMIT = 20; // Number of links to process concurrently
 
 const addFullTextToLinks = async () => {
     try {
         await dataSource.initialize();
 
-        let processedCount = 0;
         let totalProcessed = 0;
+
+        // log countLinksWithoutFullText
+        const countLinksWithoutFullText =
+            await curiusLinkRepo.countLinksWithoutFullText();
+        Logger.info(
+            `Count of links without full text: ${countLinksWithoutFullText.value}`
+        );
 
         while (true) {
             const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
@@ -51,31 +65,27 @@ const addFullTextToLinks = async () => {
                 break;
             }
 
-            const totalLinks = links.length;
-            Logger.info(`Processing batch of ${totalLinks} links...`);
-
+            Logger.info(`Processing batch of ${links.length} links...`);
             const startTime = Date.now();
-            const savePromises: Promise<LinkResponse>[] = [];
 
-            for (const link of links) {
-                await processLink(link);
-                savePromises.push(curiusLinkRepo.save(link));
-                processedCount++;
-                totalProcessed++;
-            }
+            // Process links concurrently
+            const processedLinks = await processLinksConcurrently(links);
 
-            await Promise.all(savePromises);
+            // Batch save to database
+            await curiusLinkRepo.saveMany(processedLinks);
 
+            totalProcessed += links.length;
             const batchTime = (Date.now() - startTime) / 1000;
             Logger.info(
-                `Processed ${processedCount} links in ${batchTime.toFixed(2)}s`
+                `Processed ${links.length} links in ${batchTime.toFixed(
+                    2
+                )}s. Total: ${totalProcessed}`
             );
-            processedCount = 0;
         }
 
         Logger.info(`Finished processing ${totalProcessed} links in total.`);
     } catch (error) {
-        // Logger.error("Unexpected error:", getErrorMessage(error));
+        Logger.error("Unexpected error:", error);
     } finally {
         if (dataSource.isInitialized) {
             await dataSource.destroy();
@@ -83,7 +93,23 @@ const addFullTextToLinks = async () => {
     }
 };
 
-const CONTENT_TYPE_TIMEOUT = 10000; // 10 seconds
+const processLinksConcurrently = async (
+    links: CuriusLink[]
+): Promise<CuriusLink[]> => {
+    const processChunk = async (chunk: CuriusLink[]) => {
+        return Promise.all(chunk.map(processLink));
+    };
+
+    const chunks: CuriusLink[][] = [];
+    for (let i = 0; i < links.length; i += CONCURRENCY_LIMIT) {
+        chunks.push(links.slice(i, i + CONCURRENCY_LIMIT));
+    }
+
+    const processedChunks = await Promise.all(chunks.map(processChunk));
+    return processedChunks.flat();
+};
+
+const CONTENT_TYPE_TIMEOUT = 20000; // 20 seconds
 
 const getContentType = async (url: string): Promise<string | null> => {
     try {
@@ -114,24 +140,21 @@ const getContentType = async (url: string): Promise<string | null> => {
     }
 };
 
-const processLink = async (link) => {
+const processLink = async (link: CuriusLink): Promise<CuriusLink> => {
     try {
-        // Logger.info(`Starting to process link: ${link.id} (${link.link})`);
-        const contentType = await getContentType(link.link);
+        // const contentType = await getContentType(link.link);
 
-        if (contentType?.includes("application/pdf")) {
+        const isProbablyPDF = /\.pdf($|\?)/i.test(link.link);
+
+        if (isProbablyPDF) {
             await processPDFLink(link);
         } else {
             await processHTMLLink(link);
         }
-        // Logger.info(`Finished processing link: ${link.id} (${link.link})`);
     } catch (error) {
-        // Logger.error(
-        //     `Error processing link ${link.id}:`,
-        //     error instanceof Error ? error.message : String(error)
-        // );
         link.skippedErrorFetchingFullText = true;
     }
+    return link;
 };
 
 type SkipType =
@@ -196,12 +219,6 @@ const updateLinkWithParsedContent = (link, result) => {
 
 const FETCH_TIMEOUT = 30000; // 30 seconds
 const processHTMLLink = async (link) => {
-    // mark this link as skippedErrorFetchingFullText: https://theanarchistlibrary.org/library/the-anarchist-faq-editorial-collective-an-anarchist-faq-full or https://www.sparknotes.com/lit/pride/section4/
-    if (link.link.includes("theanarchistlibrary.org")) {
-        markSkip(link, "skippedErrorFetchingFullText");
-        return;
-    }
-
     try {
         // Logger.info(`Fetching link: ${link.id} (${link.link})`);
 
@@ -222,7 +239,16 @@ const processHTMLLink = async (link) => {
 
         const html = await response.text();
 
-        const { window } = new JSDOM(html);
+        const { window } = new JSDOM(html, {
+            // Add these options to further reduce CSS-related errors
+            runScripts: "outside-only",
+            resources: "usable",
+            virtualConsole: new JSDOM.VirtualConsole().sendTo(console, {
+                omitJSDOMErrors: true,
+            }),
+            pretendToBeVisual: true,
+            url: link.link,
+        });
         if (
             !isProbablyReaderable(window.document, {
                 minScore: 10,
