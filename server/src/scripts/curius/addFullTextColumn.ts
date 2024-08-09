@@ -10,7 +10,7 @@ import { dataSource } from "src/core/infra/postgres";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkResponse } from "src/modules/curius/infra/linkRepo";
 import { Logger } from "src/utils/logger";
-import { getErrorMessage, isSuccess } from "./utils";
+import { isSuccess } from "./utils";
 
 const sanitizeText = (text: string) => {
     return text.replace(/\0/g, ""); // Remove null bytes
@@ -75,7 +75,7 @@ const addFullTextToLinks = async () => {
 
         Logger.info(`Finished processing ${totalProcessed} links in total.`);
     } catch (error) {
-        Logger.error("Unexpected error:", getErrorMessage(error));
+        // Logger.error("Unexpected error:", getErrorMessage(error));
     } finally {
         if (dataSource.isInitialized) {
             await dataSource.destroy();
@@ -105,10 +105,10 @@ const getContentType = async (url: string): Promise<string | null> => {
         if (error instanceof Error && error.name === "AbortError") {
             Logger.info(`Timeout fetching content type for ${url}`);
         } else {
-            Logger.error(
-                `Error fetching content type for ${url}:`,
-                getErrorMessage(error)
-            );
+            // Logger.error(
+            //     `Error fetching content type for ${url}:`,
+            //     getErrorMessage(error)
+            // );
         }
         return null;
     }
@@ -116,7 +116,7 @@ const getContentType = async (url: string): Promise<string | null> => {
 
 const processLink = async (link) => {
     try {
-        Logger.info(`Starting to process link: ${link.id} (${link.link})`);
+        // Logger.info(`Starting to process link: ${link.id} (${link.link})`);
         const contentType = await getContentType(link.link);
 
         if (contentType?.includes("application/pdf")) {
@@ -124,12 +124,12 @@ const processLink = async (link) => {
         } else {
             await processHTMLLink(link);
         }
-        Logger.info(`Finished processing link: ${link.id} (${link.link})`);
+        // Logger.info(`Finished processing link: ${link.id} (${link.link})`);
     } catch (error) {
-        Logger.error(
-            `Error processing link ${link.id}:`,
-            error instanceof Error ? error.message : String(error)
-        );
+        // Logger.error(
+        //     `Error processing link ${link.id}:`,
+        //     error instanceof Error ? error.message : String(error)
+        // );
         link.skippedErrorFetchingFullText = true;
     }
 };
@@ -142,11 +142,11 @@ type SkipType =
 
 const markSkip = (link, skipType: SkipType, message?: string) => {
     link[skipType] = true;
-    Logger.info(
-        `Marking link as skipped: ${link.id} (${link.link}) ${
-            message ? `(${message})` : ""
-        }`
-    );
+    // Logger.info(
+    //     `Marking link as skipped: ${link.id} (${link.link}) ${
+    //         message ? `(${message})` : ""
+    //     }`
+    // );
 };
 
 const handleNonOkResponse = (link, response) => {
@@ -164,12 +164,12 @@ const handleNonOkResponse = (link, response) => {
 const handleHTMLLinkProcessingError = (link, error) => {
     if (error instanceof Error) {
         if (error.message === "Fetch timeout") {
-            Logger.info(`Timeout fetching link: ${link.id} (${link.link})`);
+            // Logger.info(`Timeout fetching link: ${link.id} (${link.link})`);
         } else {
-            Logger.error(
-                `Error processing HTML link ${link.id}:`,
-                getErrorMessage(error)
-            );
+            // Logger.error(
+            //     `Error processing HTML link ${link.id}:`,
+            //     getErrorMessage(error)
+            // );
         }
     } else {
         Logger.error(
@@ -203,7 +203,7 @@ const processHTMLLink = async (link) => {
     }
 
     try {
-        Logger.info(`Fetching link: ${link.id} (${link.link})`);
+        // Logger.info(`Fetching link: ${link.id} (${link.link})`);
 
         const fetchPromise = fetch(link.link);
         const timeoutPromise = new Promise<never>((_, reject) =>
@@ -240,7 +240,7 @@ const processHTMLLink = async (link) => {
         }
 
         updateLinkWithParsedContent(link, result);
-        Logger.info(`Successfully processed link: ${link.id} (${link.link})`);
+        // Logger.info(`Successfully processed link: ${link.id} (${link.link})`);
     } catch (error) {
         handleHTMLLinkProcessingError(link, error);
     }
@@ -252,7 +252,7 @@ const processPDFLink = async (link) => {
         !response.ok ||
         !response.headers.get("content-type")?.includes("application/pdf")
     ) {
-        Logger.info(`Skipping inaccessible PDF: ${link.link}`);
+        // Logger.info(`Skipping inaccessible PDF: ${link.link}`);
         link.skippedInaccessiblePDF = true;
         return;
     }
