@@ -205,10 +205,10 @@ const GetContent = gql`
 `;
 
 const GetBookmarks = gql`
-  ${BaseContentSessionFields}
+  ${BaseContentFields}
   query GetBookmarks($limit: Int, $page: Int) {
     getBookmarks(limit: $limit, page: $page) {
-      ...BaseContentSessionFields
+      ...BaseContentFields
     }
   }
 `;

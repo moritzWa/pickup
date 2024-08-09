@@ -144,7 +144,7 @@ export const UserProfile = () => {
       await Promise.all([
         refetchMe(),
         apolloClient.refetchQueries({
-          include: [api.users.getProfile, api.users.me],
+          include: [api.users.getProfile, api.users.me, api.content.bookmarks],
         }),
       ]);
     } catch (err) {
@@ -301,7 +301,7 @@ export const UserProfile = () => {
       {/* <ProfileImage name={profile?.name} /> */}
 
       <SectionList
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 200 }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}

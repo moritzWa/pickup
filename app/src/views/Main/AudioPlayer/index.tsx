@@ -124,7 +124,7 @@ const AudioPlayer = () => {
         variables: {
           contentId: content?.id || "",
         },
-        refetchQueries: [api.content.get],
+        refetchQueries: [api.content.get, api.content.bookmarks],
       });
 
       const data = response.errors;
