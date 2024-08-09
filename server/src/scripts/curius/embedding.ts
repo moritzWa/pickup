@@ -1,9 +1,10 @@
 import { OpenAI } from "openai";
+import { performance } from "perf_hooks";
 import * as pgvector from "pgvector/pg";
 import { dataSource } from "src/core/infra/postgres";
 import { CuriusLinkChunk } from "src/core/infra/postgres/entities/Curius/CuriusLinkChunk";
 import { curiusLinkChunkRepo, curiusLinkRepo } from "src/modules/curius/infra";
-import { performance } from "perf_hooks";
+import { Logger } from "src/utils/logger";
 import { isSuccess } from "./utils";
 
 const openai = new OpenAI({
@@ -34,6 +35,74 @@ const chunkText = (text: string, chunkSize: number = 1200): string[] => {
     return chunks;
 };
 
+async function processAndSaveChunks(chunks: string[], link: any) {
+    const embeddingStartTime = performance.now();
+    const embeddings = await Promise.all(
+        chunks.map((chunk) =>
+            openai.embeddings.create({
+                model: "text-embedding-3-large",
+                dimensions: 256,
+                input: chunk,
+                encoding_format: "float",
+            })
+        )
+    );
+    const embeddingEndTime = performance.now();
+    Logger.info(
+        `Embedding took ${Math.round(
+            embeddingEndTime - embeddingStartTime
+        )}ms for ${chunks.length} chunks.`
+    );
+
+    const savingStartTime = performance.now();
+    await Promise.all(
+        embeddings.map((embedding, j) => {
+            const linkChunk = new CuriusLinkChunk();
+            linkChunk.chunkIndex = j;
+            linkChunk.text = chunks[j];
+            linkChunk.embedding = pgvector.toSql(embedding.data[0].embedding);
+            linkChunk.link = Promise.resolve(link);
+            return curiusLinkChunkRepo.save(linkChunk);
+        })
+    );
+    const savingEndTime = performance.now();
+    Logger.info(
+        `Saving took ${Math.round(savingEndTime - savingStartTime)}ms for ${
+            chunks.length
+        } chunks.`
+    );
+}
+
+async function processLink(link: any, index: number, totalLinks: number) {
+    const content = link.fullText || link.title;
+
+    if (!content) {
+        Logger.error(`No content available for link ${link.id}. Skipping.`);
+        return;
+    }
+
+    const linkStartTime = performance.now();
+    Logger.info(`Processing link ${index + 1} of ${totalLinks}: ${link.id}`);
+
+    const chunkingStartTime = performance.now();
+    const chunks = chunkText(content);
+    const chunkingEndTime = performance.now();
+    Logger.info(
+        `Chunking took ${Math.round(
+            chunkingEndTime - chunkingStartTime
+        )}ms. Created ${chunks.length} chunks.`
+    );
+
+    await processAndSaveChunks(chunks, link);
+
+    const linkEndTime = performance.now();
+    Logger.info(
+        `Added embeddings for link ${link.id}. Total time: ${Math.round(
+            linkEndTime - linkStartTime
+        )}ms`
+    );
+}
+
 const addEmbeddingsToLinks = async () => {
     await dataSource.initialize();
 
@@ -44,110 +113,36 @@ const addEmbeddingsToLinks = async () => {
                 LINKS_TO_PROCESS
             );
         if (!isSuccess(linksResponse)) {
-            console.error(
-                "embedding.ts: Failed to fetch links:",
-                linksResponse.error
-            );
+            Logger.error("Failed to fetch links:", linksResponse.error);
             return;
         }
 
         const links = linksResponse.value;
-        console.log(`Found ${links.length} best links without embeddings.`);
+        Logger.info(`Found ${links.length} best links without embeddings.`);
 
         for (let i = 0; i < links.length; i++) {
-            const link = links[i];
             try {
-                const content = link.fullText || link.title;
-
-                if (!content) {
-                    console.error(
-                        `No content available for link ${link.id}. Skipping.`
-                    );
-                    continue;
-                }
-
-                const linkStartTime = performance.now();
-                console.log(
-                    `embedding.ts: Processing link ${i + 1} of ${
-                        links.length
-                    }: ${link.id}`
-                );
-
-                const chunkingStartTime = performance.now();
-                const chunks = chunkText(content);
-                const chunkingEndTime = performance.now();
-                console.log(
-                    `Chunking took ${
-                        chunkingEndTime - chunkingStartTime
-                    }ms. Created ${chunks.length} chunks.`
-                );
-
-                const embeddingStartTime = performance.now();
-                const embeddings = await Promise.all(
-                    chunks.map((chunk) =>
-                        openai.embeddings.create({
-                            model: "text-embedding-3-large",
-                            dimensions: 256,
-                            input: chunk,
-                            encoding_format: "float",
-                        })
-                    )
-                );
-                const embeddingEndTime = performance.now();
-                console.log(
-                    `Embedding took ${
-                        embeddingEndTime - embeddingStartTime
-                    }ms for ${chunks.length} chunks.`
-                );
-
-                const savingStartTime = performance.now();
-                await Promise.all(
-                    embeddings.map((embedding, j) => {
-                        const linkChunk = new CuriusLinkChunk();
-                        linkChunk.chunkIndex = j;
-                        linkChunk.text = chunks[j];
-                        linkChunk.embedding = pgvector.toSql(
-                            embedding.data[0].embedding
-                        );
-                        linkChunk.link = Promise.resolve(link);
-                        return curiusLinkChunkRepo.save(linkChunk);
-                    })
-                );
-                const savingEndTime = performance.now();
-                console.log(
-                    `Saving took ${savingEndTime - savingStartTime}ms for ${
-                        chunks.length
-                    } chunks.`
-                );
-
-                const linkEndTime = performance.now();
-                console.log(
-                    `embedding.ts: Added embeddings for link ${
-                        link.id
-                    }. Total time: ${linkEndTime - linkStartTime}ms`
-                );
+                await processLink(links[i], i, links.length);
             } catch (error) {
-                console.error(
-                    `embedding.ts: Failed to generate embedding for link ${link.id}:`,
+                Logger.error(
+                    `Failed to generate embedding for link ${links[i].id}:`,
                     error
                 );
             }
 
             if ((i + 1) % 10 === 0 || i === links.length - 1) {
-                console.log(
-                    `embedding.ts: Processed ${i + 1} of ${links.length} links`
-                );
+                Logger.info(`Processed ${i + 1} of ${links.length} links`);
             }
         }
 
         const endTime = performance.now();
-        console.log(
-            `embedding.ts: Finished adding embeddings to links. Total time: ${
+        Logger.info(
+            `Finished adding embeddings to links. Total time: ${Math.round(
                 endTime - startTime
-            }ms`
+            )}ms`
         );
     } catch (error) {
-        console.error("embedding.ts: Error processing links:", error);
+        Logger.error("Error processing links:", error);
     } finally {
         if (dataSource.isInitialized) {
             await dataSource.destroy();
@@ -155,4 +150,6 @@ const addEmbeddingsToLinks = async () => {
     }
 };
 
-addEmbeddingsToLinks().catch(console.error);
+addEmbeddingsToLinks().catch((error) =>
+    Logger.error("Unhandled error:", error)
+);
