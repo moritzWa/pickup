@@ -28,4 +28,6 @@ export const INTERACTION_TYPE_MAPPING: Record<
     scrolled_past: InteractionType.ScrolledPast,
     skipped: InteractionType.Skipped,
     left_in_progress: InteractionType.LeftInProgress,
+    listened_to_beginning: InteractionType.ListenedToBeginning,
+    finished: InteractionType.Finished,
 };

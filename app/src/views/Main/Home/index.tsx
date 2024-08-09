@@ -150,7 +150,7 @@ const SingleFilter = ({
         style={{
           color: isActive ? theme.header : theme.text,
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 18,
+          fontSize: 26,
         }}
       >
         {label}

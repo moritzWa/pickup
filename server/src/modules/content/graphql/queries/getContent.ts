@@ -6,6 +6,7 @@ import {
 import { stripe } from "src/utils";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { contentRepo, contentSessionRepo } from "../../infra";
+import { ContentSessionService } from "../../services/contentSessionService";
 
 export const getContent = queryField("getContent", {
     type: nonNull("Content"),
@@ -23,6 +24,19 @@ export const getContent = queryField("getContent", {
 
         throwIfError(contentResponse);
 
-        return contentResponse.value;
+        const sessionResponse = await ContentSessionService.findOrCreate(
+            contentResponse.value,
+            user
+        );
+
+        throwIfError(sessionResponse);
+
+        const session = sessionResponse.value;
+        const content = contentResponse.value;
+
+        return {
+            ...content,
+            contentSession: session,
+        };
     },
 });

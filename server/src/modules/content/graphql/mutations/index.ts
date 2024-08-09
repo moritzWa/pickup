@@ -4,3 +4,4 @@ export * from "./startListening";
 export * from "./updateContentSession";
 export * from "./recordInteraction";
 export * from "./showMore";
+export * from "./bookmarkContent";

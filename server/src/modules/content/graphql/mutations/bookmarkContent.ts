@@ -4,7 +4,7 @@ import {
     throwIfErrorAndDatadog,
 } from "src/core/surfaces/graphql/common";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
-import { contentRepo, interactionRepo } from "../../infra";
+import { contentRepo, contentSessionRepo, interactionRepo } from "../../infra";
 import { ContentSessionService } from "../../services/contentSessionService";
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { v4 as uuidv4 } from "uuid";
@@ -34,6 +34,19 @@ export const bookmarkContent = mutationField("bookmarkContent", {
 
         throwIfError(sessionResponse);
 
+        const session = sessionResponse.value;
+        const newBookmark = !session.isBookmarked;
+
+        const newContentSessionResponse = await contentSessionRepo.update(
+            sessionResponse.value.id,
+            {
+                isBookmarked: newBookmark,
+                bookmarkedAt: newBookmark ? new Date() : null,
+            }
+        );
+
+        throwIfError(newContentSessionResponse);
+
         await interactionRepo.create({
             id: uuidv4(),
             contentId: content.id,
@@ -43,6 +56,6 @@ export const bookmarkContent = mutationField("bookmarkContent", {
             updatedAt: new Date(),
         });
 
-        return sessionResponse.value;
+        return newContentSessionResponse.value;
     },
 });

@@ -22,6 +22,7 @@ import { Button, colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBackward,
+  faBookmark,
   faCaretLeft,
   faCaretRight,
   faChevronLeft,
@@ -90,6 +91,8 @@ const AudioPlayer = () => {
     [contentId]
   );
 
+  const [bookmark] = useMutation(api.content.bookmark);
+
   const { data: contentData, error } = useQuery<Pick<Query, "getContent">>(
     api.content.get,
     {
@@ -100,8 +103,27 @@ const AudioPlayer = () => {
 
   const theme = useTheme();
   const content = contentData?.getContent as BaseContentFields | null;
+  const session = contentData?.getContent?.contentSession ?? null;
+
   const insets = useSafeAreaInsets();
   const estimatedLen = Math.ceil((durationMs || 0) / 60_000);
+
+  const bookmarkContent = async () => {
+    try {
+      const response = await bookmark({
+        variables: {
+          contentId: content?.id || "",
+        },
+        refetchQueries: [api.content.get],
+      });
+
+      const data = response.errors;
+      // console.log(response.data);
+      // console.log(JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
+  };
 
   const playOrPause = async () => {
     if (!content) {
@@ -198,6 +220,8 @@ const AudioPlayer = () => {
       console.error(err);
     }
   };
+
+  // console.log(session);
 
   return (
     <View
@@ -372,30 +396,76 @@ const AudioPlayer = () => {
           },
         ]}
       >
-        <TouchableOpacity
+        <View
           style={{
-            padding: 10,
-            width: 60,
-            alignSelf: "flex-end",
-            marginRight: 20,
-            marginBottom: 10,
+            display: "flex",
+            flexDirection: "row",
             alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 50,
-            backgroundColor: theme.secondaryBackground,
+            width: "100%",
           }}
-          onPress={setPlayerSpeed}
         >
-          <Text
+          <View style={{ flex: 1 }}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={{
+                padding: 10,
+                alignSelf: "flex-start",
+                marginLeft: 20,
+                marginBottom: 10,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 50,
+                backgroundColor: session?.isBookmarked
+                  ? colors.primary
+                  : theme.secondaryBackground,
+              }}
+              onPress={bookmarkContent}
+            >
+              <FontAwesomeIcon
+                icon={faBookmark}
+                color={session?.isBookmarked ? colors.white : theme.text}
+                size={14}
+              />
+
+              <Text
+                style={{
+                  color: session?.isBookmarked ? colors.white : theme.text,
+                  fontSize: 14,
+                  fontFamily: "Raleway-Bold",
+                  marginLeft: 5,
+                }}
+              >
+                Bookmark
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
             style={{
-              color: theme.text,
-              fontSize: 14,
-              fontFamily: "Raleway-Bold",
+              padding: 10,
+              width: 60,
+              alignSelf: "flex-end",
+              marginRight: 20,
+              marginBottom: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 50,
+              backgroundColor: theme.secondaryBackground,
             }}
+            onPress={setPlayerSpeed}
           >
-            {speed}x
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: 14,
+                fontFamily: "Raleway-Bold",
+              }}
+            >
+              {speed}x
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <Slider
           style={{

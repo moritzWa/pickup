@@ -213,6 +213,14 @@ const GetBookmarks = gql`
   }
 `;
 
+const Bookmark = gql`
+  mutation bookmarkContent($contentId: ID!) {
+    bookmarkContent(contentId: $contentId) {
+      id
+    }
+  }
+`;
+
 const GetCategories = gql`
   query GetCategories {
     getCategories {
@@ -289,6 +297,7 @@ export const api = {
     get: GetContent,
     startListening: StartListening,
     bookmarks: GetBookmarks,
+    bookmark: Bookmark,
   },
   categories: {
     list: GetCategories,

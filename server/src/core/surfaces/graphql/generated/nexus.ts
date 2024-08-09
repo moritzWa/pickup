@@ -226,6 +226,7 @@ export interface NexusGenFieldTypes {
     siteName: string | null; // String
   }
   Mutation: { // field return type
+    bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
@@ -412,6 +413,7 @@ export interface NexusGenFieldTypeNames {
     siteName: 'String'
   }
   Mutation: { // field return type name
+    bookmarkContent: 'ContentSession'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
@@ -516,6 +518,9 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    bookmarkContent: { // args
+      contentId: string; // ID!
+    }
     createUser: { // args
       email: string; // String!
       name?: string | null; // String

@@ -134,6 +134,7 @@ type Metadata {
 }
 
 type Mutation {
+  bookmarkContent(contentId: ID!): ContentSession!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
