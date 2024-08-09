@@ -16,6 +16,14 @@ const sanitizeText = (text: string) => {
     return text.replace(/\0/g, ""); // Remove null bytes
 };
 
+const originalConsoleError = console.error;
+console.error = (...args) => {
+    if (args[0] && args[0].includes("Could not parse CSS stylesheet")) {
+        return;
+    }
+    originalConsoleError(...args);
+};
+
 const BATCH_SIZE = 10;
 
 const addFullTextToLinks = async () => {
