@@ -7,13 +7,16 @@ import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
+import { failure } from "src/core/logic";
+import { UnexpectedError } from "src/core/logic/errors";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkResponse } from "src/modules/curius/infra/linkRepo";
 import { Logger } from "src/utils/logger";
+import { setTimeout } from "timers/promises";
 import { getErrorMessage, isSuccess } from "./utils";
 
 const sanitizeText = (text: string) => {
-    return text.replace(/\0/g, ""); // Remove null bytes
+    return text.replace(/\0/g, "").replace(/[\uD800-\uDFFF]/g, "");
 };
 
 const BATCH_SIZE = 50; // Reduced batch size
@@ -28,6 +31,9 @@ console.error = (...args) => {
     }
     originalConsoleError(...args);
 };
+
+const LINK_TIMEOUT = 60000; // 60 seconds timeout for processing each link
+const BATCH_TIMEOUT = 120000; // 10 minutes timeout for processing each batch
 
 const addFullTextToLinks = async () => {
     try {
@@ -50,6 +56,8 @@ const addFullTextToLinks = async () => {
         Logger.info(`Total links to process: ${totalLinks}`);
 
         while (hasMoreLinks) {
+            const batchStartTime = Date.now();
+
             const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
                 BATCH_SIZE
             );
@@ -76,12 +84,30 @@ const addFullTextToLinks = async () => {
             const savePromises: Promise<LinkResponse>[] = [];
 
             const processLink = async (link) => {
+                const linkStartTime = Date.now();
+                Logger.info(
+                    `Started processing link ${
+                        link.id
+                    } at ${new Date().toISOString()}`
+                );
+
                 try {
-                    if (link.link && link.link.endsWith(".pdf")) {
-                        await processPDFLink(link);
-                    } else {
-                        await processHTMLLink(link);
-                    }
+                    await Promise.race([
+                        (async () => {
+                            if (link.link && link.link.endsWith(".pdf")) {
+                                await processPDFLink(link);
+                            } else {
+                                await processHTMLLink(link);
+                            }
+                            Logger.info(
+                                `Finished processing content for link ${link.id}`
+                            );
+                        })(),
+                        setTimeout(
+                            LINK_TIMEOUT,
+                            `Timeout processing link ${link.id}`
+                        ),
+                    ]);
                 } catch (error) {
                     Logger.error(
                         `Error processing link ${link.id}:`,
@@ -94,13 +120,50 @@ const addFullTextToLinks = async () => {
                         link.skippedNotProbablyReadable = false;
                         link.skippedInaccessiblePDF = false;
                         link.deadLink = false;
+                        link.fullText = sanitizeText(link.fullText);
                     }
 
-                    savePromises.push(curiusLinkRepo.save(link));
+                    Logger.info(`Saving link ${link.id} to database...`);
+                    savePromises.push(
+                        curiusLinkRepo.save(link).then(
+                            (result) => {
+                                Logger.info(
+                                    `Successfully saved link ${link.id}`
+                                );
+                                return result;
+                            },
+                            (error) => {
+                                Logger.error(
+                                    `Error saving link ${link.id}:`,
+                                    getErrorMessage(error)
+                                );
+                                return failure(new UnexpectedError(error));
+                            }
+                        )
+                    );
+
+                    const linkEndTime = Date.now();
+                    Logger.info(
+                        `Finished processing link ${link.id} in ${
+                            linkEndTime - linkStartTime
+                        }ms`
+                    );
                 }
             };
 
-            await Promise.all(links.map(processLink));
+            try {
+                await Promise.race([
+                    Promise.all(links.map(processLink)),
+                    setTimeout(BATCH_TIMEOUT, "Batch processing timeout"),
+                ]);
+            } catch (error) {
+                Logger.error(
+                    `Batch processing error or timeout: ${getErrorMessage(
+                        error
+                    )}`
+                );
+            }
+
             await Promise.all(savePromises);
 
             processedLinks += batchSize;
@@ -114,6 +177,13 @@ const addFullTextToLinks = async () => {
                 `Finished processing ${batchSize} links in ${totalTime.toFixed(
                     2
                 )}s. Progress: ${progressPercentage}%`
+            );
+
+            const batchEndTime = Date.now();
+            Logger.info(
+                `Batch processing completed in ${
+                    batchEndTime - batchStartTime
+                }ms`
             );
         }
     } catch (error) {
