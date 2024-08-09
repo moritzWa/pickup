@@ -142,17 +142,25 @@ const getContentType = async (url: string): Promise<string | null> => {
 
 const processLink = async (link: CuriusLink): Promise<CuriusLink> => {
     try {
-        // const contentType = await getContentType(link.link);
-
         const isProbablyPDF = /\.pdf($|\?)/i.test(link.link);
 
         if (isProbablyPDF) {
             await processPDFLink(link);
         } else {
-            await processHTMLLink(link);
+            try {
+                await processHTMLLink(link);
+            } catch (error) {
+                // If HTML processing fails, try processing as PDF
+                if (error instanceof Error && error.message.includes("PDF")) {
+                    await processPDFLink(link);
+                } else {
+                    throw error; // Re-throw if it's not a PDF-related error
+                }
+            }
         }
     } catch (error) {
         link.skippedErrorFetchingFullText = true;
+        // Log the error if needed
     }
     return link;
 };
@@ -235,6 +243,11 @@ const processHTMLLink = async (link) => {
         if (!response.ok) {
             handleNonOkResponse(link, response);
             return;
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/pdf")) {
+            throw new Error("Unexpected PDF content");
         }
 
         const html = await response.text();
