@@ -18,6 +18,7 @@ import moment = require("moment");
 import { connect } from "src/core/infra/postgres";
 import { UserIdentityResponse } from "@onesignal/node-onesignal";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
+import { AudioService } from "src/shared/audioService";
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -130,12 +131,10 @@ const convertCuriusToContent = async (
         return success(link.contentId);
     }
 
+    // chunk the full text into less than 4000 characters long but make sure they are full words (no spaces)
+
     // try to get audio
-    const audioResponse = await openai.audio.speak({
-        text: link.fullText || "",
-        voice: "onyx",
-        model: "tts-1",
-    });
+    const audioResponse = await AudioService.generate(link.fullText || "");
 
     if (audioResponse.isFailure()) {
         return failure(audioResponse.error);
@@ -143,21 +142,9 @@ const convertCuriusToContent = async (
 
     const audio = audioResponse.value;
 
-    // need to write this to firebase
-    const uploadResponse = await firebase.storage.uploadBuffer(
-        audio,
-        "audio/mp3"
-    );
-
-    if (uploadResponse.isFailure()) {
-        return failure(uploadResponse.error);
-    }
-
-    const upload = uploadResponse.value;
-
     const contentResponse = await contentRepo.create({
         id: uuidv4(),
-        audioUrl: upload.originalUrl,
+        audioUrl: audio.url,
         context: "",
         thumbnailImageUrl: "",
         authorImageUrl: "",
@@ -195,7 +182,7 @@ if (require.main === module) {
                 "andrew.j.duca@gmail.com"
             );
 
-            const queue = await buildQueue(userResponse.value, 10);
+            const queue = await buildQueue(userResponse.value, 1);
 
             debugger;
         })

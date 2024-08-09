@@ -27,4 +27,4 @@ const filterBestCuriusLinks = async () => {
     }
 };
 
-filterBestCuriusLinks();
+void filterBestCuriusLinks();
