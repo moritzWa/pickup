@@ -2,12 +2,14 @@ import * as fs from "fs";
 import { dataSource } from "src/core/infra/postgres";
 import { CuriusLink, CuriusLinkChunk } from "src/core/infra/postgres/entities";
 import { Logger } from "src/utils/logger";
+import * as path from "path";
 
 const seedTopLinks = async () => {
     await dataSource.initialize();
 
     try {
-        const rawData = fs.readFileSync("topLinks.json", "utf8");
+        const importPath = path.join(__dirname, "topLinks.json");
+        const rawData = fs.readFileSync(importPath, "utf8");
         const topLinks = JSON.parse(rawData);
 
         const linkRepo = dataSource.getRepository(CuriusLink);

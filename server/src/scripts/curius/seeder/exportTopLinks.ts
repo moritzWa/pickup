@@ -3,6 +3,7 @@ import { dataSource } from "src/core/infra/postgres";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { isSuccess } from "src/scripts/curius/utils";
 import { Logger } from "src/utils/logger";
+import * as path from "path";
 
 const LINKS_TO_EXPORT = 200;
 
@@ -48,8 +49,9 @@ const exportTopLinks = async () => {
             })
         );
 
-        fs.writeFileSync("topLinks.json", JSON.stringify(exportData, null, 2));
-        Logger.info(`Exported ${links.length} links to topLinks.json`);
+        const exportPath = path.join(__dirname, "topLinks.json");
+        fs.writeFileSync(exportPath, JSON.stringify(exportData, null, 2));
+        Logger.info(`Exported ${links.length} links to ${exportPath}`);
     } catch (error) {
         Logger.error("Error exporting top links:", error);
     } finally {
