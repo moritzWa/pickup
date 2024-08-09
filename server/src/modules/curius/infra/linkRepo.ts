@@ -75,6 +75,7 @@ export class PostgresCuriusLinkRepository {
         }
     };
 
+    // Full text related
     async findLinksWithoutFullText(limit: number): Promise<LinksResponse> {
         try {
             const links = await this.repo.find({
@@ -96,6 +97,61 @@ export class PostgresCuriusLinkRepository {
                     id: "ASC",
                 },
             });
+            return success(links);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    // get best links to add full text
+    async filterBestLinksWithoutFullText(
+        limit: number
+    ): Promise<LinksResponse> {
+        try {
+            const links = await this.repo.find({
+                where: {
+                    fullText: IsNull(),
+                    skippedInaccessiblePDF: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+                },
+                take: limit,
+                order: {
+                    readCount: "DESC",
+                    userIds: "DESC",
+                    publishedTime: "DESC",
+                },
+            });
+            return success(links);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    // get best links to for embedding
+    async findBestLinksWithFullTextWithoutChunks(
+        limit: number
+    ): Promise<LinksResponse> {
+        try {
+            const links = await this.repo
+                .createQueryBuilder("link")
+                .where("link.fullText IS NOT NULL") // isNull is not supported for relations in where clause in typeorm
+                .andWhere((qb) => {
+                    const subQuery = qb
+                        .subQuery()
+                        .select("1")
+                        .from(CuriusLinkChunk, "chunk")
+                        .where("chunk.linkId = link.id")
+                        .getQuery();
+                    return "NOT EXISTS (" + subQuery + ")";
+                })
+                .orderBy("link.readCount", "DESC")
+                .addOrderBy("link.userIds", "DESC")
+                .addOrderBy("link.publishedTime", "DESC")
+                .take(limit)
+                .getMany();
+
             return success(links);
         } catch (err) {
             return failure(new UnexpectedError(err));
@@ -133,6 +189,22 @@ export class PostgresCuriusLinkRepository {
                 take: 100,
                 order: {
                     id: "ASC",
+                },
+            });
+            return success(links);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async filterBestLinks(limit: number): Promise<LinksResponse> {
+        try {
+            const links = await this.repo.find({
+                take: limit,
+                order: {
+                    readCount: "DESC",
+                    userIds: "DESC",
+                    publishedTime: "DESC",
                 },
             });
             return success(links);

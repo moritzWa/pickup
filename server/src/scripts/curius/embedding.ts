@@ -10,6 +10,8 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+const LINKS_TO_PROCESS = 2000;
+
 // TODO: split this usign tiktoken or similar (could also add sliding/overlapping window)
 // Improved chunking function
 const chunkText = (text: string, chunkSize: number = 1200): string[] => {
@@ -37,7 +39,10 @@ const addEmbeddingsToLinks = async () => {
 
     try {
         const startTime = performance.now();
-        const linksResponse = await curiusLinkRepo.find();
+        const linksResponse =
+            await curiusLinkRepo.findBestLinksWithFullTextWithoutChunks(
+                LINKS_TO_PROCESS
+            );
         if (!isSuccess(linksResponse)) {
             console.error(
                 "embedding.ts: Failed to fetch links:",
@@ -47,19 +52,18 @@ const addEmbeddingsToLinks = async () => {
         }
 
         const links = linksResponse.value;
-        console.log(`Found ${links.length} links.`);
+        console.log(`Found ${links.length} best links without embeddings.`);
 
         for (let i = 0; i < links.length; i++) {
             const link = links[i];
             try {
                 const content = link.fullText || link.title;
 
-                // Handle potential fetch errors
                 if (!content) {
                     console.error(
                         `No content available for link ${link.id}. Skipping.`
                     );
-                    continue; // Skip to the next link
+                    continue;
                 }
 
                 const linkStartTime = performance.now();

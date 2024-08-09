@@ -2,7 +2,7 @@
 // - https://www.npmjs.com/package/@postlight/parser // uses private github dependency only accessible via ssh token
 // - https://www.npmjs.com/package/@mozilla/readability <- current pick
 
-import { isProbablyReaderable, Readability } from "@mozilla/readability";
+import { Readability } from "@mozilla/readability";
 import { EventEmitter } from "events";
 import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
@@ -35,6 +35,7 @@ console.error = (...args) => {
 
 const BATCH_SIZE = 60; // Increased batch size
 const CONCURRENCY_LIMIT = 20; // Number of links to process concurrently
+const MAX_LINKS_TO_PROCESS = 4000;
 
 const addFullTextToLinks = async () => {
     try {
@@ -43,16 +44,21 @@ const addFullTextToLinks = async () => {
         let totalProcessed = 0;
 
         // log countLinksWithoutFullText
-        const countLinksWithoutFullText =
-            await curiusLinkRepo.countLinksWithoutFullText();
-        Logger.info(
-            `Count of links without full text: ${countLinksWithoutFullText.value}`
-        );
+        // const countLinksWithoutFullText =
+        //     await curiusLinkRepo.countLinksWithoutFullText();
+        // Logger.info(
+        //     `Count of links without full text: ${countLinksWithoutFullText.value}`
+        // );
 
-        while (true) {
-            const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
-                BATCH_SIZE
-            );
+        // while (true) {
+        // const linksResponse = await curiusLinkRepo.findLinksWithoutFullText(
+        //     BATCH_SIZE
+        // );
+
+        while (totalProcessed < MAX_LINKS_TO_PROCESS) {
+            const linksResponse =
+                await curiusLinkRepo.filterBestLinksWithoutFullText(BATCH_SIZE);
+
             if (!isSuccess(linksResponse)) {
                 Logger.error(
                     "Failed to fetch links without full text:",
@@ -83,6 +89,13 @@ const addFullTextToLinks = async () => {
                     2
                 )}s. Total: ${totalProcessed}`
             );
+
+            if (totalProcessed >= MAX_LINKS_TO_PROCESS) {
+                Logger.info(
+                    `Reached the maximum number of links to process (${MAX_LINKS_TO_PROCESS}). Exiting.`
+                );
+                break;
+            }
         }
 
         Logger.info(`Finished processing ${totalProcessed} links in total.`);
@@ -264,15 +277,12 @@ const processHTMLLink = async (link) => {
             pretendToBeVisual: true,
             url: link.link,
         });
-        if (
-            !isProbablyReaderable(window.document, {
-                minScore: 10,
-                minContentLength: 90,
-            })
-        ) {
-            markSkip(link, "skippedNotProbablyReadable");
-            return;
-        }
+
+        // Remove the isProbablyReaderable check
+        // if (!isProbablyReaderable(window.document, { minScore: 10, minContentLength: 90 })) {
+        //     markSkip(link, "skippedNotProbablyReadable");
+        //     return;
+        // }
 
         const result = new Readability(window.document).parse();
         if (!result) {
