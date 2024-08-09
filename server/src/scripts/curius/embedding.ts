@@ -48,11 +48,11 @@ async function processAndSaveChunks(chunks: string[], link: any) {
         )
     );
     const embeddingEndTime = performance.now();
-    Logger.info(
-        `Embedding took ${Math.round(
-            embeddingEndTime - embeddingStartTime
-        )}ms for ${chunks.length} chunks.`
-    );
+    // Logger.info(
+    //     `Embedding took ${Math.round(
+    //         embeddingEndTime - embeddingStartTime
+    //     )}ms for ${chunks.length} chunks.`
+    // );
 
     const savingStartTime = performance.now();
     await Promise.all(
@@ -66,11 +66,11 @@ async function processAndSaveChunks(chunks: string[], link: any) {
         })
     );
     const savingEndTime = performance.now();
-    Logger.info(
-        `Saving took ${Math.round(savingEndTime - savingStartTime)}ms for ${
-            chunks.length
-        } chunks.`
-    );
+    // Logger.info(
+    //     `Saving took ${Math.round(savingEndTime - savingStartTime)}ms for ${
+    //         chunks.length
+    //     } chunks.`
+    // );
 }
 
 async function processLink(link: any, index: number, totalLinks: number) {
@@ -82,25 +82,25 @@ async function processLink(link: any, index: number, totalLinks: number) {
     }
 
     const linkStartTime = performance.now();
-    Logger.info(`Processing link ${index + 1} of ${totalLinks}: ${link.id}`);
+    // Logger.info(`Processing link ${index + 1} of ${totalLinks}: ${link.id}`);
 
     const chunkingStartTime = performance.now();
     const chunks = chunkText(content);
     const chunkingEndTime = performance.now();
-    Logger.info(
-        `Chunking took ${Math.round(
-            chunkingEndTime - chunkingStartTime
-        )}ms. Created ${chunks.length} chunks.`
-    );
+    // Logger.info(
+    //     `Chunking took ${Math.round(
+    //         chunkingEndTime - chunkingStartTime
+    //     )}ms. Created ${chunks.length} chunks.`
+    // );
 
     await processAndSaveChunks(chunks, link);
 
     const linkEndTime = performance.now();
-    Logger.info(
-        `Added embeddings for link ${link.id}. Total time: ${Math.round(
-            linkEndTime - linkStartTime
-        )}ms`
-    );
+    // Logger.info(
+    //     `Added embeddings for link ${link.id}. Total time: ${Math.round(
+    //         linkEndTime - linkStartTime
+    //     )}ms`
+    // );
 }
 
 const addEmbeddingsToLinks = async () => {
@@ -130,9 +130,9 @@ const addEmbeddingsToLinks = async () => {
                 );
             }
 
-            if ((i + 1) % 10 === 0 || i === links.length - 1) {
-                Logger.info(`Processed ${i + 1} of ${links.length} links`);
-            }
+            // Simple progress tracking
+            const progress = (((i + 1) / links.length) * 100).toFixed(2);
+            Logger.info(`Progress: ${progress}% (${i + 1}/${links.length})`);
         }
 
         const endTime = performance.now();
