@@ -6,6 +6,14 @@ export const CategoryEnum = enumType({
     members: Category,
 });
 
+export const SubcategoryInfo = objectType({
+    name: "SubcategoryInfo",
+    definition: (t) => {
+        t.nonNull.string("label");
+        t.nonNull.string("value");
+    },
+});
+
 export const CategoryInfo = objectType({
     name: "CategoryInfo",
     definition: (t) => {
@@ -14,6 +22,7 @@ export const CategoryInfo = objectType({
         t.nonNull.string("emoji");
         t.nullable.string("backgroundColor");
         t.nullable.string("textColor");
+        t.list.field("subcategories", { type: nonNull(SubcategoryInfo) });
     },
 });
 

@@ -34,7 +34,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
-  CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
+  CategoryEnum: "arts_culture" | "business_models" | "corporate_tech" | "entrepreneurship" | "finance" | "fundraising" | "growth" | "health_wellness" | "hiring" | "international_business" | "legal" | "management" | "product_management" | "software_engineering" | "startup_ideas" | "tech_society" | "venture_capital"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
@@ -55,6 +55,7 @@ export interface NexusGenObjects {
     backgroundColor?: string | null; // String
     emoji: string; // String!
     label: string; // String!
+    subcategories?: NexusGenRootTypes['SubcategoryInfo'][] | null; // [SubcategoryInfo!]
     textColor?: string | null; // String
     value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
   }
@@ -129,6 +130,10 @@ export interface NexusGenObjects {
     title: string; // String!
     userIds: number[]; // [Int!]!
   }
+  SubcategoryInfo: { // root type
+    label: string; // String!
+    value: string; // String!
+  }
   User: entities.User ;
 }
 
@@ -147,6 +152,7 @@ export interface NexusGenFieldTypes {
     backgroundColor: string | null; // String
     emoji: string; // String!
     label: string; // String!
+    subcategories: NexusGenRootTypes['SubcategoryInfo'][] | null; // [SubcategoryInfo!]
     textColor: string | null; // String
     value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
   }
@@ -302,6 +308,10 @@ export interface NexusGenFieldTypes {
     title: string; // String!
     userIds: number[]; // [Int!]!
   }
+  SubcategoryInfo: { // field return type
+    label: string; // String!
+    value: string; // String!
+  }
   User: { // field return type
     authProvider: NexusGenEnums['UserAuthProviderEnum']; // UserAuthProviderEnum!
     authProviderId: string; // String!
@@ -334,6 +344,7 @@ export interface NexusGenFieldTypeNames {
     backgroundColor: 'String'
     emoji: 'String'
     label: 'String'
+    subcategories: 'SubcategoryInfo'
     textColor: 'String'
     value: 'CategoryEnum'
   }
@@ -488,6 +499,10 @@ export interface NexusGenFieldTypeNames {
     snippet: 'String'
     title: 'String'
     userIds: 'Int'
+  }
+  SubcategoryInfo: { // field return type name
+    label: 'String'
+    value: 'String'
   }
   User: { // field return type name
     authProvider: 'UserAuthProviderEnum'

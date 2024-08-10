@@ -1,5 +1,3 @@
-import { Maybe } from "src/core/logic";
-
 export enum Country {
     US = "US",
     UK = "UK",
@@ -8,14 +6,21 @@ export enum Country {
 }
 
 export enum Category {
-    Language = "language",
-    Entrepreneurship = "entrepreneurship",
-    History = "history",
-    Science = "science",
-    Philosophy = "philosophy",
-    PublicSpeaking = "public_speaking",
-    Negotiation = "negotiation",
-    Product = "product",
+    StartupIdeas = "startup_ideas",
+    Fundraising = "fundraising",
+    ProductManagement = "product_management",
     Hiring = "hiring",
-    Comedy = "comedy",
+    Growth = "growth",
+    SoftwareEngineering = "software_engineering",
+    VentureCapital = "venture_capital",
+    CorporateTech = "corporate_tech",
+    Entrepreneurship = "entrepreneurship",
+    BusinessModels = "business_models",
+    Finance = "finance",
+    Legal = "legal",
+    Management = "management",
+    InternationalBusiness = "international_business",
+    TechSociety = "tech_society",
+    ArtsCulture = "arts_culture",
+    HealthWellness = "health_wellness",
 }

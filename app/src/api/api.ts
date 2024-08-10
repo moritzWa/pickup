@@ -232,6 +232,10 @@ const GetCategories = gql`
         emoji
         backgroundColor
         textColor
+        subcategories {
+          label
+          value
+        }
       }
     }
   }

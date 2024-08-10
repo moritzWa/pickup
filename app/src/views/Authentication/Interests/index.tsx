@@ -11,6 +11,7 @@ import {
   Mutation,
   MutationSetInterestsArgs,
   Query,
+  SubcategoryInfo,
 } from "src/api/generated/types";
 import { Input, colors } from "src/components";
 import Back from "src/components/Back";
@@ -44,6 +45,22 @@ const Interests = () => {
   const categories = categoriesData?.getCategories || [];
 
   useEffect(() => void refetch(), [isFocused]);
+
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set()
+  );
+
+  const toggleCategory = (categoryValue: string) => {
+    setExpandedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryValue)) {
+        newSet.delete(categoryValue);
+      } else {
+        newSet.add(categoryValue);
+      }
+      return newSet;
+    });
+  };
 
   const _continue = async () => {
     try {
@@ -117,7 +134,7 @@ const Interests = () => {
             color: header,
           }}
         >
-          What type of content are you interested in? bla
+          What type of content are you interested in?
         </Text>
 
         <Input
@@ -137,13 +154,17 @@ const Interests = () => {
         <View
           style={{
             marginVertical: 25,
-            // just display flex and wrap
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
+            alignItems: "flex-start",
           }}
         >
           {categories.map((section) => (
             <View
               style={{
                 marginBottom: 20,
+                width: "100%",
               }}
               key={section.value}
             >
@@ -168,12 +189,32 @@ const Interests = () => {
                 }}
               >
                 {section.categories.map((category) => (
-                  <Category
-                    key={category.value}
-                    category={category}
-                    isActive={selected.has(category.value)}
-                    onPress={() => addOrRemove(category.value)}
-                  />
+                  <React.Fragment key={category.value}>
+                    <Category
+                      category={category}
+                      isActive={selected.has(category.value)}
+                      onPress={() => {
+                        addOrRemove(category.value);
+                        toggleCategory(category.value);
+                      }}
+                    />
+                    {expandedCategories.has(category.value) &&
+                      category.subcategories && (
+                        <>
+                          {category.subcategories.map((subcategory) => (
+                            <Category
+                              key={subcategory.value}
+                              category={{
+                                ...subcategory,
+                                emoji: "",
+                              }}
+                              isActive={selected.has(subcategory.value)}
+                              onPress={() => addOrRemove(subcategory.value)}
+                            />
+                          ))}
+                        </>
+                      )}
+                  </React.Fragment>
                 ))}
               </View>
             </View>
@@ -193,12 +234,16 @@ const Interests = () => {
   );
 };
 
+type CategoryOrSubcategory =
+  | CategoryInfo
+  | (SubcategoryInfo & { emoji: string });
+
 const Category = ({
   category,
   isActive,
   onPress,
 }: {
-  category: CategoryInfo;
+  category: CategoryOrSubcategory;
   isActive: boolean;
   onPress: () => void;
 }) => {
@@ -209,8 +254,8 @@ const Category = ({
       activeOpacity={0.8}
       onPress={onPress}
       style={{
-        padding: 10,
-        paddingHorizontal: 15,
+        padding: 8,
+        paddingHorizontal: 12,
         marginRight: 5,
         display: "flex",
         flexDirection: "row",
@@ -220,27 +265,36 @@ const Category = ({
         borderRadius: 100,
         backgroundColor: isActive
           ? colors.primary
-          : category?.backgroundColor || fullTheme.secondaryBackground,
+          : "backgroundColor" in category && category.backgroundColor
+          ? category.backgroundColor
+          : fullTheme.secondaryBackground,
       }}
-      key={category.value}
     >
-      <Text
-        style={{
-          fontFamily: "Raleway-Medium",
-          fontSize: 12,
-          color: category?.textColor || fullTheme.text,
-        }}
-      >
-        {category.emoji}
-      </Text>
+      {category.emoji && (
+        <Text
+          style={{
+            fontFamily: "Raleway-Medium",
+            fontSize: 12,
+            marginRight: 5,
+            color:
+              "textColor" in category && category.textColor
+                ? category.textColor
+                : fullTheme.text,
+          }}
+        >
+          {category.emoji}
+        </Text>
+      )}
+
       <Text
         style={{
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-SemiBold",
           fontSize: 16,
-          marginLeft: 10,
           color: isActive
             ? colors.white
-            : category?.textColor || fullTheme.text,
+            : "textColor" in category && category.textColor
+            ? category.textColor
+            : fullTheme.text,
         }}
       >
         {category.label}

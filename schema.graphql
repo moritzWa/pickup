@@ -8,22 +8,30 @@ enum ActivityFilter {
 }
 
 enum CategoryEnum {
-  Comedy
+  ArtsCulture
+  BusinessModels
+  CorporateTech
   Entrepreneurship
+  Finance
+  Fundraising
+  Growth
+  HealthWellness
   Hiring
-  History
-  Language
-  Negotiation
-  Philosophy
-  Product
-  PublicSpeaking
-  Science
+  InternationalBusiness
+  Legal
+  Management
+  ProductManagement
+  SoftwareEngineering
+  StartupIdeas
+  TechSociety
+  VentureCapital
 }
 
 type CategoryInfo {
   backgroundColor: String
   emoji: String!
   label: String!
+  subcategories: [SubcategoryInfo!]
   textColor: String
   value: CategoryEnum!
 }
@@ -214,6 +222,11 @@ type SearchResult {
   snippet: String
   title: String!
   userIds: [Int!]!
+}
+
+type SubcategoryInfo {
+  label: String!
+  value: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
