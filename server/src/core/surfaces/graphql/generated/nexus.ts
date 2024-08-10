@@ -34,7 +34,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
-  CategoryEnum: "arts_culture" | "business_models" | "corporate_tech" | "entrepreneurship" | "finance" | "food_sports" | "fundraising" | "growth" | "health_wellness" | "hiring" | "international_business" | "legal" | "management" | "politics_news" | "product_management" | "software_engineering" | "startup_ideas" | "tech_society" | "venture_capital"
+  CategoryEnum: "Arts & Culture" | "Business Models" | "Corporate Technology" | "Entrepreneurship" | "Finance & Legal" | "Health & Wellness" | "International Business" | "Management" | "Software Engineering" | "Startups" | "Technology & Society" | "Venture Capital & Investment"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
@@ -51,18 +51,14 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  CategoryInfo: { // root type
-    backgroundColor?: string | null; // String
+  Category: { // root type
     emoji: string; // String!
-    label: string; // String!
-    subcategories?: NexusGenRootTypes['SubcategoryInfo'][] | null; // [SubcategoryInfo!]
-    textColor?: string | null; // String
-    value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
+    name: string; // String!
+    subcategories: string[]; // [String!]!
   }
   CategorySection: { // root type
-    categories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
-    label: string; // String!
-    value: string; // String!
+    categories: NexusGenRootTypes['Category'][]; // [Category!]!
+    name: string; // String!
   }
   Content: entities.Content ;
   ContentRespondResponse: { // root type
@@ -130,10 +126,6 @@ export interface NexusGenObjects {
     title: string; // String!
     userIds: number[]; // [Int!]!
   }
-  SubcategoryInfo: { // root type
-    label: string; // String!
-    value: string; // String!
-  }
   User: entities.User ;
 }
 
@@ -148,18 +140,14 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
-  CategoryInfo: { // field return type
-    backgroundColor: string | null; // String
+  Category: { // field return type
     emoji: string; // String!
-    label: string; // String!
-    subcategories: NexusGenRootTypes['SubcategoryInfo'][] | null; // [SubcategoryInfo!]
-    textColor: string | null; // String
-    value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
+    name: string; // String!
+    subcategories: string[]; // [String!]!
   }
   CategorySection: { // field return type
-    categories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
-    label: string; // String!
-    value: string; // String!
+    categories: NexusGenRootTypes['Category'][]; // [Category!]!
+    name: string; // String!
   }
   Content: { // field return type
     audioUrl: string; // String!
@@ -308,10 +296,6 @@ export interface NexusGenFieldTypes {
     title: string; // String!
     userIds: number[]; // [Int!]!
   }
-  SubcategoryInfo: { // field return type
-    label: string; // String!
-    value: string; // String!
-  }
   User: { // field return type
     authProvider: NexusGenEnums['UserAuthProviderEnum']; // UserAuthProviderEnum!
     authProviderId: string; // String!
@@ -340,18 +324,14 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
-  CategoryInfo: { // field return type name
-    backgroundColor: 'String'
+  Category: { // field return type name
     emoji: 'String'
-    label: 'String'
-    subcategories: 'SubcategoryInfo'
-    textColor: 'String'
-    value: 'CategoryEnum'
+    name: 'String'
+    subcategories: 'String'
   }
   CategorySection: { // field return type name
-    categories: 'CategoryInfo'
-    label: 'String'
-    value: 'String'
+    categories: 'Category'
+    name: 'String'
   }
   Content: { // field return type name
     audioUrl: 'String'
@@ -499,10 +479,6 @@ export interface NexusGenFieldTypeNames {
     snippet: 'String'
     title: 'String'
     userIds: 'Int'
-  }
-  SubcategoryInfo: { // field return type name
-    label: 'String'
-    value: 'String'
   }
   User: { // field return type name
     authProvider: 'UserAuthProviderEnum'

@@ -1,25 +1,24 @@
-import {
-    enumType,
-    idArg,
-    list,
-    nonNull,
-    nullable,
-    objectType,
-    queryField,
-} from "nexus";
-import {
-    Context,
-    throwIfNotAuthenticated,
-} from "src/core/surfaces/graphql/context";
-import { stripe } from "src/utils";
-import { throwIfError } from "src/core/surfaces/graphql/common";
-import { contentSessionRepo } from "../../infra";
-import { omit } from "lodash";
+import { list, nonNull, objectType, queryField } from "nexus";
 import { CATEGORIES } from "../../services/categories";
+
+export const CategorySection = objectType({
+    name: "CategorySection",
+    definition(t) {
+        t.nonNull.string("name");
+        t.nonNull.list.nonNull.field("categories", { type: "Category" });
+    },
+});
+
+export const Category = objectType({
+    name: "Category",
+    definition(t) {
+        t.nonNull.string("name");
+        t.nonNull.string("emoji");
+        t.nonNull.list.nonNull.string("subcategories");
+    },
+});
 
 export const getCategories = queryField("getCategories", {
     type: nonNull(list(nonNull("CategorySection"))),
-    resolve: async (_parent, args, ctx: Context) => {
-        return CATEGORIES;
-    },
+    resolve: () => CATEGORIES,
 });

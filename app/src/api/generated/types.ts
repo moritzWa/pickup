@@ -36,40 +36,17 @@ export enum ActivityFilter {
   Unread = "unread",
 }
 
-export enum CategoryEnum {
-  Comedy = "Comedy",
-  Entrepreneurship = "Entrepreneurship",
-  Hiring = "Hiring",
-  History = "History",
-  Language = "Language",
-  Negotiation = "Negotiation",
-  Philosophy = "Philosophy",
-  Product = "Product",
-  PublicSpeaking = "PublicSpeaking",
-  Science = "Science",
-}
-
-export type CategoryInfo = {
-  __typename?: "CategoryInfo";
-  backgroundColor?: Maybe<Scalars["String"]["output"]>;
-  emoji: Scalars["String"]["output"];
-  label: Scalars["String"]["output"];
-  textColor?: Maybe<Scalars["String"]["output"]>;
-  value: CategoryEnum;
-  subcategories?: Maybe<Array<SubcategoryInfo>>;
-};
-
-export type SubcategoryInfo = {
-  __typename?: "SubcategoryInfo";
-  label: Scalars["String"]["output"];
-  value: Scalars["String"]["output"];
+export type Category = {
+  __typename?: "Category";
+  name: string;
+  emoji: string;
+  subcategories: string[];
 };
 
 export type CategorySection = {
   __typename?: "CategorySection";
-  categories: Array<CategoryInfo>;
-  label: Scalars["String"]["output"];
-  value: Scalars["String"]["output"];
+  name: string;
+  categories: Category[];
 };
 
 export type Content = {

@@ -1,196 +1,152 @@
-import { Category } from "src/core/infra/postgres/entities";
-
 export enum ParentCategory {
     TechnologyIndustry = "Technology & Industry",
     BusinessManagement = "Business & Management",
     SocietyCulture = "Society & Culture",
 }
 
-export const CATEGORIES = [
+export type SubCategory = string;
+
+export type Category = {
+    name: string;
+    emoji: string;
+    subcategories: SubCategory[];
+};
+
+export type CategorySection = {
+    name: ParentCategory;
+    categories: Category[];
+};
+
+export const CATEGORIES: CategorySection[] = [
     {
-        label: "Technology & Industry",
-        value: ParentCategory.TechnologyIndustry,
+        name: ParentCategory.TechnologyIndustry,
         categories: [
             {
-                label: "Startups",
-                value: Category.Entrepreneurship,
+                name: "Startups",
                 emoji: "🚀",
                 subcategories: [
-                    { label: "Startup Ideas", value: Category.StartupIdeas },
-                    { label: "Fundraising", value: Category.Fundraising },
-                    {
-                        label: "Product Management",
-                        value: Category.ProductManagement,
-                    },
-                    { label: "Hiring", value: Category.Hiring },
-                    { label: "Growth", value: Category.Growth },
+                    "Startup Ideas",
+                    "Fundraising",
+                    "Product Management",
+                    "Hiring",
+                    "Growth",
                 ],
             },
             {
-                label: "Software Engineering",
-                value: Category.SoftwareEngineering,
+                name: "Software Engineering",
                 emoji: "💻",
                 subcategories: [
-                    { label: "AI & Machine Learning", value: "ai_ml" },
-                    { label: "Security", value: "security" },
-                    { label: "Cloud Computing", value: "cloud_computing" },
-                    { label: "Hardware", value: "hardware" },
-                    { label: "Infrastructure", value: "infrastructure" },
+                    "AI & Machine Learning",
+                    "Security",
+                    "Cloud Computing",
+                    "Hardware",
+                    "Infrastructure",
+                    "Web3",
                 ],
             },
             {
-                label: "Venture Capital & Investment",
-                value: Category.VentureCapital,
+                name: "Venture Capital & Investment",
                 emoji: "💰",
                 subcategories: [
-                    { label: "Vertical SaaS", value: "vertical_saas" },
-                    { label: "Health Tech", value: "health_tech" },
-                    { label: "Enterprise", value: "enterprise" },
-                    { label: "Defense", value: "defense" },
-                    { label: "Crypto", value: "crypto" },
-                    { label: "Fintech", value: "fintech" },
-                    { label: "Climate Tech", value: "climate_tech" },
-                    { label: "Consumer", value: "consumer" },
-                    { label: "Games", value: "games" },
-                    { label: "Robotics", value: "robotics" },
-                    {
-                        label: "Transportation & EVs",
-                        value: "transportation_evs",
-                    },
+                    "Vertical SaaS",
+                    "Health Tech",
+                    "Enterprise",
+                    "Defense",
+                    "Crypto",
+                    "Fintech",
+                    "Climate Tech",
+                    "Consumer",
+                    "Games",
+                    "Robotics",
+                    "Transportation & EVs",
                 ],
             },
             {
-                label: "Corporate Technology",
-                value: Category.CorporateTech,
+                name: "Corporate Technology",
                 emoji: "🏢",
                 subcategories: [
-                    { label: "Apple", value: "apple" },
-                    { label: "Google", value: "google" },
-                    { label: "Microsoft", value: "microsoft" },
-                    { label: "Meta", value: "meta" },
-                    { label: "Amazon", value: "amazon" },
-                    { label: "TikTok", value: "tiktok" },
-                    { label: "OpenAI", value: "openai" },
-                    {
-                        label: "Transportation & EVs",
-                        value: "transportation_evs",
-                    },
+                    "Apple",
+                    "Google",
+                    "Microsoft",
+                    "Meta",
+                    "Amazon",
+                    "TikTok",
+                    "OpenAI",
+                    "Transportation & EVs",
                 ],
             },
         ],
     },
     {
-        label: "Business & Management",
-        value: ParentCategory.BusinessManagement,
+        name: ParentCategory.BusinessManagement,
         categories: [
             {
-                label: "Entrepreneurship",
-                value: Category.Entrepreneurship,
+                name: "Entrepreneurship",
                 emoji: "💼",
-                subcategories: [
-                    {
-                        label: "Becoming a Founder",
-                        value: "becoming_a_founder",
-                    },
-                    { label: "Company Stages", value: "company_stages" },
-                ],
+                subcategories: ["Becoming a Founder", "Company Stages"],
             },
             {
-                label: "Business Models",
-                value: Category.BusinessModels,
+                name: "Business Models",
                 emoji: "📊",
-                subcategories: [
-                    { label: "Monetization", value: "monetization" },
-                    { label: "Pricing", value: "pricing" },
-                    { label: "Unit Economics", value: "unit_economics" },
-                ],
+                subcategories: ["Monetization", "Pricing", "Unit Economics"],
             },
             {
-                label: "Finance & Legal",
-                value: Category.Finance,
+                name: "Finance & Legal",
                 emoji: "💵",
-                subcategories: [
-                    { label: "Cash Burn", value: "cash_burn" },
-                    { label: "Legal Issues", value: Category.Legal },
-                ],
+                subcategories: ["Cash Burn", "Legal Issues"],
             },
             {
-                label: "Management",
-                value: Category.Management,
+                name: "Management",
                 emoji: "📈",
-                subcategories: [
-                    { label: "Leadership", value: "leadership" },
-                    { label: "Culture", value: "culture" },
-                    { label: "Compensation", value: "compensation" },
-                ],
+                subcategories: ["Leadership", "Culture", "Compensation"],
             },
             {
-                label: "International Business",
-                value: Category.InternationalBusiness,
+                name: "International Business",
                 emoji: "🌎",
-                subcategories: [
-                    { label: "Global Expansion", value: "global_expansion" },
-                    { label: "China", value: "china" },
-                ],
+                subcategories: ["Global Expansion", "China"],
             },
         ],
     },
     {
-        label: "Society & Culture",
-        value: ParentCategory.SocietyCulture,
+        name: ParentCategory.SocietyCulture,
         categories: [
             {
-                label: "Technology & Society",
-                value: Category.TechSociety,
+                name: "Technology & Society",
                 emoji: "🔍",
                 subcategories: [
-                    { label: "Privacy", value: "privacy" },
-                    { label: "Tech & Politics", value: "tech_politics" },
-                    { label: "US Politics", value: "us_politics" },
-                    { label: "Tech & Education", value: "tech_education" },
-                    { label: "Tech & Law", value: "tech_law" },
-                    { label: "Science", value: "science" },
-                    { label: "Philosophy", value: "philosophy" },
-                    { label: "Epistemology", value: "epistemology" },
-                    {
-                        label: "Science of Progress",
-                        value: "science_of_progress",
-                    },
+                    "Privacy",
+                    "Tech & Politics",
+                    "US Politics",
+                    "Tech & Education",
+                    "Tech & Law",
+                    "Science",
+                    "Philosophy",
+                    "Epistemology",
+                    "Science of Progress",
                 ],
             },
             {
-                label: "Arts & Culture",
-                value: Category.ArtsCulture,
+                name: "Arts & Culture",
                 emoji: "🎨",
                 subcategories: [
-                    { label: "Design", value: "design" },
-                    {
-                        label: "Media & Entertainment",
-                        value: "media_entertainment",
-                    },
-                    { label: "Literature", value: "literature" },
-                    { label: "Music", value: "music" },
-                    { label: "Fashion & Beauty", value: "fashion_beauty" },
-                    { label: "Food", value: "food" },
-                    { label: "Sports", value: "sports" },
+                    "Design",
+                    "Media & Entertainment",
+                    "Literature",
+                    "Music",
+                    "Fashion & Beauty",
+                    "Food",
+                    "Sports",
                 ],
             },
             {
-                label: "Health & Wellness",
-                value: Category.HealthWellness,
+                name: "Health & Wellness",
                 emoji: "🏥",
                 subcategories: [
-                    { label: "Mental Health", value: "mental_health" },
-                    { label: "Health Tech", value: "health_tech" },
-                    { label: "Lifestyle", value: "lifestyle" },
-                    {
-                        label: "Faith & Spirituality",
-                        value: "faith_spirituality",
-                    },
-                    {
-                        label: "Climate & Environment",
-                        value: "climate_environment",
-                    },
+                    "Mental Health",
+                    "Health Tech",
+                    "Lifestyle",
+                    "Faith & Spirituality",
+                    "Climate & Environment",
                 ],
             },
         ],
