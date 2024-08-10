@@ -1,69 +1,48 @@
 import {
-  faBullhorn,
-  faChevronDown,
-  faComment,
-  faDatabase,
-  faFileSpreadsheet,
-  faHeart,
-  faMask,
-  faMoon,
-  faSearch,
-  faServer,
-  faShareAll,
-  faSignOut,
-  faTaxi,
-  faToggleOn,
-  faUserCircle,
-} from "@fortawesome/sharp-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { useNavigation, useIsFocused } from "@react-navigation/core";
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Button,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  ScrollView,
-  Switch,
-  Share,
-  RefreshControl,
-} from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { colors } from "src/components";
-import Section from "src/components/Section";
-import { constants } from "src/config";
-import { Maybe } from "src/core";
-import { useMe } from "src/hooks";
-import { NavigationProps, RootStackParamList } from "src/navigation";
-import { auth } from "src/utils/firebase";
-import { OneSignal } from "react-native-onesignal";
-import InAppReview from "react-native-in-app-review";
-import {
   ApolloError,
   useApolloClient,
   useLazyQuery,
   useMutation,
-  useQuery,
 } from "@apollo/client";
-import { api } from "src/api";
-import { isNil, truncate } from "lodash";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
-  Mutation,
-  MutationUpdateUserArgs,
-  Query,
-} from "src/api/generated/types";
-import Header from "src/components/Header";
-import FastImage from "react-native-fast-image";
-import { useTheme } from "src/hooks/useTheme";
-import { LinearGradient } from "expo-linear-gradient";
+  faBullhorn,
+  faComment,
+  faHeart,
+  faMoon,
+  faServer,
+  faSignOut,
+} from "@fortawesome/sharp-solid-svg-icons";
+import { useIsFocused, useNavigation } from "@react-navigation/core";
 import * as Haptics from "expo-haptics";
-import numbro from "numbro";
-import { check, PERMISSIONS, RESULTS } from "react-native-permissions";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  RefreshControl,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import FastImage from "react-native-fast-image";
+import InAppReview from "react-native-in-app-review";
+import { OneSignal } from "react-native-onesignal";
+import { useDispatch } from "react-redux";
+import { api } from "src/api";
 import { BaseUserFields } from "src/api/fragments";
+import { Query } from "src/api/generated/types";
+import { colors } from "src/components";
+import Header from "src/components/Header";
+import Section from "src/components/Section";
+import { constants } from "src/config";
+import { Maybe } from "src/core";
+import { useMe } from "src/hooks";
+import { useTheme } from "src/hooks/useTheme";
+import { NavigationProps } from "src/navigation";
+import { auth } from "src/utils/firebase";
 
 const Profile = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -95,6 +74,10 @@ const Profile = () => {
     theme,
     border,
   } = useTheme();
+
+  const _navigateToInterests = () => {
+    navigation.navigate("Authentication", { screen: "Interests" });
+  };
 
   const _logout = async () => {
     try {
@@ -371,6 +354,12 @@ const Profile = () => {
             onPress={_requestNotificationPermission}
             icon={<FontAwesomeIcon icon={faBullhorn} color={text} />}
             name="Enable Push Notifications"
+          />
+
+          <Section
+            onPress={_navigateToInterests}
+            icon={<FontAwesomeIcon icon={faHeart} color={text} />}
+            name="Update Interests"
           />
 
           <Section

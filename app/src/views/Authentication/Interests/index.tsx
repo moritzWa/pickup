@@ -1,41 +1,22 @@
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import React, { useEffect, useRef, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Input, colors } from "src/components";
-import Button from "src/components/Button";
-import Back from "src/components/Back";
+import { ApolloError, useMutation, useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/core";
+import { useIsFocused } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import {
-  ApolloError,
-  useLazyQuery,
-  useMutation,
-  useQuery,
-} from "@apollo/client";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "src/api";
 import {
   CategoryInfo,
   Mutation,
-  MutationCreateUserArgs,
   MutationSetInterestsArgs,
   Query,
 } from "src/api/generated/types";
-import * as Haptics from "expo-haptics";
-import { useNavigation } from "@react-navigation/core";
-import { NavigationProps } from "src/navigation";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { GoogleButton } from "src/components/GoogleButton";
-import { AppleButton } from "src/components/AppleButton";
+import { Input, colors } from "src/components";
+import Back from "src/components/Back";
+import Button from "src/components/Button";
 import { useTheme } from "src/hooks/useTheme";
-import { AppleRequestResponse } from "@invertase/react-native-apple-authentication";
-import { useIsFocused } from "@react-navigation/native";
+import { NavigationProps } from "src/navigation";
 
 const Interests = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -136,7 +117,7 @@ const Interests = () => {
             color: header,
           }}
         >
-          What type of content are you interested in?
+          What type of content are you interested in? bla
         </Text>
 
         <Input
