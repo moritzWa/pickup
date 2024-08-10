@@ -1,13 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useMemo } from "react";
-import { Appearance } from "react-native";
+import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { colors } from "src/components";
 import { IS_IPAD } from "src/config";
-import { getTheme, setTheme } from "src/redux/reducers/globalState";
+import { setTheme } from "src/redux/reducers/globalState";
+import { ReduxState } from "src/redux/types";
 
 export const useTheme = () => {
-  const theme = useSelector(getTheme);
+  const theme = useSelector((state: ReduxState) => state.global.theme);
   const dispatch = useDispatch();
 
   const _toggleDarkMode = useCallback(async () => {
