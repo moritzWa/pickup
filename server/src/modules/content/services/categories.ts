@@ -52,6 +52,11 @@ export const CATEGORIES = [
                     { label: "Climate Tech", value: "climate_tech" },
                     { label: "Consumer", value: "consumer" },
                     { label: "Games", value: "games" },
+                    { label: "Robotics", value: "robotics" },
+                    {
+                        label: "Transportation & EVs",
+                        value: "transportation_evs",
+                    },
                 ],
             },
             {
@@ -65,6 +70,7 @@ export const CATEGORIES = [
                     { label: "Meta", value: "meta" },
                     { label: "Amazon", value: "amazon" },
                     { label: "TikTok", value: "tiktok" },
+                    { label: "OpenAI", value: "openai" },
                     {
                         label: "Transportation & EVs",
                         value: "transportation_evs",
@@ -138,10 +144,18 @@ export const CATEGORIES = [
                 value: Category.TechSociety,
                 emoji: "🔍",
                 subcategories: [
-                    { label: "Ethics in AI", value: "ethics_ai" },
-                    { label: "Digital Privacy", value: "digital_privacy" },
+                    { label: "Privacy", value: "privacy" },
                     { label: "Tech & Politics", value: "tech_politics" },
+                    { label: "US Politics", value: "us_politics" },
                     { label: "Tech & Education", value: "tech_education" },
+                    { label: "Tech & Law", value: "tech_law" },
+                    { label: "Science", value: "science" },
+                    { label: "Philosophy", value: "philosophy" },
+                    { label: "Epistemology", value: "epistemology" },
+                    {
+                        label: "Science of Progress",
+                        value: "science_of_progress",
+                    },
                 ],
             },
             {
@@ -155,6 +169,10 @@ export const CATEGORIES = [
                         value: "media_entertainment",
                     },
                     { label: "Literature", value: "literature" },
+                    { label: "Music", value: "music" },
+                    { label: "Fashion & Beauty", value: "fashion_beauty" },
+                    { label: "Food", value: "food" },
+                    { label: "Sports", value: "sports" },
                 ],
             },
             {

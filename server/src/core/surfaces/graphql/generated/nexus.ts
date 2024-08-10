@@ -34,7 +34,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
-  CategoryEnum: "arts_culture" | "business_models" | "corporate_tech" | "entrepreneurship" | "finance" | "fundraising" | "growth" | "health_wellness" | "hiring" | "international_business" | "legal" | "management" | "product_management" | "software_engineering" | "startup_ideas" | "tech_society" | "venture_capital"
+  CategoryEnum: "arts_culture" | "business_models" | "corporate_tech" | "entrepreneurship" | "finance" | "food_sports" | "fundraising" | "growth" | "health_wellness" | "hiring" | "international_business" | "legal" | "management" | "politics_news" | "product_management" | "software_engineering" | "startup_ideas" | "tech_society" | "venture_capital"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"

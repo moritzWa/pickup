@@ -23,4 +23,6 @@ export enum Category {
     TechSociety = "tech_society",
     ArtsCulture = "arts_culture",
     HealthWellness = "health_wellness",
+    PoliticsNews = "politics_news",
+    FoodSports = "food_sports",
 }

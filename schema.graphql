@@ -13,6 +13,7 @@ enum CategoryEnum {
   CorporateTech
   Entrepreneurship
   Finance
+  FoodSports
   Fundraising
   Growth
   HealthWellness
@@ -20,6 +21,7 @@ enum CategoryEnum {
   InternationalBusiness
   Legal
   Management
+  PoliticsNews
   ProductManagement
   SoftwareEngineering
   StartupIdeas
