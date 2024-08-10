@@ -85,7 +85,21 @@ npx inngest-cli@latest dev -u http://localhost:8001/inngest
 
 change to the app directory
 
-run this to launch the app in a simulator
+run
+
+```console
+yarn install
+```
+
+yes, that is weird, but it works (resolves the dependency conflict)
+
+next install the pods
+
+```console
+npx pod-install
+```
+
+then run this to launch the app in a simulator
 
 ```console
 npm run start
@@ -112,3 +126,15 @@ Then run
 ```shell
 npm run migrate:run
 ```
+
+# Notes on missing web version
+
+-   this project is not yet web compatible
+-   a lot of the packages are not web compatible
+    -   react-native-track-player
+    -   @invertase/react-native-apple-authentication
+    -   react-native-splash-screen
+    -   @react-native-firebase/auth
+    -   react-native-onesignal
+    -   expo-av (for Audio)
+    -   react-native-navigation-bar-color
