@@ -1,17 +1,10 @@
-import React from "react";
-import {
-  ApolloError,
-  useLazyQuery,
-  useMutation,
-  useQuery,
-} from "@apollo/client";
-import {
-  CommonActions,
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ApolloError, useMutation, useQuery } from "@apollo/client";
+import { faPen } from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,57 +13,39 @@ import {
   Linking,
   Platform,
   RefreshControl,
-  ScrollView,
   SectionList,
   SectionListData,
-  Share,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import ActionSheet from "react-native-action-sheet";
+import ImagePicker, {
+  Image as ImageResponse,
+} from "react-native-image-crop-picker";
+import { PERMISSIONS, RESULTS, check, request } from "react-native-permissions";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
 import { api, apolloClient } from "src/api";
+import { BaseContentFields } from "src/api/fragments";
 import {
   Mutation,
   MutationUpdateUserArgs,
   Profile as ProfileT,
   Query,
 } from "src/api/generated/types";
+import { colors } from "src/components";
+import { ContentRow } from "src/components/Content/ContentRow";
+import { CurrentAudio } from "src/components/CurrentAudio";
+import Header from "src/components/Header";
+import { TabBar } from "src/components/tabs";
+import { useMe } from "src/hooks";
 import { useTheme } from "src/hooks/useTheme";
 import { NavigationProps, RootStackParamList } from "src/navigation";
-import Header from "src/components/Header";
-import { Button, colors } from "src/components";
-import { FollowersInfo } from "src/components/FollowersInfo";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMe } from "src/hooks";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faPen,
-  faPlus,
-  faPlusCircle,
-  faPlusLarge,
-} from "@fortawesome/pro-solid-svg-icons";
-import { hasValue } from "src/core";
-import * as Haptics from "expo-haptics";
-import { last, noop } from "lodash";
-import { constants } from "src/config";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { PERMISSIONS, RESULTS, check, request } from "react-native-permissions";
-import ImagePicker, {
-  Image as ImageResponse,
-} from "react-native-image-crop-picker";
-import ActionSheet from "react-native-action-sheet";
+import { setProfileFilter } from "src/redux/reducers/globalState";
+import { ProfileTabFilter, ReduxState } from "src/redux/types";
 import { storage } from "src/utils/firebase";
 import { v4 as uuidv4 } from "uuid";
-import { TabBar } from "src/components/tabs";
-import { BaseContentFields } from "src/api/fragments";
-import { ContentRow } from "src/components/Content/ContentRow";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getProfileFilter,
-  setProfileFilter,
-} from "src/redux/reducers/globalState";
-import { ProfileTabFilter } from "src/redux/types";
-import { CurrentAudio } from "src/components/CurrentAudio";
 
 export const UserProfile = () => {
   const { me, refetchMe } = useMe("network-only");
@@ -112,7 +87,9 @@ export const UserProfile = () => {
     variables: variables,
   });
 
-  const profileFilter = useSelector(getProfileFilter);
+  const profileFilter = useSelector(
+    (state: ReduxState) => state.global.profileFilter
+  );
   const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
   useEffect(() => void refetchMe(), []);
