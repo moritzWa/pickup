@@ -1,47 +1,44 @@
 // react native navigation
-import * as React from "react";
+import { useMutation } from "@apollo/client";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
+  DefaultTheme,
   NavigationContainer,
   NavigationState,
   PartialState,
   useNavigation,
-  DefaultTheme,
 } from "@react-navigation/native";
 import {
   NativeStackNavigationProp,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
+import * as React from "react";
+import { View } from "react-native";
+import { OneSignal } from "react-native-onesignal";
+import { useDispatch, useSelector } from "react-redux";
+import { api } from "src/api";
+import { useMe } from "src/hooks";
+import { useOneSignal } from "src/hooks/useOneSignal";
+import { useTheme } from "src/hooks/useTheme";
+import EnablePushNotifications from "src/views/Authentication/EnablePushNotifications";
+import FullName from "src/views/Authentication/FullName";
+import Interests from "src/views/Authentication/Interests";
+import Welcome from "src/views/Authentication/Welcome";
+import AudioPlayer from "src/views/Main/AudioPlayer";
+import CourseDetails from "src/views/Main/CourseDetails";
+import Home from "src/views/Main/Home";
+import {
+  default as Lesson,
+  default as LessonDetails,
+} from "src/views/Main/LessonDetails";
+import LessonSession from "src/views/Main/LessonSession";
+import { UserProfile } from "src/views/Main/Profile";
+import Settings from "src/views/Main/Settings";
+import { getUserAuthStatus } from "../redux/reducers/user";
 import Login from "../views/Authentication/Login";
 import Signup from "../views/Authentication/Signup";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getUserAuthStatus,
-  setUserAuthStateChanged,
-} from "../redux/reducers/user";
-import Welcome from "src/views/Authentication/Welcome";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { TabBar } from "./TabBar";
-import { useOneSignal } from "src/hooks/useOneSignal";
-import { useMutation, useQuery } from "@apollo/client";
-import { api } from "src/api";
-import { OneSignal } from "react-native-onesignal";
-import { useTheme } from "src/hooks/useTheme";
-import { View } from "react-native";
-import { useMe } from "src/hooks";
 import { LINKING } from "./linking";
-import Home from "src/views/Main/Home";
-import Lesson from "src/views/Main/LessonDetails";
-import Courses from "src/views/Main/Courses";
-import Settings from "src/views/Main/Settings";
-import CourseDetails from "src/views/Main/CourseDetails";
-import LessonDetails from "src/views/Main/LessonDetails";
-import LessonSession from "src/views/Main/LessonSession";
-import Activity from "src/views/Main/Activity";
-import AudioPlayer from "src/views/Main/AudioPlayer";
-import { UserProfile } from "src/views/Main/Profile";
-import EnablePushNotifications from "src/views/Authentication/EnablePushNotifications";
-import Interests from "src/views/Authentication/Interests";
-import FullName from "src/views/Authentication/FullName";
+import { TabBar } from "./TabBar";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -103,7 +100,7 @@ export type RootStackParamList = {
   EditProfile?: undefined;
   UserProfile?: { username: string };
   ClaimCode?: undefined;
-  Authentication: undefined;
+  Authentication: { screen?: string } | undefined;
   Interests?: undefined;
   FullName?: undefined;
 };

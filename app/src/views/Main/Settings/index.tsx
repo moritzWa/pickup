@@ -105,23 +105,15 @@ const Profile = () => {
   const _requestNotificationPermission = async () => {
     navigation.navigate("EnablePushNotifications", {
       isSignupFlow: false,
+      isAirdropFlow: false,
       hideHeader: true,
+      onAccept: () => {
+        // Handle accept action
+      },
+      onDeny: () => {
+        // Handle deny action
+      },
     });
-    // const hasPermission = await OneSignal.Notifications.hasPermission();
-    // if (hasPermission) {
-    //   setHasPush(true);
-    //   await updateUser({ variables: { hasPushNotifications: true } });
-    //   return;
-    // }
-
-    // // request permission. if cannot or don't have permission, navigate to the app store settings page
-    // const hasNotifPermission = await OneSignal.Notifications.requestPermission(
-    //   true
-    // );
-
-    // await updateUser({
-    //   variables: { hasPushNotifications: hasNotifPermission },
-    // });
   };
 
   const _refreshMe = async () => {
