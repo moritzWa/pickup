@@ -97,9 +97,32 @@ function chunkText(text: string): string[] {
 }
 
 const toSpeech = async (
-    text: string
+    _text: string
 ): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> => {
-    const chunks = chunkText(text);
+    const openPromptResponse = await openai.chat.completions.create([
+        {
+            role: "system",
+            content:
+                "Here is a batch of text. Clean it up and only return the cleaned up text. The text will be used to transform into audio content for a listener.",
+        },
+        {
+            role: "user",
+            content: `Text: ${_text}`,
+        },
+    ]);
+
+    if (openPromptResponse.isFailure()) {
+        return failure(openPromptResponse.error);
+    }
+
+    const openPrompt = openPromptResponse.value;
+    const prompt = openPrompt.choices[0].message.content;
+
+    if (!prompt) {
+        return failure(new Error("Prompt was empty"));
+    }
+
+    const chunks = chunkText(prompt);
 
     const responses: FailureOrSuccess<DefaultErrors, Buffer>[] = [];
 
