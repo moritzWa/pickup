@@ -1,35 +1,7 @@
 import React from "react";
-import {
-  ApolloError,
-  useLazyQuery,
-  useMutation,
-  useQuery,
-} from "@apollo/client";
-import {
-  CommonActions,
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Image,
-  Linking,
-  Platform,
-  RefreshControl,
-  SectionList,
-  SectionListData,
-  Share,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useTheme } from "src/hooks/useTheme";
-import { last, noop } from "lodash";
+import { View } from "react-native";
 import { TabOption } from "src/components/tabs";
+import { useTheme } from "src/hooks/useTheme";
 import { TabType } from "./TabType";
 
 type Props = {
@@ -55,6 +27,7 @@ export const TabBar = ({ tabs }: Props) => {
     >
       {tabs.map((tab) => (
         <TabOption
+          key={tab.name}
           onPress={tab.onClick}
           label={tab.name}
           isActive={tab.isActive}

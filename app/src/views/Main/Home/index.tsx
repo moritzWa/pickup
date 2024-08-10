@@ -1,41 +1,38 @@
+import { useMutation, useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
+import React, { useMemo, useRef } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
+  Alert,
+  Animated,
   FlatList,
   RefreshControl,
-  Alert,
-  Image,
-  Animated,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import React, { useMemo, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { useTheme } from "src/hooks";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { useDispatch, useSelector } from "react-redux";
 import { api, apolloClient } from "src/api";
+import { BaseContentFields } from "src/api/fragments";
 import {
   ContentFeedFilter,
   Mutation,
   Query,
   QueryGetContentFeedArgs,
 } from "src/api/generated/types";
-import { NavigationProps } from "src/navigation";
-import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRight, faPlay } from "@fortawesome/pro-solid-svg-icons";
-import { Impressions } from "./Github";
+import { useTheme } from "src/hooks";
+import { NavigationProps } from "src/navigation";
+import { setHomeFilter } from "src/redux/reducers/globalState";
+import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
 import { CurrentAudio } from "../../../components/CurrentAudio";
-import { useDispatch, useSelector } from "react-redux";
-import { getHomeFilter, setHomeFilter } from "src/redux/reducers/globalState";
-import * as Haptics from "expo-haptics";
 
 const Home = () => {
-  const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
-  const filter = useSelector(getHomeFilter);
+  // const filter = useSelector(getHomeFilter, shallowEqual);
+  const filter = useSelector((state: ReduxState) => state.global.homeFilter);
 
   const [showMore] = useMutation(api.content.showMore);
 
@@ -166,8 +163,7 @@ export enum DiscoveryTab {
 }
 
 const Options = () => {
-  const theme = useTheme();
-  const filter = useSelector(getHomeFilter);
+  const filter = useSelector((state: ReduxState) => state.global.homeFilter);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const dispatch = useDispatch();

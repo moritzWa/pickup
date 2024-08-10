@@ -1,7 +1,6 @@
 import { createAction, createReducer, createSelector } from "@reduxjs/toolkit";
-import { Maybe } from "src/core";
-import { GlobalState, ProfileTabFilter, ReduxState } from "../types";
 import { ActivityFilter, ContentFeedFilter } from "src/api/generated/types";
+import { GlobalState, ProfileTabFilter, ReduxState } from "../types";
 
 // initial state
 const initialState: GlobalState = {
@@ -39,20 +38,20 @@ export const globalStateReducer = createReducer(initialState, (builder) => {
 
 export const getHomeFilter = createSelector(
   (state: ReduxState) => state.global.homeFilter,
-  (homeFilter) => homeFilter
+  (homeFilter) => homeFilter || ContentFeedFilter.ForYou
 );
 
 export const getProfileFilter = createSelector(
   (state: ReduxState) => state.global.profileFilter,
-  (profileFilter) => profileFilter
+  (profileFilter) => profileFilter || ProfileTabFilter.All
 );
 
 export const getActivityFilter = createSelector(
   (state: ReduxState) => state.global.activityFilter,
-  (activityFilter) => activityFilter
+  (activityFilter) => activityFilter || ActivityFilter.New
 );
 
 export const getTheme = createSelector(
   (state: ReduxState) => state.global.theme,
-  (theme) => theme
+  (theme) => theme || "dark"
 );
