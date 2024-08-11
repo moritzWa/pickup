@@ -25,7 +25,8 @@
         "paths": {
             "src/*": ["./src/*"],
             "shared/*": ["../shared/*"]
-        }
+        },
+        "forceConsistentCasingInFileNames": true
     },
     "filesGlob": ["./src/**/*.ts", "./src/**/*.json", "./src/**/*.pdf"],
     "include": ["src/**/*", "src/**/*.json", "src/**/*.pdf", "../shared"],
