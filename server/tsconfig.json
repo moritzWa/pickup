@@ -37,7 +37,24 @@
         "data",
         "src/shared/_archived/integrations/providers/chains/solana/processors",
         "src/__tests__/config/jest.config.js",
-        ".eslintrc.cjs"
+        ".eslintrc.cjs",
+        "speech.mp3",
+        "combined.log",
+        "error.log",
+        "prod-paths.js",
+        "ecosystem.workers.production.config.js",
+        "ecosystem.web.production.config.js",
+        "codegen.yml",
+        ".prettierrc",
+        ".gitignore",
+        ".env",
+        ".DS_Store",
+        "tsconfig.tsbuildinfo",
+        "tsconfig.test.json",
+        "tsconfig.prod.json",
+        "package-lock.json",
+        "nodemon.json",
+        "src/scripts/curius/seeder/topLinks.json"
     ],
     "ts-node": {
         "swc": true
