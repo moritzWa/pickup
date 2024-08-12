@@ -140,7 +140,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
         position: "absolute",
         bottom: 100,
         overflow: "hidden",
-        padding: 15,
+        padding: 5,
         paddingHorizontal: 0,
         paddingBottom: 0,
         backgroundColor: bg,
@@ -169,7 +169,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
       <TouchableOpacity
         onPress={openContent}
         style={{
-          paddingHorizontal: 10,
+          paddingHorizontal: 5,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -245,8 +245,8 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
           <Animated.View
             style={{
               marginLeft: 15,
-              width: 40,
-              height: 40,
+              width: 35,
+              height: 35,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
@@ -259,7 +259,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
             <FontAwesomeIcon
               icon={isPlaying ? faPause : faPlay}
               color={colors.white}
-              size={18}
+              size={16}
               style={{ position: "relative", right: isPlaying ? 0 : -2 }}
             />
           </Animated.View>

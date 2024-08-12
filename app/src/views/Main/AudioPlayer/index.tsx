@@ -28,6 +28,7 @@ import {
   faChevronLeft,
   faForward,
   faIslandTreePalm,
+  faList,
   faPause,
   faPlay,
   faRedo,
@@ -66,7 +67,7 @@ import { Track } from "react-native-track-player";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { BaseContentFields } from "src/api/fragments";
 
-const SIZE = 125;
+const SIZE = 100;
 
 const AudioPlayer = () => {
   const route = useRoute<RouteProp<RootStackParamList, "AudioPlayer">>();
@@ -237,6 +238,7 @@ const AudioPlayer = () => {
     <View
       style={{
         flex: 1,
+        paddingBottom: insets.bottom + 15,
       }}
     >
       <View
@@ -354,8 +356,8 @@ const AudioPlayer = () => {
           >
             <TouchableOpacity
               style={{
-                width: SIZE - 15,
-                height: SIZE - 15,
+                width: SIZE - 12,
+                height: SIZE - 12,
                 borderRadius: 100,
                 backgroundColor: colors.primary,
                 justifyContent: "center",
@@ -402,81 +404,10 @@ const AudioPlayer = () => {
         style={[
           styles.container,
           {
-            marginBottom: 50,
+            marginBottom: 25,
           },
         ]}
       >
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              style={{
-                padding: 10,
-                alignSelf: "flex-start",
-                marginLeft: 20,
-                marginBottom: 10,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 50,
-                backgroundColor: session?.isBookmarked
-                  ? colors.primary
-                  : theme.secondaryBackground,
-              }}
-              onPress={bookmarkContent}
-            >
-              <FontAwesomeIcon
-                icon={faBookmark}
-                color={session?.isBookmarked ? colors.white : theme.text}
-                size={14}
-              />
-
-              <Text
-                style={{
-                  color: session?.isBookmarked ? colors.white : theme.text,
-                  fontSize: 14,
-                  fontFamily: "Raleway-Bold",
-                  marginLeft: 5,
-                }}
-              >
-                Bookmark
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            style={{
-              padding: 10,
-              width: 60,
-              alignSelf: "flex-end",
-              marginRight: 20,
-              marginBottom: 10,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 50,
-              backgroundColor: theme.secondaryBackground,
-            }}
-            onPress={setPlayerSpeed}
-          >
-            <Text
-              style={{
-                color: theme.text,
-                fontSize: 14,
-                fontFamily: "Raleway-Bold",
-              }}
-            >
-              {speed}x
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         <Slider
           style={{
             width: width * 1.75,
@@ -523,9 +454,143 @@ const AudioPlayer = () => {
             {durationMs ? formatTime(durationMs) : "-"}
           </Text>
         </View>
+
+        <View
+          style={{
+            marginTop: 25,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <View>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={{
+                padding: 10,
+                alignSelf: "flex-start",
+                marginLeft: 20,
+                marginBottom: 10,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 50,
+                backgroundColor: session?.isBookmarked
+                  ? colors.primary
+                  : theme.secondaryBackground,
+              }}
+              onPress={bookmarkContent}
+            >
+              <FontAwesomeIcon
+                icon={faBookmark}
+                color={session?.isBookmarked ? colors.white : theme.text}
+                size={14}
+              />
+
+              <Text
+                style={{
+                  color: session?.isBookmarked ? colors.white : theme.text,
+                  fontSize: 14,
+                  fontFamily: "Raleway-Bold",
+                  marginLeft: 5,
+                }}
+              >
+                Bookmark
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={{
+              padding: 10,
+              alignSelf: "flex-start",
+              marginLeft: 10,
+              marginBottom: 10,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 50,
+              backgroundColor: theme.secondaryBackground,
+            }}
+            onPress={bookmarkContent}
+          >
+            <FontAwesomeIcon icon={faList} color={theme.header} size={14} />
+          </TouchableOpacity>
+
+          <View style={{ flex: 1 }} />
+
+          <TouchableOpacity
+            style={{
+              padding: 10,
+              width: 60,
+              alignSelf: "flex-end",
+              marginRight: 20,
+              marginBottom: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 50,
+              backgroundColor: theme.secondaryBackground,
+            }}
+            onPress={setPlayerSpeed}
+          >
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: 14,
+                fontFamily: "Raleway-Bold",
+              }}
+            >
+              {speed}x
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <NextOrPrevButtons skip={skip} content={content ?? null} />
+
+      <NextQueue />
+    </View>
+  );
+};
+
+const NextQueue = () => {
+  const theme = useTheme();
+
+  return (
+    <View
+      style={{
+        marginTop: 25,
+        marginHorizontal: 20,
+        padding: 10,
+        borderRadius: 10,
+        backgroundColor: theme.secondaryBackground,
+      }}
+    >
+      <Text
+        style={{
+          color: theme.text,
+          fontFamily: "Raleway-Bold",
+          fontSize: 14,
+          textTransform: "uppercase",
+          marginBottom: 10,
+        }}
+      >
+        Up next...
+      </Text>
+      <Text
+        style={{
+          color: theme.text,
+          fontFamily: "Raleway-Bold",
+          fontSize: 16,
+          marginBottom: 10,
+        }}
+      >
+        The Reddits
+      </Text>
     </View>
   );
 };
@@ -619,10 +684,10 @@ const NextOrPrevButtons = ({
   return (
     <View
       style={{
-        paddingBottom: insets.bottom + 15,
         display: "flex",
         flexDirection: "row",
         paddingHorizontal: 10,
+        marginHorizontal: 10,
         // space between button
         justifyContent: "space-between",
       }}
