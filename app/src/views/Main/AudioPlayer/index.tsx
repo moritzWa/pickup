@@ -27,6 +27,7 @@ import {
   faCaretRight,
   faChevronLeft,
   faForward,
+  faHeadset,
   faIslandTreePalm,
   faList,
   faPause,
@@ -66,6 +67,8 @@ import { AppContext } from "App";
 import { Track } from "react-native-track-player";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { BaseContentFields } from "src/api/fragments";
+import { useSelector } from "react-redux";
+import { getQueue } from "src/redux/reducers/audio";
 
 const SIZE = 100;
 
@@ -77,6 +80,7 @@ const AudioPlayer = () => {
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const { width } = Dimensions.get("window");
+  const navigation = useNavigation<NavigationProps>();
 
   const {
     downloadAndPlayContent,
@@ -232,7 +236,9 @@ const AudioPlayer = () => {
     }
   };
 
-  console.log(session);
+  const openQueue = () => {
+    navigation.navigate("Queue");
+  };
 
   return (
     <View
@@ -516,7 +522,7 @@ const AudioPlayer = () => {
               borderRadius: 50,
               backgroundColor: theme.secondaryBackground,
             }}
-            onPress={bookmarkContent}
+            onPress={openQueue}
           >
             <FontAwesomeIcon icon={faList} color={theme.header} size={14} />
           </TouchableOpacity>
@@ -552,27 +558,77 @@ const AudioPlayer = () => {
 
       <NextOrPrevButtons skip={skip} content={content ?? null} />
 
-      <NextQueue />
+      <NextQueue content={content ?? null} />
     </View>
   );
 };
 
-const NextQueue = () => {
+const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
   const theme = useTheme();
+  const navigation = useNavigation<NavigationProps>();
+
+  const queue = useSelector(getQueue);
+  const nextContent = useMemo(() => queue[1] ?? null, [queue]);
+  const { downloadAndPlayContent } = useAudio();
+
+  const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
+    api.queue.next
+  );
+
+  const _onClickNext = async () => {
+    try {
+      if (!content) return;
+
+      const variables: QueryGetNextContentArgs = {
+        afterContentId: content.id,
+      };
+
+      const response = await getNextContent({
+        variables,
+      });
+
+      // console.log(JSON.stringify(response.error, null, 2));
+
+      const nextContentQueued = response.data?.getNextContent;
+
+      if (!nextContentQueued?.content) {
+        return;
+      }
+
+      // console.log(nextContentQueued);
+
+      const nextContentId = nextContentQueued?.content?.id || "";
+
+      console.log(`[starting ${nextContentQueued.content?.title}]`);
+
+      // update the route params
+      navigation.setParams({ contentId: nextContentId });
+
+      downloadAndPlayContent(nextContentQueued.content as BaseContentFields);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  if (!nextContent) {
+    return null;
+  }
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={_onClickNext}
       style={{
         marginTop: 25,
         marginHorizontal: 20,
         padding: 10,
-        borderRadius: 10,
-        backgroundColor: theme.secondaryBackground,
+        borderRadius: 15,
+        backgroundColor: theme.textPrimary,
       }}
     >
       <Text
         style={{
-          color: theme.text,
+          color: theme.background,
           fontFamily: "Raleway-Bold",
           fontSize: 14,
           textTransform: "uppercase",
@@ -581,17 +637,68 @@ const NextQueue = () => {
       >
         Up next...
       </Text>
-      <Text
+      <View
         style={{
-          color: theme.text,
-          fontFamily: "Raleway-Bold",
-          fontSize: 16,
-          marginBottom: 10,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
         }}
       >
-        The Reddits
-      </Text>
-    </View>
+        <FastImage
+          style={{
+            width: 40,
+            marginRight: 10,
+            height: 40,
+            borderRadius: 10,
+          }}
+          resizeMode="contain"
+          source={{
+            uri: nextContent.thumbnailImageUrl,
+          }}
+        />
+
+        <View style={{ flex: 1 }}>
+          <Text
+            numberOfLines={1}
+            style={{
+              color: theme.background,
+              fontFamily: "Raleway-Bold",
+              fontSize: 16,
+              marginBottom: 5,
+            }}
+          >
+            {nextContent.title}
+          </Text>
+
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start",
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faHeadset}
+              style={{
+                color: theme.secondaryBackground,
+              }}
+            />
+
+            <Text
+              style={{
+                marginLeft: 5,
+                color: theme.secondaryBackground,
+                fontFamily: "Raleway-Regular",
+                fontSize: 16,
+              }}
+            >
+              {Math.ceil(nextContent.lengthSeconds / 60)}min
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 

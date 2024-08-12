@@ -15,6 +15,7 @@ import {
   DefaultErrors,
   failure,
   FailureOrSuccess,
+  hasValue,
   success,
   UnexpectedError,
 } from "src/core";
@@ -28,6 +29,7 @@ import {
   setCurrentMs,
   setDurationMs,
   setIsPlaying,
+  setQueue,
   setSpeed,
 } from "src/redux/reducers/audio";
 
@@ -245,6 +247,10 @@ export const useAudio = () => {
     const queue = await TrackPlayer.getQueue();
     console.log(queue.map((q) => q.title));
   };
+
+  useEffect(() => {
+    dispatch(setQueue(queue.map((q) => q.content).filter(hasValue)));
+  }, [queue]);
 
   // sync the queue. add to the queue. etc... (track player)
 
