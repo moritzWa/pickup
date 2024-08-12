@@ -1,17 +1,11 @@
 import {
+    Column,
+    CreateDateColumn,
+    DeleteDateColumn,
     Entity,
     PrimaryGeneratedColumn,
-    Column,
-    Index,
-    ManyToOne,
-    JoinColumn,
-    CreateDateColumn,
     UpdateDateColumn,
-    DeleteDateColumn,
-    Unique,
 } from "typeorm";
-import { User } from "../User";
-import { Category } from "../types";
 
 export type FollowUpQuestion = {
     id: string;
@@ -68,7 +62,7 @@ export class Content {
         type: "jsonb",
         default: "[]",
     })
-    categories!: Category[];
+    categories!: string[];
 
     @Column({
         nullable: false,
