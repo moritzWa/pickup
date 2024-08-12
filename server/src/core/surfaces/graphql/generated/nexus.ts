@@ -34,7 +34,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
-  CategoryEnum: "comedy" | "entrepreneurship" | "hiring" | "history" | "language" | "negotiation" | "philosophy" | "product" | "public_speaking" | "science"
+  CategoryEnum: "Arts & Culture" | "Business Models" | "Corporate Technology" | "Entrepreneurship" | "Finance & Legal" | "Health & Wellness" | "International Business" | "Management" | "Software Engineering" | "Startups" | "Technology & Society" | "Venture Capital & Investment"
   ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
@@ -51,17 +51,14 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  CategoryInfo: { // root type
-    backgroundColor?: string | null; // String
+  Category: { // root type
     emoji: string; // String!
-    label: string; // String!
-    textColor?: string | null; // String
-    value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
+    name: string; // String!
+    subcategories: string[]; // [String!]!
   }
   CategorySection: { // root type
-    categories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
-    label: string; // String!
-    value: string; // String!
+    categories: NexusGenRootTypes['Category'][]; // [Category!]!
+    name: string; // String!
   }
   Content: entities.Content ;
   ContentRespondResponse: { // root type
@@ -143,17 +140,14 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
-  CategoryInfo: { // field return type
-    backgroundColor: string | null; // String
+  Category: { // field return type
     emoji: string; // String!
-    label: string; // String!
-    textColor: string | null; // String
-    value: NexusGenEnums['CategoryEnum']; // CategoryEnum!
+    name: string; // String!
+    subcategories: string[]; // [String!]!
   }
   CategorySection: { // field return type
-    categories: NexusGenRootTypes['CategoryInfo'][]; // [CategoryInfo!]!
-    label: string; // String!
-    value: string; // String!
+    categories: NexusGenRootTypes['Category'][]; // [Category!]!
+    name: string; // String!
   }
   Content: { // field return type
     audioUrl: string; // String!
@@ -330,17 +324,14 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
-  CategoryInfo: { // field return type name
-    backgroundColor: 'String'
+  Category: { // field return type name
     emoji: 'String'
-    label: 'String'
-    textColor: 'String'
-    value: 'CategoryEnum'
+    name: 'String'
+    subcategories: 'String'
   }
   CategorySection: { // field return type name
-    categories: 'CategoryInfo'
-    label: 'String'
-    value: 'String'
+    categories: 'Category'
+    name: 'String'
   }
   Content: { // field return type name
     audioUrl: 'String'

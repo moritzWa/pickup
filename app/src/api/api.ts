@@ -224,14 +224,11 @@ const Bookmark = gql`
 const GetCategories = gql`
   query GetCategories {
     getCategories {
-      label
-      value
+      name
       categories {
-        label
-        value
+        name
         emoji
-        backgroundColor
-        textColor
+        subcategories
       }
     }
   }

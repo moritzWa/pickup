@@ -1,70 +1,153 @@
-import { Category } from "src/core/infra/postgres/entities";
-
 export enum ParentCategory {
-    Business = "Business",
-    More = "More",
+    TechnologyIndustry = "Technology & Industry",
+    BusinessManagement = "Business & Management",
+    SocietyCulture = "Society & Culture",
 }
 
-export const CATEGORIES = [
+export type SubCategory = string;
+
+export type Category = {
+    name: string;
+    emoji: string;
+    subcategories: SubCategory[];
+};
+
+export type CategorySection = {
+    name: ParentCategory;
+    categories: Category[];
+};
+
+export const CATEGORIES: CategorySection[] = [
     {
-        label: "Business",
-        value: ParentCategory.Business,
+        name: ParentCategory.TechnologyIndustry,
         categories: [
             {
-                label: "Entrepreneurship",
-                value: Category.Entrepreneurship,
-                emoji: "💼",
+                name: "Startups",
+                emoji: "🚀",
+                subcategories: [
+                    "Startup Ideas",
+                    "Fundraising",
+                    "Product Management",
+                    "Hiring",
+                    "Growth",
+                ],
             },
             {
-                label: "Public Speaking",
-                value: Category.PublicSpeaking,
-                emoji: "🎤",
+                name: "Software Engineering",
+                emoji: "💻",
+                subcategories: [
+                    "AI & Machine Learning",
+                    "Security",
+                    "Cloud Computing",
+                    "Hardware",
+                    "Infrastructure",
+                    "Web3",
+                ],
             },
             {
-                label: "Negotiation",
-                value: Category.Negotiation,
-                emoji: "🤝",
+                name: "Venture Capital & Investment",
+                emoji: "💰",
+                subcategories: [
+                    "Vertical SaaS",
+                    "Health Tech",
+                    "Enterprise",
+                    "Defense",
+                    "Crypto",
+                    "Fintech",
+                    "Climate Tech",
+                    "Consumer",
+                    "Games",
+                    "Robotics",
+                    "Transportation & EVs",
+                ],
             },
             {
-                label: "Product",
-                value: Category.Product,
-                emoji: "📦",
-            },
-            {
-                label: "Hiring",
-                value: Category.Hiring,
-                emoji: "👥",
+                name: "Corporate Technology",
+                emoji: "🏢",
+                subcategories: [
+                    "Apple",
+                    "Google",
+                    "Microsoft",
+                    "Meta",
+                    "Amazon",
+                    "TikTok",
+                    "OpenAI",
+                    "Transportation & EVs",
+                ],
             },
         ],
     },
     {
-        label: "More...",
-        value: ParentCategory.More,
+        name: ParentCategory.BusinessManagement,
         categories: [
             {
-                label: "Language",
-                value: Category.Language,
-                emoji: "🗣️",
+                name: "Entrepreneurship",
+                emoji: "💼",
+                subcategories: ["Becoming a Founder", "Company Stages"],
             },
             {
-                label: "History",
-                value: Category.History,
-                emoji: "📜",
+                name: "Business Models",
+                emoji: "📊",
+                subcategories: ["Monetization", "Pricing", "Unit Economics"],
             },
             {
-                label: "Science",
-                value: Category.Science,
-                emoji: "🔬",
+                name: "Finance & Legal",
+                emoji: "💵",
+                subcategories: ["Cash Burn", "Legal Issues"],
             },
             {
-                label: "Philosophy",
-                value: Category.Philosophy,
-                emoji: "🤔",
+                name: "Management",
+                emoji: "📈",
+                subcategories: ["Leadership", "Culture", "Compensation"],
             },
             {
-                label: "Comedy",
-                value: Category.Comedy,
-                emoji: "😂",
+                name: "International Business",
+                emoji: "🌎",
+                subcategories: ["Global Expansion", "China"],
+            },
+        ],
+    },
+    {
+        name: ParentCategory.SocietyCulture,
+        categories: [
+            {
+                name: "Technology & Society",
+                emoji: "🔍",
+                subcategories: [
+                    "Privacy",
+                    "Tech & Politics",
+                    "US Politics",
+                    "Tech & Education",
+                    "Tech & Law",
+                    "Science",
+                    "Philosophy",
+                    "Epistemology",
+                    "Science of Progress",
+                ],
+            },
+            {
+                name: "Arts & Culture",
+                emoji: "🎨",
+                subcategories: [
+                    "Design",
+                    "Media & Entertainment",
+                    "Literature",
+                    "Music",
+                    "Fashion & Beauty",
+                    "Food",
+                    "Sports",
+                ],
+            },
+            {
+                name: "Health & Wellness",
+                emoji: "🏥",
+                subcategories: [
+                    "Mental Health",
+                    "Health Tech",
+                    "Lifestyle",
+                    "Faith & Spirituality",
+                    "Climate & Environment",
+                ],
             },
         ],
     },

@@ -7,31 +7,30 @@ enum ActivityFilter {
   unread
 }
 
-enum CategoryEnum {
-  Comedy
-  Entrepreneurship
-  Hiring
-  History
-  Language
-  Negotiation
-  Philosophy
-  Product
-  PublicSpeaking
-  Science
+type Category {
+  emoji: String!
+  name: String!
+  subcategories: [String!]!
 }
 
-type CategoryInfo {
-  backgroundColor: String
-  emoji: String!
-  label: String!
-  textColor: String
-  value: CategoryEnum!
+enum CategoryEnum {
+  ARTS___CULTURE
+  BUSINESS_MODELS
+  CORPORATE_TECHNOLOGY
+  ENTREPRENEURSHIP
+  FINANCE___LEGAL
+  HEALTH___WELLNESS
+  INTERNATIONAL_BUSINESS
+  MANAGEMENT
+  SOFTWARE_ENGINEERING
+  STARTUPS
+  TECHNOLOGY___SOCIETY
+  VENTURE_CAPITAL___INVESTMENT
 }
 
 type CategorySection {
-  categories: [CategoryInfo!]!
-  label: String!
-  value: String!
+  categories: [Category!]!
+  name: String!
 }
 
 type Content {

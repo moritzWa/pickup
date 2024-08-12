@@ -7,7 +7,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "src/api";
 import {
-  CategoryInfo,
+  Category,
+  CategorySection,
   Mutation,
   MutationSetInterestsArgs,
   Query,
@@ -27,7 +28,7 @@ const Interests = () => {
   const fullTheme = useTheme();
   const { background, text, header } = fullTheme;
 
-  const [selected, setSelected] = useState<Set<string>>(new Set([]));
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const isFocused = useIsFocused();
   const {
@@ -43,7 +44,38 @@ const Interests = () => {
 
   const categories = categoriesData?.getCategories || [];
 
+  console.log("=== categories ===");
+  console.log(JSON.stringify(categories, null, 2));
+
   useEffect(() => void refetch(), [isFocused]);
+
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set()
+  );
+
+  const toggleCategory = (categoryName: string) => {
+    setExpandedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryName)) {
+        newSet.delete(categoryName);
+      } else {
+        newSet.add(categoryName);
+      }
+      return newSet;
+    });
+  };
+
+  const addOrRemove = (value: string) => {
+    setSelected((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(value)) {
+        newSet.delete(value);
+      } else {
+        newSet.add(value);
+      }
+      return newSet;
+    });
+  };
 
   const _continue = async () => {
     try {
@@ -57,31 +89,26 @@ const Interests = () => {
         interestCategories: Array.from(selected),
       };
 
-      await setInterests({
+      const result = await setInterests({
         variables,
       });
 
       return navigation.navigate("EnablePushNotifications");
     } catch (err) {
       console.log("=== error ===");
-      console.log(err);
+      console.log(JSON.stringify(err, null, 2));
       if (err instanceof ApolloError) {
-        // log the full error with fields
-
-        // error alert
+        console.log(
+          "Apollo Error details:",
+          JSON.stringify(err.graphQLErrors, null, 2)
+        );
+        console.log(
+          "Network Error details:",
+          JSON.stringify(err.networkError, null, 2)
+        );
         Alert.alert("Error", err.message);
       }
     }
-  };
-
-  const addOrRemove = (value: string) => {
-    if (selected.has(value)) {
-      selected.delete(value);
-    } else {
-      selected.add(value);
-    }
-
-    setSelected(new Set(selected));
   };
 
   return (
@@ -117,11 +144,11 @@ const Interests = () => {
             color: header,
           }}
         >
-          What type of content are you interested in? bla
+          What type of content are you interested in?
         </Text>
 
         <Input
-          placeholder="Type here..."
+          placeholder="I'm currently struggling with/challenged by..."
           textContentType="name"
           value={description}
           numberOfLines={4}
@@ -137,15 +164,19 @@ const Interests = () => {
         <View
           style={{
             marginVertical: 25,
-            // just display flex and wrap
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
+            alignItems: "flex-start",
           }}
         >
-          {categories.map((section) => (
+          {categories.map((section: CategorySection) => (
             <View
               style={{
                 marginBottom: 20,
+                width: "100%",
               }}
-              key={section.value}
+              key={section.name}
             >
               <Text
                 style={{
@@ -156,7 +187,7 @@ const Interests = () => {
                   textTransform: "uppercase",
                 }}
               >
-                {section.label}
+                {section.name}
               </Text>
 
               <View
@@ -167,13 +198,33 @@ const Interests = () => {
                   alignItems: "center",
                 }}
               >
-                {section.categories.map((category) => (
-                  <Category
-                    key={category.value}
-                    category={category}
-                    isActive={selected.has(category.value)}
-                    onPress={() => addOrRemove(category.value)}
-                  />
+                {section.categories.map((category: Category) => (
+                  <React.Fragment key={category.name}>
+                    <CategoryButton
+                      category={category}
+                      isActive={selected.has(category.name)}
+                      onPress={() => {
+                        addOrRemove(category.name);
+                        toggleCategory(category.name);
+                      }}
+                    />
+                    {expandedCategories.has(category.name) &&
+                      category.subcategories && (
+                        <>
+                          {category.subcategories.map((subcategory: string) => (
+                            <CategoryButton
+                              key={subcategory}
+                              category={{
+                                name: subcategory,
+                                emoji: "",
+                              }}
+                              isActive={selected.has(subcategory)}
+                              onPress={() => addOrRemove(subcategory)}
+                            />
+                          ))}
+                        </>
+                      )}
+                  </React.Fragment>
                 ))}
               </View>
             </View>
@@ -193,15 +244,20 @@ const Interests = () => {
   );
 };
 
-const Category = ({
+type CategoryButtonProps = {
+  category: {
+    name: string;
+    emoji: string;
+  };
+  isActive: boolean;
+  onPress: () => void;
+};
+
+const CategoryButton = ({
   category,
   isActive,
   onPress,
-}: {
-  category: CategoryInfo;
-  isActive: boolean;
-  onPress: () => void;
-}) => {
+}: CategoryButtonProps) => {
   const fullTheme = useTheme();
 
   return (
@@ -209,8 +265,8 @@ const Category = ({
       activeOpacity={0.8}
       onPress={onPress}
       style={{
-        padding: 10,
-        paddingHorizontal: 15,
+        padding: 8,
+        paddingHorizontal: 12,
         marginRight: 5,
         display: "flex",
         flexDirection: "row",
@@ -220,30 +276,30 @@ const Category = ({
         borderRadius: 100,
         backgroundColor: isActive
           ? colors.primary
-          : category?.backgroundColor || fullTheme.secondaryBackground,
+          : fullTheme.secondaryBackground,
       }}
-      key={category.value}
     >
-      <Text
-        style={{
-          fontFamily: "Raleway-Medium",
-          fontSize: 12,
-          color: category?.textColor || fullTheme.text,
-        }}
-      >
-        {category.emoji}
-      </Text>
+      {category.emoji && (
+        <Text
+          style={{
+            fontFamily: "Raleway-Medium",
+            fontSize: 12,
+            marginRight: 5,
+            color: fullTheme.text,
+          }}
+        >
+          {category.emoji}
+        </Text>
+      )}
+
       <Text
         style={{
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-SemiBold",
           fontSize: 16,
-          marginLeft: 10,
-          color: isActive
-            ? colors.white
-            : category?.textColor || fullTheme.text,
+          color: isActive ? colors.white : fullTheme.text,
         }}
       >
-        {category.label}
+        {category.name}
       </Text>
     </TouchableOpacity>
   );
