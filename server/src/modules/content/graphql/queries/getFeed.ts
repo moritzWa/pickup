@@ -22,7 +22,7 @@ export const ContentFeedFilter = enumType({
     members: ["popular", "for_you", "new", "unread", "queue"],
 });
 
-export const getContentFeed = queryField("getContentFeed", {
+export const getFeed = queryField("getFeed", {
     type: nonNull(list(nonNull("Content"))),
     args: {
         limit: nullable(intArg()),

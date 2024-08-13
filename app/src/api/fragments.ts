@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 import { Maybe } from "src/core";
-import { Content, ContentSession, Queue, User } from "./generated/types";
+import { Content, ContentSession, FeedItem, User } from "./generated/types";
 
 export type BaseUserFields = Pick<
   User,
@@ -143,13 +143,16 @@ export const BaseContentSessionFields = gql`
   }
 `;
 
-export type BaseQueueFields = Pick<Queue, "id" | "createdAt" | "updatedAt"> & {
+export type BaseFeedItemFields = Pick<
+  FeedItem,
+  "id" | "createdAt" | "updatedAt"
+> & {
   content: BaseContentFields | null;
 };
 
-export const BaseQueueFields = gql`
+export const BaseFeedItemFields = gql`
   ${BaseContentFields}
-  fragment BaseQueueFields on Queue {
+  fragment BaseFeedItemFields on FeedItem {
     id
     createdAt
     updatedAt

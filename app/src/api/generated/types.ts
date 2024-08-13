@@ -108,6 +108,19 @@ export type CreateUserResponse = {
   user: User;
 };
 
+export type FeedItem = {
+  __typename?: 'FeedItem';
+  content?: Maybe<Content>;
+  contentId: Scalars['ID']['output'];
+  contentSession?: Maybe<ContentSession>;
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['ID']['output'];
+  isQueued: Scalars['Boolean']['output'];
+  position: Scalars['Float']['output'];
+  updatedAt: Scalars['Date']['output'];
+  userId: Scalars['ID']['output'];
+};
+
 export type FollowUpQuestion = {
   __typename?: 'FollowUpQuestion';
   answer: Scalars['String']['output'];
@@ -157,6 +170,7 @@ export type Metadata = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addToQueue: Scalars['String']['output'];
   bookmarkContent: ContentSession;
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
@@ -172,6 +186,11 @@ export type Mutation = {
   updateContentSession: ContentSession;
   updateUser: User;
   verifyPhoneNumber: User;
+};
+
+
+export type MutationAddToQueueArgs = {
+  contentId: Scalars['ID']['input'];
 };
 
 
@@ -273,17 +292,17 @@ export type Query = {
   getBookmarks: Array<Content>;
   getCategories: Array<CategorySection>;
   getContent: Content;
-  getContentFeed: Array<Content>;
   getContentSession: ContentSession;
   getCurrentContentSession?: Maybe<ContentSession>;
+  getFeed: Array<Content>;
   getIntercomMobileToken: Scalars['String']['output'];
   getLikes: Array<ContentSession>;
   getMobileUpdate: GetMobileUpdateResponse;
-  getNextContent?: Maybe<Queue>;
+  getNextContent?: Maybe<FeedItem>;
   getPaymentMethods: Array<PaymentMethod>;
-  getPrevContent?: Maybe<Queue>;
+  getPrevContent?: Maybe<FeedItem>;
   getProfile: Profile;
-  getQueue: Array<Queue>;
+  getQueue: Array<FeedItem>;
   me?: Maybe<User>;
   searchSimilarLinks: Array<SearchResult>;
 };
@@ -310,14 +329,14 @@ export type QueryGetContentArgs = {
 };
 
 
-export type QueryGetContentFeedArgs = {
-  filter?: InputMaybe<ContentFeedFilter>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
+export type QueryGetContentSessionArgs = {
+  contentId: Scalars['ID']['input'];
 };
 
 
-export type QueryGetContentSessionArgs = {
-  contentId: Scalars['ID']['input'];
+export type QueryGetFeedArgs = {
+  filter?: InputMaybe<ContentFeedFilter>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -352,18 +371,6 @@ export type QueryGetProfileArgs = {
 export type QuerySearchSimilarLinksArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   query: Scalars['String']['input'];
-};
-
-export type Queue = {
-  __typename?: 'Queue';
-  content?: Maybe<Content>;
-  contentId: Scalars['ID']['output'];
-  contentSession?: Maybe<ContentSession>;
-  createdAt: Scalars['Date']['output'];
-  id: Scalars['ID']['output'];
-  position: Scalars['Float']['output'];
-  updatedAt: Scalars['Date']['output'];
-  userId: Scalars['ID']['output'];
 };
 
 export type SearchResult = {

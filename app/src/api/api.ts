@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 import {
   BaseContentFields,
   BaseContentSessionFields,
-  BaseQueueFields,
+  BaseFeedItemFields,
   BaseUserFields,
 } from "./fragments";
 
@@ -244,28 +244,28 @@ const GetCategories = gql`
 `;
 
 const GetNextContent = gql`
-  ${BaseQueueFields}
+  ${BaseFeedItemFields}
   query GetNextContent($afterContentId: ID!) {
     getNextContent(afterContentId: $afterContentId) {
-      ...BaseQueueFields
+      ...BaseFeedItemFields
     }
   }
 `;
 
 const GetPrevContent = gql`
-  ${BaseQueueFields}
+  ${BaseFeedItemFields}
   query GetPrevContent($beforeContentId: ID!) {
     getPrevContent(beforeContentId: $beforeContentId) {
-      ...BaseQueueFields
+      ...BaseFeedItemFields
     }
   }
 `;
 
 const GetQueue = gql`
-  ${BaseQueueFields}
+  ${BaseFeedItemFields}
   query getQueue {
     getQueue {
-      ...BaseQueueFields
+      ...BaseFeedItemFields
     }
   }
 `;

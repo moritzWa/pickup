@@ -1,4 +1,4 @@
-import { Content, Queue, User } from "src/core/infra/postgres/entities";
+import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import {
     DefaultErrors,
     failure,
@@ -10,7 +10,7 @@ import {
     DEFAULT_LINKS_RETURN,
     LinkWithDistance,
 } from "src/modules/curius/infra/linkRepo";
-import { contentRepo, queueRepo } from "../../infra";
+import { contentRepo, feedRepo } from "../../infra";
 import { v4 as uuidv4 } from "uuid";
 import { firebase, openai } from "src/utils";
 import { storage } from "firebase-admin";
@@ -24,7 +24,7 @@ import { AudioService } from "src/shared/audioService";
 export const buildQueue = async (
     user: User,
     limit: number
-): Promise<FailureOrSuccess<DefaultErrors, Queue[]>> => {
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
     const categories = user.interestCategories.join(" ");
     const description = user.interestDescription;
     const rawQuery = `${categories} ${description}`;
@@ -97,13 +97,14 @@ export const buildQueue = async (
 const buildQueueFromContent = async (
     user: User,
     content: Content[]
-): Promise<FailureOrSuccess<DefaultErrors, Queue[]>> => {
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
     // TODO: we need to then make a queue here
     const queueResponses = await Promise.all(
         content.map((c, i) =>
-            queueRepo.create({
+            feedRepo.create({
                 id: uuidv4(),
                 position: i,
+                isQueued: false,
                 userId: user.id,
                 contentId: c.id,
                 // make it so increasing time? maybe

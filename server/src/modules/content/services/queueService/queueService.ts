@@ -1,4 +1,4 @@
-import { Content, Queue, User } from "src/core/infra/postgres/entities";
+import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import {
     DefaultErrors,
     failure,
@@ -6,7 +6,7 @@ import {
     NotFoundError,
     success,
 } from "src/core/logic";
-import { queueRepo } from "../../infra";
+import { feedRepo } from "../../infra";
 import { v4 as uuidv4 } from "uuid";
 import { LessThan, MoreThan } from "typeorm";
 import { throwIfError } from "src/core/surfaces/graphql/common";
@@ -15,8 +15,8 @@ import { pgUserRepo } from "src/modules/users/infra/postgres";
 const enqueue = async (
     user: User,
     contentId: string
-): Promise<FailureOrSuccess<DefaultErrors, Queue>> => {
-    const currentPositionResponse = await queueRepo.currentPosition(user.id);
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem>> => {
+    const currentPositionResponse = await feedRepo.currentPosition(user.id);
 
     if (currentPositionResponse.isFailure()) {
         return failure(currentPositionResponse.error);
@@ -25,9 +25,10 @@ const enqueue = async (
     const currentPosition = currentPositionResponse.value;
     const nextPosition = currentPosition + 1;
 
-    const queueResponse = await queueRepo.create({
+    const queueResponse = await feedRepo.create({
         id: uuidv4(),
         position: nextPosition,
+        isQueued: true,
         userId: user.id,
         contentId,
         createdAt: new Date(),
@@ -40,8 +41,8 @@ const enqueue = async (
 const remove = async (
     user: User,
     contentId: string
-): Promise<FailureOrSuccess<DefaultErrors, Queue>> => {
-    const queueResponse = await queueRepo.findOne({
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem>> => {
+    const queueResponse = await feedRepo.findOne({
         where: {
             userId: user.id,
             contentId,
@@ -52,7 +53,7 @@ const remove = async (
         return failure(queueResponse.error);
     }
 
-    await queueRepo.delete(queueResponse.value.id);
+    await feedRepo.delete(queueResponse.value.id);
 
     return queueResponse;
 };
@@ -60,8 +61,8 @@ const remove = async (
 const next = async (
     user: User,
     content: Content
-): Promise<FailureOrSuccess<DefaultErrors, Queue>> => {
-    const currentQueueResponse = await queueRepo.findOne({
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem>> => {
+    const currentQueueResponse = await feedRepo.findOne({
         where: {
             userId: user.id,
             contentId: content.id,
@@ -74,7 +75,7 @@ const next = async (
 
     const currentPos = currentQueueResponse.value.position;
 
-    const nextItemResponse = await queueRepo.find({
+    const nextItemResponse = await feedRepo.find({
         where: {
             userId: user.id,
             position: MoreThan(currentPos),
@@ -98,8 +99,8 @@ const next = async (
 const prev = async (
     user: User,
     content: Content
-): Promise<FailureOrSuccess<DefaultErrors, Queue>> => {
-    const currentQueueResponse = await queueRepo.findOne({
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem>> => {
+    const currentQueueResponse = await feedRepo.findOne({
         where: {
             userId: user.id,
             contentId: content.id,
@@ -112,7 +113,7 @@ const prev = async (
 
     const currentPos = currentQueueResponse.value.position;
 
-    const prevItemResponse = await queueRepo.find({
+    const prevItemResponse = await feedRepo.find({
         where: {
             userId: user.id,
             position: LessThan(currentPos),
@@ -135,20 +136,21 @@ const prev = async (
 
 const current = async (
     user: User
-): Promise<FailureOrSuccess<DefaultErrors, Queue | null>> => {
-    if (!user.currentQueueId) {
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem | null>> => {
+    if (!user.currentFeedItemId) {
         return success(null);
     }
 
-    const queueResponse = await queueRepo.findById(user.currentQueueId);
+    const queueResponse = await feedRepo.findById(user.currentFeedItemId);
 
     return queueResponse;
 };
 
 const list = async (
     user: User
-): Promise<FailureOrSuccess<DefaultErrors, Queue[]>> => {
-    const queueResponse = await queueRepo.findForUser(user.id, {
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
+    const queueResponse = await feedRepo.findForUser(user.id, {
+        where: { isQueued: true },
         order: {
             position: "asc",
         },
@@ -164,10 +166,10 @@ const list = async (
 
 const setCurrent = async (
     user: User,
-    queue: Queue
+    queue: FeedItem
 ): Promise<FailureOrSuccess<DefaultErrors, User>> => {
     await pgUserRepo.update(user.id, {
-        currentQueueId: queue.id,
+        currentFeedItemId: queue.id,
     });
 
     return success(user);

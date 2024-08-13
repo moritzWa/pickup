@@ -16,14 +16,14 @@ import { User } from "src/core/infra/postgres/entities/User";
 import { Content } from "./Content";
 
 @Entity({
-    name: "queue",
+    name: "feed_items",
 })
 @Unique(["userId", "contentId", "position"])
 // index for user and ascending position
-@Index("user_position_idx", ["userId", "position"])
+@Index("feed_item_user_position_idx", ["userId", "position"])
 // index for user and descending created at
-@Index("user_created_at_idx", ["userId", "createdAt"])
-export class Queue {
+@Index("feed_item_user_created_at_idx", ["userId", "createdAt"])
+export class FeedItem {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
@@ -37,16 +37,24 @@ export class Queue {
 
     @Column({
         nullable: false,
+        name: "is_queued",
+        type: "boolean",
+        default: false,
+    })
+    isQueued!: boolean;
+
+    @Column({
+        nullable: false,
         name: "user_id",
     })
-    @Index("user_id_idx")
+    @Index("feed_items_user_id_idx")
     userId!: string;
 
     @Column({
         nullable: false,
         name: "content_id",
     })
-    @Index("content_id_idx")
+    @Index("feed_items_content_id_idx")
     contentId!: string;
 
     @ManyToOne(() => User, (t) => t.id, {

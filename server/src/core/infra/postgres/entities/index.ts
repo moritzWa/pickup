@@ -13,6 +13,6 @@ export { CuriusUser } from "./Curius/CuriusUser";
 // relationships
 export { Relationship } from "./Relationship";
 export { Interaction } from "./Interaction";
-export { Queue } from "./Queue";
+export { FeedItem } from "./FeedItem";
 
 export * from "./types";
