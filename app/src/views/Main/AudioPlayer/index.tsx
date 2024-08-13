@@ -67,8 +67,12 @@ import { AppContext } from "App";
 import { Track } from "react-native-track-player";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { BaseContentFields } from "src/api/fragments";
-import { useSelector } from "react-redux";
-import { getQueue } from "src/redux/reducers/audio";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getCurrentContent,
+  getQueue,
+  setCurrentContent,
+} from "src/redux/reducers/audio";
 
 const SIZE = 100;
 
@@ -81,6 +85,7 @@ const AudioPlayer = () => {
 
   const { width } = Dimensions.get("window");
   const navigation = useNavigation<NavigationProps>();
+  const dispatch = useDispatch();
 
   const {
     downloadAndPlayContent,
@@ -214,31 +219,13 @@ const AudioPlayer = () => {
     )}`;
   };
 
-  const listenForSpeech = async () => {
-    try {
-      Voice.onSpeechStart = () => {
-        console.log("Speech started.");
-      };
-
-      Voice.onSpeechEnd = () => {
-        console.log("Speech ended.");
-      };
-
-      Voice.onSpeechResults = (e) => {
-        console.log("Speech results.");
-        console.log(e);
-        // console.log(e.value[0]);
-      };
-
-      await Voice.start("en-US");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const openQueue = () => {
     navigation.navigate("Queue");
   };
+
+  useEffect(() => {
+    dispatch(setCurrentContent(content));
+  }, [content]);
 
   return (
     <View
@@ -495,7 +482,7 @@ const AudioPlayer = () => {
                 size={14}
               />
 
-              <Text
+              {/* <Text
                 style={{
                   color: session?.isBookmarked ? colors.white : theme.text,
                   fontSize: 14,
@@ -504,7 +491,7 @@ const AudioPlayer = () => {
                 }}
               >
                 Bookmark
-              </Text>
+              </Text> */}
             </TouchableOpacity>
           </View>
 
@@ -524,7 +511,7 @@ const AudioPlayer = () => {
             }}
             onPress={openQueue}
           >
-            <FontAwesomeIcon icon={faList} color={theme.header} size={14} />
+            <FontAwesomeIcon icon={faList} color={theme.text} size={14} />
           </TouchableOpacity>
 
           <View style={{ flex: 1 }} />
@@ -567,8 +554,16 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 
+  const currentContent = useSelector(getCurrentContent);
   const queue = useSelector(getQueue);
-  const nextContent = useMemo(() => queue[1] ?? null, [queue]);
+
+  // console.log("current: " + currentContent?.id);
+
+  const nextContent = useMemo(() => {
+    const currentIndex = queue.findIndex((q) => q.id === currentContent?.id);
+    return queue[currentIndex + 1] ?? null;
+  }, [queue, currentContent]);
+
   const { downloadAndPlayContent } = useAudio();
 
   const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
@@ -629,8 +624,8 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
       <Text
         style={{
           color: theme.background,
-          fontFamily: "Raleway-Bold",
-          fontSize: 14,
+          fontFamily: "Raleway-Black",
+          fontSize: 12,
           textTransform: "uppercase",
           marginBottom: 10,
         }}
@@ -651,7 +646,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
             height: 40,
             borderRadius: 10,
           }}
-          resizeMode="contain"
+          resizeMode="cover"
           source={{
             uri: nextContent.thumbnailImageUrl,
           }}

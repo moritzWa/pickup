@@ -126,7 +126,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
     }
   };
 
-  const bg = theme.theme === "light" ? "#DFDCFB" : "#050129";
+  const bg = theme.bgPrimary;
   const title = activeContent?.content?.title;
   const thumbnailImageUrl = activeContent?.content?.thumbnailImageUrl;
 
@@ -135,163 +135,209 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   }
 
   return (
-    <BlurView
+    <View
       style={{
-        position: "absolute",
-        bottom: 100,
-        overflow: "hidden",
-        padding: 5,
+        bottom: 60,
+        width: "100%",
+        height: 50,
         paddingHorizontal: 0,
         paddingBottom: 0,
-        backgroundColor: bg,
+        backgroundColor: theme.background,
+        opacity: 1,
         display: "flex",
         alignSelf: "center",
-        opacity: 0.97,
-        borderRadius: 15,
+        position: "relative",
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        width: "95%",
-        borderWidth: 1,
-        borderColor: theme.medBackground,
-        // shadow
       }}
-      intensity={75} // You can adjust the intensity of the blur
-      tint={theme.theme}
-      // colors={
-      //   theme.theme === "dark"
-      //     ? [colors.back, colors.primary, colors.pink70]
-      //     : [colors.pink70, colors.primary, colors.pink70]
-      // }
-      // start={{ x: 0, y: 0 }}
-      // end={{ x: 1, y: 0 }}
     >
-      <TouchableOpacity
-        onPress={openContent}
+      <BlurView
         style={{
-          paddingHorizontal: 5,
+          position: "absolute",
+          bottom: 10,
+          overflow: "hidden",
+          padding: 5,
+          paddingHorizontal: 0,
+          paddingBottom: 0,
+          backgroundColor: bg,
           display: "flex",
+          alignSelf: "center",
+          opacity: 0.97,
+          borderRadius: 15,
           justifyContent: "center",
           alignItems: "center",
-          width: "100%",
-          flexDirection: "row",
+          flexDirection: "column",
+          width: "95%",
+          borderWidth: 1,
+          borderColor: theme.medBackground,
+          // shadow
         }}
-        activeOpacity={1}
+        intensity={75} // You can adjust the intensity of the blur
+        tint={theme.theme}
+        // colors={
+        //   theme.theme === "dark"
+        //     ? [colors.back, colors.primary, colors.pink70]
+        //     : [colors.pink70, colors.primary, colors.pink70]
+        // }
+        // start={{ x: 0, y: 0 }}
+        // end={{ x: 1, y: 0 }}
       >
-        {thumbnailImageUrl ? (
-          <Image
-            source={{
-              uri: thumbnailImageUrl,
-            }}
-            style={{ width: 40, height: 40, borderRadius: 10 }}
-          />
-        ) : null}
-
+        {/* make a background rectangle that is  black representing progress */}
         <View
           style={{
-            marginLeft: 10,
-            flex: 1,
-            alignItems: "flex-start",
+            width: "100%",
+            height: "105%",
+            marginBottom: 0,
+            marginHorizontal: 5,
+            alignSelf: "center",
+            backgroundColor: bg,
+            borderRadius: 0,
+            top: 0,
+            overflow: "hidden",
+            position: "absolute",
           }}
         >
-          <Text
+          <LinearGradient
+            colors={[colors.primary, colors.primary]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
             style={{
-              flex: 1,
-              color: theme.header,
-              fontFamily: "Raleway-SemiBold",
-              textAlign: "center",
-              fontSize: 16,
+              width: (percentFinished.toString() + "%") as DimensionValue,
+              height: "100%",
+              opacity: 0.1,
             }}
-            numberOfLines={1}
-          >
-            {title || ""}
-          </Text>
-
-          <View
-            style={{
-              display: "flex",
-              marginTop: 5,
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faHeadphonesAlt}
-              color={theme.text}
-              size={12}
-              style={{ marginRight: 5 }}
-            />
-
-            <Text
-              style={{
-                color: theme.text,
-                fontFamily: "Raleway-Medium",
-                textAlign: "center",
-                fontSize: 14,
-              }}
-              numberOfLines={1}
-            >
-              {leftMinutes === 0 ? "<1" : leftMinutes}min left
-            </Text>
-          </View>
+          />
         </View>
 
         <TouchableOpacity
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          onPress={playOrPause}
+          onPress={openContent}
+          style={{
+            paddingHorizontal: 5,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            flexDirection: "row",
+          }}
           activeOpacity={1}
         >
-          <Animated.View
+          {thumbnailImageUrl ? (
+            <Image
+              source={{
+                uri: thumbnailImageUrl,
+              }}
+              style={{ width: 40, height: 40, borderRadius: 10 }}
+            />
+          ) : null}
+
+          <View
             style={{
-              marginLeft: 15,
-              width: 35,
-              height: 35,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 100,
-              backgroundColor: colors.primary,
-              alignSelf: "center",
-              transform: [{ scale: animation }],
+              marginLeft: 10,
+              flex: 1,
+              alignItems: "flex-start",
             }}
           >
-            <FontAwesomeIcon
-              icon={isPlaying ? faPause : faPlay}
-              color={colors.white}
-              size={16}
-              style={{ position: "relative", right: isPlaying ? 0 : -2 }}
-            />
-          </Animated.View>
-        </TouchableOpacity>
-      </TouchableOpacity>
+            <Text
+              style={{
+                flex: 1,
+                color: theme.header,
+                fontFamily: "Raleway-SemiBold",
+                textAlign: "center",
+                fontSize: 16,
+              }}
+              numberOfLines={1}
+            >
+              {title || ""}
+            </Text>
 
-      {/* make a progress bar */}
-      <View
-        style={{
-          width: "100%",
-          height: 4,
-          marginBottom: 0,
-          marginHorizontal: 5,
-          alignSelf: "center",
-          backgroundColor: bg,
-          borderRadius: 10,
-          marginTop: 10,
-          overflow: "hidden",
-        }}
-      >
-        <LinearGradient
-          colors={[colors.primary, colors.primary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
+            <View
+              style={{
+                display: "flex",
+                marginTop: 5,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faHeadphonesAlt}
+                color={theme.text}
+                size={12}
+                style={{ marginRight: 5 }}
+              />
+
+              <Text
+                style={{
+                  color: theme.text,
+                  fontFamily: "Raleway-Medium",
+                  textAlign: "center",
+                  fontSize: 14,
+                }}
+                numberOfLines={1}
+              >
+                {leftMinutes === 0 ? "<1" : leftMinutes}min left
+              </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={playOrPause}
+            activeOpacity={1}
+            style={{ marginRight: 5 }}
+          >
+            <Animated.View
+              style={{
+                marginLeft: 15,
+                width: 35,
+                height: 35,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 100,
+                backgroundColor: colors.primary,
+                alignSelf: "center",
+                transform: [{ scale: animation }],
+              }}
+            >
+              <FontAwesomeIcon
+                icon={isPlaying ? faPause : faPlay}
+                color={colors.white}
+                size={16}
+                style={{ position: "relative", right: isPlaying ? 0 : -2 }}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+
+        {/* make a progress bar */}
+        <View
           style={{
-            width: (percentFinished.toString() + "%") as DimensionValue,
+            width: "100%",
             height: 4,
-            borderTopRightRadius: 10,
-            borderBottomRightRadius: 10,
+            marginBottom: 0,
+            marginHorizontal: 5,
+            alignSelf: "center",
+            backgroundColor: bg,
+            borderRadius: 10,
+            marginTop: 10,
+            overflow: "hidden",
           }}
-        />
-      </View>
-    </BlurView>
+        >
+          <LinearGradient
+            colors={[colors.primary, colors.primary]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              width: (percentFinished.toString() + "%") as DimensionValue,
+              height: 4,
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+            }}
+          />
+        </View>
+      </BlurView>
+    </View>
   );
 };

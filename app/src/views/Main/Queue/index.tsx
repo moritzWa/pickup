@@ -69,7 +69,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
           height: 40,
           borderRadius: 10,
         }}
-        resizeMode="contain"
+        resizeMode="cover"
         source={{
           uri: content.thumbnailImageUrl,
         }}

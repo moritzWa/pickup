@@ -56,11 +56,12 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
         style={{
           flexDirection: "column",
           width: "100%",
+          zIndex: 100,
           position: "absolute",
           bottom: 0,
           left: 0,
           borderTopWidth: 1,
-          // backgroundColor: background,
+          backgroundColor: background,
           borderTopColor: medBackground,
         }}
       >

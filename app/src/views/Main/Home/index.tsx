@@ -28,6 +28,10 @@ import { setHomeFilter } from "src/redux/reducers/globalState";
 import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
 import { CurrentAudio } from "../../../components/CurrentAudio";
+import { useAudio } from "src/hooks/useAudio";
+import { setCurrentContent } from "src/redux/reducers/audio";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faCar } from "@fortawesome/pro-solid-svg-icons";
 
 const Home = () => {
   const theme = useTheme();
@@ -35,6 +39,9 @@ const Home = () => {
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
 
   const [showMore] = useMutation(api.content.showMore);
+  const { downloadAndPlayContent, toggle } = useAudio();
+  const dispatch = useDispatch();
+  const navigation = useNavigation<NavigationProps>();
 
   const variables = useMemo(
     (): QueryGetContentFeedArgs => ({
@@ -57,6 +64,24 @@ const Home = () => {
   };
 
   const content = (data?.getContentFeed ?? []) as BaseContentFields[];
+
+  const onPressContent = async (content: BaseContentFields) => {
+    navigation.navigate("AudioPlayer", {
+      contentId: content.id,
+    });
+  };
+
+  const onPlayContent = async (content: BaseContentFields) => {
+    // alert("play");
+    await downloadAndPlayContent(content);
+    dispatch(setCurrentContent(content));
+  };
+
+  const onTogglePlayOrPause = async (content: BaseContentFields) => {
+    // alert("toggle");
+    await toggle();
+    dispatch(setCurrentContent(content));
+  };
 
   const onRefresh = async () => {
     await refetch();
@@ -88,16 +113,27 @@ const Home = () => {
         // hide scrollbar
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          padding: 10,
-          paddingTop: 15,
+          // padding: 10,
+          // paddingTop: 15,
           paddingBottom: 150,
         }}
-        renderItem={({ item: c }) => <ContentRow content={c} />}
+        // ListHeaderComponent={<HomeHeader />}
+        renderItem={({ item: c }) => (
+          <ContentRow
+            onPlay={() => onPlayContent(c)}
+            togglePlayOrPause={() => onTogglePlayOrPause(c)}
+            onPress={() => onPressContent(c)}
+            content={c}
+          />
+        )}
         ListFooterComponent={
           // Show more
           <TouchableOpacity
             style={{
-              padding: 10,
+              padding: 5,
+              margin: 15,
+              borderRadius: 15,
+              backgroundColor: theme.secondaryBackground,
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
@@ -123,6 +159,63 @@ const Home = () => {
 
       <CurrentAudio content={content} />
     </SafeAreaView>
+  );
+};
+
+const HomeHeader = () => {
+  const theme = useTheme();
+
+  return (
+    <View
+      style={{
+        marginTop: 10,
+        padding: 10,
+        borderRadius: 15,
+        marginHorizontal: 20,
+        backgroundColor: colors.primary,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
+      <View
+        style={{
+          width: 60,
+          height: 60,
+          backgroundColor: colors.white,
+          borderRadius: 20,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <FontAwesomeIcon icon={faCar} size={30} color={colors.primary} />
+      </View>
+
+      <View style={{ marginLeft: 10, flex: 1 }}>
+        <Text
+          style={{
+            color: colors.white,
+            fontFamily: "Raleway-Bold",
+            fontSize: 18,
+            marginBottom: 0,
+          }}
+        >
+          Do you commute to work?
+        </Text>
+        <Text
+          style={{
+            color: colors.white,
+            fontFamily: "Raleway-Regular",
+            fontSize: 16,
+            marginBottom: 5,
+          }}
+        >
+          If so, let us know and we'll have content ready to go.
+        </Text>
+      </View>
+    </View>
   );
 };
 
@@ -218,8 +311,8 @@ const Options = () => {
   return (
     <View
       style={{
-        paddingHorizontal: 5,
-        paddingBottom: 5,
+        paddingHorizontal: 10,
+        // paddingBottom: 5,
         display: "flex",
         flexDirection: "row",
         alignItems: "center",

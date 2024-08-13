@@ -16,7 +16,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
 import { Query } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
-import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
+import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -30,6 +30,7 @@ import {
   faHourglass1,
   faHourglass3,
   faHourglassClock,
+  faPause,
   faPerson,
   faPlay,
   faTypewriter,
@@ -37,12 +38,28 @@ import {
 } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "../../views/Main/Home/Github";
 import FastImage from "react-native-fast-image";
+import { useSelector } from "react-redux";
+import { getCurrentContent, getIsPlaying } from "src/redux/reducers/audio";
 
-export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
+export const ContentRow = ({
+  content: c,
+  onPress,
+  onPlay,
+  togglePlayOrPause,
+}: {
+  content: BaseContentFields;
+  onPress: () => void;
+  onPlay: () => void;
+  togglePlayOrPause: () => void;
+}) => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
   const [startContent, { error }] = useMutation(api.content.start);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
+
+  const activeContent = useSelector(getCurrentContent);
+  const isActive = activeContent?.id === c.id;
+  const isPlaying = useSelector(getIsPlaying);
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -55,29 +72,32 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
     Animated.spring(animation, {
       toValue: 1, // Scale back to original size
       friction: 3,
-      tension: 40,
+      tension: 37,
       useNativeDriver: true,
     }).start();
   };
 
   const start = async () => {
     try {
-      const response = await startContent({
-        variables: {
-          contentId: c.id,
-        },
-        refetchQueries: [api.content.current],
-      });
+      if (onPress) onPress();
 
-      navigation.navigate("AudioPlayer", {
-        contentId: c.id,
-      });
+      // navigation.navigate("AudioPlayer", {
+      //   contentId: c.id,
+      // });
     } catch (err) {
       console.log(err);
       Alert.alert(
         "Error",
         "There was an error starting the course. Please try again."
       );
+    }
+  };
+
+  const playOrPause = async () => {
+    if (isActive) {
+      togglePlayOrPause();
+    } else {
+      onPlay();
     }
   };
 
@@ -88,21 +108,23 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
       activeOpacity={1}
       onPress={start}
       style={{
-        padding: 15,
-        borderRadius: 15,
-        borderColor: theme.border,
-        borderWidth: 1,
-        backgroundColor: theme.background,
+        padding: 20,
+        borderRadius: 0,
+        borderColor: theme.secondaryBackground,
+        borderBottomWidth: 1,
+        backgroundColor: isActive
+          ? theme.secondaryBackground
+          : theme.background,
         // shadow
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 0,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 5,
-        marginBottom: 15,
+        // shadowColor: "#000",
+        // shadowOffset: {
+        //   width: 0,
+        //   height: 0,
+        // },
+        // shadowOpacity: 0.05,
+        // shadowRadius: 4,
+        // elevation: 5,
+        // marginBottom: 15,
       }}
     >
       <View>
@@ -115,8 +137,22 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             flex: 1,
           }}
         >
+          {c.thumbnailImageUrl ? (
+            <FastImage
+              source={{
+                uri: c.thumbnailImageUrl,
+              }}
+              style={{
+                width: 37,
+                height: 37,
+                borderRadius: 5,
+              }}
+            />
+          ) : null}
+
           <View
             style={{
+              marginLeft: 10,
               marginRight: 10,
               flex: 1,
               alignItems: "flex-start",
@@ -124,10 +160,12 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             }}
           >
             <Text
-              numberOfLines={1}
+              numberOfLines={2}
               style={{
-                color: theme.header,
-                fontSize: 18,
+                color: isActive ? colors.primary : theme.header,
+                fontSize: 16,
+                // underline it if active
+                // textDecorationLine: isActive ? "underline" : "none",
                 // marginRight: 20,
                 fontFamily: "Raleway-SemiBold",
               }}
@@ -136,23 +174,10 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             </Text>
           </View>
 
-          {c.thumbnailImageUrl ? (
-            <FastImage
-              source={{
-                uri: c.thumbnailImageUrl,
-              }}
-              style={{
-                width: 25,
-                height: 25,
-                borderRadius: 5,
-              }}
-            />
-          ) : null}
-
-          {/* <Animated.View
+          <Animated.View
             style={{
-              width: 40,
-              height: 40,
+              width: 37,
+              height: 37,
               marginRight: 0,
               flexDirection: "row",
               alignItems: "center",
@@ -166,17 +191,20 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
             <TouchableOpacity
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
-              onPress={start}
+              onPress={playOrPause}
               activeOpacity={1}
             >
               <FontAwesomeIcon
-                icon={faPlay}
+                icon={isActive && isPlaying ? faPause : faPlay}
                 color={colors.white}
-                size={18}
-                style={{ position: "relative", right: -2 }}
+                size={16}
+                style={{
+                  position: "relative",
+                  right: isActive && isPlaying ? 0 : -1,
+                }}
               />
             </TouchableOpacity>
-          </Animated.View> */}
+          </Animated.View>
         </View>
 
         <View style={{}}>
@@ -191,7 +219,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                 style={{
                   color: theme.text,
                   fontSize: 14,
-                  marginRight: 50,
+                  // marginRight: 50,
                   fontFamily: "Raleway-Medium",
                 }}
                 numberOfLines={2}
@@ -241,7 +269,7 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                       fontFamily: "Raleway-Medium",
                     }}
                   >
-                    By {c.authorName}
+                    {c.authorName}
                   </Text>
                 </View>
 
@@ -255,16 +283,16 @@ export const ContentRow = ({ content: c }: { content: BaseContentFields }) => {
                 >
                   <FontAwesomeIcon
                     icon={faClock}
-                    color={theme.text}
-                    size={14}
+                    color={theme.textSecondary}
+                    size={12}
                     style={{ marginRight: 5 }}
                   />
 
                   <Text
                     style={{
-                      color: theme.text,
+                      color: theme.textSecondary,
                       fontSize: 14,
-                      fontFamily: "Raleway-SemiBold",
+                      fontFamily: "Raleway-Medium",
                     }}
                   >
                     {estimatedLen}m

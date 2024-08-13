@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
@@ -26,6 +26,7 @@ import {
   getIsPlaying,
   getSpeed,
   setAudioUrl,
+  setCurrentContent,
   setCurrentMs,
   setDurationMs,
   setIsPlaying,
@@ -40,6 +41,8 @@ export const useAudio = () => {
   const { data: queueData, error: queueError } = useQuery<
     Pick<Query, "getQueue">
   >(api.queue.list);
+
+  const [startContent, { error }] = useMutation(api.content.start);
 
   const queue = (queueData?.getQueue ?? []) as BaseQueueFields[];
 
@@ -91,6 +94,7 @@ export const useAudio = () => {
       globalSound.current = sound;
 
       dispatch(setAudioUrl(url));
+      dispatch(setCurrentContent(content));
 
       // make it so it can play even if it is muted
       await Audio.setAudioModeAsync({
@@ -127,6 +131,13 @@ export const useAudio = () => {
       await logQueue();
 
       await TrackPlayer.play();
+
+      await startContent({
+        variables: {
+          contentId: content.id,
+        },
+        refetchQueries: [api.content.current],
+      });
 
       //   await sound.playAsync();
       dispatch(setIsPlaying(true));
