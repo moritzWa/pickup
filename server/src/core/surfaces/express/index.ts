@@ -83,7 +83,7 @@ const startInngest = async () => {
             functions: inngestFunctions,
             signingKey: config.inngest.signingKey,
             baseUrl: config.inngest.baseInngestUrl,
-            id: "movement-workers",
+            id: "pickup-workers",
         })(req, res, next);
     });
 
@@ -93,7 +93,7 @@ const startInngest = async () => {
             functions: cronInngestFunctions,
             signingKey: config.inngest.signingKey,
             baseUrl: config.inngest.baseInngestUrl,
-            id: "movement-crons",
+            id: "pickup-workers",
         })(req, res, next);
     });
 

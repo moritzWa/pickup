@@ -145,9 +145,7 @@ export const config = {
     basescan: {
         apiKey: process.env.BASESCAN_API_KEY || "",
     },
-    appStoreUrl:
-        process.env.APP_STORE_URL ||
-        "https://apps.apple.com/us/app/movement-market/id6476886584",
+    appStoreUrl: process.env.APP_STORE_URL,
     twilio: {
         fromNumber: process.env.TWILIO_FROM_NUMBER || "",
         accountSid: process.env.TWILIO_ACCOUNT_SID || "",

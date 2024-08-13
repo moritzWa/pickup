@@ -222,6 +222,14 @@ export const useAudio = () => {
     dispatch(setSpeed(speed));
   };
 
+  const playNext = async () => {
+    await TrackPlayer.skipToNext();
+  };
+
+  const playPrev = async () => {
+    await TrackPlayer.skipToPrevious();
+  };
+
   // ehhh might need to adjust this more...
   // const syncQueue = async (queue: BaseQueueFields[]) => {
   //   console.log(`[syncing queue ${queue.length}]`);
@@ -277,5 +285,7 @@ export const useAudio = () => {
     setSpeed: setTrackSpeed,
     speed,
     syncQueue: noop,
+    playNext,
+    playPrev,
   };
 };
