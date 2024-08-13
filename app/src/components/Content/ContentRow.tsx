@@ -104,9 +104,7 @@ export const ContentRow = ({
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
 
   return (
-    <TouchableOpacity
-      activeOpacity={1}
-      onPress={start}
+    <View
       style={{
         padding: 20,
         borderRadius: 0,
@@ -150,7 +148,9 @@ export const ContentRow = ({
             />
           ) : null}
 
-          <View
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={start}
             style={{
               marginLeft: 10,
               marginRight: 10,
@@ -172,7 +172,7 @@ export const ContentRow = ({
             >
               {c.title}
             </Text>
-          </View>
+          </TouchableOpacity>
 
           <Animated.View
             style={{
@@ -332,6 +332,6 @@ export const ContentRow = ({
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };

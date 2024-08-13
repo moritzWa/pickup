@@ -90,7 +90,7 @@ const Home = () => {
   const onRefresh = async () => {
     await refetch();
     apolloClient.refetchQueries({
-      include: [api.content.current],
+      include: [api.content.current, api.users.me],
     });
   };
 
@@ -211,18 +211,16 @@ const HomeHeader = () => {
 
   return (
     <>
-      {commuteTime ? (
-        <DatePicker
-          modal
-          open={open}
-          date={commuteTime?.time ?? new Date()}
-          mode="time"
-          onConfirm={onConfirm}
-          onCancel={() => {
-            setOpen(false);
-          }}
-        />
-      ) : null}
+      <DatePicker
+        modal
+        open={open}
+        date={commuteTime?.time ?? new Date()}
+        mode="time"
+        onConfirm={onConfirm}
+        onCancel={() => {
+          setOpen(false);
+        }}
+      />
 
       <TouchableOpacity
         activeOpacity={0.9}

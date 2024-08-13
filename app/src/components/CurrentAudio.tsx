@@ -305,7 +305,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
                 icon={isPlaying ? faPause : faPlay}
                 color={colors.white}
                 size={16}
-                style={{ position: "relative", right: isPlaying ? 0 : -2 }}
+                style={{ position: "relative", right: isPlaying ? 0 : -1 }}
               />
             </Animated.View>
           </TouchableOpacity>
