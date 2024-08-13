@@ -20,7 +20,7 @@ const ENTITIES = [
     entities.CuriusMention,
     entities.Relationship,
     entities.Interaction,
-    entities.Queue,
+    entities.FeedItem,
 ];
 
 function getMigrationDirectory() {

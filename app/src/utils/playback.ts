@@ -1,4 +1,5 @@
 import TrackPlayer, { Event } from "react-native-track-player";
+import { useAudio } from "src/hooks/useAudio";
 import { store } from "src/redux";
 import {
   setCurrentMs,
@@ -7,6 +8,8 @@ import {
 } from "src/redux/reducers/audio";
 
 export const PlaybackService = async function () {
+  const { playNext, playPrev } = useAudio();
+
   TrackPlayer.addEventListener(Event.RemotePlay, async () => {
     await TrackPlayer.play();
     store.dispatch(setIsPlaying(true));
@@ -40,10 +43,16 @@ export const PlaybackService = async function () {
   });
 
   TrackPlayer.addEventListener(Event.RemoteNext, async () => {
-    await TrackPlayer.skipToNext();
+    await playNext();
   });
 
   TrackPlayer.addEventListener(Event.RemotePrevious, async () => {
-    await TrackPlayer.skipToPrevious();
+    await playPrev();
+  });
+
+  TrackPlayer.addEventListener(Event.PlaybackState, async (e) => {
+    console.log("last index: " + e.state);
+
+    await playPrev();
   });
 };

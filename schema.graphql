@@ -52,6 +52,7 @@ type Content {
 }
 
 enum ContentFeedFilter {
+  archived
   for_you
   new
   popular
@@ -87,6 +88,18 @@ type CreateUserResponse {
 """Date custom scalar type"""
 scalar Date
 
+type FeedItem {
+  content: Content
+  contentId: ID!
+  contentSession: ContentSession
+  createdAt: Date!
+  id: ID!
+  isQueued: Boolean!
+  position: Float!
+  updatedAt: Date!
+  userId: ID!
+}
+
 type FollowUpQuestion {
   answer: String!
   id: String!
@@ -97,6 +110,11 @@ type GetMobileUpdateResponse {
   latestVersion: String
   shouldUpdate: Boolean!
   userVersion: String
+}
+
+type GetQueueResponse {
+  queue: [FeedItem!]!
+  total: Int!
 }
 
 type Interaction {
@@ -131,7 +149,10 @@ type Metadata {
 }
 
 type Mutation {
+  addToQueue(contentId: ID!): FeedItem!
+  archiveContent(contentId: ID!): FeedItem!
   bookmarkContent(contentId: ID!): ContentSession!
+  clearQueue: String!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
@@ -171,30 +192,19 @@ type Query {
   getBookmarks(limit: Int, page: Int): [Content!]!
   getCategories: [CategorySection!]!
   getContent(contentId: ID!): Content!
-  getContentFeed(filter: ContentFeedFilter, limit: Int): [Content!]!
   getContentSession(contentId: ID!): ContentSession!
   getCurrentContentSession: ContentSession
+  getFeed(filter: ContentFeedFilter, limit: Int): [Content!]!
   getIntercomMobileToken(platform: String): String!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
-  getNextContent(afterContentId: ID!, currentMs: Int): Queue
+  getNextContent(afterContentId: ID!, currentMs: Int): FeedItem
   getPaymentMethods: [PaymentMethod!]!
-  getPrevContent(beforeContentId: ID!, currentMs: Int): Queue
+  getPrevContent(beforeContentId: ID!, currentMs: Int): FeedItem
   getProfile(userId: ID): Profile!
-  getQueue: [Queue!]!
+  getQueue: GetQueueResponse!
   me: User
   searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
-}
-
-type Queue {
-  content: Content
-  contentId: ID!
-  contentSession: ContentSession
-  createdAt: Date!
-  id: ID!
-  position: Float!
-  updatedAt: Date!
-  userId: ID!
 }
 
 type SearchResult {
@@ -221,6 +231,7 @@ type User {
   authProviderId: String!
   avatarImageUrl: String
   biometricPublicKey: String
+  commuteTime: String
   createdAt: Date!
   description: String!
   email: String!
@@ -239,6 +250,7 @@ type User {
   referredByCode: String
   referredByName: String
   role: String
+  timezone: String
   updatedAt: Date!
 }
 

@@ -11,23 +11,23 @@ import { success, failure, Maybe } from "src/core/logic";
 import { UnexpectedError, NotFoundError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
 import { FailureOrSuccess } from "src/core/logic";
-import { Queue as QueueModel } from "src/core/infra/postgres/entities";
+import { FeedItem as FeedItemModel } from "src/core/infra/postgres/entities";
 import { dataSource } from "src/core/infra/postgres";
 import { Helpers } from "src/utils";
 
-type QueueResponse = FailureOrSuccess<DefaultErrors, QueueModel>;
-type QueueArrayResponse = FailureOrSuccess<DefaultErrors, QueueModel[]>;
+type FeedItemResponse = FailureOrSuccess<DefaultErrors, FeedItemModel>;
+type FeedItemArrayResponse = FailureOrSuccess<DefaultErrors, FeedItemModel[]>;
 
-export class PostgresQueueRepository {
-    constructor(private model: typeof QueueModel) {}
+export class PostgresFeedItemRepository {
+    constructor(private model: typeof FeedItemModel) {}
 
-    private get repo(): Repository<QueueModel> {
+    private get repo(): Repository<FeedItemModel> {
         return dataSource.getRepository(this.model);
     }
 
     async find(
-        options: FindManyOptions<QueueModel>
-    ): Promise<QueueArrayResponse> {
+        options: FindManyOptions<FeedItemModel>
+    ): Promise<FeedItemArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
             const res = await this.repo.find(query);
@@ -39,7 +39,7 @@ export class PostgresQueueRepository {
         userId: string
     ): Promise<FailureOrSuccess<DefaultErrors, number>> => {
         return Helpers.trySuccessFail(async () => {
-            const queues = await this.repo.find({
+            const feeditems = await this.repo.find({
                 where: {
                     userId,
                 },
@@ -49,22 +49,24 @@ export class PostgresQueueRepository {
                 take: 1,
             });
 
-            const position = queues[0]?.position || 0;
+            const position = feeditems[0]?.position || 0;
 
             return success(position);
         });
     };
 
-    async findOne(options: FindOneOptions<QueueModel>): Promise<QueueResponse> {
+    async findOne(
+        options: FindOneOptions<FeedItemModel>
+    ): Promise<FeedItemResponse> {
         return Helpers.trySuccessFail(async () => {
             const user = await this.repo.findOne(options);
-            if (!user) return failure(new NotFoundError("Queue not found."));
+            if (!user) return failure(new NotFoundError("FeedItem not found."));
             return success(user);
         });
     }
 
     // YOU MUST CHECK BY LOWERCASE IF YOU SEARCH BY USERNAME!
-    async findByQueuename(username: string): Promise<QueueArrayResponse> {
+    async findByFeedItemname(username: string): Promise<FeedItemArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
@@ -76,7 +78,7 @@ export class PostgresQueueRepository {
     }
 
     async count(
-        options: FindManyOptions<QueueModel>
+        options: FindManyOptions<FeedItemModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
@@ -85,7 +87,7 @@ export class PostgresQueueRepository {
         });
     }
 
-    async findById(userId: string): Promise<QueueResponse> {
+    async findById(userId: string): Promise<FeedItemResponse> {
         try {
             const user = await this.repo
                 .createQueryBuilder()
@@ -93,7 +95,7 @@ export class PostgresQueueRepository {
                 .getOne();
 
             if (!user) {
-                return failure(new NotFoundError("Queue not found."));
+                return failure(new NotFoundError("FeedItem not found."));
             }
 
             return success(user);
@@ -102,7 +104,7 @@ export class PostgresQueueRepository {
         }
     }
 
-    async findByIds(userIds: string[]): Promise<QueueArrayResponse> {
+    async findByIds(userIds: string[]): Promise<FeedItemArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
@@ -115,13 +117,13 @@ export class PostgresQueueRepository {
 
     findForUser = async (
         userId: string,
-        options?: FindManyOptions<QueueModel>
-    ): Promise<QueueArrayResponse> => {
+        options?: FindManyOptions<FeedItemModel>
+    ): Promise<FeedItemArrayResponse> => {
         return Helpers.trySuccessFail(async () => {
-            const query = Helpers.stripUndefined(options);
             const res = await this.repo.find({
-                ...query,
+                ...options,
                 where: {
+                    ...options?.where,
                     userId,
                 },
             });
@@ -129,14 +131,14 @@ export class PostgresQueueRepository {
         });
     };
 
-    async findByEmail(email: string): Promise<QueueResponse> {
+    async findByEmail(email: string): Promise<FeedItemResponse> {
         return await Helpers.trySuccessFail(async () => {
             const user = await this.repo
                 .createQueryBuilder()
                 .where("email = :email", { email })
                 .getOne();
             if (!user) {
-                return failure(new NotFoundError("Queue not found."));
+                return failure(new NotFoundError("FeedItem not found."));
             }
             return success(user);
         });
@@ -144,9 +146,9 @@ export class PostgresQueueRepository {
 
     async update(
         userId: string,
-        updates: Partial<QueueModel>,
+        updates: Partial<FeedItemModel>,
         dbTxn?: EntityManager
-    ): Promise<QueueResponse> {
+    ): Promise<FeedItemResponse> {
         try {
             dbTxn
                 ? await dbTxn.update(this.model, { id: userId }, updates)
@@ -157,7 +159,7 @@ export class PostgresQueueRepository {
                 : await this.repo.findOneBy({ id: userId });
 
             if (!user) {
-                return failure(new NotFoundError("Queue does not exist!"));
+                return failure(new NotFoundError("FeedItem does not exist!"));
             }
 
             return success(user);
@@ -168,7 +170,7 @@ export class PostgresQueueRepository {
 
     async bulkUpdate(
         userIds: string[],
-        updates: Partial<QueueModel>
+        updates: Partial<FeedItemModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             if (!userIds.length) {
@@ -177,20 +179,20 @@ export class PostgresQueueRepository {
 
             const updateResult = await this.repo
                 .createQueryBuilder()
-                .update(QueueModel)
+                .update(FeedItemModel)
                 .set(updates)
                 .where("id IN (:...userIds)", { userIds })
                 .execute();
 
             if (!updateResult) {
-                return failure(new NotFoundError("Queue update failed."));
+                return failure(new NotFoundError("FeedItem update failed."));
             }
 
             return success(updateResult.affected || 0);
         });
     }
 
-    async save(obj: QueueModel): Promise<QueueResponse> {
+    async save(obj: FeedItemModel): Promise<FeedItemResponse> {
         try {
             return success(await this.repo.save(obj));
         } catch (err) {
@@ -199,14 +201,14 @@ export class PostgresQueueRepository {
     }
 
     // hard delete
-    async delete(userId: string): Promise<QueueResponse> {
+    async delete(userId: string): Promise<FeedItemResponse> {
         try {
             const user = await this.repo.findOne({
                 where: { id: userId },
             });
 
             if (!user) {
-                return failure(new NotFoundError("Queue does not exist!"));
+                return failure(new NotFoundError("FeedItem does not exist!"));
             }
 
             await this.repo.delete({ id: userId });
@@ -218,15 +220,15 @@ export class PostgresQueueRepository {
     }
 
     async create(
-        params: Omit<QueueModel, "content" | "user">,
+        params: Omit<FeedItemModel, "content" | "user">,
         dbTxn?: EntityManager
-    ): Promise<QueueResponse> {
+    ): Promise<FeedItemResponse> {
         try {
-            const newQueue = dbTxn
+            const newFeedItem = dbTxn
                 ? await dbTxn.save(this.model, params)
                 : await this.repo.save(params);
 
-            return success(newQueue);
+            return success(newFeedItem);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }

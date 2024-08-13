@@ -12,6 +12,9 @@ import { api } from "src/api";
 import { useMe } from "src/hooks";
 import { colors } from "src/components";
 import { hasIn, isNil } from "lodash";
+import { CurrentAudio } from "src/components/CurrentAudio";
+import { useSelector } from "react-redux";
+import { getCurrentContent } from "src/redux/reducers/audio";
 
 const HomeIcon = require("src/assets/icons/home.png");
 const HomeIconFilled = require("src/assets/icons/home-filled.png");
@@ -47,9 +50,12 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
     header,
   } = fullTheme;
   const { me } = useMe();
+  const currentContent = useSelector(getCurrentContent);
 
   return (
     <>
+      {currentContent ? <CurrentAudio content={currentContent} /> : null}
+
       <BlurView
         intensity={50} // You can adjust the intensity of the blur
         tint={theme}
@@ -60,9 +66,9 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
           position: "absolute",
           bottom: 0,
           left: 0,
-          borderTopWidth: 1,
-          backgroundColor: background,
-          borderTopColor: medBackground,
+          // borderTopWidth: 1,
+          // backgroundColor: background,
+          // borderTopColor: medBackground,
         }}
       >
         {/* <InternetConnection /> */}

@@ -19,12 +19,12 @@ import { loops } from "src/utils/loops";
 import { auth } from "firebase-admin";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, contentSessionRepo, queueRepo } from "../../infra";
+import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { QueueService } from "../../services/queueService/queueService";
 
 export const getPrevContent = queryField("getPrevContent", {
-    type: nullable("Queue"),
+    type: nullable("FeedItem"),
     args: {
         beforeContentId: nonNull(idArg()),
         currentMs: nullable(intArg()),
@@ -46,7 +46,7 @@ export const getPrevContent = queryField("getPrevContent", {
         throwIfError(prevQueueResponse);
 
         await pgUserRepo.update(user.id, {
-            currentQueueId: prevQueueResponse.value.id,
+            currentFeedItemId: prevQueueResponse.value.id,
         });
 
         return prevQueueResponse.value;

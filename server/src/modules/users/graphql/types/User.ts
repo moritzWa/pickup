@@ -37,6 +37,10 @@ export const User = objectType({
         t.nullable.string("referralCode");
         t.field("authProvider", { type: nonNull("UserAuthProviderEnum") });
         t.nonNull.string("authProviderId");
+
+        t.nullable.string("timezone");
+        t.nullable.string("commuteTime");
+
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
         t.nonNull.boolean("isSuperuser");

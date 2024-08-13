@@ -3,7 +3,7 @@ import tracer from "dd-trace";
 const port = process.env.DATADOG_APM_PORT;
 const hostname = process.env.DATADOG_APM_HOST;
 const env = process.env.DATADOG_ENV;
-const service = process.env.DATADOG_SERVICE || "movement-server";
+const service = process.env.DATADOG_SERVICE || "pickup-server";
 
 tracer
     .init({

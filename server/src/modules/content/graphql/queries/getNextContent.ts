@@ -23,14 +23,14 @@ import {
     contentRepo,
     contentSessionRepo,
     interactionRepo,
-    queueRepo,
+    feedRepo,
 } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { QueueService } from "../../services/queueService/queueService";
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 
 export const getNextContent = queryField("getNextContent", {
-    type: nullable("Queue"),
+    type: nullable("FeedItem"),
     args: {
         afterContentId: nonNull(idArg()),
         currentMs: nullable(intArg()),
@@ -52,7 +52,7 @@ export const getNextContent = queryField("getNextContent", {
         throwIfError(nextQueueResponse);
 
         await pgUserRepo.update(user.id, {
-            currentQueueId: nextQueueResponse.value.id,
+            currentFeedItemId: nextQueueResponse.value.id,
         });
 
         // if current ms is less than 15 seconds, record interaction of skipping the content

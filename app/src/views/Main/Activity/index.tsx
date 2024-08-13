@@ -95,7 +95,7 @@ const Activity = () => {
         renderItem={({ item: c }) => <ContentRow content={c} />}
       />
 
-      <CurrentAudio content={content} />
+      {/* <CurrentAudio content={content} /> */}
     </SafeAreaView>
   );
 };

@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 import {
   BaseContentFields,
   BaseContentSessionFields,
-  BaseQueueFields,
+  BaseFeedItemFields,
   BaseUserFields,
 } from "./fragments";
 
@@ -69,6 +69,15 @@ const SetInterests = gql`
       interestCategories: $interestCategories
       interestDescription: $interestDescription
     ) {
+      ...BaseUserFields
+    }
+  }
+`;
+
+const SetCommuteTime = gql`
+  ${BaseUserFields}
+  mutation SetCommuteTime($commuteTime: String!, $timezone: String!) {
+    setCommuteTime(commuteTime: $commuteTime, timezone: $timezone) {
       ...BaseUserFields
     }
   }
@@ -179,8 +188,8 @@ const StartListening = gql`
 
 const GetContentFeed = gql`
   ${BaseContentFields}
-  query GetContentFeed($limit: Int, $filter: ContentFeedFilter) {
-    getContentFeed(limit: $limit, filter: $filter) {
+  query GetFeed($limit: Int, $filter: ContentFeedFilter) {
+    getFeed(limit: $limit, filter: $filter) {
       ...BaseContentFields
     }
   }
@@ -221,6 +230,24 @@ const Bookmark = gql`
   }
 `;
 
+const AddToQueue = gql`
+  ${BaseFeedItemFields}
+  mutation AddToQueue($contentId: ID!) {
+    addToQueue(contentId: $contentId) {
+      ...BaseFeedItemFields
+    }
+  }
+`;
+
+const ArchiveContent = gql`
+  ${BaseFeedItemFields}
+  mutation ArchiveContent($contentId: ID!) {
+    archiveContent(contentId: $contentId) {
+      ...BaseFeedItemFields
+    }
+  }
+`;
+
 const GetCategories = gql`
   query GetCategories {
     getCategories {
@@ -235,29 +262,38 @@ const GetCategories = gql`
 `;
 
 const GetNextContent = gql`
-  ${BaseQueueFields}
+  ${BaseFeedItemFields}
   query GetNextContent($afterContentId: ID!) {
     getNextContent(afterContentId: $afterContentId) {
-      ...BaseQueueFields
+      ...BaseFeedItemFields
     }
   }
 `;
 
 const GetPrevContent = gql`
-  ${BaseQueueFields}
+  ${BaseFeedItemFields}
   query GetPrevContent($beforeContentId: ID!) {
     getPrevContent(beforeContentId: $beforeContentId) {
-      ...BaseQueueFields
+      ...BaseFeedItemFields
     }
   }
 `;
 
 const GetQueue = gql`
-  ${BaseQueueFields}
+  ${BaseFeedItemFields}
   query getQueue {
     getQueue {
-      ...BaseQueueFields
+      queue {
+        ...BaseFeedItemFields
+      }
+      total
     }
+  }
+`;
+
+const ClearQueue = gql`
+  mutation ClearQueue {
+    clearQueue
   }
 `;
 
@@ -274,6 +310,7 @@ export const api = {
     getIntercomHash: GetIntercomMobileToken,
     update: UpdateUser,
     setInterests: SetInterests,
+    setCommuteTime: SetCommuteTime,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
     getProfile: GetProfile,
@@ -284,6 +321,7 @@ export const api = {
     next: GetNextContent,
     prev: GetPrevContent,
     list: GetQueue,
+    clear: ClearQueue,
   },
   content: {
     showMore: ShowMore,
@@ -295,6 +333,8 @@ export const api = {
     startListening: StartListening,
     bookmarks: GetBookmarks,
     bookmark: Bookmark,
+    addToQueue: AddToQueue,
+    archive: ArchiveContent,
   },
   categories: {
     list: GetCategories,

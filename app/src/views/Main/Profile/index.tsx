@@ -40,8 +40,10 @@ import { CurrentAudio } from "src/components/CurrentAudio";
 import Header from "src/components/Header";
 import { TabBar } from "src/components/tabs";
 import { useMe } from "src/hooks";
+import { useAudio } from "src/hooks/useAudio";
 import { useTheme } from "src/hooks/useTheme";
 import { NavigationProps, RootStackParamList } from "src/navigation";
+import { setCurrentContent } from "src/redux/reducers/audio";
 import { setProfileFilter } from "src/redux/reducers/globalState";
 import { ProfileTabFilter, ReduxState } from "src/redux/types";
 import { storage } from "src/utils/firebase";
@@ -52,6 +54,8 @@ export const UserProfile = () => {
 
   // console.log("ME: " + me);
 
+  const navigation = useNavigation<NavigationProps>();
+  const { downloadAndPlayContent, toggle } = useAudio();
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
   const username = params?.username ?? me?.id;
   const insets = useSafeAreaInsets();
@@ -94,9 +98,7 @@ export const UserProfile = () => {
 
   useEffect(() => void refetchMe(), []);
 
-  const { data, error } = useQuery<Pick<Query, "getContentFeed">>(
-    api.content.feed
-  );
+  const { data, error } = useQuery<Pick<Query, "getFeed">>(api.content.feed);
 
   const { data: bookmarksData } = useQuery<Pick<Query, "getBookmarks">>(
     api.content.bookmarks
@@ -105,7 +107,7 @@ export const UserProfile = () => {
   const dispatch = useDispatch();
 
   const bookmarks = (bookmarksData?.getBookmarks ?? []) as BaseContentFields[];
-  const feed = (data?.getContentFeed ?? []) as BaseContentFields[];
+  const feed = (data?.getFeed ?? []) as BaseContentFields[];
 
   const content = useMemo(() => {
     if (profileFilter === ProfileTabFilter.Bookmarks) {
@@ -114,6 +116,24 @@ export const UserProfile = () => {
 
     return feed;
   }, [bookmarks, feed, profileFilter]);
+
+  const onPressContent = async (content: BaseContentFields) => {
+    navigation.navigate("AudioPlayer", {
+      contentId: content.id,
+    });
+  };
+
+  const onPlayContent = async (content: BaseContentFields) => {
+    // alert("play");
+    await downloadAndPlayContent(content);
+    dispatch(setCurrentContent(content));
+  };
+
+  const onTogglePlayOrPause = async (content: BaseContentFields) => {
+    // alert("toggle");
+    await toggle();
+    dispatch(setCurrentContent(content));
+  };
 
   const _onRefresh = async () => {
     setIsRefreshing(true);
@@ -163,8 +183,15 @@ export const UserProfile = () => {
           <FlatList
             data={content}
             keyExtractor={(item) => item.id}
-            style={{ padding: 10 }}
-            renderItem={({ item }) => <ContentRow content={item} />}
+            style={{ paddingTop: 0 }}
+            renderItem={({ item: c }) => (
+              <ContentRow
+                onPlay={() => onPlayContent(c)}
+                togglePlayOrPause={() => onTogglePlayOrPause(c)}
+                onPress={() => onPressContent(c)}
+                content={c}
+              />
+            )}
           />
         ),
     }),
@@ -202,7 +229,7 @@ export const UserProfile = () => {
         data: [{}],
         renderItem: () => (
           // select between tabs
-          <View style={{ marginBottom: 0 }}>
+          <View style={{ marginBottom: 0, marginHorizontal: 0 }}>
             <TabBar tabs={tabs} />
           </View>
         ),
@@ -289,7 +316,7 @@ export const UserProfile = () => {
         sections={sections}
       />
 
-      <CurrentAudio content={content} />
+      {/* <CurrentAudio content={content} /> */}
     </View>
   );
 };
@@ -393,6 +420,7 @@ const Profile = ({ username }: { username: string | null }) => {
       style={{
         // borderBottomWidth: 1,
         paddingBottom: 5,
+        paddingHorizontal: 5,
         // borderBottomColor: border,
       }}
     >

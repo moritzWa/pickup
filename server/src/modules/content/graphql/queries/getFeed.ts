@@ -13,16 +13,16 @@ import {
 } from "src/core/surfaces/graphql/context";
 import { stripe } from "src/utils";
 import { throwIfError } from "src/core/surfaces/graphql/common";
-import { contentRepo, contentSessionRepo } from "../../infra";
+import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
 import { In } from "typeorm";
 import { keyBy } from "lodash";
 
 export const ContentFeedFilter = enumType({
     name: "ContentFeedFilter",
-    members: ["popular", "for_you", "new", "unread", "queue"],
+    members: ["popular", "for_you", "new", "unread", "queue", "archived"],
 });
 
-export const getContentFeed = queryField("getContentFeed", {
+export const getFeed = queryField("getFeed", {
     type: nonNull(list(nonNull("Content"))),
     args: {
         limit: nullable(intArg()),
@@ -36,15 +36,17 @@ export const getContentFeed = queryField("getContentFeed", {
         const { limit } = args;
         const user = ctx.me!;
 
-        const contentResponse = await contentRepo.find({
+        const feedResponse = await feedRepo.findForUser(user.id, {
+            where: { isArchived: false },
             take: limit ?? 0,
+            relations: { content: true },
         });
 
-        throwIfError(contentResponse);
+        throwIfError(feedResponse);
 
         // Note: just doing in memory, lil easier than fiddling with typeorm
 
-        const contentIds = contentResponse.value.map((c) => c.id);
+        const contentIds = feedResponse.value.map((c) => c.contentId);
 
         const contentSessionsResponse = await contentSessionRepo.find({
             where: {
@@ -60,11 +62,12 @@ export const getContentFeed = queryField("getContentFeed", {
             (cs) => cs.contentId
         );
 
-        const content = contentResponse.value.map((c) => {
+        const content = feedResponse.value.map((c) => {
             const session = sessionByContentId[c.id];
+            const content = c.content;
 
             return {
-                ...c,
+                ...content,
                 contentSession: session,
             };
         });

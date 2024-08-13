@@ -1,5 +1,5 @@
 import { connect } from "src/core/infra/postgres";
-import { Content, Queue, User } from "src/core/infra/postgres/entities";
+import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import {
     DefaultErrors,
     failure,
@@ -14,47 +14,21 @@ import {
 } from "src/modules/curius/infra/linkRepo";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
-import { openai } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, queueRepo } from "../../infra";
+import { contentRepo, feedRepo } from "../../infra";
 import moment = require("moment");
 
 // needs to be idempotent
 export const buildQueue = async (
     user: User,
     limit: number
-): Promise<FailureOrSuccess<DefaultErrors, Queue[]>> => {
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
     const categories = user.interestCategories.join(" ");
     const description = user.interestDescription;
     const rawQuery = `${categories} ${description}`;
 
-    console.log(`finding links similar to ${rawQuery}`);
-
-    const openPromptResponse = await openai.chat.completions.create([
-        {
-            role: "system",
-            content:
-                "You are a librarian that helps users find content that they will enjoy. You are tasked with finding content that is similar to the user's interests.",
-        },
-        {
-            role: "user",
-            content: `My interests are: ${rawQuery}. Write a sentence prompt about my interests that I would give to a librarian to find content I like.`,
-        },
-    ]);
-
-    if (openPromptResponse.isFailure()) {
-        return failure(openPromptResponse.error);
-    }
-
-    const openPrompt = openPromptResponse.value;
-    const prompt = openPrompt.choices[0].message.content;
-
-    if (!prompt) {
-        return failure(new Error("Prompt was empty"));
-    }
-
     const similarLinksResponse = await curiusLinkRepo.findSimilarLinks(
-        prompt,
+        rawQuery,
         limit ?? DEFAULT_LINKS_RETURN
     );
 
@@ -96,13 +70,15 @@ export const buildQueue = async (
 const buildQueueFromContent = async (
     user: User,
     content: Content[]
-): Promise<FailureOrSuccess<DefaultErrors, Queue[]>> => {
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
     // TODO: we need to then make a queue here
     const queueResponses = await Promise.all(
         content.map((c, i) =>
-            queueRepo.create({
+            feedRepo.create({
                 id: uuidv4(),
                 position: i,
+                isQueued: false,
+                isArchived: false,
                 userId: user.id,
                 contentId: c.id,
                 // make it so increasing time? maybe

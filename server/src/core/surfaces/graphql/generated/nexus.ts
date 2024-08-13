@@ -35,7 +35,7 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   CategoryEnum: "Arts & Culture" | "Business Models" | "Corporate Technology" | "Entrepreneurship" | "Finance & Legal" | "Health & Wellness" | "International Business" | "Management" | "Software Engineering" | "Startups" | "Technology & Society" | "Venture Capital & Investment"
-  ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
+  ContentFeedFilter: "archived" | "for_you" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
 }
@@ -70,6 +70,7 @@ export interface NexusGenObjects {
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
   }
+  FeedItem: entities.FeedItem ;
   FollowUpQuestion: { // root type
     answer: string; // String!
     id: string; // String!
@@ -79,6 +80,10 @@ export interface NexusGenObjects {
     latestVersion?: string | null; // String
     shouldUpdate: boolean; // Boolean!
     userVersion?: string | null; // String
+  }
+  GetQueueResponse: { // root type
+    queue: NexusGenRootTypes['FeedItem'][]; // [FeedItem!]!
+    total: number; // Int!
   }
   Interaction: entities.Interaction ;
   Metadata: { // root type
@@ -110,7 +115,6 @@ export interface NexusGenObjects {
     username: string; // String!
   }
   Query: {};
-  Queue: entities.Queue ;
   SearchResult: { // root type
     averageDistance: number; // Float!
     createdDate: NexusGenScalars['Date']; // Date!
@@ -188,6 +192,17 @@ export interface NexusGenFieldTypes {
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
   }
+  FeedItem: { // field return type
+    content: NexusGenRootTypes['Content'] | null; // Content
+    contentId: string; // ID!
+    contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
+    createdAt: NexusGenScalars['Date']; // Date!
+    id: string; // ID!
+    isQueued: boolean; // Boolean!
+    position: number; // Float!
+    updatedAt: NexusGenScalars['Date']; // Date!
+    userId: string; // ID!
+  }
   FollowUpQuestion: { // field return type
     answer: string; // String!
     id: string; // String!
@@ -197,6 +212,10 @@ export interface NexusGenFieldTypes {
     latestVersion: string | null; // String
     shouldUpdate: boolean; // Boolean!
     userVersion: string | null; // String
+  }
+  GetQueueResponse: { // field return type
+    queue: NexusGenRootTypes['FeedItem'][]; // [FeedItem!]!
+    total: number; // Int!
   }
   Interaction: { // field return type
     contentId: string; // ID!
@@ -218,7 +237,10 @@ export interface NexusGenFieldTypes {
     siteName: string | null; // String
   }
   Mutation: { // field return type
+    addToQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
+    archiveContent: NexusGenRootTypes['FeedItem']; // FeedItem!
     bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
+    clearQueue: string; // String!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
@@ -255,29 +277,19 @@ export interface NexusGenFieldTypes {
     getBookmarks: NexusGenRootTypes['Content'][]; // [Content!]!
     getCategories: NexusGenRootTypes['CategorySection'][]; // [CategorySection!]!
     getContent: NexusGenRootTypes['Content']; // Content!
-    getContentFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     getCurrentContentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
+    getFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getIntercomMobileToken: string; // String!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
-    getNextContent: NexusGenRootTypes['Queue'] | null; // Queue
+    getNextContent: NexusGenRootTypes['FeedItem'] | null; // FeedItem
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
-    getPrevContent: NexusGenRootTypes['Queue'] | null; // Queue
+    getPrevContent: NexusGenRootTypes['FeedItem'] | null; // FeedItem
     getProfile: NexusGenRootTypes['Profile']; // Profile!
-    getQueue: NexusGenRootTypes['Queue'][]; // [Queue!]!
+    getQueue: NexusGenRootTypes['GetQueueResponse']; // GetQueueResponse!
     me: NexusGenRootTypes['User'] | null; // User
     searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
-  }
-  Queue: { // field return type
-    content: NexusGenRootTypes['Content'] | null; // Content
-    contentId: string; // ID!
-    contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
-    createdAt: NexusGenScalars['Date']; // Date!
-    id: string; // ID!
-    position: number; // Float!
-    updatedAt: NexusGenScalars['Date']; // Date!
-    userId: string; // ID!
   }
   SearchResult: { // field return type
     averageDistance: number; // Float!
@@ -299,6 +311,7 @@ export interface NexusGenFieldTypes {
     authProviderId: string; // String!
     avatarImageUrl: string | null; // String
     biometricPublicKey: string | null; // String
+    commuteTime: string | null; // String
     createdAt: NexusGenScalars['Date']; // Date!
     description: string; // String!
     email: string; // String!
@@ -317,6 +330,7 @@ export interface NexusGenFieldTypes {
     referredByCode: string | null; // String
     referredByName: string | null; // String
     role: string | null; // String
+    timezone: string | null; // String
     updatedAt: NexusGenScalars['Date']; // Date!
   }
 }
@@ -370,6 +384,17 @@ export interface NexusGenFieldTypeNames {
     token: 'String'
     user: 'User'
   }
+  FeedItem: { // field return type name
+    content: 'Content'
+    contentId: 'ID'
+    contentSession: 'ContentSession'
+    createdAt: 'Date'
+    id: 'ID'
+    isQueued: 'Boolean'
+    position: 'Float'
+    updatedAt: 'Date'
+    userId: 'ID'
+  }
   FollowUpQuestion: { // field return type name
     answer: 'String'
     id: 'String'
@@ -379,6 +404,10 @@ export interface NexusGenFieldTypeNames {
     latestVersion: 'String'
     shouldUpdate: 'Boolean'
     userVersion: 'String'
+  }
+  GetQueueResponse: { // field return type name
+    queue: 'FeedItem'
+    total: 'Int'
   }
   Interaction: { // field return type name
     contentId: 'ID'
@@ -400,7 +429,10 @@ export interface NexusGenFieldTypeNames {
     siteName: 'String'
   }
   Mutation: { // field return type name
+    addToQueue: 'FeedItem'
+    archiveContent: 'FeedItem'
     bookmarkContent: 'ContentSession'
+    clearQueue: 'String'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
@@ -437,29 +469,19 @@ export interface NexusGenFieldTypeNames {
     getBookmarks: 'Content'
     getCategories: 'CategorySection'
     getContent: 'Content'
-    getContentFeed: 'Content'
     getContentSession: 'ContentSession'
     getCurrentContentSession: 'ContentSession'
+    getFeed: 'Content'
     getIntercomMobileToken: 'String'
     getLikes: 'ContentSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
-    getNextContent: 'Queue'
+    getNextContent: 'FeedItem'
     getPaymentMethods: 'PaymentMethod'
-    getPrevContent: 'Queue'
+    getPrevContent: 'FeedItem'
     getProfile: 'Profile'
-    getQueue: 'Queue'
+    getQueue: 'GetQueueResponse'
     me: 'User'
     searchSimilarLinks: 'SearchResult'
-  }
-  Queue: { // field return type name
-    content: 'Content'
-    contentId: 'ID'
-    contentSession: 'ContentSession'
-    createdAt: 'Date'
-    id: 'ID'
-    position: 'Float'
-    updatedAt: 'Date'
-    userId: 'ID'
   }
   SearchResult: { // field return type name
     averageDistance: 'Float'
@@ -481,6 +503,7 @@ export interface NexusGenFieldTypeNames {
     authProviderId: 'String'
     avatarImageUrl: 'String'
     biometricPublicKey: 'String'
+    commuteTime: 'String'
     createdAt: 'Date'
     description: 'String'
     email: 'String'
@@ -499,12 +522,19 @@ export interface NexusGenFieldTypeNames {
     referredByCode: 'String'
     referredByName: 'String'
     role: 'String'
+    timezone: 'String'
     updatedAt: 'Date'
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
+    addToQueue: { // args
+      contentId: string; // ID!
+    }
+    archiveContent: { // args
+      contentId: string; // ID!
+    }
     bookmarkContent: { // args
       contentId: string; // ID!
     }
@@ -571,12 +601,12 @@ export interface NexusGenArgTypes {
     getContent: { // args
       contentId: string; // ID!
     }
-    getContentFeed: { // args
-      filter?: NexusGenEnums['ContentFeedFilter'] | null; // ContentFeedFilter
-      limit?: number | null; // Int
-    }
     getContentSession: { // args
       contentId: string; // ID!
+    }
+    getFeed: { // args
+      filter?: NexusGenEnums['ContentFeedFilter'] | null; // ContentFeedFilter
+      limit?: number | null; // Int
     }
     getIntercomMobileToken: { // args
       platform?: string | null; // String

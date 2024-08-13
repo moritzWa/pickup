@@ -1086,6 +1086,8 @@ PODS:
     - React-debug
   - react-native-airplay-button (1.1.0):
     - React-Core
+  - react-native-date-picker (5.0.4):
+    - React-Core
   - react-native-get-random-values (1.11.0):
     - React-Core
   - react-native-hash (3.0.3):
@@ -1508,6 +1510,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-airplay-button (from `../node_modules/react-native-airplay-button`)
+  - react-native-date-picker (from `../node_modules/react-native-date-picker`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-hash (from `../node_modules/react-native-hash`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
@@ -1671,6 +1674,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   react-native-airplay-button:
     :path: "../node_modules/react-native-airplay-button"
+  react-native-date-picker:
+    :path: "../node_modules/react-native-date-picker"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
   react-native-hash:
@@ -1832,6 +1837,7 @@ SPEC CHECKSUMS:
   React-logger: fa92ba4d3a5d39ac450f59be2a3cec7b099f0304
   React-Mapbuffer: 70da5955150a58732e9336a0c7e71cd49e909f25
   react-native-airplay-button: 90c7ba52402c8e92342003b8a1ff78dfb4357a9e
+  react-native-date-picker: 6891317e850deae5b53d51355226e07a495aba61
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-hash: 4664516df1834e1293b30e711c63f61f7f801b6a
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
