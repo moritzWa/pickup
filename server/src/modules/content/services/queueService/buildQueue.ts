@@ -29,33 +29,12 @@ export const buildQueue = async (
     const description = user.interestDescription;
     const rawQuery = `${categories} ${description}`;
 
-    console.log(`finding links similar to ${rawQuery}`);
-
-    const openPromptResponse = await openai.chat.completions.create([
-        {
-            role: "system",
-            content:
-                "You are a librarian that helps users find content that they will enjoy. You are tasked with finding content that is similar to the user's interests.",
-        },
-        {
-            role: "user",
-            content: `My interests are: ${rawQuery}. Write a sentence prompt about my interests that I would give to a librarian to find content I like.`,
-        },
-    ]);
-
-    if (openPromptResponse.isFailure()) {
-        return failure(openPromptResponse.error);
-    }
-
-    const openPrompt = openPromptResponse.value;
-    const prompt = openPrompt.choices[0].message.content;
-
     if (!prompt) {
         return failure(new Error("Prompt was empty"));
     }
 
     const similarLinksResponse = await curiusLinkRepo.findSimilarLinks(
-        prompt,
+        rawQuery,
         limit ?? DEFAULT_LINKS_RETURN
     );
 
