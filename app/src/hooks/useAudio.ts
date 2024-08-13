@@ -3,13 +3,13 @@ import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
-import { isNil } from "lodash";
+import { isNil, noop } from "lodash";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
 import TrackPlayer, { AddTrack, State, Track } from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
 import { api } from "src/api";
-import { BaseContentFields, BaseQueueFields } from "src/api/fragments";
+import { BaseContentFields } from "src/api/fragments";
 import { Query } from "src/api/generated/types";
 import {
   DefaultErrors,
@@ -43,8 +43,6 @@ export const useAudio = () => {
   >(api.queue.list);
 
   const [startContent, { error }] = useMutation(api.content.start);
-
-  const queue = (queueData?.getQueue ?? []) as BaseQueueFields[];
 
   const currentMs = useSelector(getCurrentMs);
   const durationMs = useSelector(getDurationMs);
@@ -225,43 +223,43 @@ export const useAudio = () => {
   };
 
   // ehhh might need to adjust this more...
-  const syncQueue = async (queue: BaseQueueFields[]) => {
-    console.log(`[syncing queue ${queue.length}]`);
+  // const syncQueue = async (queue: BaseQueueFields[]) => {
+  //   console.log(`[syncing queue ${queue.length}]`);
 
-    const activeTrack = await TrackPlayer.getActiveTrack();
-    const currentContentId = activeTrack?.metadata?.contentId;
+  //   const activeTrack = await TrackPlayer.getActiveTrack();
+  //   const currentContentId = activeTrack?.metadata?.contentId;
 
-    await TrackPlayer.removeUpcomingTracks();
-    await TrackPlayer.remove(0);
+  //   await TrackPlayer.removeUpcomingTracks();
+  //   await TrackPlayer.remove(0);
 
-    await logQueue();
+  //   await logQueue();
 
-    for (const q of queue) {
-      const content = q.content!;
+  //   for (const q of queue) {
+  //     const content = q.content!;
 
-      // don't add the track if it is already the active one
-      // if (cus
+  //     // don't add the track if it is already the active one
+  //     // if (cus
 
-      await TrackPlayer.add({
-        url: content.audioUrl || "",
-        title: content.title || "",
-        artist: content.authorName || "",
-        artwork: content.thumbnailImageUrl || "",
-        metadata: { contentId: content.id },
-      });
-    }
+  //     await TrackPlayer.add({
+  //       url: content.audioUrl || "",
+  //       title: content.title || "",
+  //       artist: content.authorName || "",
+  //       artwork: content.thumbnailImageUrl || "",
+  //       metadata: { contentId: content.id },
+  //     });
+  //   }
 
-    logQueue();
-  };
+  //   logQueue();
+  // };
 
   const logQueue = async () => {
     const queue = await TrackPlayer.getQueue();
     console.log(queue.map((q) => q.title));
   };
 
-  useEffect(() => {
-    dispatch(setQueue(queue.map((q) => q.content).filter(hasValue)));
-  }, [queue]);
+  // useEffect(() => {
+  //   dispatch(setQueue(queue.map((q) => q.content).filter(hasValue)));
+  // }, [queue]);
 
   // sync the queue. add to the queue. etc... (track player)
 
@@ -278,6 +276,6 @@ export const useAudio = () => {
     setPosition,
     setSpeed: setTrackSpeed,
     speed,
-    syncQueue,
+    syncQueue: noop,
   };
 };

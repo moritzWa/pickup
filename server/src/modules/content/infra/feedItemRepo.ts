@@ -120,10 +120,10 @@ export class PostgresFeedItemRepository {
         options?: FindManyOptions<FeedItemModel>
     ): Promise<FeedItemArrayResponse> => {
         return Helpers.trySuccessFail(async () => {
-            const query = Helpers.stripUndefined(options);
             const res = await this.repo.find({
-                ...query,
+                ...options,
                 where: {
+                    ...options?.where,
                     userId,
                 },
             });

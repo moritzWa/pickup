@@ -188,8 +188,8 @@ const StartListening = gql`
 
 const GetContentFeed = gql`
   ${BaseContentFields}
-  query GetContentFeed($limit: Int, $filter: ContentFeedFilter) {
-    getContentFeed(limit: $limit, filter: $filter) {
+  query GetFeed($limit: Int, $filter: ContentFeedFilter) {
+    getFeed(limit: $limit, filter: $filter) {
       ...BaseContentFields
     }
   }
@@ -230,6 +230,24 @@ const Bookmark = gql`
   }
 `;
 
+const AddToQueue = gql`
+  ${BaseFeedItemFields}
+  mutation AddToQueue($contentId: ID!) {
+    addToQueue(contentId: $contentId) {
+      ...BaseFeedItemFields
+    }
+  }
+`;
+
+const ArchiveContent = gql`
+  ${BaseFeedItemFields}
+  mutation ArchiveContent($contentId: ID!) {
+    archiveContent(contentId: $contentId) {
+      ...BaseFeedItemFields
+    }
+  }
+`;
+
 const GetCategories = gql`
   query GetCategories {
     getCategories {
@@ -265,7 +283,10 @@ const GetQueue = gql`
   ${BaseFeedItemFields}
   query getQueue {
     getQueue {
-      ...BaseFeedItemFields
+      queue {
+        ...BaseFeedItemFields
+      }
+      total
     }
   }
 `;
@@ -305,6 +326,8 @@ export const api = {
     startListening: StartListening,
     bookmarks: GetBookmarks,
     bookmark: Bookmark,
+    addToQueue: AddToQueue,
+    archive: ArchiveContent,
   },
   categories: {
     list: GetCategories,

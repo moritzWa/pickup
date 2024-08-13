@@ -54,6 +54,7 @@ type Content {
 }
 
 enum ContentFeedFilter {
+  archived
   for_you
   new
   popular
@@ -113,6 +114,11 @@ type GetMobileUpdateResponse {
   userVersion: String
 }
 
+type GetQueueResponse {
+  queue: [FeedItem!]!
+  total: Int!
+}
+
 type Interaction {
   contentId: ID!
   createdAt: Date!
@@ -146,6 +152,7 @@ type Metadata {
 
 type Mutation {
   addToQueue(contentId: ID!): FeedItem!
+  archiveContent(contentId: ID!): FeedItem!
   bookmarkContent(contentId: ID!): ContentSession!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
@@ -196,7 +203,7 @@ type Query {
   getPaymentMethods: [PaymentMethod!]!
   getPrevContent(beforeContentId: ID!, currentMs: Int): FeedItem
   getProfile(userId: ID): Profile!
-  getQueue: [FeedItem!]!
+  getQueue: GetQueueResponse!
   me: User
   searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
 }

@@ -50,7 +50,7 @@ import { useAudio } from "src/hooks/useAudio";
 import BigNumber from "bignumber.js";
 import { Track } from "react-native-track-player";
 
-export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
+export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 
@@ -137,9 +137,9 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
   return (
     <View
       style={{
-        bottom: 60,
+        bottom: 90,
         width: "100%",
-        height: 50,
+        height: 10,
         paddingHorizontal: 0,
         paddingBottom: 0,
         backgroundColor: theme.background,

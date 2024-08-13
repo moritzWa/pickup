@@ -105,6 +105,7 @@ const buildQueueFromContent = async (
                 id: uuidv4(),
                 position: i,
                 isQueued: false,
+                isArchived: false,
                 userId: user.id,
                 contentId: c.id,
                 // make it so increasing time? maybe

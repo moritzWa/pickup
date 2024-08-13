@@ -17,10 +17,11 @@ import { api, apolloClient } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
 import {
   ContentFeedFilter,
+  GetQueueResponse,
   Mutation,
   MutationSetCommuteTimeArgs,
   Query,
-  QueryGetContentFeedArgs,
+  QueryGetFeedArgs,
 } from "src/api/generated/types";
 import { colors } from "src/components";
 import { useMe, useTheme } from "src/hooks";
@@ -36,6 +37,7 @@ import { faCar } from "@fortawesome/pro-solid-svg-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
+import { hasValue } from "src/core";
 
 const Home = () => {
   const theme = useTheme();
@@ -48,14 +50,14 @@ const Home = () => {
   const navigation = useNavigation<NavigationProps>();
 
   const variables = useMemo(
-    (): QueryGetContentFeedArgs => ({
-      filter: filter,
-      limit: 10,
+    (): QueryGetFeedArgs => ({
+      filter: ContentFeedFilter.ForYou,
+      limit: 100,
     }),
-    [filter]
+    []
   );
 
-  const { data, refetch, error } = useQuery<Pick<Query, "getContentFeed">>(
+  const { data, refetch, error } = useQuery<Pick<Query, "getFeed">>(
     api.content.feed,
     {
       variables,
@@ -63,11 +65,26 @@ const Home = () => {
     }
   );
 
+  const { data: queueData, refetch: refetchQueue } = useQuery<
+    Pick<Query, "getQueue">
+  >(api.queue.list, {
+    variables,
+    fetchPolicy: "cache-and-network",
+  });
+
   const onShowMorePress = async () => {
     await showMore();
   };
 
-  const content = (data?.getContentFeed ?? []) as BaseContentFields[];
+  const content = useMemo((): BaseContentFields[] => {
+    if (filter === ContentFeedFilter.Queue) {
+      return (queueData?.getQueue?.queue ?? [])
+        .map((q) => q.content as BaseContentFields)
+        .filter(hasValue);
+    }
+
+    return (data?.getFeed ?? []) as BaseContentFields[];
+  }, [data, filter]);
 
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {
@@ -90,7 +107,7 @@ const Home = () => {
   const onRefresh = async () => {
     await refetch();
     apolloClient.refetchQueries({
-      include: [api.content.current, api.users.me],
+      include: [api.content.current, api.users.me, api.queue.list],
     });
   };
 
@@ -161,7 +178,7 @@ const Home = () => {
         }
       />
 
-      <CurrentAudio content={content} />
+      {/* <CurrentAudio content={content} /> */}
     </SafeAreaView>
   );
 };
@@ -305,10 +322,12 @@ const SingleFilter = ({
   label,
   onPress,
   isActive,
+  count,
 }: {
   label: string;
   isActive: boolean;
   onPress: () => void;
+  count?: number;
 }) => {
   const theme = useTheme();
 
@@ -316,17 +335,53 @@ const SingleFilter = ({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.9}
-      style={{ flexDirection: "row", padding: 10 }}
+      style={{
+        flexDirection: "row",
+        display: "flex",
+        alignItems: "center",
+        padding: 10,
+      }}
     >
       <Text
         style={{
           color: isActive ? theme.header : theme.text,
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 26,
+          fontSize: 18,
         }}
       >
         {label}
       </Text>
+
+      {count ? (
+        <View
+          style={{
+            backgroundColor: colors.primary,
+            borderRadius: 100,
+            width: 20,
+            position: "relative",
+            top: 1,
+            height: 20,
+            marginLeft: 7,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: colors.white,
+              fontFamily: "sans-serif",
+              fontSize: 12,
+              fontWeight: "900",
+              position: "relative",
+              top: 0,
+            }}
+          >
+            {count}
+          </Text>
+        </View>
+      ) : null}
     </TouchableOpacity>
   );
 };
@@ -352,6 +407,13 @@ const Options = () => {
     api.content.startListening
   );
   const [setCommuteTime] = useMutation(api.users.setCommuteTime);
+
+  const { data: queueData, refetch: refetchQueue } = useQuery<
+    Pick<Query, "getQueue">
+  >(api.queue.list, {
+    variables: {},
+    fetchPolicy: "cache-and-network",
+  });
 
   const onPress = async (feed: ContentFeedFilter) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -412,6 +474,8 @@ const Options = () => {
     return null;
   }, [me]);
 
+  const queueCount = queueData?.getQueue?.total ?? 0;
+
   return (
     <>
       {commuteTime ? (
@@ -430,7 +494,7 @@ const Options = () => {
       <View
         style={{
           paddingHorizontal: 10,
-          // paddingBottom: 5,
+          paddingBottom: 5,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -439,6 +503,7 @@ const Options = () => {
         <View
           style={{
             flex: 1,
+            // paddingHorizontal: 5,
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
@@ -447,7 +512,7 @@ const Options = () => {
           <SingleFilter
             onPress={() => onPress(ContentFeedFilter.ForYou)}
             isActive={filter === ContentFeedFilter.ForYou}
-            label="For you"
+            label="Feed"
           />
 
           {/* <SingleFilter
@@ -456,11 +521,18 @@ const Options = () => {
           label="Popular"
         /> */}
 
+          <SingleFilter
+            onPress={() => onPress(ContentFeedFilter.Queue)}
+            isActive={filter === ContentFeedFilter.Queue}
+            label="Queue"
+            count={queueCount}
+          />
+
           {/* <SingleFilter
-          onPress={() => onPress(ContentFeedFilter.Queue)}
-          isActive={filter === ContentFeedFilter.Queue}
-          label="Queue"
-        /> */}
+            onPress={() => onPress(ContentFeedFilter.Archived)}
+            isActive={filter === ContentFeedFilter.Archived}
+            label="Archived"
+          /> */}
         </View>
 
         {commuteTime ? (

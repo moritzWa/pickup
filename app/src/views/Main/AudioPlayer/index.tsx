@@ -609,6 +609,8 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
     return null;
   }
 
+  return null; // TODO: fix this
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}

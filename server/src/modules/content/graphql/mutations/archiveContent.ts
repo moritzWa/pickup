@@ -14,7 +14,7 @@ import { ContentSessionService } from "../../services/contentSessionService";
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { v4 as uuidv4 } from "uuid";
 
-export const addToQueue = mutationField("addToQueue", {
+export const archiveContent = mutationField("archiveContent", {
     type: nonNull("FeedItem"),
     args: {
         contentId: nonNull(idArg()),
@@ -32,20 +32,25 @@ export const addToQueue = mutationField("addToQueue", {
 
         const content = contentResponse.value;
 
-        // TODO: add to queue
-        const feedItemResponse = await feedRepo.create({
-            id: uuidv4(),
-            position: 0,
-            isArchived: false,
-            isQueued: true,
-            userId: user.id,
-            contentId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+        const feedItemResponse = await feedRepo.findOne({
+            where: {
+                contentId: content.id,
+                userId: user.id,
+                isArchived: false,
+            },
         });
 
         throwIfError(feedItemResponse);
 
-        return feedItemResponse.value;
+        const updatedFeedItemResponse = await feedRepo.update(
+            feedItemResponse.value.id,
+            {
+                isArchived: true,
+            }
+        );
+
+        throwIfError(updatedFeedItemResponse);
+
+        return updatedFeedItemResponse.value;
     },
 });

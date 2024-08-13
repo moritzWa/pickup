@@ -14,12 +14,18 @@ import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
-import { Query } from "src/api/generated/types";
+import {
+  Mutation,
+  MutationAddToQueueArgs,
+  MutationArchiveContentArgs,
+  Query,
+} from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
 import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
+  faArchive,
   faArrowRight,
   faCircle,
   faCircle0,
@@ -40,6 +46,8 @@ import { Impressions } from "../../views/Main/Home/Github";
 import FastImage from "react-native-fast-image";
 import { useSelector } from "react-redux";
 import { getCurrentContent, getIsPlaying } from "src/redux/reducers/audio";
+import { noop } from "lodash";
+import { Swipeable } from "react-native-gesture-handler";
 
 export const ContentRow = ({
   content: c,
@@ -60,6 +68,48 @@ export const ContentRow = ({
   const activeContent = useSelector(getCurrentContent);
   const isActive = activeContent?.id === c.id;
   const isPlaying = useSelector(getIsPlaying);
+
+  const [addToQueue] = useMutation<Pick<Mutation, "addToQueue">>(
+    api.content.addToQueue
+  );
+
+  const [archiveContent] = useMutation<Pick<Mutation, "archiveContent">>(
+    api.content.archive
+  );
+
+  const onArchiveContent = async () => {
+    try {
+      const variables: MutationArchiveContentArgs = {
+        contentId: c.id,
+      };
+
+      await archiveContent({
+        variables,
+        refetchQueries: [
+          api.content.addToQueue,
+          api.queue.list,
+          api.content.feed,
+        ],
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const onAddContentToQueue = async () => {
+    try {
+      const variables: MutationAddToQueueArgs = {
+        contentId: c.id,
+      };
+
+      await addToQueue({
+        variables,
+        refetchQueries: [api.content.addToQueue, api.queue.list],
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -101,141 +151,218 @@ export const ContentRow = ({
     }
   };
 
+  const renderRightActions = () => (
+    <View
+      style={{
+        alignItems: "center",
+        paddingHorizontal: 20,
+        display: "flex",
+        height: "100%",
+        backgroundColor: theme.bgPrimary,
+        flexDirection: "row",
+      }}
+    >
+      <TouchableOpacity
+        onPress={onAddContentToQueue}
+        activeOpacity={0.9}
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "row",
+          backgroundColor: theme.bgPrimary,
+          width: 75,
+          height: 75,
+          borderRadius: 50,
+          marginTop: 10,
+          marginBottom: 10,
+        }}
+      >
+        <Image
+          source={require("src/assets/icons/solid-list-circle-plus.png")}
+          tintColor={colors.primary}
+          resizeMode="contain"
+          style={{
+            width: 30,
+            height: 30,
+          }}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderLeftActions = () => (
+    <View
+      style={{
+        alignItems: "center",
+        paddingHorizontal: 20,
+        display: "flex",
+        height: "100%",
+        backgroundColor: theme.medBackground,
+        flexDirection: "row",
+      }}
+    >
+      <TouchableOpacity
+        onPress={onArchiveContent}
+        activeOpacity={0.9}
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "row",
+          width: 75,
+          height: 75,
+          borderRadius: 50,
+          marginTop: 10,
+          marginBottom: 10,
+        }}
+      >
+        <FontAwesomeIcon icon={faArchive} color={theme.text} size={24} />
+      </TouchableOpacity>
+    </View>
+  );
+
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
 
   return (
-    <View
-      style={{
-        padding: 20,
-        borderRadius: 0,
-        borderColor: theme.secondaryBackground,
-        borderBottomWidth: 1,
-        backgroundColor: isActive
-          ? theme.secondaryBackground
-          : theme.background,
-        // shadow
-        // shadowColor: "#000",
-        // shadowOffset: {
-        //   width: 0,
-        //   height: 0,
-        // },
-        // shadowOpacity: 0.05,
-        // shadowRadius: 4,
-        // elevation: 5,
-        // marginBottom: 15,
-      }}
+    <Swipeable
+      renderLeftActions={renderLeftActions}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      overshootLeft={false}
     >
-      <View>
-        <View
-          style={{
-            marginBottom: 10,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            flex: 1,
-          }}
-        >
-          {c.thumbnailImageUrl ? (
-            <FastImage
-              source={{
-                uri: c.thumbnailImageUrl,
+      <View
+        style={{
+          padding: 20,
+          borderRadius: 0,
+          borderColor: isActive
+            ? theme.bgPrimaryLight
+            : theme.secondaryBackground,
+          borderBottomWidth: 1,
+          backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,
+          // shadow
+          // shadowColor: "#000",
+          // shadowOffset: {
+          //   width: 0,
+          //   height: 0,
+          // },
+          // shadowOpacity: 0.05,
+          // shadowRadius: 4,
+          // elevation: 5,
+          // marginBottom: 15,
+        }}
+      >
+        <View>
+          <View
+            style={{
+              marginBottom: 10,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
+            {c.thumbnailImageUrl ? (
+              <FastImage
+                source={{
+                  uri: c.thumbnailImageUrl,
+                }}
+                style={{
+                  width: 37,
+                  height: 37,
+                  borderRadius: 5,
+                }}
+              />
+            ) : null}
+
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={start}
+              style={{
+                marginLeft: 10,
+                marginRight: 10,
+                flex: 1,
+                alignItems: "flex-start",
+                justifyContent: "center",
               }}
+            >
+              <Text
+                numberOfLines={2}
+                style={{
+                  color: isActive ? colors.primary : theme.header,
+                  fontSize: 16,
+                  // underline it if active
+                  // textDecorationLine: isActive ? "underline" : "none",
+                  // marginRight: 20,
+                  fontFamily: "Raleway-SemiBold",
+                }}
+              >
+                {c.title}
+              </Text>
+            </TouchableOpacity>
+
+            <Animated.View
               style={{
                 width: 37,
                 height: 37,
-                borderRadius: 5,
+                marginRight: 0,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 100,
+                backgroundColor: colors.primary,
+                alignSelf: "center",
+                transform: [{ scale: animation }],
               }}
-            />
-          ) : null}
+            >
+              <TouchableOpacity
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={playOrPause}
+                activeOpacity={1}
+              >
+                <FontAwesomeIcon
+                  icon={isActive && isPlaying ? faPause : faPlay}
+                  color={colors.white}
+                  size={16}
+                  style={{
+                    position: "relative",
+                    right: isActive && isPlaying ? 0 : -1,
+                  }}
+                />
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
 
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={start}
-            style={{
-              marginLeft: 10,
-              marginRight: 10,
-              flex: 1,
-              alignItems: "flex-start",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              numberOfLines={2}
+          <View style={{}}>
+            <View
               style={{
-                color: isActive ? colors.primary : theme.header,
-                fontSize: 16,
-                // underline it if active
-                // textDecorationLine: isActive ? "underline" : "none",
-                // marginRight: 20,
-                fontFamily: "Raleway-SemiBold",
+                flexDirection: "row",
+                alignItems: "flex-start",
               }}
             >
-              {c.title}
-            </Text>
-          </TouchableOpacity>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    color: theme.text,
+                    fontSize: 14,
+                    // marginRight: 50,
+                    fontFamily: "Raleway-Medium",
+                  }}
+                  numberOfLines={2}
+                >
+                  {c.summary}
+                </Text>
 
-          <Animated.View
-            style={{
-              width: 37,
-              height: 37,
-              marginRight: 0,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 100,
-              backgroundColor: colors.primary,
-              alignSelf: "center",
-              transform: [{ scale: animation }],
-            }}
-          >
-            <TouchableOpacity
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              onPress={playOrPause}
-              activeOpacity={1}
-            >
-              <FontAwesomeIcon
-                icon={isActive && isPlaying ? faPause : faPlay}
-                color={colors.white}
-                size={16}
-                style={{
-                  position: "relative",
-                  right: isActive && isPlaying ? 0 : -1,
-                }}
-              />
-            </TouchableOpacity>
-          </Animated.View>
-        </View>
-
-        <View style={{}}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-start",
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  color: theme.text,
-                  fontSize: 14,
-                  // marginRight: 50,
-                  fontFamily: "Raleway-Medium",
-                }}
-                numberOfLines={2}
-              >
-                {c.summary}
-              </Text>
-
-              <View
-                style={{
-                  marginTop: 15,
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                {/* <Text
+                <View
+                  style={{
+                    marginTop: 15,
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* <Text
                   style={{
                     flex: 1,
                     color: theme.text,
@@ -246,92 +373,93 @@ export const ContentRow = ({
                   {c.authorName}
                 </Text> */}
 
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginRight: 30,
-                    flex: 1,
-                  }}
-                >
-                  {/* <FontAwesomeIcon
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginRight: 30,
+                      flex: 1,
+                    }}
+                  >
+                    {/* <FontAwesomeIcon
                     icon={faHeadSide}
                     color={theme.text}
                     size={14}
                     style={{ marginRight: 5 }}
                   /> */}
 
-                  <Text
-                    style={{
-                      color: theme.text,
-                      fontSize: 14,
-                      fontFamily: "Raleway-Medium",
-                    }}
-                  >
-                    {c.authorName}
-                  </Text>
-                </View>
+                    <Text
+                      style={{
+                        color: theme.text,
+                        fontSize: 14,
+                        fontFamily: "Raleway-Medium",
+                      }}
+                    >
+                      {c.authorName}
+                    </Text>
+                  </View>
 
-                <View
-                  style={{
-                    display: "flex",
-                    marginLeft: 15,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faClock}
-                    color={theme.textSecondary}
-                    size={12}
-                    style={{ marginRight: 5 }}
-                  />
-
-                  <Text
-                    style={{
-                      color: theme.textSecondary,
-                      fontSize: 14,
-                      fontFamily: "Raleway-Medium",
-                    }}
-                  >
-                    {estimatedLen}m
-                  </Text>
-                </View>
-
-                {c.contentSession?.percentFinished ? (
                   <View
                     style={{
                       display: "flex",
                       marginLeft: 15,
                       flexDirection: "row",
                       alignItems: "center",
-                      // marginRight: 15,
                     }}
                   >
                     <FontAwesomeIcon
-                      icon={faCircleNotch}
-                      color={theme.text}
-                      size={14}
+                      icon={faClock}
+                      color={theme.textSecondary}
+                      size={12}
                       style={{ marginRight: 5 }}
                     />
 
                     <Text
                       style={{
-                        color: theme.text,
+                        color: theme.textSecondary,
                         fontSize: 14,
-                        fontFamily: "Raleway-SemiBold",
+                        fontFamily: "Raleway-Medium",
                       }}
                     >
-                      {c.contentSession?.percentFinished}%
+                      {estimatedLen}m
                     </Text>
                   </View>
-                ) : null}
+
+                  {c.contentSession?.percentFinished ? (
+                    <View
+                      style={{
+                        display: "flex",
+                        marginLeft: 15,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        // marginRight: 15,
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={faCircleNotch}
+                        color={theme.text}
+                        size={14}
+                        style={{ marginRight: 5 }}
+                      />
+
+                      <Text
+                        style={{
+                          color: theme.text,
+                          fontSize: 14,
+                          fontFamily: "Raleway-SemiBold",
+                        }}
+                      >
+                        {c.contentSession?.percentFinished}%
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
               </View>
             </View>
           </View>
         </View>
       </View>
-    </View>
+    </Swipeable>
   );
 };

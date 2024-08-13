@@ -6,3 +6,4 @@ export * from "./recordInteraction";
 export * from "./showMore";
 export * from "./bookmarkContent";
 export * from "./addToQueue";
+export * from "./archiveContent";

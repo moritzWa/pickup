@@ -21,6 +21,7 @@ export const run = async () => {
             const c = content.value[i];
             await feedRepo.create({
                 id: uuidv4(),
+                isArchived: false,
                 position: i,
                 isQueued: false,
                 userId: user.id,

@@ -73,6 +73,7 @@ export type Content = {
 };
 
 export enum ContentFeedFilter {
+  Archived = 'archived',
   ForYou = 'for_you',
   New = 'new',
   Popular = 'popular',
@@ -135,6 +136,12 @@ export type GetMobileUpdateResponse = {
   userVersion?: Maybe<Scalars['String']['output']>;
 };
 
+export type GetQueueResponse = {
+  __typename?: 'GetQueueResponse';
+  queue: Array<FeedItem>;
+  total: Scalars['Int']['output'];
+};
+
 export type Interaction = {
   __typename?: 'Interaction';
   contentId: Scalars['ID']['output'];
@@ -170,7 +177,8 @@ export type Metadata = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addToQueue: Scalars['String']['output'];
+  addToQueue: FeedItem;
+  archiveContent: FeedItem;
   bookmarkContent: ContentSession;
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
@@ -190,6 +198,11 @@ export type Mutation = {
 
 
 export type MutationAddToQueueArgs = {
+  contentId: Scalars['ID']['input'];
+};
+
+
+export type MutationArchiveContentArgs = {
   contentId: Scalars['ID']['input'];
 };
 
@@ -302,7 +315,7 @@ export type Query = {
   getPaymentMethods: Array<PaymentMethod>;
   getPrevContent?: Maybe<FeedItem>;
   getProfile: Profile;
-  getQueue: Array<FeedItem>;
+  getQueue: GetQueueResponse;
   me?: Maybe<User>;
   searchSimilarLinks: Array<SearchResult>;
 };

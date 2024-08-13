@@ -45,6 +45,14 @@ export class FeedItem {
 
     @Column({
         nullable: false,
+        name: "is_archived",
+        type: "boolean",
+        default: false,
+    })
+    isArchived!: boolean;
+
+    @Column({
+        nullable: false,
         name: "user_id",
     })
     @Index("feed_items_user_id_idx")

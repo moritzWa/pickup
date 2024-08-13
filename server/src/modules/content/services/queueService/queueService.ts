@@ -27,6 +27,7 @@ const enqueue = async (
 
     const queueResponse = await feedRepo.create({
         id: uuidv4(),
+        isArchived: false,
         position: nextPosition,
         isQueued: true,
         userId: user.id,

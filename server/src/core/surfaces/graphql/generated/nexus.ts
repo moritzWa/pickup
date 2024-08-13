@@ -35,7 +35,7 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   CategoryEnum: "Arts & Culture" | "Business Models" | "Corporate Technology" | "Entrepreneurship" | "Finance & Legal" | "Health & Wellness" | "International Business" | "Management" | "Software Engineering" | "Startups" | "Technology & Society" | "Venture Capital & Investment"
-  ContentFeedFilter: "for_you" | "new" | "popular" | "queue" | "unread"
+  ContentFeedFilter: "archived" | "for_you" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
 }
@@ -80,6 +80,10 @@ export interface NexusGenObjects {
     latestVersion?: string | null; // String
     shouldUpdate: boolean; // Boolean!
     userVersion?: string | null; // String
+  }
+  GetQueueResponse: { // root type
+    queue: NexusGenRootTypes['FeedItem'][]; // [FeedItem!]!
+    total: number; // Int!
   }
   Interaction: entities.Interaction ;
   Metadata: { // root type
@@ -211,6 +215,10 @@ export interface NexusGenFieldTypes {
     shouldUpdate: boolean; // Boolean!
     userVersion: string | null; // String
   }
+  GetQueueResponse: { // field return type
+    queue: NexusGenRootTypes['FeedItem'][]; // [FeedItem!]!
+    total: number; // Int!
+  }
   Interaction: { // field return type
     contentId: string; // ID!
     createdAt: NexusGenScalars['Date']; // Date!
@@ -232,6 +240,7 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     addToQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
+    archiveContent: NexusGenRootTypes['FeedItem']; // FeedItem!
     bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
@@ -279,7 +288,7 @@ export interface NexusGenFieldTypes {
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
     getPrevContent: NexusGenRootTypes['FeedItem'] | null; // FeedItem
     getProfile: NexusGenRootTypes['Profile']; // Profile!
-    getQueue: NexusGenRootTypes['FeedItem'][]; // [FeedItem!]!
+    getQueue: NexusGenRootTypes['GetQueueResponse']; // GetQueueResponse!
     me: NexusGenRootTypes['User'] | null; // User
     searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
   }
@@ -399,6 +408,10 @@ export interface NexusGenFieldTypeNames {
     shouldUpdate: 'Boolean'
     userVersion: 'String'
   }
+  GetQueueResponse: { // field return type name
+    queue: 'FeedItem'
+    total: 'Int'
+  }
   Interaction: { // field return type name
     contentId: 'ID'
     createdAt: 'Date'
@@ -420,6 +433,7 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     addToQueue: 'FeedItem'
+    archiveContent: 'FeedItem'
     bookmarkContent: 'ContentSession'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
@@ -467,7 +481,7 @@ export interface NexusGenFieldTypeNames {
     getPaymentMethods: 'PaymentMethod'
     getPrevContent: 'FeedItem'
     getProfile: 'Profile'
-    getQueue: 'FeedItem'
+    getQueue: 'GetQueueResponse'
     me: 'User'
     searchSimilarLinks: 'SearchResult'
   }
@@ -518,6 +532,9 @@ export interface NexusGenFieldTypeNames {
 export interface NexusGenArgTypes {
   Mutation: {
     addToQueue: { // args
+      contentId: string; // ID!
+    }
+    archiveContent: { // args
       contentId: string; // ID!
     }
     bookmarkContent: { // args

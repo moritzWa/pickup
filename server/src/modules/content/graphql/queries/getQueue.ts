@@ -6,6 +6,7 @@ import {
     list,
     mutationField,
     nonNull,
+    objectType,
     queryField,
     stringArg,
 } from "nexus";
@@ -22,8 +23,18 @@ import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { QueueService } from "../../services/queueService/queueService";
 
+export const GetQueueResponse = objectType({
+    name: "GetQueueResponse",
+    definition(t) {
+        t.nonNull.list.nonNull.field("queue", {
+            type: "FeedItem",
+        });
+        t.nonNull.int("total");
+    },
+});
+
 export const getQueue = queryField("getQueue", {
-    type: nonNull(list(nonNull("FeedItem"))),
+    type: nonNull("GetQueueResponse"),
     args: {},
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);
@@ -34,6 +45,9 @@ export const getQueue = queryField("getQueue", {
 
         throwIfError(queueResponse);
 
-        return queueResponse.value;
+        return {
+            queue: queueResponse.value,
+            total: queueResponse.value.length,
+        };
     },
 });
