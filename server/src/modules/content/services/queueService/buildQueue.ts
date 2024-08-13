@@ -29,10 +29,6 @@ export const buildQueue = async (
     const description = user.interestDescription;
     const rawQuery = `${categories} ${description}`;
 
-    if (!prompt) {
-        return failure(new Error("Prompt was empty"));
-    }
-
     const similarLinksResponse = await curiusLinkRepo.findSimilarLinks(
         rawQuery,
         limit ?? DEFAULT_LINKS_RETURN
