@@ -13,7 +13,7 @@ export const createAuthor = mutationField("createAuthor", {
         const authorResponse = await authorRepo.create({
             id: uuidv4(),
             name,
-            imageUrl,
+            imageUrl: imageUrl ?? null,
             contents: [],
         });
         if (authorResponse.isFailure()) {

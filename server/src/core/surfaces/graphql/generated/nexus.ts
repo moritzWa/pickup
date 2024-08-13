@@ -34,7 +34,6 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
-  CategoryEnum: "Arts & Culture" | "Business Models" | "Corporate Technology" | "Entrepreneurship" | "Finance & Legal" | "Health & Wellness" | "International Business" | "Management" | "Software Engineering" | "Startups" | "Technology & Society" | "Venture Capital & Investment"
   ContentFeedFilter: "archived" | "for_you" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
   UserAuthProviderEnum: "firebase"
@@ -51,6 +50,12 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  Author: { // root type
+    contents?: Array<NexusGenRootTypes['Content'] | null> | null; // [Content]
+    id: string; // String!
+    imageUrl?: string | null; // String
+    name: string; // String!
+  }
   Category: { // root type
     emoji: string; // String!
     name: string; // String!
@@ -144,6 +149,12 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  Author: { // field return type
+    contents: Array<NexusGenRootTypes['Content'] | null> | null; // [Content]
+    id: string; // String!
+    imageUrl: string | null; // String
+    name: string; // String!
+  }
   Category: { // field return type
     emoji: string; // String!
     name: string; // String!
@@ -155,6 +166,7 @@ export interface NexusGenFieldTypes {
   }
   Content: { // field return type
     audioUrl: string; // String!
+    authors: NexusGenRootTypes['Author'][] | null; // [Author!]
     categories: string[]; // [String!]!
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string; // String!
@@ -241,6 +253,7 @@ export interface NexusGenFieldTypes {
     archiveContent: NexusGenRootTypes['FeedItem']; // FeedItem!
     bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     clearQueue: string; // String!
+    createAuthor: NexusGenRootTypes['Author'] | null; // Author
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
@@ -274,6 +287,7 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     checkCode: boolean; // Boolean!
     getActivity: NexusGenRootTypes['Content'][]; // [Content!]!
+    getAuthor: NexusGenRootTypes['Author']; // Author!
     getBookmarks: NexusGenRootTypes['Content'][]; // [Content!]!
     getCategories: NexusGenRootTypes['CategorySection'][]; // [CategorySection!]!
     getContent: NexusGenRootTypes['Content']; // Content!
@@ -336,6 +350,12 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  Author: { // field return type name
+    contents: 'Content'
+    id: 'String'
+    imageUrl: 'String'
+    name: 'String'
+  }
   Category: { // field return type name
     emoji: 'String'
     name: 'String'
@@ -347,6 +367,7 @@ export interface NexusGenFieldTypeNames {
   }
   Content: { // field return type name
     audioUrl: 'String'
+    authors: 'Author'
     categories: 'String'
     contentSession: 'ContentSession'
     context: 'String'
@@ -433,6 +454,7 @@ export interface NexusGenFieldTypeNames {
     archiveContent: 'FeedItem'
     bookmarkContent: 'ContentSession'
     clearQueue: 'String'
+    createAuthor: 'Author'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
@@ -466,6 +488,7 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     checkCode: 'Boolean'
     getActivity: 'Content'
+    getAuthor: 'Author'
     getBookmarks: 'Content'
     getCategories: 'CategorySection'
     getContent: 'Content'
@@ -538,6 +561,10 @@ export interface NexusGenArgTypes {
     bookmarkContent: { // args
       contentId: string; // ID!
     }
+    createAuthor: { // args
+      imageUrl?: string | null; // String
+      name: string; // String!
+    }
     createUser: { // args
       email: string; // String!
       name?: string | null; // String
@@ -593,6 +620,9 @@ export interface NexusGenArgTypes {
     }
     getActivity: { // args
       filter?: NexusGenEnums['ActivityFilter'] | null; // ActivityFilter
+    }
+    getAuthor: { // args
+      authorId: string; // ID!
     }
     getBookmarks: { // args
       limit?: number | null; // Int
