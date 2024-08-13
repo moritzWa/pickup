@@ -35,8 +35,6 @@ type CategorySection {
 
 type Content {
   audioUrl: String!
-  authorImageUrl: String
-  authorName: String!
   categories: [String!]!
   contentSession: ContentSession
   context: String!
