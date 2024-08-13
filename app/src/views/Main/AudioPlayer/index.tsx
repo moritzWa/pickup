@@ -27,7 +27,9 @@ import {
   faCaretRight,
   faChevronLeft,
   faForward,
+  faHeadset,
   faIslandTreePalm,
+  faList,
   faPause,
   faPlay,
   faRedo,
@@ -65,8 +67,14 @@ import { AppContext } from "App";
 import { Track } from "react-native-track-player";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { BaseContentFields } from "src/api/fragments";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getCurrentContent,
+  getQueue,
+  setCurrentContent,
+} from "src/redux/reducers/audio";
 
-const SIZE = 125;
+const SIZE = 100;
 
 const AudioPlayer = () => {
   const route = useRoute<RouteProp<RootStackParamList, "AudioPlayer">>();
@@ -76,6 +84,8 @@ const AudioPlayer = () => {
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
   const { width } = Dimensions.get("window");
+  const navigation = useNavigation<NavigationProps>();
+  const dispatch = useDispatch();
 
   const {
     downloadAndPlayContent,
@@ -209,34 +219,19 @@ const AudioPlayer = () => {
     )}`;
   };
 
-  const listenForSpeech = async () => {
-    try {
-      Voice.onSpeechStart = () => {
-        console.log("Speech started.");
-      };
-
-      Voice.onSpeechEnd = () => {
-        console.log("Speech ended.");
-      };
-
-      Voice.onSpeechResults = (e) => {
-        console.log("Speech results.");
-        console.log(e);
-        // console.log(e.value[0]);
-      };
-
-      await Voice.start("en-US");
-    } catch (err) {
-      console.error(err);
-    }
+  const openQueue = () => {
+    navigation.navigate("Queue");
   };
 
-  console.log(session);
+  useEffect(() => {
+    dispatch(setCurrentContent(content));
+  }, [content]);
 
   return (
     <View
       style={{
         flex: 1,
+        paddingBottom: insets.bottom + 15,
       }}
     >
       <View
@@ -354,8 +349,8 @@ const AudioPlayer = () => {
           >
             <TouchableOpacity
               style={{
-                width: SIZE - 15,
-                height: SIZE - 15,
+                width: SIZE - 12,
+                height: SIZE - 12,
                 borderRadius: 100,
                 backgroundColor: colors.primary,
                 justifyContent: "center",
@@ -402,81 +397,10 @@ const AudioPlayer = () => {
         style={[
           styles.container,
           {
-            marginBottom: 50,
+            marginBottom: 25,
           },
         ]}
       >
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              style={{
-                padding: 10,
-                alignSelf: "flex-start",
-                marginLeft: 20,
-                marginBottom: 10,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 50,
-                backgroundColor: session?.isBookmarked
-                  ? colors.primary
-                  : theme.secondaryBackground,
-              }}
-              onPress={bookmarkContent}
-            >
-              <FontAwesomeIcon
-                icon={faBookmark}
-                color={session?.isBookmarked ? colors.white : theme.text}
-                size={14}
-              />
-
-              <Text
-                style={{
-                  color: session?.isBookmarked ? colors.white : theme.text,
-                  fontSize: 14,
-                  fontFamily: "Raleway-Bold",
-                  marginLeft: 5,
-                }}
-              >
-                Bookmark
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            style={{
-              padding: 10,
-              width: 60,
-              alignSelf: "flex-end",
-              marginRight: 20,
-              marginBottom: 10,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 50,
-              backgroundColor: theme.secondaryBackground,
-            }}
-            onPress={setPlayerSpeed}
-          >
-            <Text
-              style={{
-                color: theme.text,
-                fontSize: 14,
-                fontFamily: "Raleway-Bold",
-              }}
-            >
-              {speed}x
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         <Slider
           style={{
             width: width * 1.75,
@@ -523,10 +447,253 @@ const AudioPlayer = () => {
             {durationMs ? formatTime(durationMs) : "-"}
           </Text>
         </View>
+
+        <View
+          style={{
+            marginTop: 25,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <View>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={{
+                padding: 10,
+                alignSelf: "flex-start",
+                marginLeft: 20,
+                marginBottom: 10,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 50,
+                backgroundColor: session?.isBookmarked
+                  ? colors.primary
+                  : theme.secondaryBackground,
+              }}
+              onPress={bookmarkContent}
+            >
+              <FontAwesomeIcon
+                icon={faBookmark}
+                color={session?.isBookmarked ? colors.white : theme.text}
+                size={14}
+              />
+
+              {/* <Text
+                style={{
+                  color: session?.isBookmarked ? colors.white : theme.text,
+                  fontSize: 14,
+                  fontFamily: "Raleway-Bold",
+                  marginLeft: 5,
+                }}
+              >
+                Bookmark
+              </Text> */}
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={{
+              padding: 10,
+              alignSelf: "flex-start",
+              marginLeft: 10,
+              marginBottom: 10,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 50,
+              backgroundColor: theme.secondaryBackground,
+            }}
+            onPress={openQueue}
+          >
+            <FontAwesomeIcon icon={faList} color={theme.text} size={14} />
+          </TouchableOpacity>
+
+          <View style={{ flex: 1 }} />
+
+          <TouchableOpacity
+            style={{
+              padding: 10,
+              width: 60,
+              alignSelf: "flex-end",
+              marginRight: 20,
+              marginBottom: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 50,
+              backgroundColor: theme.secondaryBackground,
+            }}
+            onPress={setPlayerSpeed}
+          >
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: 14,
+                fontFamily: "Raleway-Bold",
+              }}
+            >
+              {speed}x
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <NextOrPrevButtons skip={skip} content={content ?? null} />
+
+      <NextQueue content={content ?? null} />
     </View>
+  );
+};
+
+const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
+  const theme = useTheme();
+  const navigation = useNavigation<NavigationProps>();
+
+  const currentContent = useSelector(getCurrentContent);
+  const queue = useSelector(getQueue);
+
+  // console.log("current: " + currentContent?.id);
+
+  const nextContent = useMemo(() => {
+    const currentIndex = queue.findIndex((q) => q.id === currentContent?.id);
+    return queue[currentIndex + 1] ?? null;
+  }, [queue, currentContent]);
+
+  const { downloadAndPlayContent } = useAudio();
+
+  const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
+    api.queue.next
+  );
+
+  const _onClickNext = async () => {
+    try {
+      if (!content) return;
+
+      const variables: QueryGetNextContentArgs = {
+        afterContentId: content.id,
+      };
+
+      const response = await getNextContent({
+        variables,
+      });
+
+      // console.log(JSON.stringify(response.error, null, 2));
+
+      const nextContentQueued = response.data?.getNextContent;
+
+      if (!nextContentQueued?.content) {
+        return;
+      }
+
+      // console.log(nextContentQueued);
+
+      const nextContentId = nextContentQueued?.content?.id || "";
+
+      console.log(`[starting ${nextContentQueued.content?.title}]`);
+
+      // update the route params
+      navigation.setParams({ contentId: nextContentId });
+
+      downloadAndPlayContent(nextContentQueued.content as BaseContentFields);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  if (!nextContent) {
+    return null;
+  }
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={_onClickNext}
+      style={{
+        marginTop: 25,
+        marginHorizontal: 20,
+        padding: 10,
+        borderRadius: 15,
+        backgroundColor: theme.textPrimary,
+      }}
+    >
+      <Text
+        style={{
+          color: theme.background,
+          fontFamily: "Raleway-Black",
+          fontSize: 12,
+          textTransform: "uppercase",
+          marginBottom: 10,
+        }}
+      >
+        Up next...
+      </Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <FastImage
+          style={{
+            width: 40,
+            marginRight: 10,
+            height: 40,
+            borderRadius: 10,
+          }}
+          resizeMode="cover"
+          source={{
+            uri: nextContent.thumbnailImageUrl,
+          }}
+        />
+
+        <View style={{ flex: 1 }}>
+          <Text
+            numberOfLines={1}
+            style={{
+              color: theme.background,
+              fontFamily: "Raleway-Bold",
+              fontSize: 16,
+              marginBottom: 5,
+            }}
+          >
+            {nextContent.title}
+          </Text>
+
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start",
+            }}
+          >
+            <FontAwesomeIcon
+              icon={faHeadset}
+              style={{
+                color: theme.secondaryBackground,
+              }}
+            />
+
+            <Text
+              style={{
+                marginLeft: 5,
+                color: theme.secondaryBackground,
+                fontFamily: "Raleway-Regular",
+                fontSize: 16,
+              }}
+            >
+              {Math.ceil(nextContent.lengthSeconds / 60)}min
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -619,10 +786,10 @@ const NextOrPrevButtons = ({
   return (
     <View
       style={{
-        paddingBottom: insets.bottom + 15,
         display: "flex",
         flexDirection: "row",
         paddingHorizontal: 10,
+        marginHorizontal: 10,
         // space between button
         justifyContent: "space-between",
       }}

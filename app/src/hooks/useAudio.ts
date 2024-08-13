@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
@@ -15,6 +15,7 @@ import {
   DefaultErrors,
   failure,
   FailureOrSuccess,
+  hasValue,
   success,
   UnexpectedError,
 } from "src/core";
@@ -25,9 +26,11 @@ import {
   getIsPlaying,
   getSpeed,
   setAudioUrl,
+  setCurrentContent,
   setCurrentMs,
   setDurationMs,
   setIsPlaying,
+  setQueue,
   setSpeed,
 } from "src/redux/reducers/audio";
 
@@ -38,6 +41,8 @@ export const useAudio = () => {
   const { data: queueData, error: queueError } = useQuery<
     Pick<Query, "getQueue">
   >(api.queue.list);
+
+  const [startContent, { error }] = useMutation(api.content.start);
 
   const queue = (queueData?.getQueue ?? []) as BaseQueueFields[];
 
@@ -89,6 +94,7 @@ export const useAudio = () => {
       globalSound.current = sound;
 
       dispatch(setAudioUrl(url));
+      dispatch(setCurrentContent(content));
 
       // make it so it can play even if it is muted
       await Audio.setAudioModeAsync({
@@ -125,6 +131,13 @@ export const useAudio = () => {
       await logQueue();
 
       await TrackPlayer.play();
+
+      await startContent({
+        variables: {
+          contentId: content.id,
+        },
+        refetchQueries: [api.content.current],
+      });
 
       //   await sound.playAsync();
       dispatch(setIsPlaying(true));
@@ -245,6 +258,10 @@ export const useAudio = () => {
     const queue = await TrackPlayer.getQueue();
     console.log(queue.map((q) => q.title));
   };
+
+  useEffect(() => {
+    dispatch(setQueue(queue.map((q) => q.content).filter(hasValue)));
+  }, [queue]);
 
   // sync the queue. add to the queue. etc... (track player)
 

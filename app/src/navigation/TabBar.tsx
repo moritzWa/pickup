@@ -50,12 +50,13 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
 
   return (
     <>
-      <View
-        // intensity={75} // You can adjust the intensity of the blur
-        // tint={theme}
+      <BlurView
+        intensity={50} // You can adjust the intensity of the blur
+        tint={theme}
         style={{
           flexDirection: "column",
           width: "100%",
+          zIndex: 100,
           position: "absolute",
           bottom: 0,
           left: 0,
@@ -89,7 +90,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
             );
           })}
         </View>
-      </View>
+      </BlurView>
     </>
   );
 }

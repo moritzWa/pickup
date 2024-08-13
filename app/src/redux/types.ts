@@ -1,4 +1,5 @@
 import { Audio } from "expo-av";
+import { BaseContentFields } from "src/api/fragments";
 import { ActivityFilter, ContentFeedFilter } from "src/api/generated/types";
 import { Maybe } from "src/core";
 
@@ -19,6 +20,9 @@ export type UserState = {
 export type AudioState = {
   // sound: Audio.Sound | null;
   audioUrl: string | null;
+  currentContent: Maybe<BaseContentFields>;
+  nextContent: Maybe<BaseContentFields>;
+  queue: BaseContentFields[];
   currentMs: number | null;
   durationMs: number | null;
   isPlaying: boolean;

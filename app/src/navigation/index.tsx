@@ -39,6 +39,7 @@ import Login from "../views/Authentication/Login";
 import Signup from "../views/Authentication/Signup";
 import { LINKING } from "./linking";
 import { TabBar } from "./TabBar";
+import Queue from "src/views/Main/Queue";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -97,6 +98,7 @@ export type RootStackParamList = {
   };
   Settings: undefined;
   Profile: undefined;
+  Queue: undefined;
   EditProfile?: undefined;
   UserProfile?: { username: string };
   ClaimCode?: undefined;
@@ -349,6 +351,14 @@ export const MainNavigationStack = () => {
                 headerShown: false,
               }}
               component={AudioPlayer}
+            />
+
+            <Stack.Screen
+              name="Queue"
+              component={Queue}
+              options={{
+                headerShown: false,
+              }}
             />
           </Stack.Group>
         </Stack.Navigator>
