@@ -78,7 +78,7 @@ export class Content {
         nullable: true,
         type: "vector" as any,
     })
-    embedding!: string | null;
+    embedding!: any | null;
 
     @Column({
         nullable: false,
@@ -129,6 +129,20 @@ export class Content {
         type: "jsonb",
     })
     followUpQuestions!: FollowUpQuestion[];
+
+    @Column({
+        nullable: true,
+        name: "reference_id",
+        type: "text",
+    })
+    referenceId!: string | null;
+
+    @Column({
+        name: "released_at",
+        nullable: true,
+        type: "timestamp",
+    })
+    releasedAt!: Date | null;
 
     @CreateDateColumn({
         name: "created_at",
