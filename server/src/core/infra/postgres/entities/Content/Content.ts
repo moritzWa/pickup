@@ -31,6 +31,21 @@ export class Content {
 
     @Column({
         nullable: true,
+        name: "insertion_id",
+        type: "text",
+    })
+    insertionId!: string | null;
+
+    @Column({
+        nullable: false,
+        name: "is_processed",
+        type: "boolean",
+        default: false,
+    })
+    isProcessed!: boolean;
+
+    @Column({
+        nullable: true,
         name: "thumbnail_image_url",
         type: "text",
     })
@@ -57,6 +72,13 @@ export class Content {
         type: "int",
     })
     lengthMs!: number;
+
+    @Column({
+        name: "embedding",
+        nullable: true,
+        type: "vector" as any,
+    })
+    embedding!: string | null;
 
     @Column({
         nullable: false,

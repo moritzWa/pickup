@@ -77,7 +77,27 @@ const generateSpeech = async ({
     }
 };
 
+const getEmbeddings = async (
+    query: string
+): Promise<FailureOrSuccess<DefaultErrors, number[]>> => {
+    try {
+        const embedding = await client.embeddings.create({
+            model: "text-embedding-3-large",
+            dimensions: 256,
+            input: query,
+            encoding_format: "float",
+        });
+
+        const vector = embedding.data[0].embedding;
+
+        return success(vector);
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
 export const openai = {
+    embeddings: { create: getEmbeddings },
     chat: {
         completions: {
             create: createCompletion,
