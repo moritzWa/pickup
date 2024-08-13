@@ -242,6 +242,7 @@ export interface NexusGenFieldTypes {
     addToQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
     archiveContent: NexusGenRootTypes['FeedItem']; // FeedItem!
     bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
+    clearQueue: string; // String!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
@@ -435,6 +436,7 @@ export interface NexusGenFieldTypeNames {
     addToQueue: 'FeedItem'
     archiveContent: 'FeedItem'
     bookmarkContent: 'ContentSession'
+    clearQueue: 'String'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'

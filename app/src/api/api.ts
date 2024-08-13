@@ -291,6 +291,12 @@ const GetQueue = gql`
   }
 `;
 
+const ClearQueue = gql`
+  mutation ClearQueue {
+    clearQueue
+  }
+`;
+
 const ShowMore = gql`
   mutation ShowMore {
     showMore
@@ -315,6 +321,7 @@ export const api = {
     next: GetNextContent,
     prev: GetPrevContent,
     list: GetQueue,
+    clear: ClearQueue,
   },
   content: {
     showMore: ShowMore,

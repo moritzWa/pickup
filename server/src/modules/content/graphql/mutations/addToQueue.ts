@@ -32,6 +32,29 @@ export const addToQueue = mutationField("addToQueue", {
 
         const content = contentResponse.value;
 
+        const feedItemExistsResponse = await feedRepo.findOne({
+            where: {
+                userId: user.id,
+                contentId,
+            },
+        });
+
+        if (
+            feedItemExistsResponse.isSuccess() &&
+            feedItemExistsResponse.value
+        ) {
+            // update it to queued
+            const feedItem = feedItemExistsResponse.value;
+
+            const updateResponse = await feedRepo.update(feedItem.id, {
+                isQueued: true,
+            });
+
+            throwIfError(updateResponse);
+
+            return feedItem;
+        }
+
         // TODO: add to queue
         const feedItemResponse = await feedRepo.create({
             id: uuidv4(),

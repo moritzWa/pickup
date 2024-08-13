@@ -49,6 +49,8 @@ const Home = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
 
+  const [clear] = useMutation(api.queue.clear);
+
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
       filter: ContentFeedFilter.ForYou,
@@ -104,12 +106,20 @@ const Home = () => {
     dispatch(setCurrentContent(content));
   };
 
+  const clearQueue = async () => {
+    await clear({
+      refetchQueries: [api.queue.list, api.content.feed],
+    });
+  };
+
   const onRefresh = async () => {
     await refetch();
     apolloClient.refetchQueries({
       include: [api.content.current, api.users.me, api.queue.list],
     });
   };
+
+  console.log(data);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -138,7 +148,64 @@ const Home = () => {
           // paddingTop: 15,
           paddingBottom: 150,
         }}
-        ListHeaderComponent={<HomeHeader />}
+        ListHeaderComponent={
+          <>
+            <HomeHeader />
+            {filter === ContentFeedFilter.Queue ? (
+              <View
+                style={{
+                  marginTop: 10,
+                  marginHorizontal: 20,
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                {content.length > 0 ? (
+                  <Text
+                    style={{
+                      flex: 1,
+                      color: theme.header,
+                      fontFamily: "Raleway-Bold",
+                      fontSize: 24,
+                      textAlign: "left",
+                    }}
+                  >
+                    Next up...
+                  </Text>
+                ) : (
+                  <Text
+                    style={{
+                      flex: 1,
+                      paddingVertical: 25,
+                      color: theme.header,
+                      fontFamily: "Raleway-Bold",
+                      fontSize: 24,
+                      textAlign: "left",
+                    }}
+                  >
+                    Queue is empty.
+                  </Text>
+                )}
+                {content.length > 0 ? (
+                  <TouchableOpacity activeOpacity={0.9} onPress={clearQueue}>
+                    <Text
+                      style={{
+                        color: theme.text,
+                        fontFamily: "Raleway-Bold",
+                        fontSize: 16,
+                        textAlign: "center",
+                        padding: 10,
+                      }}
+                    >
+                      Clear Queue
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            ) : null}
+          </>
+        }
         renderItem={({ item: c }) => (
           <ContentRow
             onPlay={() => onPlayContent(c)}

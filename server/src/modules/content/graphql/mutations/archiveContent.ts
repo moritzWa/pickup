@@ -46,6 +46,7 @@ export const archiveContent = mutationField("archiveContent", {
             feedItemResponse.value.id,
             {
                 isArchived: true,
+                isQueued: false,
             }
         );
 
