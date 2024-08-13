@@ -25,6 +25,8 @@ export type BaseUserFields = Pick<
   | "description"
   | "referralCode"
   | "authProviderId"
+  | "timezone"
+  | "commuteTime"
 >;
 
 export const BaseUserFields = gql`
@@ -49,6 +51,8 @@ export const BaseUserFields = gql`
     description
     referralCode
     authProviderId
+    timezone
+    commuteTime
   }
 `;
 

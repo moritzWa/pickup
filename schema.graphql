@@ -223,6 +223,7 @@ type User {
   authProviderId: String!
   avatarImageUrl: String
   biometricPublicKey: String
+  commuteTime: String
   createdAt: Date!
   description: String!
   email: String!
@@ -241,6 +242,7 @@ type User {
   referredByCode: String
   referredByName: String
   role: String
+  timezone: String
   updatedAt: Date!
 }
 

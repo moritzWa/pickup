@@ -74,6 +74,15 @@ const SetInterests = gql`
   }
 `;
 
+const SetCommuteTime = gql`
+  ${BaseUserFields}
+  mutation SetCommuteTime($commuteTime: String!, $timezone: String!) {
+    setCommuteTime(commuteTime: $commuteTime, timezone: $timezone) {
+      ...BaseUserFields
+    }
+  }
+`;
+
 const VerifyBiometric = gql`
   mutation VerifyBiometric($signature: String!, $payload: String!) {
     verifyBiometric(signature: $signature, payload: $payload) {
@@ -274,6 +283,7 @@ export const api = {
     getIntercomHash: GetIntercomMobileToken,
     update: UpdateUser,
     setInterests: SetInterests,
+    setCommuteTime: SetCommuteTime,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
     getProfile: GetProfile,

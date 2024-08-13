@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@apollo/client";
 import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -18,11 +18,12 @@ import { BaseContentFields } from "src/api/fragments";
 import {
   ContentFeedFilter,
   Mutation,
+  MutationSetCommuteTimeArgs,
   Query,
   QueryGetContentFeedArgs,
 } from "src/api/generated/types";
 import { colors } from "src/components";
-import { useTheme } from "src/hooks";
+import { useMe, useTheme } from "src/hooks";
 import { NavigationProps } from "src/navigation";
 import { setHomeFilter } from "src/redux/reducers/globalState";
 import { ReduxState } from "src/redux/types";
@@ -32,6 +33,9 @@ import { useAudio } from "src/hooks/useAudio";
 import { setCurrentContent } from "src/redux/reducers/audio";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faCar } from "@fortawesome/pro-solid-svg-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import DatePicker from "react-native-date-picker";
+import moment from "moment";
 
 const Home = () => {
   const theme = useTheme();
@@ -117,7 +121,7 @@ const Home = () => {
           // paddingTop: 15,
           paddingBottom: 150,
         }}
-        // ListHeaderComponent={<HomeHeader />}
+        ListHeaderComponent={<HomeHeader />}
         renderItem={({ item: c }) => (
           <ContentRow
             onPlay={() => onPlayContent(c)}
@@ -165,57 +169,137 @@ const Home = () => {
 const HomeHeader = () => {
   const theme = useTheme();
 
+  const { me } = useMe();
+  const [open, setOpen] = useState(false);
+  const [setCommuteTime] = useMutation(api.users.setCommuteTime);
+
+  const onConfirm = async (date: Date) => {
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const time = moment(date).format("HH:mm");
+
+      const variables: MutationSetCommuteTimeArgs = {
+        timezone,
+        commuteTime: time,
+      };
+
+      const response = await setCommuteTime({
+        variables,
+        refetchQueries: [api.users.me],
+      });
+
+      setOpen(false);
+      // Alert.alert("Success", "Commute time set successfully");
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
+  };
+
+  const commuteTime = useMemo(() => {
+    if (me?.commuteTime) {
+      return {
+        formatted: moment(me.commuteTime, "HH:mm").format("h:mm A"),
+        time: moment(me.commuteTime, "HH:mm").toDate(),
+      };
+    }
+    return null;
+  }, [me]);
+
+  if (!!me?.commuteTime) {
+    return null;
+  }
+
   return (
-    <View
-      style={{
-        marginTop: 10,
-        padding: 10,
-        borderRadius: 15,
-        marginHorizontal: 20,
-        backgroundColor: colors.primary,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-      }}
-    >
-      <View
-        style={{
-          width: 60,
-          height: 60,
-          backgroundColor: colors.white,
-          borderRadius: 20,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
+    <>
+      {commuteTime ? (
+        <DatePicker
+          modal
+          open={open}
+          date={commuteTime?.time ?? new Date()}
+          mode="time"
+          onConfirm={onConfirm}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
+      ) : null}
+
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => {
+          setOpen(true);
         }}
       >
-        <FontAwesomeIcon icon={faCar} size={30} color={colors.primary} />
-      </View>
+        <LinearGradient
+          colors={[colors.purple70, colors.primary]}
+          start={[0, 0]}
+          end={[1, 1]}
+          style={{
+            marginTop: 5,
+            padding: 10,
+            paddingHorizontal: 15,
+            borderRadius: 0,
+            marginHorizontal: 0,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              backgroundColor: colors.white,
+              borderRadius: 100,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <FontAwesomeIcon icon={faCar} size={24} color={colors.purple70} />
+          </View>
 
-      <View style={{ marginLeft: 10, flex: 1 }}>
-        <Text
-          style={{
-            color: colors.white,
-            fontFamily: "Raleway-Bold",
-            fontSize: 18,
-            marginBottom: 0,
-          }}
-        >
-          Do you commute to work?
-        </Text>
-        <Text
-          style={{
-            color: colors.white,
-            fontFamily: "Raleway-Regular",
-            fontSize: 16,
-            marginBottom: 5,
-          }}
-        >
-          If so, let us know and we'll have content ready to go.
-        </Text>
-      </View>
-    </View>
+          <View style={{ marginLeft: 10, flex: 1 }}>
+            {commuteTime ? (
+              <Text
+                style={{
+                  color: colors.white,
+                  fontFamily: "Raleway-Bold",
+                  fontSize: 16,
+                  marginBottom: 0,
+                }}
+              >
+                Commute save {commuteTime}.
+              </Text>
+            ) : (
+              <>
+                <Text
+                  style={{
+                    color: colors.white,
+                    fontFamily: "Raleway-Bold",
+                    fontSize: 16,
+                    marginBottom: 0,
+                  }}
+                >
+                  Do you commute to work?
+                </Text>
+                <Text
+                  style={{
+                    color: colors.white,
+                    fontFamily: "Raleway-Regular",
+                    fontSize: 14,
+                    marginTop: 5,
+                  }}
+                >
+                  If so, let us know and we'll have content ready to go.
+                </Text>
+              </>
+            )}
+          </View>
+        </LinearGradient>
+      </TouchableOpacity>
+    </>
   );
 };
 
@@ -259,27 +343,17 @@ const Options = () => {
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
+  const [open, setOpen] = useState(false);
+  const { me } = useMe();
+
+  const theme = useTheme();
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
+
   const [startListening] = useMutation<Pick<Mutation, "startListening">>(
     api.content.startListening
   );
-
-  const onPressIn = () => {
-    Animated.spring(animation, {
-      toValue: 0.9, // Scale down to 90%
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const onPressOut = () => {
-    Animated.spring(animation, {
-      toValue: 1, // Scale back to original size
-      friction: 3,
-      tension: 40,
-      useNativeDriver: true,
-    }).start();
-  };
+  const [setCommuteTime] = useMutation(api.users.setCommuteTime);
 
   const onPress = async (feed: ContentFeedFilter) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -308,81 +382,123 @@ const Options = () => {
     });
   };
 
+  const onConfirm = async (date: Date) => {
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const time = moment(date).format("HH:mm");
+
+      const variables: MutationSetCommuteTimeArgs = {
+        timezone,
+        commuteTime: time,
+      };
+
+      const response = await setCommuteTime({
+        variables,
+        refetchQueries: [api.users.me],
+      });
+
+      setOpen(false);
+      // Alert.alert("Success", "Commute time set successfully");
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
+  };
+
+  const commuteTime = useMemo(() => {
+    if (me?.commuteTime) {
+      return {
+        formatted: moment(me.commuteTime, "HH:mm").format("h:mm A"),
+        time: moment(me.commuteTime, "HH:mm").toDate(),
+      };
+    }
+    return null;
+  }, [me]);
+
   return (
-    <View
-      style={{
-        paddingHorizontal: 10,
-        // paddingBottom: 5,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-      }}
-    >
+    <>
+      {commuteTime ? (
+        <DatePicker
+          modal
+          open={open}
+          date={commuteTime?.time ?? new Date()}
+          mode="time"
+          onConfirm={onConfirm}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
+      ) : null}
+
       <View
         style={{
-          flex: 1,
+          paddingHorizontal: 10,
+          // paddingBottom: 5,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
         }}
       >
-        <SingleFilter
-          onPress={() => onPress(ContentFeedFilter.ForYou)}
-          isActive={filter === ContentFeedFilter.ForYou}
-          label="For you"
-        />
+        <View
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <SingleFilter
+            onPress={() => onPress(ContentFeedFilter.ForYou)}
+            isActive={filter === ContentFeedFilter.ForYou}
+            label="For you"
+          />
 
-        {/* <SingleFilter
+          {/* <SingleFilter
           onPress={() => onPress(ContentFeedFilter.Popular)}
           isActive={filter === ContentFeedFilter.Popular}
           label="Popular"
         /> */}
 
-        {/* <SingleFilter
+          {/* <SingleFilter
           onPress={() => onPress(ContentFeedFilter.Queue)}
           isActive={filter === ContentFeedFilter.Queue}
           label="Queue"
         /> */}
+        </View>
+
+        {commuteTime ? (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => setOpen(true)}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              borderRadius: 100,
+              marginRight: 10,
+              paddingVertical: 7,
+              padding: 10,
+              backgroundColor: theme.bgPrimary,
+            }}
+          >
+            <FontAwesomeIcon
+              style={{ marginRight: 5 }}
+              icon={faCar}
+              size={16}
+              color={colors.primary}
+            />
+            <Text
+              style={{
+                color: colors.primary,
+                fontFamily: "Raleway-Bold",
+                fontSize: 16,
+              }}
+            >
+              {commuteTime.formatted}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
-
-      {/* <Animated.View
-        style={{
-          marginRight: 10,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 100,
-          backgroundColor: colors.primary,
-          alignSelf: "center",
-          transform: [{ scale: animation }],
-        }}
-      >
-        <TouchableOpacity
-          onPressIn={onPressIn}
-          onPressOut={onPressOut}
-          onPress={onStartListening}
-          activeOpacity={1}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            flexDirection: "row",
-            justifyContent: "center",
-            // padding: 5,
-            height: 35,
-            width: 35,
-            borderRadius: 100,
-          }}
-        >
-
-          <FontAwesomeIcon
-            icon={faPlay}
-            color={colors.white}
-            size={16}
-            style={{ position: "relative", right: -1 }}
-          />
-        </TouchableOpacity>
-      </Animated.View> */}
-    </View>
+    </>
   );
 };
 

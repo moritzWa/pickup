@@ -11,7 +11,7 @@ import {
     Unique,
 } from "typeorm";
 import { User } from "../User";
-import { Category } from "../types";
+import { Category } from "src/modules/content/services/categories";
 
 export type FollowUpQuestion = {
     id: string;

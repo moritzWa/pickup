@@ -301,6 +301,7 @@ export interface NexusGenFieldTypes {
     authProviderId: string; // String!
     avatarImageUrl: string | null; // String
     biometricPublicKey: string | null; // String
+    commuteTime: string | null; // String
     createdAt: NexusGenScalars['Date']; // Date!
     description: string; // String!
     email: string; // String!
@@ -319,6 +320,7 @@ export interface NexusGenFieldTypes {
     referredByCode: string | null; // String
     referredByName: string | null; // String
     role: string | null; // String
+    timezone: string | null; // String
     updatedAt: NexusGenScalars['Date']; // Date!
   }
 }
@@ -485,6 +487,7 @@ export interface NexusGenFieldTypeNames {
     authProviderId: 'String'
     avatarImageUrl: 'String'
     biometricPublicKey: 'String'
+    commuteTime: 'String'
     createdAt: 'Date'
     description: 'String'
     email: 'String'
@@ -503,6 +506,7 @@ export interface NexusGenFieldTypeNames {
     referredByCode: 'String'
     referredByName: 'String'
     role: 'String'
+    timezone: 'String'
     updatedAt: 'Date'
   }
 }
