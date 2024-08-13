@@ -3,9 +3,11 @@ import {
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
+    ManyToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from "typeorm";
+import { Author } from "../Author/Author";
 
 export type FollowUpQuestion = {
     id: string;
@@ -64,19 +66,10 @@ export class Content {
     })
     categories!: string[];
 
-    @Column({
-        nullable: false,
-        name: "author_name",
-        type: "text",
+    @ManyToMany(() => Author, (author) => author.contents, {
+        cascade: true,
     })
-    authorName!: string;
-
-    @Column({
-        nullable: true,
-        name: "author_image_url",
-        type: "text",
-    })
-    authorImageUrl!: string | null;
+    authors!: Author[];
 
     @Column({
         nullable: false,

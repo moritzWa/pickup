@@ -151,8 +151,6 @@ export interface NexusGenFieldTypes {
   }
   Content: { // field return type
     audioUrl: string; // String!
-    authorImageUrl: string | null; // String
-    authorName: string; // String!
     categories: string[]; // [String!]!
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string; // String!
@@ -335,8 +333,6 @@ export interface NexusGenFieldTypeNames {
   }
   Content: { // field return type name
     audioUrl: 'String'
-    authorImageUrl: 'String'
-    authorName: 'String'
     categories: 'String'
     contentSession: 'ContentSession'
     context: 'String'

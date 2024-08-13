@@ -1,3 +1,4 @@
+import { connect } from "src/core/infra/postgres";
 import { Content, Queue, User } from "src/core/infra/postgres/entities";
 import {
     DefaultErrors,
@@ -5,20 +6,18 @@ import {
     FailureOrSuccess,
     success,
 } from "src/core/logic";
+import { authorRepo } from "src/modules/author/infra";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import {
     DEFAULT_LINKS_RETURN,
     LinkWithDistance,
 } from "src/modules/curius/infra/linkRepo";
-import { contentRepo, queueRepo } from "../../infra";
-import { v4 as uuidv4 } from "uuid";
-import { firebase, openai } from "src/utils";
-import { storage } from "firebase-admin";
-import moment = require("moment");
-import { connect } from "src/core/infra/postgres";
-import { UserIdentityResponse } from "@onesignal/node-onesignal";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
+import { openai } from "src/utils";
+import { v4 as uuidv4 } from "uuid";
+import { contentRepo, queueRepo } from "../../infra";
+import moment = require("moment");
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -142,16 +141,18 @@ const convertCuriusToContent = async (
 
     const audio = audioResponse.value;
 
+    const contentId = uuidv4();
+
+    // Create the Content object first
     const contentResponse = await contentRepo.create({
-        id: uuidv4(),
+        id: contentId,
         audioUrl: audio.url,
         context: "",
         thumbnailImageUrl: "",
-        authorImageUrl: "",
+        authors: [], // This will be updated later
         sourceImageUrl: "",
         lengthMs: 0,
         categories: [],
-        authorName: "",
         summary: link.snippet || "",
         followUpQuestions: [],
         title: link.title,
@@ -165,6 +166,26 @@ const convertCuriusToContent = async (
     }
 
     const content = contentResponse.value;
+
+    // Create the authors with the Content object included in the contents array
+    const authors = await Promise.all(
+        (link.byline ? [link.byline] : []).map(async (name) => {
+            const authorResponse = await authorRepo.create({
+                id: uuidv4(),
+                name,
+                imageUrl: null,
+                contents: [content], // Pass the Content object here
+            });
+            if (authorResponse.isFailure()) {
+                throw new Error(authorResponse.error.message);
+            }
+            return authorResponse.value;
+        })
+    );
+
+    // Update the Content object with the created authors
+    content.authors = authors;
+    await contentRepo.save(content);
 
     // update the link to link to the content now
     await curiusLinkRepo.update(link.id, {

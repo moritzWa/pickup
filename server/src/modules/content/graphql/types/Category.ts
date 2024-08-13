@@ -20,7 +20,7 @@ export const CategoryEnum = enumType({
     members: categoryEnumValues,
 });
 
-export const Category = objectType({
+export const CategoryType = objectType({
     name: "Category",
     definition(t) {
         t.nonNull.string("name");
@@ -29,10 +29,10 @@ export const Category = objectType({
     },
 });
 
-export const CategorySection = objectType({
+export const CategorySectionType = objectType({
     name: "CategorySection",
     definition(t) {
         t.nonNull.string("name");
-        t.nonNull.list.nonNull.field("categories", { type: Category });
+        t.nonNull.list.nonNull.field("categories", { type: CategoryType });
     },
 });

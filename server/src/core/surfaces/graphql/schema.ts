@@ -4,6 +4,7 @@ import * as path from "path";
 import { DateScalar } from "./base";
 
 // resolvers
+import * as author from "src/modules/author/graphql";
 import * as content from "src/modules/content/graphql";
 import * as curius from "src/modules/curius/graphql";
 import * as users from "src/modules/users/graphql";
@@ -15,6 +16,7 @@ const types = {
     ...schemas,
     ...users,
     ...content,
+    ...author,
     ...curius,
 };
 
