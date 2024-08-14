@@ -35,6 +35,13 @@ export class Content {
     context!: string;
 
     @Column({
+        nullable: false,
+        name: "content",
+        type: "text",
+    })
+    content!: string;
+
+    @Column({
         nullable: true,
         name: "insertion_id",
         type: "text",

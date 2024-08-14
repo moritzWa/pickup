@@ -124,6 +124,7 @@ const convertCuriusToContent = async (
         insertionId: null,
         audioUrl: audio.url,
         context: "",
+        content: link.fullText || "",
         isProcessed: false,
         thumbnailImageUrl: "",
         embedding: null,

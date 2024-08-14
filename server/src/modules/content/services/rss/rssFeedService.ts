@@ -25,6 +25,7 @@ const scrapeRssFeed = async (
         const content: Content = {
             id: uuidv4(),
             isProcessed: false,
+            content: item.content || "",
             context: item.content || "",
             insertionId,
             sourceImageUrl: "",

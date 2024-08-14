@@ -56,7 +56,32 @@ const enqueueContentForProcessing = async (): Promise<
     return success(null);
 };
 
+function splitTextIntoChunks(text: string, maxChunkSize = 8000): string[] {
+    const chunks: string[] = [];
+    const sentences = text.split(". ");
+
+    let currentChunk = "";
+
+    for (let i = 0; i < sentences.length; i++) {
+        const sentence = sentences[i] + (i < sentences.length - 1 ? ". " : ".");
+
+        if (currentChunk.length + sentence.length > maxChunkSize) {
+            chunks.push(currentChunk.trim());
+            currentChunk = sentence;
+        } else {
+            currentChunk += sentence;
+        }
+    }
+
+    if (currentChunk.length > 0) {
+        chunks.push(currentChunk.trim());
+    }
+
+    return chunks;
+}
+
 export const ContentService = {
     getSimilarContent,
     enqueueContentForProcessing,
+    chunkContent: splitTextIntoChunks,
 };

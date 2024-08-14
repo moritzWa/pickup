@@ -217,6 +217,7 @@
         "stripe": "^10.17.0",
         "supertest": "^6.2.4",
         "throng": "^5.0.0",
+        "tiktoken": "^1.0.15",
         "tiny-secp256k1": "^2.2.1",
         "ts-node": "^10.2.1",
         "tsconfig-paths": "^3.11.0",

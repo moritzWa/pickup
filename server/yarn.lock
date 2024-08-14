@@ -16724,6 +16724,11 @@ through2@^4.0.0:
   resolved "https://registry.npmjs.org/through/-/through-2.3.8.tgz"
   integrity sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==
 
+tiktoken@^1.0.15:
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/tiktoken/-/tiktoken-1.0.15.tgz#a1e11681fa51b50c81bb7eaaee53b7a66e844a23"
+  integrity sha512-sCsrq/vMWUSEW29CJLNmPvWxlVp7yh2tlkAjpJltIKqp5CKf98ZNpdeHRmAlPVFlGEbswDc6SmI8vz64W/qErw==
+
 timers-browserify@^1.0.1:
   version "1.4.2"
   resolved "https://registry.npmjs.org/timers-browserify/-/timers-browserify-1.4.2.tgz"

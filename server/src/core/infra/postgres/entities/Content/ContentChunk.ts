@@ -9,8 +9,8 @@ import { Content } from "./Content";
 
 @Entity({ name: "content_chunks" })
 export class ContentChunk {
-    @PrimaryGeneratedColumn()
-    id!: number;
+    @PrimaryGeneratedColumn("uuid")
+    id!: string;
 
     @Column({
         name: "chunk_index",
