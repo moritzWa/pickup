@@ -7,19 +7,20 @@ const scrapeSomethingWonderful = async () => {
     await dataSource.initialize();
 
     const url = "https://www.readsomethinggreat.com";
-    const distinctArticles = new Set<string>();
-
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    // Add this line to capture console logs from the browser
     page.on("console", (msg) => console.log("Browser Log:", msg.text()));
 
-    for (let i = 0; i < 20; i++) {
-        try {
-            console.log(`Fetching URL: ${url}`);
-            await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 }); // Added timeout
+    let batchNumber = 1;
+    let totalNewContent = 0;
+    let totalNewAuthors = 0;
+    let consecutiveEmptyBatches = 0;
 
+    while (consecutiveEmptyBatches < 3) {
+        console.log(`Starting batch ${batchNumber}`);
+        try {
+            await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
             await page.waitForSelector(".bubble-element.Group");
 
             const { articles, debugInfo } = await page.evaluate(() => {
@@ -105,7 +106,10 @@ const scrapeSomethingWonderful = async () => {
                 return { articles, debugInfo };
             });
 
-            console.log("Debug Info:", JSON.stringify(debugInfo, null, 2));
+            // console.log("Debug Info:", JSON.stringify(debugInfo, null, 2));
+
+            let newContentCount = 0;
+            let newAuthorCount = 0;
 
             for (const article of articles) {
                 if (
@@ -117,7 +121,21 @@ const scrapeSomethingWonderful = async () => {
                     continue;
                 }
 
-                distinctArticles.add(JSON.stringify(article));
+                const existingContent = await dataSource
+                    .getRepository(Content)
+                    .findOne({
+                        where: {
+                            title: article.title,
+                            websiteUrl: article.url,
+                        },
+                    });
+
+                if (existingContent) {
+                    console.log(`Skipping existing content: ${article.title}`);
+                    continue;
+                }
+
+                newContentCount++;
 
                 const authorNames = article.author
                     .split("&")
@@ -137,6 +155,7 @@ const scrapeSomethingWonderful = async () => {
                         author = await dataSource
                             .getRepository(Author)
                             .save(author);
+                        newAuthorCount++;
                     }
 
                     authors.push(author);
@@ -154,61 +173,46 @@ const scrapeSomethingWonderful = async () => {
                 content.lengthMs = durationInMs;
                 content.websiteUrl = article.url;
                 content.followUpQuestions = [];
+                content.authors = authors;
 
-                // Save the content first
-                const savedContent = await dataSource
-                    .getRepository(Content)
-                    .save(content);
+                // Save the content entity
+                await dataSource.getRepository(Content).save(content);
 
                 // Update the authors with the new content
                 for (const author of authors) {
-                    if (!author.contents) {
-                        author.contents = [];
-                    }
-                    author.contents.push(savedContent);
+                    author.contents = author.contents || [];
+                    author.contents.push(content);
                     await dataSource.getRepository(Author).save(author);
                 }
-
-                // Update the content with the authors
-                savedContent.authors = authors;
-                await dataSource.getRepository(Content).save(savedContent);
             }
+
+            console.log(`Batch ${batchNumber} results:`);
+            console.log(`New content added: ${newContentCount}`);
+            console.log(`New authors added: ${newAuthorCount}`);
+
+            totalNewContent += newContentCount;
+            totalNewAuthors += newAuthorCount;
+
+            if (newContentCount === 0) {
+                consecutiveEmptyBatches++;
+            } else {
+                consecutiveEmptyBatches = 0;
+            }
+
+            batchNumber++;
         } catch (error) {
-            console.error(`Error during fetch: ${error}`);
+            console.error(`Error during batch ${batchNumber}:`, error);
         }
+
+        // Wait for 5 seconds before the next batch
+        await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     await browser.close();
 
-    console.log(`Found ${distinctArticles.size} distinct articles.`);
-    distinctArticles.forEach((article) => console.log(JSON.parse(article)));
-
-    // // Add this verification step
-    // try {
-    //     const contentRepository = dataSource.getRepository(Content);
-    //     const sampleContent = await contentRepository.findOneOrFail({
-    //         where: {},
-    //         relations: ["authors"],
-    //         order: { id: "DESC" },
-    //     });
-
-    //     console.log("Verification: Sample Content");
-    //     console.log("Title:", sampleContent.title);
-    //     console.log("Authors:");
-    //     if (sampleContent.authors && sampleContent.authors.length > 0) {
-    //         sampleContent.authors.forEach((author) => {
-    //             console.log(`- ${author.name}`);
-    //         });
-    //     } else {
-    //         console.log("No authors found for this content.");
-    //     }
-    // } catch (error) {
-    //     if (error instanceof Error) {
-    //         console.error("Error during verification:", error.message);
-    //     } else {
-    //         console.error("Error during verification:", error);
-    //     }
-    // }
+    console.log("Scraping completed:");
+    console.log(`Total new content added: ${totalNewContent}`);
+    console.log(`Total new authors added: ${totalNewAuthors}`);
 
     await dataSource.destroy();
 };

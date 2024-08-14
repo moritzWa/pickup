@@ -26,7 +26,7 @@ export class Content {
     id!: string;
 
     @Column({
-        nullable: false,
+        nullable: true,
         name: "context",
         type: "text",
     })
