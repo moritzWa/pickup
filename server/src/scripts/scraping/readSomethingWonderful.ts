@@ -32,44 +32,68 @@ const scrapeSomethingWonderful = async () => {
 
                 const debugInfo: any = {};
 
+                function removeStyles(html: string): string {
+                    return html.replace(/\s*style="[^"]*"/g, "");
+                }
+
                 articleElements.forEach((element, index) => {
                     const category = element
                         .querySelector(".bubble-element.Text:first-child")
                         ?.textContent?.trim();
 
                     const titleElement = element.querySelector(
-                        ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:first-of-type"
+                        ".bubble-element.Group > div:nth-of-type(3) > div:nth-of-type(1)"
                     );
 
                     const title = titleElement?.textContent?.trim();
 
-                    // Debug information for title
-                    debugInfo[`article_${index}_title`] = {
-                        selector:
-                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:first-of-type",
-                        found: !!titleElement,
-                        text: title,
-                        html: titleElement?.outerHTML,
-                    };
+                    const authorElement = element.querySelector(
+                        ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-of-type(2)"
+                    );
 
-                    const authorAndDuration = element
-                        .querySelector(
-                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-of-type(2)"
-                        )
-                        ?.textContent?.trim();
-
+                    const authorAndDuration =
+                        authorElement?.textContent?.trim();
                     const author = authorAndDuration?.split("|")[0]?.trim();
                     const duration = authorAndDuration?.split("|")[1]?.trim();
 
-                    const excerpt = element
-                        .querySelector(
-                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-of-type(3)"
-                        )
-                        ?.textContent?.trim();
+                    const excerptElement = element.querySelector(
+                        ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-of-type(3)"
+                    );
+
+                    const excerpt = excerptElement?.textContent?.trim();
+
                     const readNowLink = element.querySelector(
                         "a.bubble-element.Link[href]:not([title='share article'])"
                     );
                     const url = readNowLink?.getAttribute("href");
+
+                    // Debug information
+                    debugInfo[`article_${index}`] = {
+                        // category: {
+                        //     text: category,
+                        //     html: removeStyles(
+                        //         element.querySelector(
+                        //             ".bubble-element.Text:first-child"
+                        //         )?.outerHTML || ""
+                        //     ),
+                        // },
+                        title: {
+                            selector:
+                                ".bubble-element.Group[id^='GroupArticle'] > .bubble-element.Group.cmaUaZh > .bubble-element.Text:nth-of-type(1)", // Updated selector to target the title correctly
+                            found: !!titleElement,
+                            text: title,
+                            html: removeStyles(titleElement?.outerHTML || ""),
+                        },
+                        // authorAndDuration: {
+                        //     text: authorAndDuration,
+                        //     html: removeStyles(authorElement?.outerHTML || ""),
+                        // },
+                        // excerpt: {
+                        //     text: excerpt,
+                        //     html: removeStyles(excerptElement?.outerHTML || ""),
+                        // },
+                        // fullHtml: removeStyles(element.outerHTML),
+                    };
 
                     if (
                         category &&
