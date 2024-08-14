@@ -359,6 +359,10 @@ const MarqueeText = ({ title }: { title: string }) => {
   const [textWidth, setTextWidth] = useState(0);
 
   useEffect(() => {
+    if (title.length < 40) {
+      return;
+    }
+
     if (textWidth > screenWidth) {
       const duration = (textWidth / screenWidth) * 8000; // Duration proportional to text length
 
@@ -378,7 +382,7 @@ const MarqueeText = ({ title }: { title: string }) => {
         ])
       ).start();
     }
-  }, [animatedValue, textWidth]);
+  }, [animatedValue, textWidth, title]);
 
   const translateX = animatedValue.interpolate({
     inputRange: [0, 1],
@@ -392,7 +396,7 @@ const MarqueeText = ({ title }: { title: string }) => {
         style={[
           styles.text,
           {
-            transform: [{ translateX }],
+            // transform: [{ translateX }],
           },
         ]}
         numberOfLines={1}
