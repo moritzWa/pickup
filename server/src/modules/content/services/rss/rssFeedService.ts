@@ -39,9 +39,8 @@ const scrapeRssFeed = async (
             summary: item.contentSnippet || "",
             followUpQuestions: [],
             websiteUrl: websiteUrl || "",
+            authors: [], // TODO:
             releasedAt: item.isoDate ? new Date(item.isoDate) : null,
-            authorImageUrl: feed.image?.link || "",
-            authorName: feed.title || "",
             createdAt: new Date(),
             updatedAt: new Date(),
             chunks: [],

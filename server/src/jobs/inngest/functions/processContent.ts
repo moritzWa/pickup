@@ -12,12 +12,11 @@ import { NonRetriableError, slugify } from "inngest";
 import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
 import axios from "axios";
-import { parseBuffer, parseFile } from "music-metadata";
 import { TranscribeService } from "src/modules/content/services/transcribeService";
-import { parallel } from "radash";
 import { ContentService } from "src/modules/content/services/contentService";
 import { ContentChunk } from "src/core/infra/postgres/entities";
 import { v4 as uuidv4 } from "uuid";
+import { parseBuffer, parseFile } from "music-metadata";
 
 const NAME = "Process Content";
 const CONCURRENCY = 50;

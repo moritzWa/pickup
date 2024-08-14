@@ -50,12 +50,7 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  Author: { // root type
-    contents?: Array<NexusGenRootTypes['Content'] | null> | null; // [Content]
-    id: string; // String!
-    imageUrl?: string | null; // String
-    name: string; // String!
-  }
+  Author: entities.Author ;
   Category: { // root type
     emoji: string; // String!
     name: string; // String!
