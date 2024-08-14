@@ -42,6 +42,10 @@ export const startContent = mutationField("startContent", {
                 currentContentSessionId: existingSessionResponse.value.id,
             });
 
+            await contentSessionRepo.update(existingSessionResponse.value.id, {
+                lastListenedAt: new Date(),
+            });
+
             return existingSessionResponse.value;
         }
 

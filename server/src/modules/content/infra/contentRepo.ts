@@ -210,6 +210,15 @@ export class PostgresContentRepository {
         }
     }
 
+    bulkInsert = async (
+        contents: Omit<ContentModel, "accounts">[]
+    ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> => {
+        return Helpers.trySuccessFail(async () => {
+            const res = await this.repo.save(contents);
+            return success(res);
+        });
+    };
+
     async findSimilarContent(
         vector: number[],
         limit: number = DEFAULT_LINKS_RETURN

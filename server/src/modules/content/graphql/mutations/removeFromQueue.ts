@@ -36,6 +36,7 @@ export const removeFromQueue = mutationField("removeFromQueue", {
             where: {
                 userId: user.id,
                 contentId,
+                isQueued: true,
             },
         });
 
@@ -47,6 +48,7 @@ export const removeFromQueue = mutationField("removeFromQueue", {
 
         const updateResponse = await feedRepo.update(feedItem.id, {
             isQueued: false,
+            queuedAt: null,
         });
 
         throwIfError(updateResponse);

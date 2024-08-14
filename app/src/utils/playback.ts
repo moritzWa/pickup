@@ -8,8 +8,6 @@ import {
 } from "src/redux/reducers/audio";
 
 export const PlaybackService = async function () {
-  // const { playNext, playPrev } = useAudio();
-
   TrackPlayer.addEventListener(Event.RemotePlay, async () => {
     await TrackPlayer.play();
     store.dispatch(setIsPlaying(true));

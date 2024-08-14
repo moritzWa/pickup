@@ -1,4 +1,5 @@
 import { connect } from "src/core/infra/postgres";
+import { contentRepo } from "src/modules/content/infra";
 import { RSSFeedService } from "src/modules/content/services/rss/rssFeedService";
 
 // https://pod.link/
@@ -94,10 +95,22 @@ const scrapePodcasts = async () => {
     debugger;
 
     for (const podcast of PODCASTS) {
-        console.log(podcast.name);
+        const contentResponse = await RSSFeedService.scrapeRssFeed(
+            podcast.url,
+            podcast.name
+        );
 
-        await RSSFeedService.scrapeRssFeed(podcast.url, podcast.name);
+        if (contentResponse.isFailure()) {
+            debugger;
+            continue;
+        }
+
+        const response = await contentRepo.bulkInsert(contentResponse.value);
+
+        console.log(`[finished ${podcast.name}]`);
     }
+
+    debugger;
 };
 
 // if running this main file, scrape all the podcasts

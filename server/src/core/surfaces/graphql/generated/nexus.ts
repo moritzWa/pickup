@@ -603,6 +603,7 @@ export interface NexusGenArgTypes {
       currentMs?: number | null; // Int
       isBookmarked?: boolean | null; // Boolean
       isLiked?: boolean | null; // Boolean
+      lastListenedAt?: NexusGenScalars['Date'] | null; // Date
     }
     updateUser: { // args
       avatarImageUrl?: string | null; // String

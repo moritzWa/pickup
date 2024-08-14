@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { QueueService } from "../../services/queueService/queueService";
+import { ContentService } from "../../services/contentService";
 
 export const getPrevContent = queryField("getPrevContent", {
     type: nullable("FeedItem"),
@@ -41,13 +42,15 @@ export const getPrevContent = queryField("getPrevContent", {
 
         const content = contentResponse.value;
 
-        const prevQueueResponse = await QueueService.prev(user, content);
+        const prevQueueResponse = await ContentService.prev(user, content);
 
         throwIfError(prevQueueResponse);
 
-        await pgUserRepo.update(user.id, {
-            currentFeedItemId: prevQueueResponse.value.id,
-        });
+        if (prevQueueResponse.value) {
+            await pgUserRepo.update(user.id, {
+                currentFeedItemId: prevQueueResponse.value.id,
+            });
+        }
 
         return prevQueueResponse.value;
     },

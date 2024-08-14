@@ -48,6 +48,7 @@ export const addToQueue = mutationField("addToQueue", {
 
             const updateResponse = await feedRepo.update(feedItem.id, {
                 isQueued: true,
+                queuedAt: new Date(),
             });
 
             throwIfError(updateResponse);
@@ -55,10 +56,10 @@ export const addToQueue = mutationField("addToQueue", {
             return feedItem;
         }
 
-        // TODO: add to queue
         const feedItemResponse = await feedRepo.create({
             id: uuidv4(),
             position: 0,
+            queuedAt: new Date(),
             isArchived: false,
             isQueued: true,
             userId: user.id,

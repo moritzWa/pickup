@@ -135,6 +135,7 @@ export class Content {
         nullable: true,
         name: "reference_id",
         type: "text",
+        unique: true,
     })
     referenceId!: string | null;
 

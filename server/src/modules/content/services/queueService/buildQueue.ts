@@ -27,42 +27,18 @@ export const buildQueue = async (
     const description = user.interestDescription;
     const rawQuery = `${categories} ${description}`;
 
-    const similarLinksResponse = await curiusLinkRepo.findSimilarLinks(
-        rawQuery,
-        limit ?? DEFAULT_LINKS_RETURN
-    );
+    // TODO:
+    const similarContentResponse = await contentRepo.find({
+        take: 10,
+    });
 
-    if (similarLinksResponse.isFailure()) {
-        return failure(similarLinksResponse.error);
+    if (similarContentResponse.isFailure()) {
+        return failure(similarContentResponse.error);
     }
 
-    const links = similarLinksResponse.value;
+    const similarContent = similarContentResponse.value;
 
-    const contentIdsResponse = await Promise.all(
-        links.map(convertCuriusToContent)
-    );
-
-    const failures = contentIdsResponse.filter((r) => r.isFailure());
-
-    if (failures.length > 0) {
-        return failure(failures[0].error);
-    }
-
-    const contentIds = contentIdsResponse.map((r) => r.value);
-
-    if (!contentIds.length) {
-        return success([]);
-    }
-
-    const contentResponse = await contentRepo.findByIds(contentIds);
-
-    if (contentResponse.isFailure()) {
-        return failure(contentResponse.error);
-    }
-
-    const content = contentResponse.value;
-
-    const queueResponse = await buildQueueFromContent(user, content);
+    const queueResponse = await buildQueueFromContent(user, similarContent);
 
     return queueResponse;
 };
@@ -79,6 +55,7 @@ const buildQueueFromContent = async (
                 position: i,
                 isQueued: false,
                 isArchived: false,
+                queuedAt: null,
                 userId: user.id,
                 contentId: c.id,
                 // make it so increasing time? maybe
@@ -185,6 +162,8 @@ if (require.main === module) {
             const userResponse = await pgUserRepo.findByEmail(
                 "andrew.j.duca@gmail.com"
             );
+
+            debugger;
 
             const queue = await buildQueue(userResponse.value, 1);
 

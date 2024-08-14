@@ -161,7 +161,7 @@ type Mutation {
   showMore: String!
   startContent(contentId: ID!): ContentSession!
   startListening: ContentSession!
-  updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean): ContentSession!
+  updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean, lastListenedAt: Date): ContentSession!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
 }

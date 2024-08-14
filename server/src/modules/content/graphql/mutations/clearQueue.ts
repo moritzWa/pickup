@@ -37,7 +37,7 @@ export const clearQueue = mutationField("clearQueue", {
                     feedItem.id,
                     {
                         isQueued: false,
-                        isArchived: false,
+                        queuedAt: null,
                     }
                 );
 

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
@@ -16,7 +16,11 @@ import TrackPlayer, {
 import { useDispatch, useSelector } from "react-redux";
 import { api } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
-import { Mutation, Query } from "src/api/generated/types";
+import {
+  Mutation,
+  Query,
+  QueryGetNextContentArgs,
+} from "src/api/generated/types";
 import {
   DefaultErrors,
   failure,
@@ -44,8 +48,9 @@ import {
 } from "src/redux/reducers/audio";
 import { singletonHook } from "react-singleton-hook";
 
+export type UseAudioReturn = ReturnType<typeof useAudioHook>;
+
 const useAudioHook = () => {
-  const { sound: globalSound } = useContext(AppContext);
   const dispatch = useDispatch();
 
   const queue = useSelector(getQueue);
@@ -62,6 +67,10 @@ const useAudioHook = () => {
 
   const [removeFromQueue] = useMutation<Pick<Mutation, "removeFromQueue">>(
     api.content.removeFromQueue
+  );
+
+  const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
+    api.content.next
   );
 
   const getFileName = async (url: string): Promise<string> => {
@@ -91,10 +100,6 @@ const useAudioHook = () => {
 
     console.log(`[downloading and playing ${url}]`);
 
-    if (!globalSound) {
-      return failure(new UnexpectedError("No sound object found"));
-    }
-
     const fileName = await getFileName(url);
     const fileUri = (FileSystem.documentDirectory || "") + fileName;
 
@@ -104,8 +109,6 @@ const useAudioHook = () => {
       });
 
       const sound = new Audio.Sound();
-
-      globalSound.current = sound;
 
       dispatch(setAudioUrl(url));
       dispatch(setCurrentContent(content));
@@ -165,11 +168,6 @@ const useAudioHook = () => {
 
   const toggle = async () => {
     try {
-      const sound = globalSound?.current;
-      if (!sound) {
-        return;
-      }
-
       const state = await TrackPlayer.getPlaybackState();
 
       // if playing -> pause
@@ -247,43 +245,37 @@ const useAudioHook = () => {
       (q) => q?.id === currentContent?.id
     );
 
-    let newQueue = [...queue];
-
     // if it is in the queue, remove it
     if (queueElementIndex !== -1) {
       console.log(`[removing ${currentContent?.title} from the queue]`);
 
       const queueElement = queue[queueElementIndex];
 
-      void removeFromQueue({
+      await removeFromQueue({
         variables: {
           contentId: queueElement.id,
         },
-        refetchQueries: [api.queue.list],
+        refetchQueries: [api.queue.list, api.content.feed],
       });
-
-      // then remove that element from the list
-
-      newQueue = queue.splice(queueElementIndex, 1);
     }
 
-    if (newQueue.length) {
-      // add the next item to track player and start it
-      const nextItem = newQueue[0] as BaseContentFields;
+    const nextContentVariables: QueryGetNextContentArgs = {
+      afterContentId: currentContent?.id || "",
+    };
 
-      await downloadAndPlayContent(nextItem);
+    const nextItemResponse = await getNextContent({
+      variables: nextContentVariables,
+    });
 
-      return;
-    }
+    const nextItem = nextItemResponse?.data?.getNextContent;
+    const content = nextItem?.content as BaseContentFields;
 
-    const feedItemIndex = feed.findIndex((f) => f?.id === currentContent?.id);
-    const nextElement =
-      feedItemIndex === -1 ? feed[0] : feed[feedItemIndex + 1];
+    console.log(`[next up is ${nextItem?.content?.title}]`);
 
-    if (nextElement) {
-      await downloadAndPlayContent(nextElement);
+    if (content) {
+      dispatch(setCurrentContent(content));
 
-      return;
+      await downloadAndPlayContent(content);
     }
   };
 

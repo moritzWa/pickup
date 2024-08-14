@@ -63,7 +63,7 @@ import Slider from "@react-native-community/slider";
 import { useSpeech } from "./useSpeech";
 import Close from "src/components/Close";
 import { useAudio } from "src/hooks/useAudio";
-import { AppContext } from "App";
+import { AppContext } from "context";
 import { Track } from "react-native-track-player";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { BaseContentFields } from "src/api/fragments";
@@ -98,7 +98,7 @@ const AudioPlayer = () => {
     isPlaying,
     audioUrl,
     skip,
-  } = useAudio();
+  } = useContext(AppContext).audio!;
 
   const contentVariables = useMemo(
     (): QueryGetContentArgs => ({
@@ -564,10 +564,10 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
     return queue[currentIndex + 1] ?? null;
   }, [queue, currentContent]);
 
-  const { downloadAndPlayContent } = useAudio();
+  const { downloadAndPlayContent } = useContext(AppContext).audio!;
 
   const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
-    api.queue.next
+    api.content.next
   );
 
   const _onClickNext = async () => {
@@ -650,7 +650,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
           }}
           resizeMode="cover"
           source={{
-            uri: nextContent.thumbnailImageUrl,
+            uri: nextContent.thumbnailImageUrl || "",
           }}
         />
 
@@ -706,17 +706,17 @@ const NextOrPrevButtons = ({
   content: BaseContentFields | null;
   skip: (seconds: number) => void;
 }) => {
-  const { downloadAndPlayContent } = useAudio();
+  const { downloadAndPlayContent } = useContext(AppContext).audio!;
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProps>();
 
   const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
-    api.queue.next
+    api.content.next
   );
 
   const [getPrevContent] = useLazyQuery<Pick<Query, "getPrevContent">>(
-    api.queue.prev
+    api.content.prev
   );
 
   const _onClickPrev = async () => {

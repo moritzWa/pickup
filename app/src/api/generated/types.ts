@@ -268,6 +268,7 @@ export type MutationUpdateContentSessionArgs = {
   currentMs?: InputMaybe<Scalars['Int']['input']>;
   isBookmarked?: InputMaybe<Scalars['Boolean']['input']>;
   isLiked?: InputMaybe<Scalars['Boolean']['input']>;
+  lastListenedAt?: InputMaybe<Scalars['Date']['input']>;
 };
 
 

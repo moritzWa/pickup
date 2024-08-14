@@ -3,6 +3,7 @@ import {
     FindManyOptions,
     FindOneOptions,
     getRepository,
+    Not,
     Repository,
 } from "typeorm";
 import { sql } from "pg-sql";
@@ -64,6 +65,31 @@ export class PostgresFeedItemRepository {
             return success(user);
         });
     }
+
+    topOfQueue = async (
+        userId: string,
+        excludingContentId: string | null = null
+    ): Promise<FailureOrSuccess<DefaultErrors, Maybe<FeedItemModel>>> => {
+        try {
+            const items = await this.repo.find({
+                where: Helpers.stripUndefined({
+                    userId: userId,
+                    isQueued: true,
+                    contentId: excludingContentId
+                        ? Not(excludingContentId)
+                        : undefined,
+                }),
+                order: {
+                    queuedAt: "asc",
+                },
+                take: 1,
+            });
+
+            return success(items[0] ?? null);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
 
     // YOU MUST CHECK BY LOWERCASE IF YOU SEARCH BY USERNAME!
     async findByFeedItemname(username: string): Promise<FeedItemArrayResponse> {

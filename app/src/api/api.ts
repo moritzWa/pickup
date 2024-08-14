@@ -198,7 +198,7 @@ const GetContentFeed = gql`
 const GetActivity = gql`
   ${BaseContentFields}
   query GetActivity($filter: ActivityFilter) {
-    getActivity(limit: $limit, filter: $filter) {
+    getActivity(filter: $filter) {
       ...BaseContentFields
     }
   }
@@ -312,6 +312,27 @@ const ShowMore = gql`
   }
 `;
 
+const UpdateContentSession = gql`
+  ${BaseContentSessionFields}
+  mutation UpdateContentSession(
+    $contentSessionId: ID!
+    $isBookmarked: Boolean
+    $isLiked: Boolean
+    $currentMs: Int
+    $lastListenedAt: Date
+  ) {
+    updateContentSession(
+      contentSessionId: $contentSessionId
+      isBookmarked: $isBookmarked
+      isLiked: $isLiked
+      currentMs: $currentMs
+      lastListenedAt: $lastListenedAt
+    ) {
+      ...BaseContentSessionFields
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
@@ -327,12 +348,12 @@ export const api = {
     paymentMethods: GetPaymentMethods,
   },
   queue: {
-    next: GetNextContent,
-    prev: GetPrevContent,
     list: GetQueue,
     clear: ClearQueue,
   },
   content: {
+    next: GetNextContent,
+    prev: GetPrevContent,
     showMore: ShowMore,
     current: GetCurrentContentSession,
     start: StartContent,
@@ -345,6 +366,7 @@ export const api = {
     addToQueue: AddToQueue,
     removeFromQueue: RemoveFromQueue,
     archive: ArchiveContent,
+    updateSession: UpdateContentSession,
   },
   categories: {
     list: GetCategories,

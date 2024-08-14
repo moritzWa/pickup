@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@apollo/client";
 import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -38,6 +38,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
 import { hasValue } from "src/core";
+import { AppContext } from "context";
 
 const Home = () => {
   const theme = useTheme();
@@ -45,7 +46,7 @@ const Home = () => {
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
 
   const [showMore] = useMutation(api.content.showMore);
-  const { downloadAndPlayContent, toggle } = useAudio();
+  const { downloadAndPlayContent, toggle } = useContext(AppContext).audio!;
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
 
@@ -77,7 +78,9 @@ const Home = () => {
   const feed = (data?.getFeed ?? []) as BaseContentFields[];
 
   const onShowMorePress = async () => {
-    await showMore();
+    await showMore({
+      refetchQueries: [api.queue.list, api.content.feed],
+    });
   };
 
   const content = useMemo((): BaseContentFields[] => {
@@ -90,8 +93,6 @@ const Home = () => {
     return (data?.getFeed ?? []) as BaseContentFields[];
   }, [data, filter, queueData?.getQueue?.queue]);
 
-  console.log(JSON.stringify(error, null, 2));
-
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {
       contentId: content.id,
@@ -101,7 +102,6 @@ const Home = () => {
   const onPlayContent = async (content: BaseContentFields) => {
     // alert("play");
     await downloadAndPlayContent(content);
-    dispatch(setCurrentContent(content));
   };
 
   const onTogglePlayOrPause = async (content: BaseContentFields) => {
@@ -173,6 +173,7 @@ const Home = () => {
               <View
                 style={{
                   marginTop: 10,
+                  marginBottom: 10,
                   marginHorizontal: 20,
                   display: "flex",
                   flexDirection: "row",
@@ -230,36 +231,39 @@ const Home = () => {
             togglePlayOrPause={() => onTogglePlayOrPause(c)}
             onPress={() => onPressContent(c)}
             content={c}
+            filter={filter}
           />
         )}
         ListFooterComponent={
           // Show more
-          <TouchableOpacity
-            style={{
-              padding: 5,
-              margin: 15,
-              borderRadius: 15,
-              backgroundColor: theme.secondaryBackground,
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            activeOpacity={0.8}
-            onPress={onShowMorePress}
-          >
-            <Text
+          filter === ContentFeedFilter.ForYou ? (
+            <TouchableOpacity
               style={{
-                color: colors.primary,
-                fontFamily: "Raleway-Bold",
-                fontSize: 16,
-                textAlign: "center",
-                padding: 10,
+                padding: 5,
+                margin: 15,
+                borderRadius: 15,
+                backgroundColor: theme.secondaryBackground,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
               }}
+              activeOpacity={0.8}
+              onPress={onShowMorePress}
             >
-              Show more 👀
-            </Text>
-            {/* <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} /> */}
-          </TouchableOpacity>
+              <Text
+                style={{
+                  color: colors.primary,
+                  fontFamily: "Raleway-Bold",
+                  fontSize: 16,
+                  textAlign: "center",
+                  padding: 10,
+                }}
+              >
+                Show more 👀
+              </Text>
+              {/* <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} /> */}
+            </TouchableOpacity>
+          ) : null
         }
       />
 

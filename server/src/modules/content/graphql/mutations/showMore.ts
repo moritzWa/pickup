@@ -16,6 +16,7 @@ import { ResponseService } from "../../services/respondService";
 import { contentRepo } from "../../infra";
 import { inngest } from "src/jobs/inngest/clients";
 import { InngestEventName } from "src/jobs/inngest/types";
+import { buildQueue } from "../../services/queueService";
 
 export const showMore = mutationField("showMore", {
     type: nonNull("String"),
@@ -27,10 +28,7 @@ export const showMore = mutationField("showMore", {
 
         const user = ctx.me!;
 
-        await inngest.send({
-            name: InngestEventName.BuildUserQueue,
-            data: { userId: user.id },
-        });
+        await buildQueue(user, 10);
 
         return "Requested more queue items.";
     },

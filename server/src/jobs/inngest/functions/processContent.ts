@@ -120,7 +120,7 @@ const _embedContent = async (contentId: string) => {
     const content = contentResponse.value;
     const fullContent = content.content;
 
-    const chunks = ContentService.chunkContent(fullContent);
+    const chunks = ContentService.chunkContent(fullContent || "");
 
     const allChunks: ContentChunk[] = [];
 

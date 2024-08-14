@@ -9,12 +9,13 @@ import {
   Animated,
   Image,
 } from "react-native";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
 import {
+  ContentFeedFilter,
   Mutation,
   MutationAddToQueueArgs,
   MutationArchiveContentArgs,
@@ -60,14 +61,18 @@ export const ContentRow = ({
   onPress,
   onPlay,
   togglePlayOrPause,
+  filter,
 }: {
   content: BaseContentFields;
   onPress: () => void;
   onPlay: () => void;
   togglePlayOrPause: () => void;
+  filter?: ContentFeedFilter;
 }) => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
+
+  const swipeableRef = useRef<Swipeable>(null);
 
   const [startContent, { error }] = useMutation(api.content.start);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
@@ -116,15 +121,17 @@ export const ContentRow = ({
       };
 
       if (isQueued) {
-        await removeFromQueue({
+        const response = await removeFromQueue({
           variables,
           refetchQueries: [api.content.addToQueue, api.queue.list],
         });
+        console.log("removed from queue");
       } else {
         await addToQueue({
           variables,
           refetchQueries: [api.content.addToQueue, api.queue.list],
         });
+        console.log("added to queue");
       }
     } catch (err) {
       console.log(err);
@@ -253,6 +260,10 @@ export const ContentRow = ({
     </View>
   );
 
+  useEffect(() => {
+    swipeableRef.current?.close();
+  }, [filter]);
+
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
 
   return (
@@ -261,6 +272,7 @@ export const ContentRow = ({
       renderRightActions={renderRightActions}
       overshootRight={false}
       overshootLeft={false}
+      ref={swipeableRef}
     >
       <View
         style={{

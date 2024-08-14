@@ -15,9 +15,13 @@ import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
-import { Query } from "src/api/generated/types";
+import {
+  Mutation,
+  MutationUpdateContentSessionArgs,
+  Query,
+} from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
-import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
+import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -35,7 +39,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Header from "src/components/Header";
 import FastImage from "react-native-fast-image";
 import { BlurView } from "expo-blur";
-import { AppContext } from "App";
+import { AppContext } from "context";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCurrentAudioUrl,
@@ -60,10 +64,21 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
     Pick<Query, "getCurrentContentSession">
   >(api.content.current, {});
 
+  const [updateSession] = useMutation<
+    Pick<Mutation, "updateContentSession">,
+    MutationUpdateContentSessionArgs
+  >(api.content.updateSession);
+
   const currentAudioUrl = useSelector(getCurrentAudioUrl);
 
-  const { downloadAndPlayContent, toggle, percentFinished, leftMinutes } =
-    useAudio();
+  const {
+    downloadAndPlayContent,
+    currentMs,
+    durationMs,
+    toggle,
+    percentFinished,
+    leftMinutes,
+  } = useContext(AppContext).audio!;
 
   const isFocused = useIsFocused();
   const activeContent = contentData?.getCurrentContentSession ?? null;
@@ -111,6 +126,13 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
     try {
       const audioUrl = activeContent?.content?.audioUrl || "";
 
+      void updateSession({
+        variables: {
+          contentSessionId: activeContent?.id || "",
+          lastListenedAt: new Date(),
+        },
+      });
+
       // this will set it on the ref
       if (currentAudioUrl !== audioUrl) {
         const content = activeContent?.content as BaseContentFields;
@@ -130,7 +152,20 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
   const title = activeContent?.content?.title;
   const thumbnailImageUrl = activeContent?.content?.thumbnailImageUrl;
 
-  if (!activeContent) {
+  // if there is no active content or the active content is finished playing
+  const shouldHide = useMemo(() => {
+    if (!activeContent) {
+      return true;
+    }
+
+    const isDone =
+      (currentMs ?? 0) > 0 &&
+      new BigNumber(currentMs ?? 0).gte(durationMs ?? 0);
+
+    return isDone;
+  }, [activeContent, percentFinished]);
+
+  if (shouldHide) {
     return null;
   }
 
