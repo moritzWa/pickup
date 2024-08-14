@@ -4,10 +4,13 @@ import {
     DeleteDateColumn,
     Entity,
     ManyToMany,
+    OneToMany,
     PrimaryGeneratedColumn,
+    Relation,
     UpdateDateColumn,
 } from "typeorm";
 import { Author } from "../Author/Author";
+import { ContentChunk } from "./ContentChunk";
 
 export type FollowUpQuestion = {
     id: string;
@@ -127,6 +130,11 @@ export class Content {
         type: "text",
     })
     referenceId!: string | null;
+
+    @OneToMany(() => ContentChunk, (t) => t.content, {
+        eager: false,
+    })
+    chunks!: Relation<ContentChunk[]>;
 
     @Column({
         name: "released_at",

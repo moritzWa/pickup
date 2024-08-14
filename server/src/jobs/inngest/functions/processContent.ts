@@ -6,6 +6,8 @@ import { InngestEventName } from "../types";
 import { NonRetriableError, slugify } from "inngest";
 import { contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
+import axios from "axios";
+import { parseBuffer, parseFile } from "music-metadata";
 
 const NAME = "Process Content";
 const CONCURRENCY = 50;
@@ -28,9 +30,7 @@ const processContent = inngest.createFunction(
 
         await step.run("embed-content", async () => _embedContent(contentId));
 
-        await step.run("add-audio-content", async () =>
-            _convertToAudio(contentId)
-        );
+        await step.run("audio-content", async () => _convertToAudio(contentId));
 
         await step.run("mark-content-processed", async () =>
             _markContentProcessed(contentId)
@@ -105,6 +105,23 @@ const _convertToAudio = async (contentId: string) => {
     const content = contentResponse.value;
 
     if (content.audioUrl) {
+        if (!content.lengthMs) {
+            // get the audio length
+            const response = await axios.get(content.audioUrl, {
+                responseType: "arraybuffer",
+            });
+
+            const buffer = Buffer.from(response.data);
+
+            // Parse the audio metadata
+            const metadata = await parseBuffer(buffer, "audio/mpeg");
+            const durationMS = (metadata.format.duration ?? 0) * 1_000;
+
+            await contentRepo.update(content.id, {
+                lengthMs: durationMS,
+            });
+        }
+
         return Promise.resolve();
     }
 

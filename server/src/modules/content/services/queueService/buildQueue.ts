@@ -130,14 +130,15 @@ const convertCuriusToContent = async (
         authors: [], // This will be updated later
         embedding: null,
         sourceImageUrl: "",
-        referenceId: null, // Add this line
-        releasedAt: new Date(), // Add this line
+        referenceId: null,
+        releasedAt: link.createdDate,
         lengthMs: 0,
         categories: [],
         summary: link.snippet || "",
         followUpQuestions: [],
         title: link.title,
         websiteUrl: link.link,
+        chunks: [],
         createdAt: new Date(),
         updatedAt: new Date(),
     });

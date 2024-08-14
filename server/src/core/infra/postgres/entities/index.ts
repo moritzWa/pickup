@@ -4,6 +4,7 @@ export { User } from "./User";
 export { Author } from "./Author/Author";
 export { Content } from "./Content/Content";
 export { ContentSession } from "./Content/ContentSession";
+export { ContentChunk } from "./Content/ContentChunk";
 // curius
 export { CuriusComment } from "./Curius/CuriusComment";
 export { CuriusHighlight } from "./Curius/CuriusHighlight";
