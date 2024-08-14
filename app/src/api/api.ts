@@ -333,6 +333,15 @@ const UpdateContentSession = gql`
   }
 `;
 
+const GetContentSession = gql`
+  ${BaseContentSessionFields}
+  query GetContentSession($contentId: ID!) {
+    getContentSession(contentId: $contentId) {
+      ...BaseContentSessionFields
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
@@ -367,6 +376,7 @@ export const api = {
     removeFromQueue: RemoveFromQueue,
     archive: ArchiveContent,
     updateSession: UpdateContentSession,
+    getSession: GetContentSession,
   },
   categories: {
     list: GetCategories,

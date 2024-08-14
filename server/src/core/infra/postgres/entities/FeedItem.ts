@@ -86,6 +86,7 @@ export class FeedItem {
 
     @ManyToOne(() => Content, (t) => t.id, {
         nullable: false,
+        eager: true,
         onDelete: "CASCADE",
     })
     @JoinColumn({ name: "content_id" })

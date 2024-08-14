@@ -40,6 +40,10 @@ export const getFeed = queryField("getFeed", {
             where: { isArchived: false },
             take: limit ?? 0,
             relations: { content: true },
+            order: {
+                position: "asc",
+                createdAt: "desc",
+            },
         });
 
         throwIfError(feedResponse);

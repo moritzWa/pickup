@@ -498,7 +498,11 @@ export const ContentRow = ({
   );
 };
 
-const ContentRowImage = ({ content: c }: { content: BaseContentFields }) => {
+export const ContentRowImage = ({
+  content: c,
+}: {
+  content: BaseContentFields;
+}) => {
   const gradient = getGradientById(c.id);
 
   if (c.thumbnailImageUrl) {
