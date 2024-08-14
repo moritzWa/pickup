@@ -10,8 +10,11 @@ const hasLogging = process.env.TYPEORM_LOGGING === "true";
 const ENTITIES = [
     entities.User,
     entities.Notification,
+    // content
     entities.Content,
     entities.ContentSession,
+    entities.ContentChunk,
+    // curius
     entities.CuriusLink,
     entities.CuriusLinkChunk,
     entities.CuriusUser,

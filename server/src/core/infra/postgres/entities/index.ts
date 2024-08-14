@@ -3,6 +3,7 @@ export { User } from "./User";
 // content
 export { Content } from "./Content/Content";
 export { ContentSession } from "./Content/ContentSession";
+export { ContentChunk } from "./Content/ContentChunk";
 // curius
 export { CuriusComment } from "./Curius/CuriusComment";
 export { CuriusHighlight } from "./Curius/CuriusHighlight";

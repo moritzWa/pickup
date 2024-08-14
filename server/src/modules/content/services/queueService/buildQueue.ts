@@ -129,6 +129,8 @@ const convertCuriusToContent = async (
         embedding: null,
         authorImageUrl: "",
         sourceImageUrl: "",
+        referenceId: null,
+        releasedAt: link.createdDate,
         lengthMs: 0,
         categories: [],
         authorName: "",
@@ -136,6 +138,7 @@ const convertCuriusToContent = async (
         followUpQuestions: [],
         title: link.title,
         websiteUrl: link.link,
+        chunks: [],
         createdAt: new Date(),
         updatedAt: new Date(),
     });

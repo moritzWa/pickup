@@ -3,11 +3,16 @@ import {
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
+    Relation,
     UpdateDateColumn,
 } from "typeorm";
 import { User } from "../User";
 import { Category } from "src/modules/content/services/categories";
+import { ContentChunk } from "./ContentChunk";
 
 export type FollowUpQuestion = {
     id: string;
@@ -136,6 +141,11 @@ export class Content {
         type: "text",
     })
     referenceId!: string | null;
+
+    @OneToMany(() => ContentChunk, (t) => t.content, {
+        eager: false,
+    })
+    chunks!: Relation<ContentChunk[]>;
 
     @Column({
         name: "released_at",

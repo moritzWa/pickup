@@ -43,12 +43,15 @@ const scrapeRssFeed = async (
             authorName: feed.title || "",
             createdAt: new Date(),
             updatedAt: new Date(),
+            chunks: [],
         };
 
         allContent.push(content);
     }
 
     debugger;
+
+    // spit off to queue to process
 
     // need to then make all the stuff
 
