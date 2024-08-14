@@ -87,13 +87,15 @@ const transcribeAudioUrl = async (
 
         const files = fs
             .readdirSync(outputDir)
-            .filter((file) => file.endsWith(".mp3"));
+            .filter((file) => file.endsWith(".mp3") || file.endsWith(".m4a"));
 
         const fullTranscript: string[] = [];
 
         debugger;
 
-        for (const filePath of files) {
+        for (const fileName of files) {
+            const filePath = path.join(outputDir, fileName);
+
             // Create a read stream from the temporary file
             const audioStream = fs.createReadStream(filePath);
 
