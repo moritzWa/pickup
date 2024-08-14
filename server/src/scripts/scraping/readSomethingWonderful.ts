@@ -1,10 +1,13 @@
 import puppeteer from "puppeteer";
+import { dataSource } from "src/core/infra/postgres";
+import { Author } from "src/core/infra/postgres/entities/Author/Author";
+import { Content } from "src/core/infra/postgres/entities/Content/Content";
 
 const scrapeSomethingWonderful = async () => {
     const url = "https://www.readsomethinggreat.com";
     const distinctArticles = new Set<string>();
 
-    const browser = await puppeteer.launch({ headless: false }); // Set headless to false
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     // Add this line to capture console logs from the browser
@@ -69,14 +72,6 @@ const scrapeSomethingWonderful = async () => {
 
                     // Debug information
                     debugInfo[`article_${index}`] = {
-                        // category: {
-                        //     text: category,
-                        //     html: removeStyles(
-                        //         element.querySelector(
-                        //             ".bubble-element.Text:first-child"
-                        //         )?.outerHTML || ""
-                        //     ),
-                        // },
                         title: {
                             selector:
                                 ".bubble-element.Group[id^='GroupArticle'] > .bubble-element.Group.cmaUaZh > .bubble-element.Text:nth-of-type(1)", // Updated selector to target the title correctly
@@ -84,15 +79,6 @@ const scrapeSomethingWonderful = async () => {
                             text: title,
                             html: removeStyles(titleElement?.outerHTML || ""),
                         },
-                        // authorAndDuration: {
-                        //     text: authorAndDuration,
-                        //     html: removeStyles(authorElement?.outerHTML || ""),
-                        // },
-                        // excerpt: {
-                        //     text: excerpt,
-                        //     html: removeStyles(excerptElement?.outerHTML || ""),
-                        // },
-                        // fullHtml: removeStyles(element.outerHTML),
                     };
 
                     if (
@@ -119,8 +105,46 @@ const scrapeSomethingWonderful = async () => {
 
             console.log("Debug Info:", JSON.stringify(debugInfo, null, 2));
 
-            articles.forEach((article) => {
+            articles.forEach(async (article) => {
+                if (
+                    article.title.includes(
+                        "AudioPen: Go from fuzzy thought to clear text"
+                    )
+                ) {
+                    console.log("Skipping AudioPen advertisement");
+                    return;
+                }
+
                 distinctArticles.add(JSON.stringify(article));
+
+                const authorNames = article.author
+                    .split("&")
+                    .map((name) => name.trim());
+                const authors: Author[] = [];
+
+                for (const name of authorNames) {
+                    let author = await dataSource
+                        .getRepository(Author)
+                        .findOne({
+                            where: { name },
+                        });
+
+                    if (!author) {
+                        author = new Author();
+                        author.id = name;
+                        author.name = name;
+                        await dataSource.getRepository(Author).save(author);
+                    }
+
+                    authors.push(author);
+                }
+
+                const content = new Content();
+                content.title = article.title;
+                content.context = article.excerpt;
+                content.websiteUrl = article.url;
+                content.authors = authors;
+                await dataSource.getRepository(Content).save(content);
             });
         } catch (error) {
             console.error(`Error during fetch: ${error}`);
