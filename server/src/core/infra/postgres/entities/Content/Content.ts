@@ -62,19 +62,19 @@ export class Content {
     sourceImageUrl!: string | null;
 
     @Column({
-        nullable: false,
+        nullable: true,
         name: "audio_url",
         type: "text",
     })
-    audioUrl!: string;
+    audioUrl!: string | null;
 
     // estimated length of the audio
     @Column({
-        nullable: false,
+        nullable: true,
         name: "length_ms",
         type: "int",
     })
-    lengthMs!: number;
+    lengthMs!: number | null;
 
     @Column({
         name: "embedding",
