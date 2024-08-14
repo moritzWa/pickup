@@ -1,9 +1,8 @@
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { AppContext } from "App";
 import BigNumber from "bignumber.js";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import * as FileSystem from "expo-file-system";
-import { isNil, noop } from "lodash";
+import { isNil, noop, times } from "lodash";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
 import TrackPlayer, {
@@ -14,10 +13,11 @@ import TrackPlayer, {
   useTrackPlayerEvents,
 } from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
-import { api } from "src/api";
+import { api, apolloClient } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
 import {
   Mutation,
+  MutationUpdateContentSessionArgs,
   Query,
   QueryGetNextContentArgs,
 } from "src/api/generated/types";
@@ -65,6 +65,23 @@ const useAudioHook = () => {
   const audioUrl = useSelector(getCurrentAudioUrl);
   const speed = useSelector(getSpeed);
 
+  const variables = useMemo(
+    () => ({
+      contentId: currentContent?.id || "",
+    }),
+    [currentContent]
+  );
+
+  const { data } = useQuery<Pick<Query, "getContentSession">>(
+    api.content.getSession,
+    {
+      variables,
+      fetchPolicy: "cache-and-network",
+    }
+  );
+
+  const session = data?.getContentSession;
+
   const [removeFromQueue] = useMutation<Pick<Mutation, "removeFromQueue">>(
     api.content.removeFromQueue
   );
@@ -72,6 +89,11 @@ const useAudioHook = () => {
   const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
     api.content.next
   );
+
+  const [updateSession] = useMutation<
+    Pick<Mutation, "updateContentSession">,
+    MutationUpdateContentSessionArgs
+  >(api.content.updateSession);
 
   const getFileName = async (url: string): Promise<string> => {
     const hash = await JSHash("message", CONSTANTS.HashAlgorithms.sha256);
@@ -95,23 +117,27 @@ const useAudioHook = () => {
 
   const downloadAndPlayContent = async (
     content: BaseContentFields
-  ): Promise<FailureOrSuccess<DefaultErrors, Audio.Sound>> => {
+  ): Promise<FailureOrSuccess<DefaultErrors, null>> => {
     const url = content.audioUrl;
+
+    if (!url) {
+      console.log("[MISSING AUDIO URL]");
+      return failure(new UnexpectedError("No audio url found."));
+    }
 
     console.log(`[downloading and playing ${url}]`);
 
-    const fileName = await getFileName(url);
-    const fileUri = (FileSystem.documentDirectory || "") + fileName;
+    // const fileName = await getFileName(url);
+    // const fileUri = (FileSystem.documentDirectory || "") + fileName;
 
     try {
-      const { uri } = await FileSystem.downloadAsync(url, fileUri, {
-        sessionType: FileSystem.FileSystemSessionType.BACKGROUND,
-      });
-
-      const sound = new Audio.Sound();
+      // const { uri } = await FileSystem.downloadAsync(url, fileUri, {
+      //   sessionType: FileSystem.FileSystemSessionType.BACKGROUND,
+      // });
 
       dispatch(setAudioUrl(url));
       dispatch(setCurrentContent(content));
+      dispatch(setCurrentMs(0));
 
       // make it so it can play even if it is muted
       await Audio.setAudioModeAsync({
@@ -132,7 +158,7 @@ const useAudioHook = () => {
 
       // await TrackPlayer.skip;
       const track: AddTrack = {
-        url: uri,
+        url: url,
         title: content?.title || "Title",
         artist: content?.authorName || "Author",
         artwork: content?.thumbnailImageUrl || "",
@@ -159,7 +185,7 @@ const useAudioHook = () => {
       //   await sound.playAsync();
       dispatch(setIsPlaying(true));
 
-      return success(sound);
+      return success(null);
     } catch (error) {
       console.error(error);
       return failure(new UnexpectedError(error));
@@ -182,6 +208,19 @@ const useAudioHook = () => {
       // await sound.playAsync();
       await TrackPlayer.play();
       dispatch(setIsPlaying(true));
+
+      if (session) {
+        console.log(`[updating ${session.id} to ${currentMs}]`);
+
+        void updateSession({
+          variables: {
+            contentSessionId: session.id,
+            lastListenedAt: new Date(),
+            currentMs,
+          },
+          refetchQueries: [api.content.getSession],
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -189,7 +228,31 @@ const useAudioHook = () => {
 
   const leftMs = (durationMs ?? 0) - (currentMs ?? 0);
 
-  const leftMinutes = Math.floor(leftMs / 60_000);
+  const leftTimeFormatted = useMemo(() => {
+    const totalSeconds = Math.floor(leftMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    let timeString = "";
+
+    if (hours > 0) {
+      timeString += `${hours}:`;
+    }
+
+    if (minutes > 0 || hours > 0) {
+      // include minutes if hours are present
+      timeString += `${minutes}:`;
+    }
+
+    timeString += `${seconds}`;
+
+    if (timeString === seconds.toString()) {
+      return `${timeString}s`;
+    }
+
+    return timeString;
+  }, [leftMs]);
 
   const percentFinished = useMemo(
     () =>
@@ -241,30 +304,21 @@ const useAudioHook = () => {
     // - [ ]  if elements left in queue, start playing it
     // - [ ]  if not, find the content right after it in the feed. or just pick the first content and play that.
 
-    const queueElementIndex = queue.findIndex(
-      (q) => q?.id === currentContent?.id
-    );
-
-    // if it is in the queue, remove it
-    if (queueElementIndex !== -1) {
-      console.log(`[removing ${currentContent?.title} from the queue]`);
-
-      const queueElement = queue[queueElementIndex];
-
-      await removeFromQueue({
-        variables: {
-          contentId: queueElement.id,
-        },
-        refetchQueries: [api.queue.list, api.content.feed],
-      });
-    }
+    // alert("next " + currentContent?.id);
 
     const nextContentVariables: QueryGetNextContentArgs = {
       afterContentId: currentContent?.id || "",
     };
 
+    // console.log("GETTING NEXT CONTENT: " + nextContentVariables);
+
     const nextItemResponse = await getNextContent({
       variables: nextContentVariables,
+      fetchPolicy: "network-only",
+    });
+
+    apolloClient.refetchQueries({
+      include: [api.queue.list, api.content.feed],
     });
 
     const nextItem = nextItemResponse?.data?.getNextContent;
@@ -272,11 +326,9 @@ const useAudioHook = () => {
 
     console.log(`[next up is ${nextItem?.content?.title}]`);
 
-    if (content) {
-      dispatch(setCurrentContent(content));
+    dispatch(setCurrentContent(content));
 
-      await downloadAndPlayContent(content);
-    }
+    await downloadAndPlayContent(content);
   };
 
   const playPrev = async () => {
@@ -321,7 +373,8 @@ const useAudioHook = () => {
   useTrackPlayerEvents([Event.PlaybackState], async (data) => {
     // console.log(data.state);
     if (data.state === "ended") {
-      console.log("ENDED");
+      // console.log("ENDED");
+
       await playNext();
     }
   });
@@ -344,7 +397,7 @@ const useAudioHook = () => {
     downloadAndPlayContent,
     toggle,
     percentFinished,
-    leftMinutes,
+    leftTimeFormatted,
     currentMs,
     durationMs,
     isPlaying,
@@ -367,7 +420,7 @@ export const useAudio = useAudioHook;
 //     > => failure(new UnexpectedError("No sound object found")),
 //     toggle: async () => {},
 //     percentFinished: 0,
-//     leftMinutes: 0,
+//     leftTimeFormatted: 0,
 //     currentMs: 0,
 //     durationMs: 0,
 //     audioUrl: "",

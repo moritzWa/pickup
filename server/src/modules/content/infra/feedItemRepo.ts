@@ -67,21 +67,18 @@ export class PostgresFeedItemRepository {
     }
 
     topOfQueue = async (
-        userId: string,
-        excludingContentId: string | null = null
+        userId: string
     ): Promise<FailureOrSuccess<DefaultErrors, Maybe<FeedItemModel>>> => {
         try {
             const items = await this.repo.find({
                 where: Helpers.stripUndefined({
                     userId: userId,
                     isQueued: true,
-                    contentId: excludingContentId
-                        ? Not(excludingContentId)
-                        : undefined,
                 }),
                 order: {
                     queuedAt: "asc",
                 },
+                relations: { content: true },
                 take: 1,
             });
 

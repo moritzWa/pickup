@@ -4,6 +4,7 @@ import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
+    Maybe,
     success,
     UnexpectedError,
 } from "src/core/logic";
@@ -85,7 +86,9 @@ function splitTextIntoChunks(text: string, maxChunkSize = 8000): string[] {
 const next = async (
     user: User,
     content: Content
-): Promise<FailureOrSuccess<DefaultErrors, FeedItem>> => {
+): Promise<
+    FailureOrSuccess<DefaultErrors, Maybe<{ item: FeedItem; content: Content }>>
+> => {
     const currentFeedItemResponse = await feedRepo.findOne({
         where: {
             userId: user.id,
@@ -93,28 +96,37 @@ const next = async (
         },
     });
 
+    // console.log("CURRENT FEED: " + currentFeedItemResponse.value);
+
     if (currentFeedItemResponse.isFailure()) {
         return failure(currentFeedItemResponse.error);
     }
 
     const currentFeedItem = currentFeedItemResponse.value;
 
+    // remove content from the ueue
+    await feedRepo.update(currentFeedItem.id, {
+        isQueued: false,
+        queuedAt: null,
+    });
+
     const [topOfQueueResponse, currentFeedResponse] = await Promise.all([
-        feedRepo.topOfQueue(user.id, content.id),
+        feedRepo.topOfQueue(user.id),
         feedRepo.find({
             where: {
                 userId: user.id,
                 isQueued: false,
-                position: MoreThan(currentFeedItem.position),
+                // need or equal if the content has same position?
+                position: MoreThanOrEqual(currentFeedItem.position),
             },
+            relations: { content: true },
             order: {
                 position: "asc",
+                createdAt: "desc",
             },
-            take: 1,
+            take: 10, // TODO: total hack bc the positioning isn't sequential atm
         }),
     ]);
-
-    console.log("top of queue: " + topOfQueueResponse);
 
     if (topOfQueueResponse.isFailure()) {
         return failure(topOfQueueResponse.error);
@@ -122,13 +134,27 @@ const next = async (
 
     const topOfQueue = topOfQueueResponse.value;
 
+    // console.log(topOfQueue);
+
     if (topOfQueue) {
-        return success(topOfQueue);
+        return success({
+            item: topOfQueue,
+            content: topOfQueue.content,
+        });
     }
 
-    const feed = currentFeedResponse.value[0] ?? null;
+    const feed =
+        currentFeedResponse.value.find((v) => v.contentId !== content.id) ??
+        null;
 
-    return success(feed);
+    if (!feed) {
+        return success(null);
+    }
+
+    return success({
+        item: feed,
+        content: feed?.content,
+    });
 };
 
 // TODO: fix this...

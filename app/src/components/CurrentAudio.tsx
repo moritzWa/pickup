@@ -9,8 +9,11 @@ import {
   Image,
   Animated,
   DimensionValue,
+  StyleSheet,
+  Dimensions,
+  Easing,
 } from "react-native";
-import React, { useContext, useEffect, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
@@ -34,7 +37,7 @@ import {
   faPlay,
 } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "../views/Main/Home/Github";
-import { ContentRow } from "./Content/ContentRow";
+import { ContentRow, ContentRowImage } from "./Content/ContentRow";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "src/components/Header";
 import FastImage from "react-native-fast-image";
@@ -43,6 +46,7 @@ import { AppContext } from "context";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCurrentAudioUrl,
+  getCurrentContent,
   getCurrentMs,
   getDurationMs,
   getIsPlaying,
@@ -60,9 +64,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
 
   const isPlaying = useSelector(getIsPlaying);
 
-  const { data: contentData, refetch } = useQuery<
-    Pick<Query, "getCurrentContentSession">
-  >(api.content.current, {});
+  const activeContent = useSelector(getCurrentContent);
 
   const [updateSession] = useMutation<
     Pick<Mutation, "updateContentSession">,
@@ -77,16 +79,11 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
     durationMs,
     toggle,
     percentFinished,
-    leftMinutes,
+    leftTimeFormatted,
   } = useContext(AppContext).audio!;
 
   const isFocused = useIsFocused();
-  const activeContent = contentData?.getCurrentContentSession ?? null;
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
-
-  useEffect(() => {
-    refetch();
-  }, [isFocused]);
 
   const handlePressIn = () => {
     Animated.spring(animation, {
@@ -106,7 +103,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
 
   const openContent = async () => {
     try {
-      const contentId = activeContent?.content?.id || "";
+      const contentId = activeContent?.id || "";
 
       if (!contentId) {
         return;
@@ -124,7 +121,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
 
   const playOrPause = async () => {
     try {
-      const audioUrl = activeContent?.content?.audioUrl || "";
+      const audioUrl = activeContent?.audioUrl || "";
 
       void updateSession({
         variables: {
@@ -135,7 +132,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
 
       // this will set it on the ref
       if (currentAudioUrl !== audioUrl) {
-        const content = activeContent?.content as BaseContentFields;
+        const content = activeContent as BaseContentFields;
 
         await downloadAndPlayContent(content);
 
@@ -149,20 +146,16 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
   };
 
   const bg = theme.bgPrimary;
-  const title = activeContent?.content?.title;
-  const thumbnailImageUrl = activeContent?.content?.thumbnailImageUrl;
+  const title = activeContent?.title;
 
   // if there is no active content or the active content is finished playing
   const shouldHide = useMemo(() => {
     if (!activeContent) {
+      console.log("no active content");
       return true;
     }
 
-    const isDone =
-      (currentMs ?? 0) > 0 &&
-      new BigNumber(currentMs ?? 0).gte(durationMs ?? 0);
-
-    return isDone;
+    return false;
   }, [activeContent, percentFinished]);
 
   if (shouldHide) {
@@ -192,7 +185,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
           position: "absolute",
           bottom: 10,
           overflow: "hidden",
-          padding: 5,
+          padding: 8,
           paddingHorizontal: 0,
           paddingBottom: 0,
           backgroundColor: bg,
@@ -224,7 +217,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
             width: "100%",
             height: "105%",
             marginBottom: 0,
-            marginHorizontal: 5,
+            marginHorizontal: 0,
             alignSelf: "center",
             backgroundColor: bg,
             borderRadius: 0,
@@ -257,34 +250,16 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
           }}
           activeOpacity={1}
         >
-          {thumbnailImageUrl ? (
-            <Image
-              source={{
-                uri: thumbnailImageUrl,
-              }}
-              style={{ width: 40, height: 40, borderRadius: 10 }}
-            />
-          ) : null}
+          <ContentRowImage content={content} />
 
           <View
             style={{
-              marginLeft: 10,
+              marginLeft: 5,
               flex: 1,
               alignItems: "flex-start",
             }}
           >
-            <Text
-              style={{
-                flex: 1,
-                color: theme.header,
-                fontFamily: "Raleway-SemiBold",
-                textAlign: "center",
-                fontSize: 16,
-              }}
-              numberOfLines={1}
-            >
-              {title || ""}
-            </Text>
+            <MarqueeText title={title || ""} />
 
             <View
               style={{
@@ -310,7 +285,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
                 }}
                 numberOfLines={1}
               >
-                {leftMinutes === 0 ? "<1" : leftMinutes}min left
+                {leftTimeFormatted} left
               </Text>
             </View>
           </View>
@@ -376,3 +351,67 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
     </View>
   );
 };
+
+const screenWidth = Dimensions.get("window").width;
+
+const MarqueeText = ({ title }: { title: string }) => {
+  const animatedValue = useRef(new Animated.Value(0)).current;
+  const [textWidth, setTextWidth] = useState(0);
+
+  useEffect(() => {
+    if (textWidth > screenWidth) {
+      const duration = (textWidth / screenWidth) * 8000; // Duration proportional to text length
+
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animatedValue, {
+            toValue: 1,
+            duration: duration, // Adjust the duration for the speed of scrolling
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animatedValue, {
+            toValue: 0,
+            duration: duration, // Same duration to scroll back to the start
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [animatedValue, textWidth]);
+
+  const translateX = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -(textWidth - screenWidth)], // Moves from 0 to the difference between text width and screen width
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.Text
+        onLayout={(e) => setTextWidth(e.nativeEvent.layout.width)} // Get the actual width of the text
+        style={[
+          styles.text,
+          {
+            transform: [{ translateX }],
+          },
+        ]}
+        numberOfLines={1}
+      >
+        {title}
+      </Animated.Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    width: screenWidth - 125,
+    overflow: "hidden",
+  },
+  text: {
+    fontSize: 16, // Adjust the font size as needed
+    fontWeight: "bold",
+    width: screenWidth * 1.5,
+    fontFamily: "Raleway-Bold",
+  },
+});

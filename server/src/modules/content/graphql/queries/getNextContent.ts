@@ -50,14 +50,14 @@ export const getNextContent = queryField("getNextContent", {
 
         const nextQueueResponse = await ContentService.next(user, content);
 
-        console.log(nextQueueResponse);
-
         throwIfError(nextQueueResponse);
 
-        await pgUserRepo.update(user.id, {
-            currentFeedItemId: nextQueueResponse.value.id,
-        });
+        if (nextQueueResponse.value) {
+            await pgUserRepo.update(user.id, {
+                currentFeedItemId: nextQueueResponse.value.item.id,
+            });
+        }
 
-        return nextQueueResponse.value;
+        return nextQueueResponse.value?.item ?? null;
     },
 });
