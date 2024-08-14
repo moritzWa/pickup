@@ -7,19 +7,20 @@ const scrapeSomethingWonderful = async () => {
     const browser = await puppeteer.launch({ headless: false }); // Set headless to false
     const page = await browser.newPage();
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 2; i++) {
         try {
             console.log(`Fetching URL: ${url}`);
-            await page.goto(url, { waitUntil: "networkidle2" });
+            await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 }); // Added timeout
 
             // Wait for the articles to load
             await page.waitForSelector(".bubble-element.Group");
 
             const articles = await page.evaluate(() => {
                 const articleElements = document.querySelectorAll(
-                    ".bubble-element.Group"
+                    ".bubble-element.Group[id^='GroupArticle']"
                 );
                 const articles: {
+                    category: string;
                     title: string;
                     authorAndDuration: string;
                     excerpt: string;
@@ -27,21 +28,40 @@ const scrapeSomethingWonderful = async () => {
                 }[] = [];
 
                 articleElements.forEach((element) => {
+                    const category = element
+                        .querySelector(
+                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text"
+                        )
+                        ?.textContent?.trim();
                     const title = element
-                        .querySelector(".Text:nth-of-type(1)")
+                        .querySelector(
+                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-child(1)"
+                        )
                         ?.textContent?.trim();
                     const authorAndDuration = element
-                        .querySelector(".Text:nth-of-type(2)")
+                        .querySelector(
+                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-child(2)"
+                        )
                         ?.textContent?.trim();
                     const excerpt = element
-                        .querySelector(".Text:nth-of-type(3)")
+                        .querySelector(
+                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-child(3)"
+                        )
                         ?.textContent?.trim();
-                    const url = element
-                        .querySelector("a:contains('Read Now')")
-                        ?.getAttribute("href");
+                    const readNowLink = element.querySelector(
+                        "a.bubble-element.Link[href]:not([title='share article'])"
+                    );
+                    const url = readNowLink?.getAttribute("href");
 
-                    if (title && authorAndDuration && excerpt && url) {
+                    if (
+                        category &&
+                        title &&
+                        authorAndDuration &&
+                        excerpt &&
+                        url
+                    ) {
                         articles.push({
+                            category,
                             title,
                             authorAndDuration,
                             excerpt,
