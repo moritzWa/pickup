@@ -32,29 +32,29 @@ const scrapeSomethingWonderful = async () => {
 
                 const debugInfo: any = {};
 
-                const firstTitle = articleElements[0]?.querySelector(
-                    ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text"
-                );
-                debugInfo.firstTitle = firstTitle
-                    ? firstTitle.textContent
-                    : null;
-
                 articleElements.forEach((element, index) => {
                     const category = element
-                        .querySelector(
-                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text"
-                        )
+                        .querySelector(".bubble-element.Text:first-child")
                         ?.textContent?.trim();
 
-                    const title = element
-                        .querySelector(
-                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element"
-                        )
-                        ?.textContent?.trim();
+                    const titleElement = element.querySelector(
+                        ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:first-of-type"
+                    );
+
+                    const title = titleElement?.textContent?.trim();
+
+                    // Debug information for title
+                    debugInfo[`article_${index}_title`] = {
+                        selector:
+                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:first-of-type",
+                        found: !!titleElement,
+                        text: title,
+                        html: titleElement?.outerHTML,
+                    };
 
                     const authorAndDuration = element
                         .querySelector(
-                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-child(2)"
+                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-of-type(2)"
                         )
                         ?.textContent?.trim();
 
@@ -63,22 +63,13 @@ const scrapeSomethingWonderful = async () => {
 
                     const excerpt = element
                         .querySelector(
-                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-child(3)"
+                            ".bubble-element.Group > .bubble-element.Group > .bubble-element.Text:nth-of-type(3)"
                         )
                         ?.textContent?.trim();
                     const readNowLink = element.querySelector(
                         "a.bubble-element.Link[href]:not([title='share article'])"
                     );
                     const url = readNowLink?.getAttribute("href");
-
-                    debugInfo[`article_${index}`] = {
-                        category,
-                        title,
-                        author,
-                        duration,
-                        excerpt,
-                        url,
-                    };
 
                     if (
                         category &&
