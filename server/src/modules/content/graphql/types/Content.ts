@@ -1,5 +1,5 @@
-import BigNumber from "bignumber.js";
-import { enumType, list, nonNull, nullable, objectType } from "nexus";
+import { list, nonNull, nullable, objectType } from "nexus";
+import { Author } from "src/modules/author/graphql";
 
 export const FollowUpQuestion = objectType({
     name: "FollowUpQuestion",
@@ -16,8 +16,9 @@ export const Content = objectType({
         t.nonNull.string("id");
         t.nonNull.string("context");
         t.nonNull.string("audioUrl");
-        t.nonNull.string("authorName");
-        t.nullable.string("authorImageUrl");
+        t.list.field("authors", {
+            type: nonNull(Author),
+        });
         t.nullable.string("thumbnailImageUrl");
         t.nullable.string("sourceImageUrl");
         t.nonNull.string("title");

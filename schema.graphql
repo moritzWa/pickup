@@ -7,25 +7,17 @@ enum ActivityFilter {
   unread
 }
 
+type Author {
+  contents: [Content]
+  id: String!
+  imageUrl: String
+  name: String!
+}
+
 type Category {
   emoji: String!
   name: String!
   subcategories: [String!]!
-}
-
-enum CategoryEnum {
-  ARTS___CULTURE
-  BUSINESS_MODELS
-  CORPORATE_TECHNOLOGY
-  ENTREPRENEURSHIP
-  FINANCE___LEGAL
-  HEALTH___WELLNESS
-  INTERNATIONAL_BUSINESS
-  MANAGEMENT
-  SOFTWARE_ENGINEERING
-  STARTUPS
-  TECHNOLOGY___SOCIETY
-  VENTURE_CAPITAL___INVESTMENT
 }
 
 type CategorySection {
@@ -35,8 +27,7 @@ type CategorySection {
 
 type Content {
   audioUrl: String!
-  authorImageUrl: String
-  authorName: String!
+  authors: [Author!]
   categories: [String!]!
   contentSession: ContentSession
   context: String!
@@ -155,6 +146,7 @@ type Mutation {
   archiveContent(contentId: ID!): FeedItem!
   bookmarkContent(contentId: ID!): ContentSession!
   clearQueue: String!
+  createAuthor(imageUrl: String, name: String!): Author
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!
@@ -191,6 +183,7 @@ type Profile {
 type Query {
   checkCode(referralCode: String!): Boolean!
   getActivity(filter: ActivityFilter): [Content!]!
+  getAuthor(authorId: ID!): Author!
   getBookmarks(limit: Int, page: Int): [Content!]!
   getCategories: [CategorySection!]!
   getContent(contentId: ID!): Content!

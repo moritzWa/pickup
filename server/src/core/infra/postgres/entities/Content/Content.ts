@@ -3,15 +3,13 @@ import {
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
-    JoinColumn,
-    ManyToOne,
+    ManyToMany,
     OneToMany,
     PrimaryGeneratedColumn,
     Relation,
     UpdateDateColumn,
 } from "typeorm";
-import { User } from "../User";
-import { Category } from "src/modules/content/services/categories";
+import { Author } from "../Author/Author";
 import { ContentChunk } from "./ContentChunk";
 
 export type FollowUpQuestion = {
@@ -100,19 +98,10 @@ export class Content {
     })
     categories!: string[];
 
-    @Column({
-        nullable: false,
-        name: "author_name",
-        type: "text",
+    @ManyToMany(() => Author, (author) => author.contents, {
+        cascade: true,
     })
-    authorName!: string;
-
-    @Column({
-        nullable: true,
-        name: "author_image_url",
-        type: "text",
-    })
-    authorImageUrl!: string | null;
+    authors!: Author[];
 
     @Column({
         nullable: false,

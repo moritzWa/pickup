@@ -130,7 +130,9 @@ const respondToContent = async (
         // an AI language learning tutor talking to a student. this is what they say. prompt something back so they learn something
         {
             role: "system",
-            content: `Here is a piece of content by ${content.authorName}: ${content.context}`,
+            content: `Here is a piece of content by ${content.authors
+                .map((author) => author.name)
+                .join(", ")}: ${content.context}`,
         },
         {
             role: "system",
