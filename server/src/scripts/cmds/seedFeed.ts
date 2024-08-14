@@ -24,6 +24,7 @@ export const run = async () => {
                 isArchived: false,
                 position: i,
                 isQueued: false,
+                queuedAt: null,
                 userId: user.id,
                 contentId: c.id,
                 createdAt: new Date(),

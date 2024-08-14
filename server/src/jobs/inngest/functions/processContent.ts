@@ -1,12 +1,21 @@
 import { Tags } from "hot-shots";
-import { DefaultErrors, failure, FailureOrSuccess } from "src/core/logic";
+import {
+    DefaultErrors,
+    failure,
+    FailureOrSuccess,
+    success,
+} from "src/core/logic";
 import { Datadog, openai } from "src/utils";
 import { inngest } from "../clients";
 import { InngestEventName } from "../types";
 import { NonRetriableError, slugify } from "inngest";
-import { contentRepo } from "src/modules/content/infra";
+import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
 import axios from "axios";
+import { TranscribeService } from "src/modules/content/services/transcribeService";
+import { ContentService } from "src/modules/content/services/contentService";
+import { ContentChunk } from "src/core/infra/postgres/entities";
+import { v4 as uuidv4 } from "uuid";
 import { parseBuffer, parseFile } from "music-metadata";
 
 const NAME = "Process Content";
@@ -28,9 +37,15 @@ const processContent = inngest.createFunction(
             _checkIfProcessed(contentId)
         );
 
+        await step.run("transcribe-content", async () =>
+            _transcribeContent(contentId)
+        );
+
         await step.run("embed-content", async () => _embedContent(contentId));
 
-        await step.run("audio-content", async () => _convertToAudio(contentId));
+        await step.run("generated-audio", async () =>
+            _convertToAudio(contentId)
+        );
 
         await step.run("mark-content-processed", async () =>
             _markContentProcessed(contentId)
@@ -56,6 +71,45 @@ const _checkIfProcessed = async (contentId: string) => {
     return Promise.resolve();
 };
 
+const _transcribeContent = async (contentId: string) => {
+    const contentResponse = await contentRepo.findById(contentId);
+
+    if (contentResponse.isFailure()) {
+        throw contentResponse.error;
+    }
+
+    const content = contentResponse.value;
+
+    if (!content.content) {
+        return Promise.resolve();
+    }
+
+    if (!content.audioUrl) {
+        throw new NonRetriableError("No audio URL to transcribe");
+    }
+
+    // get the transcript. and then store it. don't need to chunk it
+    const transcriptResponse = await TranscribeService.transcribeAudioUrl(
+        content.audioUrl
+    );
+
+    if (transcriptResponse.isFailure()) {
+        throw transcriptResponse.error;
+    }
+
+    const transcript = transcriptResponse.value;
+
+    const updateTranscriptResponse = await contentRepo.update(content.id, {
+        content: transcript,
+    });
+
+    if (updateTranscriptResponse.isFailure()) {
+        throw updateTranscriptResponse.error;
+    }
+
+    return Promise.resolve();
+};
+
 const _embedContent = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
@@ -64,32 +118,38 @@ const _embedContent = async (contentId: string) => {
     }
 
     const content = contentResponse.value;
-    const query = content.summary;
+    const fullContent = content.content;
 
-    if (content.embedding) {
-        return Promise.resolve();
+    const chunks = ContentService.chunkContent(fullContent || "");
+
+    const allChunks: ContentChunk[] = [];
+
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const embeddingResponse = await openai.embeddings.create(chunk);
+
+        if (embeddingResponse.isFailure()) {
+            throw embeddingResponse.error;
+        }
+
+        const embedding = embeddingResponse.value;
+
+        const contentChunk: ContentChunk = {
+            id: uuidv4(),
+            chunkIndex: i,
+            transcript: chunk,
+            embedding,
+            content,
+            contentId: content.id,
+        };
+
+        allChunks.push(contentChunk);
     }
 
-    if (!query) {
-        throw new NonRetriableError(
-            "Cannot retry bc the content has no summary"
-        );
-    }
+    const response = await contentChunkRepo.insert(allChunks);
 
-    const embeddingResponse = await openai.embeddings.create(query);
-
-    if (embeddingResponse.isFailure()) {
-        throw embeddingResponse.error;
-    }
-
-    const embedding = embeddingResponse.value;
-
-    const contentUpdateResponse = await contentRepo.update(content.id, {
-        embedding: embedding,
-    });
-
-    if (contentUpdateResponse.isFailure()) {
-        throw contentUpdateResponse.error;
+    if (response.isFailure()) {
+        throw response.error;
     }
 
     return Promise.resolve();

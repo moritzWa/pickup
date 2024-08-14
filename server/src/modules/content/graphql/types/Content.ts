@@ -16,6 +16,12 @@ export const Content = objectType({
         t.nonNull.string("id");
         t.nonNull.string("context");
         t.nonNull.string("audioUrl");
+        t.nullable.string("authorName", {
+            resolve: (p) => (p.authors || [])[0]?.name,
+        });
+        t.nullable.string("authorImageUrl", {
+            resolve: (p) => (p.authors || [])[0]?.imageUrl,
+        });
         t.list.field("authors", {
             type: nonNull(Author),
         });

@@ -9,15 +9,17 @@ import {
   Animated,
   Image,
 } from "react-native";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
 import { api } from "src/api";
 import {
+  ContentFeedFilter,
   Mutation,
   MutationAddToQueueArgs,
   MutationArchiveContentArgs,
+  MutationRemoveFromQueueArgs,
   Query,
 } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
@@ -39,38 +41,56 @@ import {
   faPause,
   faPerson,
   faPlay,
+  faPodcast,
   faTypewriter,
   faVolumeMedium,
 } from "@fortawesome/pro-solid-svg-icons";
 import { Impressions } from "../../views/Main/Home/Github";
 import FastImage from "react-native-fast-image";
 import { useSelector } from "react-redux";
-import { getCurrentContent, getIsPlaying } from "src/redux/reducers/audio";
+import {
+  getCurrentContent,
+  getIsPlaying,
+  getQueue,
+  getQueueContentIdSet,
+} from "src/redux/reducers/audio";
 import { noop } from "lodash";
 import { Swipeable } from "react-native-gesture-handler";
+import { LinearGradient } from "expo-linear-gradient";
 
 export const ContentRow = ({
   content: c,
   onPress,
   onPlay,
   togglePlayOrPause,
+  filter,
 }: {
   content: BaseContentFields;
   onPress: () => void;
   onPlay: () => void;
   togglePlayOrPause: () => void;
+  filter?: ContentFeedFilter;
 }) => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
+
+  const swipeableRef = useRef<Swipeable>(null);
+
   const [startContent, { error }] = useMutation(api.content.start);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
+  const contentIds = useSelector(getQueueContentIdSet);
   const activeContent = useSelector(getCurrentContent);
   const isActive = activeContent?.id === c.id;
   const isPlaying = useSelector(getIsPlaying);
+  const isQueued = contentIds.has(c.id);
 
   const [addToQueue] = useMutation<Pick<Mutation, "addToQueue">>(
     api.content.addToQueue
+  );
+
+  const [removeFromQueue] = useMutation<Pick<Mutation, "removeFromQueue">>(
+    api.content.removeFromQueue
   );
 
   const [archiveContent] = useMutation<Pick<Mutation, "archiveContent">>(
@@ -96,16 +116,25 @@ export const ContentRow = ({
     }
   };
 
-  const onAddContentToQueue = async () => {
+  const onAddOrRemoveContentToQueue = async () => {
     try {
-      const variables: MutationAddToQueueArgs = {
+      const variables: MutationAddToQueueArgs | MutationRemoveFromQueueArgs = {
         contentId: c.id,
       };
 
-      await addToQueue({
-        variables,
-        refetchQueries: [api.content.addToQueue, api.queue.list],
-      });
+      if (isQueued) {
+        const response = await removeFromQueue({
+          variables,
+          refetchQueries: [api.content.addToQueue, api.queue.list],
+        });
+        console.log("removed from queue");
+      } else {
+        await addToQueue({
+          variables,
+          refetchQueries: [api.content.addToQueue, api.queue.list],
+        });
+        console.log("added to queue");
+      }
     } catch (err) {
       console.log(err);
     }
@@ -158,19 +187,18 @@ export const ContentRow = ({
         paddingHorizontal: 20,
         display: "flex",
         height: "100%",
-        backgroundColor: theme.bgPrimary,
+        backgroundColor: isQueued ? theme.bgRed : theme.bgPrimary,
         flexDirection: "row",
       }}
     >
       <TouchableOpacity
-        onPress={onAddContentToQueue}
+        onPress={onAddOrRemoveContentToQueue}
         activeOpacity={0.9}
         style={{
           justifyContent: "center",
           alignItems: "center",
           display: "flex",
           flexDirection: "row",
-          backgroundColor: theme.bgPrimary,
           width: 75,
           height: 75,
           borderRadius: 50,
@@ -178,15 +206,27 @@ export const ContentRow = ({
           marginBottom: 10,
         }}
       >
-        <Image
-          source={require("src/assets/icons/solid-list-circle-plus.png")}
-          tintColor={colors.primary}
-          resizeMode="contain"
-          style={{
-            width: 30,
-            height: 30,
-          }}
-        />
+        {isQueued ? (
+          <Image
+            source={require("src/assets/icons/solid-list-circle-minus.png")}
+            tintColor={colors.red50}
+            resizeMode="contain"
+            style={{
+              width: 30,
+              height: 30,
+            }}
+          />
+        ) : (
+          <Image
+            source={require("src/assets/icons/solid-list-circle-plus.png")}
+            tintColor={colors.primary}
+            resizeMode="contain"
+            style={{
+              width: 30,
+              height: 30,
+            }}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -222,6 +262,10 @@ export const ContentRow = ({
     </View>
   );
 
+  useEffect(() => {
+    swipeableRef.current?.close();
+  }, [filter]);
+
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
 
   return (
@@ -230,6 +274,7 @@ export const ContentRow = ({
       renderRightActions={renderRightActions}
       overshootRight={false}
       overshootLeft={false}
+      ref={swipeableRef}
     >
       <View
         style={{
@@ -262,18 +307,7 @@ export const ContentRow = ({
               flex: 1,
             }}
           >
-            {c.thumbnailImageUrl ? (
-              <FastImage
-                source={{
-                  uri: c.thumbnailImageUrl,
-                }}
-                style={{
-                  width: 37,
-                  height: 37,
-                  borderRadius: 5,
-                }}
-              />
-            ) : null}
+            <ContentRowImage content={c} />
 
             <TouchableOpacity
               activeOpacity={0.9}
@@ -463,3 +497,79 @@ export const ContentRow = ({
     </Swipeable>
   );
 };
+
+const ContentRowImage = ({ content: c }: { content: BaseContentFields }) => {
+  const gradient = getGradientById(c.id);
+
+  if (c.thumbnailImageUrl) {
+    return (
+      <FastImage
+        source={{
+          uri: c.thumbnailImageUrl,
+        }}
+        style={{
+          width: 37,
+          height: 37,
+          borderRadius: 5,
+        }}
+      />
+    );
+  }
+
+  return (
+    <LinearGradient
+      colors={gradient}
+      style={{
+        width: 37,
+        height: 37,
+        borderRadius: 5,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+      // start left -> right
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      <FontAwesomeIcon icon={faPodcast} color={"white"} size={24} />
+    </LinearGradient>
+  );
+};
+
+function getGradientById(id: string) {
+  function stringToNumber(id: string) {
+    let num = 0;
+    for (let i = 0; i < id.length; i++) {
+      num += id.charCodeAt(i);
+    }
+    return num;
+  }
+
+  const gradients = [
+    ["#FF5F6D", "#FFC371"], // Gradient 1
+    ["#36D1DC", "#5B86E5"], // Gradient 2
+    ["#FFAFBD", "#ffc3a0"], // Gradient 3
+    ["#2193b0", "#6dd5ed"], // Gradient 4
+    ["#cc2b5e", "#753a88"], // Gradient 5
+    ["#ee9ca7", "#ffdde1"], // Gradient 6
+    ["#bdc3c7", "#2c3e50"], // Gradient 7
+    ["#e96443", "#904e95"], // Gradient 8
+    ["#de6262", "#ffb88c"], // Gradient 9
+    ["#f46b45", "#eea849"], // Gradient 10
+    ["#a8ff78", "#78ffd6"], // Gradient 11
+    ["#ff0844", "#ffb199"], // Gradient 12
+    ["#96e6a1", "#d4fc79"], // Gradient 13
+    ["#56ab2f", "#a8e063"], // Gradient 14
+    ["#108dc7", "#ef8e38"], // Gradient 15
+    ["#fc00ff", "#00dbde"], // Gradient 16
+    ["#74ebd5", "#ACB6E5"], // Gradient 17
+    ["#16A085", "#F4D03F"], // Gradient 18
+    ["#7F00FF", "#E100FF"], // Gradient 19
+    ["#ff7e5f", "#feb47b"], // Gradient 20
+  ];
+
+  // Use the id to pick a gradient, using modulo to wrap around if id exceeds array length
+  const index = stringToNumber(id) % gradients.length;
+  return gradients[index];
+}

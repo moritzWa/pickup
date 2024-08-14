@@ -1,5 +1,6 @@
 import * as Parser from "rss-parser";
 import { Content } from "src/core/infra/postgres/entities";
+import { DefaultErrors, FailureOrSuccess, success } from "src/core/logic";
 import { v4 as uuidv4 } from "uuid";
 
 const parser = new Parser();
@@ -8,12 +9,10 @@ const scrapeRssFeed = async (
     url: string,
     name: string,
     _insertionId?: string
-) => {
+): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
     let insertionId = _insertionId || uuidv4();
 
     const feed = await parser.parseURL(url);
-
-    debugger;
 
     const items = feed.items;
     const websiteUrl = feed.link;
@@ -25,6 +24,7 @@ const scrapeRssFeed = async (
         const content: Content = {
             id: uuidv4(),
             isProcessed: false,
+            content: item.content || "",
             context: item.content || "",
             insertionId,
             sourceImageUrl: "",
@@ -38,9 +38,8 @@ const scrapeRssFeed = async (
             summary: item.contentSnippet || "",
             followUpQuestions: [],
             websiteUrl: websiteUrl || "",
+            authors: [], // TODO:
             releasedAt: item.isoDate ? new Date(item.isoDate) : null,
-            authorImageUrl: feed.image?.link || "",
-            authorName: feed.title || "",
             createdAt: new Date(),
             updatedAt: new Date(),
             chunks: [],
@@ -49,13 +48,11 @@ const scrapeRssFeed = async (
         allContent.push(content);
     }
 
-    debugger;
-
     // spit off to queue to process
 
     // need to then make all the stuff
 
-    return feed;
+    return success(allContent);
 };
 
 export const RSSFeedService = {

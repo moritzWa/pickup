@@ -198,7 +198,7 @@ const GetContentFeed = gql`
 const GetActivity = gql`
   ${BaseContentFields}
   query GetActivity($filter: ActivityFilter) {
-    getActivity(limit: $limit, filter: $filter) {
+    getActivity(filter: $filter) {
       ...BaseContentFields
     }
   }
@@ -234,6 +234,15 @@ const AddToQueue = gql`
   ${BaseFeedItemFields}
   mutation AddToQueue($contentId: ID!) {
     addToQueue(contentId: $contentId) {
+      ...BaseFeedItemFields
+    }
+  }
+`;
+
+const RemoveFromQueue = gql`
+  ${BaseFeedItemFields}
+  mutation RemoveFromQueue($contentId: ID!) {
+    removeFromQueue(contentId: $contentId) {
       ...BaseFeedItemFields
     }
   }
@@ -303,6 +312,27 @@ const ShowMore = gql`
   }
 `;
 
+const UpdateContentSession = gql`
+  ${BaseContentSessionFields}
+  mutation UpdateContentSession(
+    $contentSessionId: ID!
+    $isBookmarked: Boolean
+    $isLiked: Boolean
+    $currentMs: Int
+    $lastListenedAt: Date
+  ) {
+    updateContentSession(
+      contentSessionId: $contentSessionId
+      isBookmarked: $isBookmarked
+      isLiked: $isLiked
+      currentMs: $currentMs
+      lastListenedAt: $lastListenedAt
+    ) {
+      ...BaseContentSessionFields
+    }
+  }
+`;
+
 export const api = {
   users: {
     deleteMe: DeleteMe,
@@ -318,12 +348,12 @@ export const api = {
     paymentMethods: GetPaymentMethods,
   },
   queue: {
-    next: GetNextContent,
-    prev: GetPrevContent,
     list: GetQueue,
     clear: ClearQueue,
   },
   content: {
+    next: GetNextContent,
+    prev: GetPrevContent,
     showMore: ShowMore,
     current: GetCurrentContentSession,
     start: StartContent,
@@ -334,7 +364,9 @@ export const api = {
     bookmarks: GetBookmarks,
     bookmark: Bookmark,
     addToQueue: AddToQueue,
+    removeFromQueue: RemoveFromQueue,
     archive: ArchiveContent,
+    updateSession: UpdateContentSession,
   },
   categories: {
     list: GetCategories,

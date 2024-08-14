@@ -50,12 +50,7 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  Author: { // root type
-    contents?: Array<NexusGenRootTypes['Content'] | null> | null; // [Content]
-    id: string; // String!
-    imageUrl?: string | null; // String
-    name: string; // String!
-  }
+  Author: entities.Author ;
   Category: { // root type
     emoji: string; // String!
     name: string; // String!
@@ -166,6 +161,8 @@ export interface NexusGenFieldTypes {
   }
   Content: { // field return type
     audioUrl: string; // String!
+    authorImageUrl: string | null; // String
+    authorName: string | null; // String
     authors: NexusGenRootTypes['Author'][] | null; // [Author!]
     categories: string[]; // [String!]!
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
@@ -258,6 +255,7 @@ export interface NexusGenFieldTypes {
     deleteMe: string; // String!
     getAuthToken: string; // String!
     recordInteraction: NexusGenRootTypes['Interaction']; // Interaction!
+    removeFromQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
     respondToContent: NexusGenRootTypes['ContentRespondResponse']; // ContentRespondResponse!
     sendVerification: string; // String!
     setCommuteTime: NexusGenRootTypes['User']; // User!
@@ -367,6 +365,8 @@ export interface NexusGenFieldTypeNames {
   }
   Content: { // field return type name
     audioUrl: 'String'
+    authorImageUrl: 'String'
+    authorName: 'String'
     authors: 'Author'
     categories: 'String'
     contentSession: 'ContentSession'
@@ -459,6 +459,7 @@ export interface NexusGenFieldTypeNames {
     deleteMe: 'String'
     getAuthToken: 'String'
     recordInteraction: 'Interaction'
+    removeFromQueue: 'FeedItem'
     respondToContent: 'ContentRespondResponse'
     sendVerification: 'String'
     setCommuteTime: 'User'
@@ -576,6 +577,9 @@ export interface NexusGenArgTypes {
       contentId: string; // ID!
       eventType: NexusGenEnums['InteractionTypeEnum']; // InteractionTypeEnum!
     }
+    removeFromQueue: { // args
+      contentId: string; // ID!
+    }
     respondToContent: { // args
       audioFileUrl: string; // String!
       contentId: string; // ID!
@@ -599,6 +603,7 @@ export interface NexusGenArgTypes {
       currentMs?: number | null; // Int
       isBookmarked?: boolean | null; // Boolean
       isLiked?: boolean | null; // Boolean
+      lastListenedAt?: NexusGenScalars['Date'] | null; // Date
     }
     updateUser: { // args
       avatarImageUrl?: string | null; // String

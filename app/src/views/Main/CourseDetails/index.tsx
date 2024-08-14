@@ -67,8 +67,6 @@ const CourseDetails = () => {
   const lessons = lessonsData?.getCourseLessons ?? [];
   const course = courseData?.getCourse;
 
-  console.log(lessons);
-
   return (
     <View style={{ flex: 1 }}>
       <Header hasBackButton title={course?.title} />

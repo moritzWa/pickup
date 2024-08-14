@@ -23,6 +23,10 @@ import { Content } from "./Content";
 @Index("feed_item_user_position_idx", ["userId", "position"])
 // index for user and descending created at
 @Index("feed_item_user_created_at_idx", ["userId", "createdAt"])
+// queued at ascending with userId for items where isQueued is true
+@Index("feed_item_queued_at_idx", ["queuedAt", "userId"], {
+    where: "is_queued = true",
+})
 export class FeedItem {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
@@ -42,6 +46,14 @@ export class FeedItem {
         default: false,
     })
     isQueued!: boolean;
+
+    // queuedAt
+    @Column({
+        nullable: true,
+        name: "queued_at",
+        type: "timestamp",
+    })
+    queuedAt!: Maybe<Date>;
 
     @Column({
         nullable: false,

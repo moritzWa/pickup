@@ -2,9 +2,15 @@ import { ApolloError, useMutation, useQuery } from "@apollo/client";
 import { faPen } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import Clipboard from "@react-native-clipboard/clipboard";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  useIsFocused,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import { AppContext } from "context";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -55,7 +61,7 @@ export const UserProfile = () => {
   // console.log("ME: " + me);
 
   const navigation = useNavigation<NavigationProps>();
-  const { downloadAndPlayContent, toggle } = useAudio();
+  const { downloadAndPlayContent, toggle } = useContext(AppContext).audio!;
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
   const username = params?.username ?? me?.id;
   const insets = useSafeAreaInsets();
@@ -91,6 +97,8 @@ export const UserProfile = () => {
     variables: variables,
   });
 
+  const isFocused = useIsFocused();
+
   const profileFilter = useSelector(
     (state: ReduxState) => state.global.profileFilter
   );
@@ -98,7 +106,11 @@ export const UserProfile = () => {
 
   useEffect(() => void refetchMe(), []);
 
-  const { data, error } = useQuery<Pick<Query, "getFeed">>(api.content.feed);
+  const {
+    data,
+    error,
+    refetch: refetchActivity,
+  } = useQuery<Pick<Query, "getActivity">>(api.content.activity);
 
   const { data: bookmarksData } = useQuery<Pick<Query, "getBookmarks">>(
     api.content.bookmarks
@@ -107,15 +119,19 @@ export const UserProfile = () => {
   const dispatch = useDispatch();
 
   const bookmarks = (bookmarksData?.getBookmarks ?? []) as BaseContentFields[];
-  const feed = (data?.getFeed ?? []) as BaseContentFields[];
+  const activity = (data?.getActivity ?? []) as BaseContentFields[];
+
+  useEffect(() => void refetchActivity(), [isFocused]);
 
   const content = useMemo(() => {
     if (profileFilter === ProfileTabFilter.Bookmarks) {
       return bookmarks;
     }
 
-    return feed;
-  }, [bookmarks, feed, profileFilter]);
+    return activity;
+  }, [bookmarks, activity, profileFilter]);
+
+  console.log(activity);
 
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {

@@ -58,12 +58,13 @@ import { auth } from "src/utils/firebase";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import { getCurrentAudioUrl } from "src/redux/reducers/audio";
-import { useAudio } from "src/hooks/useAudio";
+import { useAudio, UseAudioReturn } from "src/hooks/useAudio";
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
 } from "react-native-track-player";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { AppContext } from "context";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -73,12 +74,6 @@ LogBox.ignoreAllLogs(); //Ignore all log notifications
 //   loadDevMessages();
 //   loadErrorMessages();
 // }
-
-export const AppContext = createContext<{
-  sound: React.MutableRefObject<Audio.Sound> | null;
-}>({
-  sound: null,
-});
 
 function App() {
   const [isLoaded] = Font.useFonts({});
@@ -121,8 +116,8 @@ function App() {
     store.dispatch(setUserAuthStateChanged("LOADING"));
 
     auth().onAuthStateChanged(async (u) => {
-      console.log("auth state changed");
-      console.log(u);
+      // console.log("auth state changed");
+      // console.log(u);
 
       try {
         if (u) {
@@ -244,6 +239,8 @@ function App() {
     !isLoaded || authStatus === "NOT_LOADED" || authStatus === "LOADING";
   // (authStatus === "LOGGED_IN" && !hasClearedBiometric);
 
+  const audio = useAudio();
+
   useEffect(() => {
     if (!isNotReady) return;
     SplashScreen.hide();
@@ -266,7 +263,7 @@ function App() {
   }
 
   return (
-    <AppContext.Provider value={{ sound: sound }}>
+    <AppContext.Provider value={{ audio }}>
       <BottomSheetModalProvider>
         <MainNavigationStack />
       </BottomSheetModalProvider>

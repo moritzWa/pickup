@@ -1,4 +1,4 @@
-import { createAction, createReducer } from "@reduxjs/toolkit";
+import { createAction, createReducer, createSelector } from "@reduxjs/toolkit";
 import { AudioState, AuthStatus, ReduxState, UserState } from "../types";
 import { Audio } from "expo-av";
 
@@ -8,6 +8,7 @@ const initialState: AudioState = {
   currentContent: null,
   nextContent: null,
   queue: [],
+  feed: [],
   currentMs: null,
   durationMs: null,
   isPlaying: false,
@@ -26,6 +27,8 @@ export const setNextContent =
   createAction<AudioState["nextContent"]>("SET_NEXT_CONTENT");
 
 export const setQueue = createAction<AudioState["queue"]>("SET_QUEUE");
+
+export const setFeed = createAction<AudioState["feed"]>("SET_FEED");
 
 export const setCurrentMs =
   createAction<AudioState["currentMs"]>("SET_CURRENT_MS");
@@ -64,6 +67,9 @@ export const audioReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setQueue, (state, action) => {
       state.queue = action.payload;
+    })
+    .addCase(setFeed, (state, action) => {
+      state.feed = action.payload;
     });
 });
 
@@ -93,3 +99,11 @@ export const getNextContent = (state: ReduxState): AudioState["nextContent"] =>
 
 export const getQueue = (state: ReduxState): AudioState["queue"] =>
   state.audio.queue;
+
+export const getFeed = (state: ReduxState): AudioState["queue"] =>
+  state.audio.feed;
+
+export const getQueueContentIdSet = createSelector(
+  getQueue,
+  (queue) => new Set(queue.map((content) => content.id))
+);

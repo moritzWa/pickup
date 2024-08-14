@@ -29,6 +29,9 @@ export const getActivity = queryField("getActivity", {
                 relations: {
                     content: true,
                 },
+                order: {
+                    lastListenedAt: "desc",
+                },
             }
         );
 

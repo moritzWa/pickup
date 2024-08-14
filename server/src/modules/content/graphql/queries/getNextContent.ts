@@ -28,6 +28,7 @@ import {
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { QueueService } from "../../services/queueService/queueService";
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
+import { ContentService } from "../../services/contentService";
 
 export const getNextContent = queryField("getNextContent", {
     type: nullable("FeedItem"),
@@ -47,49 +48,15 @@ export const getNextContent = queryField("getNextContent", {
 
         const content = contentResponse.value;
 
-        const nextQueueResponse = await QueueService.next(user, content);
+        const nextQueueResponse = await ContentService.next(user, content);
+
+        console.log(nextQueueResponse);
 
         throwIfError(nextQueueResponse);
 
         await pgUserRepo.update(user.id, {
             currentFeedItemId: nextQueueResponse.value.id,
         });
-
-        // if current ms is less than 15 seconds, record interaction of skipping the content
-        if (args.currentMs && args.currentMs < 15000) {
-            await interactionRepo.create({
-                id: uuidv4(),
-                contentId: content.id,
-                userId: user.id,
-                type: InteractionType.Skipped,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            });
-        } else if (
-            args.currentMs &&
-            args.currentMs < content.lengthMs - 5_000
-        ) {
-            await interactionRepo.create({
-                id: uuidv4(),
-                contentId: content.id,
-                userId: user.id,
-                type: InteractionType.LeftInProgress,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            });
-        } else if (
-            args.currentMs &&
-            content.lengthMs - 5_000 < args.currentMs
-        ) {
-            await interactionRepo.create({
-                id: uuidv4(),
-                contentId: content.id,
-                userId: user.id,
-                type: InteractionType.Finished,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            });
-        }
 
         return nextQueueResponse.value;
     },

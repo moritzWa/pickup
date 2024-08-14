@@ -20,6 +20,8 @@ import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo } from "../../infra";
 import BigNumber from "bignumber.js";
+import { last } from "lodash";
+import { dateArg } from "src/core/surfaces/graphql/base";
 
 export const updateContentSession = mutationField("updateContentSession", {
     type: nonNull("ContentSession"),
@@ -28,11 +30,12 @@ export const updateContentSession = mutationField("updateContentSession", {
         isBookmarked: nullable(booleanArg()),
         isLiked: nullable(booleanArg()),
         currentMs: nullable(intArg()),
+        lastListenedAt: nullable(dateArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);
 
-        const { contentSessionId } = args;
+        const { contentSessionId, lastListenedAt } = args;
         const user = ctx.me!;
 
         const contentSessionResponse = await contentSessionRepo.findById(
@@ -62,8 +65,8 @@ export const updateContentSession = mutationField("updateContentSession", {
                 bookmarkedAt: args.isBookmarked
                     ? new Date()
                     : contentSession.bookmarkedAt,
+                lastListenedAt: lastListenedAt ?? contentSession.lastListenedAt,
                 updatedAt: new Date(),
-                lastListenedAt: new Date(),
             }
         );
 

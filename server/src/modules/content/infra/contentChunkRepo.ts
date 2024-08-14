@@ -3,32 +3,46 @@ import {
     FindManyOptions,
     FindOneOptions,
     getRepository,
-    Not,
     Repository,
 } from "typeorm";
 import { sql } from "pg-sql";
+import * as pgvector from "pgvector/pg";
 
 import { success, failure, Maybe } from "src/core/logic";
 import { UnexpectedError, NotFoundError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
 import { FailureOrSuccess } from "src/core/logic";
-import { FeedItem as FeedItemModel } from "src/core/infra/postgres/entities";
+import { ContentChunk as ContentChunkModel } from "src/core/infra/postgres/entities";
 import { dataSource } from "src/core/infra/postgres";
 import { Helpers } from "src/utils";
+import { DEFAULT_LINKS_RETURN } from "src/modules/curius/infra/linkRepo";
 
-type FeedItemResponse = FailureOrSuccess<DefaultErrors, FeedItemModel>;
-type FeedItemArrayResponse = FailureOrSuccess<DefaultErrors, FeedItemModel[]>;
+type ContentChunkResponse = FailureOrSuccess<DefaultErrors, ContentChunkModel>;
+type ContentChunkArrayResponse = FailureOrSuccess<
+    DefaultErrors,
+    ContentChunkModel[]
+>;
 
-export class PostgresFeedItemRepository {
-    constructor(private model: typeof FeedItemModel) {}
+export type ContentChunkWithDistance = ContentChunkModel & {
+    averageDistance: number;
+    minDistance: number;
+};
 
-    private get repo(): Repository<FeedItemModel> {
+export type SimilarContentChunkWithDistanceResponse = FailureOrSuccess<
+    DefaultErrors,
+    ContentChunkWithDistance[]
+>;
+
+export class PostgresContentChunkRepository {
+    constructor(private model: typeof ContentChunkModel) {}
+
+    private get repo(): Repository<ContentChunkModel> {
         return dataSource.getRepository(this.model);
     }
 
     async find(
-        options: FindManyOptions<FeedItemModel>
-    ): Promise<FeedItemArrayResponse> {
+        options: FindManyOptions<ContentChunkModel>
+    ): Promise<ContentChunkArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
             const res = await this.repo.find(query);
@@ -36,63 +50,21 @@ export class PostgresFeedItemRepository {
         });
     }
 
-    currentPosition = async (
-        userId: string
-    ): Promise<FailureOrSuccess<DefaultErrors, number>> => {
-        return Helpers.trySuccessFail(async () => {
-            const feeditems = await this.repo.find({
-                where: {
-                    userId,
-                },
-                order: {
-                    position: "desc",
-                },
-                take: 1,
-            });
-
-            const position = feeditems[0]?.position || 0;
-
-            return success(position);
-        });
-    };
-
     async findOne(
-        options: FindOneOptions<FeedItemModel>
-    ): Promise<FeedItemResponse> {
+        options: FindOneOptions<ContentChunkModel>
+    ): Promise<ContentChunkResponse> {
         return Helpers.trySuccessFail(async () => {
             const user = await this.repo.findOne(options);
-            if (!user) return failure(new NotFoundError("FeedItem not found."));
+            if (!user)
+                return failure(new NotFoundError("ContentChunk not found."));
             return success(user);
         });
     }
 
-    topOfQueue = async (
-        userId: string,
-        excludingContentId: string | null = null
-    ): Promise<FailureOrSuccess<DefaultErrors, Maybe<FeedItemModel>>> => {
-        try {
-            const items = await this.repo.find({
-                where: Helpers.stripUndefined({
-                    userId: userId,
-                    isQueued: true,
-                    contentId: excludingContentId
-                        ? Not(excludingContentId)
-                        : undefined,
-                }),
-                order: {
-                    queuedAt: "asc",
-                },
-                take: 1,
-            });
-
-            return success(items[0] ?? null);
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
-    };
-
     // YOU MUST CHECK BY LOWERCASE IF YOU SEARCH BY USERNAME!
-    async findByFeedItemname(username: string): Promise<FeedItemArrayResponse> {
+    async findByContentChunkname(
+        username: string
+    ): Promise<ContentChunkArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
@@ -104,7 +76,7 @@ export class PostgresFeedItemRepository {
     }
 
     async count(
-        options: FindManyOptions<FeedItemModel>
+        options: FindManyOptions<ContentChunkModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             const query = Helpers.stripUndefined(options);
@@ -113,7 +85,7 @@ export class PostgresFeedItemRepository {
         });
     }
 
-    async findById(userId: string): Promise<FeedItemResponse> {
+    async findById(userId: string): Promise<ContentChunkResponse> {
         try {
             const user = await this.repo
                 .createQueryBuilder()
@@ -121,7 +93,7 @@ export class PostgresFeedItemRepository {
                 .getOne();
 
             if (!user) {
-                return failure(new NotFoundError("FeedItem not found."));
+                return failure(new NotFoundError("ContentChunk not found."));
             }
 
             return success(user);
@@ -130,7 +102,7 @@ export class PostgresFeedItemRepository {
         }
     }
 
-    async findByIds(userIds: string[]): Promise<FeedItemArrayResponse> {
+    async findByIds(userIds: string[]): Promise<ContentChunkArrayResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
@@ -141,30 +113,14 @@ export class PostgresFeedItemRepository {
         });
     }
 
-    findForUser = async (
-        userId: string,
-        options?: FindManyOptions<FeedItemModel>
-    ): Promise<FeedItemArrayResponse> => {
-        return Helpers.trySuccessFail(async () => {
-            const res = await this.repo.find({
-                ...options,
-                where: {
-                    ...options?.where,
-                    userId,
-                },
-            });
-            return success(res);
-        });
-    };
-
-    async findByEmail(email: string): Promise<FeedItemResponse> {
+    async findByEmail(email: string): Promise<ContentChunkResponse> {
         return await Helpers.trySuccessFail(async () => {
             const user = await this.repo
                 .createQueryBuilder()
                 .where("email = :email", { email })
                 .getOne();
             if (!user) {
-                return failure(new NotFoundError("FeedItem not found."));
+                return failure(new NotFoundError("ContentChunk not found."));
             }
             return success(user);
         });
@@ -172,9 +128,9 @@ export class PostgresFeedItemRepository {
 
     async update(
         userId: string,
-        updates: Partial<FeedItemModel>,
+        updates: Partial<ContentChunkModel>,
         dbTxn?: EntityManager
-    ): Promise<FeedItemResponse> {
+    ): Promise<ContentChunkResponse> {
         try {
             dbTxn
                 ? await dbTxn.update(this.model, { id: userId }, updates)
@@ -185,7 +141,9 @@ export class PostgresFeedItemRepository {
                 : await this.repo.findOneBy({ id: userId });
 
             if (!user) {
-                return failure(new NotFoundError("FeedItem does not exist!"));
+                return failure(
+                    new NotFoundError("ContentChunk does not exist!")
+                );
             }
 
             return success(user);
@@ -196,7 +154,7 @@ export class PostgresFeedItemRepository {
 
     async bulkUpdate(
         userIds: string[],
-        updates: Partial<FeedItemModel>
+        updates: Partial<ContentChunkModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {
         return Helpers.trySuccessFail(async () => {
             if (!userIds.length) {
@@ -205,20 +163,22 @@ export class PostgresFeedItemRepository {
 
             const updateResult = await this.repo
                 .createQueryBuilder()
-                .update(FeedItemModel)
+                .update(ContentChunkModel)
                 .set(updates)
                 .where("id IN (:...userIds)", { userIds })
                 .execute();
 
             if (!updateResult) {
-                return failure(new NotFoundError("FeedItem update failed."));
+                return failure(
+                    new NotFoundError("ContentChunk update failed.")
+                );
             }
 
             return success(updateResult.affected || 0);
         });
     }
 
-    async save(obj: FeedItemModel): Promise<FeedItemResponse> {
+    async save(obj: ContentChunkModel): Promise<ContentChunkResponse> {
         try {
             return success(await this.repo.save(obj));
         } catch (err) {
@@ -227,14 +187,16 @@ export class PostgresFeedItemRepository {
     }
 
     // hard delete
-    async delete(userId: string): Promise<FeedItemResponse> {
+    async delete(userId: string): Promise<ContentChunkResponse> {
         try {
             const user = await this.repo.findOne({
                 where: { id: userId },
             });
 
             if (!user) {
-                return failure(new NotFoundError("FeedItem does not exist!"));
+                return failure(
+                    new NotFoundError("ContentChunk does not exist!")
+                );
             }
 
             await this.repo.delete({ id: userId });
@@ -246,15 +208,62 @@ export class PostgresFeedItemRepository {
     }
 
     async create(
-        params: Omit<FeedItemModel, "content" | "user">,
+        params: Omit<ContentChunkModel, "accounts">,
         dbTxn?: EntityManager
-    ): Promise<FeedItemResponse> {
+    ): Promise<ContentChunkResponse> {
         try {
-            const newFeedItem = dbTxn
+            const newContentChunk = dbTxn
                 ? await dbTxn.save(this.model, params)
                 : await this.repo.save(params);
 
-            return success(newFeedItem);
+            return success(newContentChunk);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    insert = async (
+        contentChunks: Partial<ContentChunkModel>[],
+        dbTxn?: EntityManager
+    ): Promise<ContentChunkArrayResponse> => {
+        return Helpers.trySuccessFail(async () => {
+            const newContentChunks = dbTxn
+                ? await dbTxn.save(this.model, contentChunks)
+                : await this.repo.save(contentChunks);
+
+            return success(newContentChunks);
+        });
+    };
+
+    async findSimilarContentChunk(
+        vector: number[],
+        limit: number = DEFAULT_LINKS_RETURN
+    ): Promise<SimilarContentChunkWithDistanceResponse> {
+        try {
+            const result = await this.repo
+                .createQueryBuilder("contentchunk")
+                .select("contentchunk")
+                .addSelect(
+                    "AVG(contentchunk.embedding <-> :embedding)",
+                    "average_distance"
+                )
+                .addSelect(
+                    "MIN(contentchunk.embedding <-> :embedding)",
+                    "min_distance"
+                )
+                .setParameter("embedding", pgvector.toSql(vector))
+                .groupBy("contentchunk.id")
+                .orderBy("min_distance", "ASC")
+                .limit(limit)
+                .getRawAndEntities();
+
+            const linksWithDistance = result.entities.map((entity, index) => ({
+                ...entity,
+                averageDistance: parseFloat(result.raw[index].average_distance),
+                minDistance: parseFloat(result.raw[index].min_distance),
+            }));
+
+            return success(linksWithDistance);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }

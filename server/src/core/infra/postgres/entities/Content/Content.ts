@@ -34,6 +34,13 @@ export class Content {
 
     @Column({
         nullable: true,
+        name: "content",
+        type: "text",
+    })
+    content!: string | null;
+
+    @Column({
+        nullable: true,
         name: "insertion_id",
         type: "text",
     })
@@ -128,6 +135,7 @@ export class Content {
         nullable: true,
         name: "reference_id",
         type: "text",
+        unique: true,
     })
     referenceId!: string | null;
 

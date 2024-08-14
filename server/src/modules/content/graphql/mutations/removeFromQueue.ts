@@ -14,7 +14,7 @@ import { ContentSessionService } from "../../services/contentSessionService";
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { v4 as uuidv4 } from "uuid";
 
-export const addToQueue = mutationField("addToQueue", {
+export const removeFromQueue = mutationField("removeFromQueue", {
     type: nonNull("FeedItem"),
     args: {
         contentId: nonNull(idArg()),
@@ -36,40 +36,23 @@ export const addToQueue = mutationField("addToQueue", {
             where: {
                 userId: user.id,
                 contentId,
+                isQueued: true,
             },
         });
 
-        if (
-            feedItemExistsResponse.isSuccess() &&
-            feedItemExistsResponse.value
-        ) {
-            // update it to queued
-            const feedItem = feedItemExistsResponse.value;
+        throwIfError(feedItemExistsResponse);
 
-            const updateResponse = await feedRepo.update(feedItem.id, {
-                isQueued: true,
-                queuedAt: new Date(),
-            });
+        const feedItem = feedItemExistsResponse.value;
 
-            throwIfError(updateResponse);
+        // update to be isQueued false
 
-            return feedItem;
-        }
-
-        const feedItemResponse = await feedRepo.create({
-            id: uuidv4(),
-            position: 0,
-            queuedAt: new Date(),
-            isArchived: false,
-            isQueued: true,
-            userId: user.id,
-            contentId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+        const updateResponse = await feedRepo.update(feedItem.id, {
+            isQueued: false,
+            queuedAt: null,
         });
 
-        throwIfError(feedItemResponse);
+        throwIfError(updateResponse);
 
-        return feedItemResponse.value;
+        return updateResponse.value;
     },
 });
