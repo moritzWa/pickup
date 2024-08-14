@@ -71,7 +71,7 @@ const _checkIfProcessed = async (contentId: string) => {
     return Promise.resolve();
 };
 
-const _transcribeContent = async (contentId: string) => {
+export const _transcribeContent = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
@@ -87,6 +87,8 @@ const _transcribeContent = async (contentId: string) => {
     if (!content.audioUrl) {
         throw new NonRetriableError("No audio URL to transcribe");
     }
+
+    // debugger;
 
     // get the transcript. and then store it. don't need to chunk it
     const transcriptResponse = await TranscribeService.transcribeAudioUrl(
@@ -110,7 +112,7 @@ const _transcribeContent = async (contentId: string) => {
     return Promise.resolve();
 };
 
-const _embedContent = async (contentId: string) => {
+export const _embedContent = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
@@ -155,7 +157,7 @@ const _embedContent = async (contentId: string) => {
     return Promise.resolve();
 };
 
-const _convertToAudio = async (contentId: string) => {
+export const _convertToAudio = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
@@ -204,7 +206,7 @@ const _convertToAudio = async (contentId: string) => {
     return Promise.resolve();
 };
 
-const _markContentProcessed = async (contentId: string) => {
+export const _markContentProcessed = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
