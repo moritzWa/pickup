@@ -6,6 +6,7 @@ import {
     Repository,
 } from "typeorm";
 import { sql } from "pg-sql";
+import * as pgvector from "pgvector/pg";
 
 import { success, failure, Maybe } from "src/core/logic";
 import { UnexpectedError, NotFoundError } from "src/core/logic/errors";
@@ -14,9 +15,20 @@ import { FailureOrSuccess } from "src/core/logic";
 import { Content as ContentModel } from "src/core/infra/postgres/entities";
 import { dataSource } from "src/core/infra/postgres";
 import { Helpers } from "src/utils";
+import { DEFAULT_LINKS_RETURN } from "src/modules/curius/infra/linkRepo";
 
 type ContentResponse = FailureOrSuccess<DefaultErrors, ContentModel>;
 type ContentArrayResponse = FailureOrSuccess<DefaultErrors, ContentModel[]>;
+
+export type ContentWithDistance = ContentModel & {
+    averageDistance: number;
+    minDistance: number;
+};
+
+export type SimilarContentWithDistanceResponse = FailureOrSuccess<
+    DefaultErrors,
+    ContentWithDistance[]
+>;
 
 export class PostgresContentRepository {
     constructor(private model: typeof ContentModel) {}
@@ -193,6 +205,40 @@ export class PostgresContentRepository {
                 : await this.repo.save(params);
 
             return success(newContent);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async findSimilarContent(
+        vector: number[],
+        limit: number = DEFAULT_LINKS_RETURN
+    ): Promise<SimilarContentWithDistanceResponse> {
+        try {
+            const result = await this.repo
+                .createQueryBuilder("content")
+                .select("content")
+                .addSelect(
+                    "AVG(content.embedding <-> :embedding)",
+                    "average_distance"
+                )
+                .addSelect(
+                    "MIN(content.embedding <-> :embedding)",
+                    "min_distance"
+                )
+                .setParameter("embedding", pgvector.toSql(vector))
+                .groupBy("content.id")
+                .orderBy("min_distance", "ASC")
+                .limit(limit)
+                .getRawAndEntities();
+
+            const linksWithDistance = result.entities.map((entity, index) => ({
+                ...entity,
+                averageDistance: parseFloat(result.raw[index].average_distance),
+                minDistance: parseFloat(result.raw[index].min_distance),
+            }));
+
+            return success(linksWithDistance);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }

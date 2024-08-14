@@ -122,11 +122,16 @@ const convertCuriusToContent = async (
     // Create the Content object first
     const contentResponse = await contentRepo.create({
         id: contentId,
+        insertionId: null,
         audioUrl: audio.url,
         context: "",
+        isProcessed: false,
         thumbnailImageUrl: "",
         authors: [], // This will be updated later
+        embedding: null,
         sourceImageUrl: "",
+        referenceId: null, // Add this line
+        releasedAt: new Date(), // Add this line
         lengthMs: 0,
         categories: [],
         summary: link.snippet || "",

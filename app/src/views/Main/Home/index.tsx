@@ -119,8 +119,6 @@ const Home = () => {
     });
   };
 
-  console.log(data);
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
@@ -352,7 +350,7 @@ const HomeHeader = () => {
                   marginBottom: 0,
                 }}
               >
-                Commute save {commuteTime}.
+                Commute save {commuteTime.formatted}.
               </Text>
             ) : (
               <>
