@@ -23,6 +23,7 @@ export type AudioState = {
   currentContent: Maybe<BaseContentFields>;
   nextContent: Maybe<BaseContentFields>;
   queue: BaseContentFields[];
+  feed: BaseContentFields[];
   currentMs: number | null;
   durationMs: number | null;
   isPlaying: boolean;

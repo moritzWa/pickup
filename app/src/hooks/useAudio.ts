@@ -6,11 +6,17 @@ import * as FileSystem from "expo-file-system";
 import { isNil, noop } from "lodash";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { JSHash, JSHmac, CONSTANTS } from "react-native-hash";
-import TrackPlayer, { AddTrack, State, Track } from "react-native-track-player";
+import TrackPlayer, {
+  AddTrack,
+  Event,
+  State,
+  Track,
+  useTrackPlayerEvents,
+} from "react-native-track-player";
 import { useDispatch, useSelector } from "react-redux";
 import { api } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
-import { Query } from "src/api/generated/types";
+import { Mutation, Query } from "src/api/generated/types";
 import {
   DefaultErrors,
   failure,
@@ -21,9 +27,12 @@ import {
 } from "src/core";
 import {
   getCurrentAudioUrl,
+  getCurrentContent,
   getCurrentMs,
   getDurationMs,
+  getFeed,
   getIsPlaying,
+  getQueue,
   getSpeed,
   setAudioUrl,
   setCurrentContent,
@@ -33,22 +42,27 @@ import {
   setQueue,
   setSpeed,
 } from "src/redux/reducers/audio";
+import { singletonHook } from "react-singleton-hook";
 
-export const useAudio = () => {
+const useAudioHook = () => {
   const { sound: globalSound } = useContext(AppContext);
   const dispatch = useDispatch();
 
-  const { data: queueData, error: queueError } = useQuery<
-    Pick<Query, "getQueue">
-  >(api.queue.list);
+  const queue = useSelector(getQueue);
+  const feed = useSelector(getFeed);
 
   const [startContent, { error }] = useMutation(api.content.start);
 
+  const currentContent = useSelector(getCurrentContent);
   const currentMs = useSelector(getCurrentMs);
   const durationMs = useSelector(getDurationMs);
   const isPlaying = useSelector(getIsPlaying);
   const audioUrl = useSelector(getCurrentAudioUrl);
   const speed = useSelector(getSpeed);
+
+  const [removeFromQueue] = useMutation<Pick<Mutation, "removeFromQueue">>(
+    api.content.removeFromQueue
+  );
 
   const getFileName = async (url: string): Promise<string> => {
     const hash = await JSHash("message", CONSTANTS.HashAlgorithms.sha256);
@@ -74,6 +88,8 @@ export const useAudio = () => {
     content: BaseContentFields
   ): Promise<FailureOrSuccess<DefaultErrors, Audio.Sound>> => {
     const url = content.audioUrl;
+
+    console.log(`[downloading and playing ${url}]`);
 
     if (!globalSound) {
       return failure(new UnexpectedError("No sound object found"));
@@ -105,17 +121,17 @@ export const useAudio = () => {
         playThroughEarpieceAndroid: false,
       });
 
-      const currentTrackIndex = await TrackPlayer.getActiveTrackIndex();
+      const tracks = await TrackPlayer.getQueue();
 
-      if (!isNil(currentTrackIndex)) {
-        await TrackPlayer.remove(currentTrackIndex);
-      }
+      await TrackPlayer.remove(tracks.map((_t, i) => i));
+
+      console.log(`[removed ${tracks.length} tracks from the queue]`);
 
       // await TrackPlayer.skip;
       const track: AddTrack = {
         url: uri,
-        title: content?.title || "",
-        artist: content?.authorName || "",
+        title: content?.title || "Title",
+        artist: content?.authorName || "Author",
         artwork: content?.thumbnailImageUrl || "",
         metadata: {
           contentId: content.id,
@@ -126,11 +142,11 @@ export const useAudio = () => {
 
       await TrackPlayer.add([track], 0);
 
-      await logQueue();
+      // await logQueue();
 
       await TrackPlayer.play();
 
-      await startContent({
+      void startContent({
         variables: {
           contentId: content.id,
         },
@@ -223,7 +239,52 @@ export const useAudio = () => {
   };
 
   const playNext = async () => {
-    await TrackPlayer.skipToNext();
+    // - [ ]  if it is in the queue, unqueue it
+    // - [ ]  if elements left in queue, start playing it
+    // - [ ]  if not, find the content right after it in the feed. or just pick the first content and play that.
+
+    const queueElementIndex = queue.findIndex(
+      (q) => q?.id === currentContent?.id
+    );
+
+    let newQueue = [...queue];
+
+    // if it is in the queue, remove it
+    if (queueElementIndex !== -1) {
+      console.log(`[removing ${currentContent?.title} from the queue]`);
+
+      const queueElement = queue[queueElementIndex];
+
+      void removeFromQueue({
+        variables: {
+          contentId: queueElement.id,
+        },
+        refetchQueries: [api.queue.list],
+      });
+
+      // then remove that element from the list
+
+      newQueue = queue.splice(queueElementIndex, 1);
+    }
+
+    if (newQueue.length) {
+      // add the next item to track player and start it
+      const nextItem = newQueue[0] as BaseContentFields;
+
+      await downloadAndPlayContent(nextItem);
+
+      return;
+    }
+
+    const feedItemIndex = feed.findIndex((f) => f?.id === currentContent?.id);
+    const nextElement =
+      feedItemIndex === -1 ? feed[0] : feed[feedItemIndex + 1];
+
+    if (nextElement) {
+      await downloadAndPlayContent(nextElement);
+
+      return;
+    }
   };
 
   const playPrev = async () => {
@@ -265,6 +326,22 @@ export const useAudio = () => {
     console.log(queue.map((q) => q.title));
   };
 
+  useTrackPlayerEvents([Event.PlaybackState], async (data) => {
+    // console.log(data.state);
+    if (data.state === "ended") {
+      console.log("ENDED");
+      await playNext();
+    }
+  });
+
+  useTrackPlayerEvents([Event.RemoteNext], async (data) => {
+    await playNext();
+  });
+
+  useTrackPlayerEvents([Event.RemotePrevious], async (data) => {
+    await playPrev();
+  });
+
   // useEffect(() => {
   //   dispatch(setQueue(queue.map((q) => q.content).filter(hasValue)));
   // }, [queue]);
@@ -289,3 +366,27 @@ export const useAudio = () => {
     playPrev,
   };
 };
+
+export const useAudio = useAudioHook;
+// singletonHook(
+//   {
+//     downloadAndPlayContent: async (): Promise<
+//       FailureOrSuccess<DefaultErrors, Audio.Sound>
+//     > => failure(new UnexpectedError("No sound object found")),
+//     toggle: async () => {},
+//     percentFinished: 0,
+//     leftMinutes: 0,
+//     currentMs: 0,
+//     durationMs: 0,
+//     audioUrl: "",
+//     isPlaying: false,
+//     skip: async () => {},
+//     setPosition: async () => {},
+//     setSpeed: async () => {},
+//     speed: 1,
+//     syncQueue: async () => {},
+//     playNext: async () => {},
+//     playPrev: async () => {},
+//   },
+//   useAudioHook
+// );

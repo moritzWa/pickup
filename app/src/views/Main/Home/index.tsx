@@ -31,7 +31,7 @@ import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
 import { CurrentAudio } from "../../../components/CurrentAudio";
 import { useAudio } from "src/hooks/useAudio";
-import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
+import { setCurrentContent, setFeed, setQueue } from "src/redux/reducers/audio";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faCar } from "@fortawesome/pro-solid-svg-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -74,6 +74,8 @@ const Home = () => {
     fetchPolicy: "cache-and-network",
   });
 
+  const feed = (data?.getFeed ?? []) as BaseContentFields[];
+
   const onShowMorePress = async () => {
     await showMore();
   };
@@ -86,7 +88,7 @@ const Home = () => {
     }
 
     return (data?.getFeed ?? []) as BaseContentFields[];
-  }, [data, filter]);
+  }, [data, filter, queueData?.getQueue?.queue]);
 
   console.log(JSON.stringify(error, null, 2));
 
@@ -120,6 +122,22 @@ const Home = () => {
       include: [api.content.current, api.users.me, api.queue.list],
     });
   };
+
+  const queue = queueData?.getQueue?.queue ?? [];
+
+  // FIXME: this is super hacky
+  useEffect(() => {
+    dispatch(
+      setQueue(
+        queue.map((q) => q.content as BaseContentFields).filter(hasValue)
+      )
+    );
+  }, [JSON.stringify(queue.map((q) => q.id))]);
+
+  // FIXME: this is super hacky
+  useEffect(() => {
+    dispatch(setFeed(feed));
+  }, [JSON.stringify(feed.map((f) => f.id))]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -542,15 +560,6 @@ const Options = () => {
   }, [me]);
 
   const queueCount = queueData?.getQueue?.total ?? 0;
-  const queue = queueData?.getQueue?.queue ?? [];
-
-  useEffect(() => {
-    dispatch(
-      setQueue(
-        queue.map((q) => q.content as BaseContentFields).filter(hasValue)
-      )
-    );
-  }, [queue]);
 
   return (
     <>

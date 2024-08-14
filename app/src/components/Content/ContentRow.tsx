@@ -255,8 +255,6 @@ export const ContentRow = ({
 
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
 
-  console.log(contentIds, c.id, isQueued);
-
   return (
     <Swipeable
       renderLeftActions={renderLeftActions}
