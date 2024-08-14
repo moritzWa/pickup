@@ -8,7 +8,11 @@ export class QueueAdj1723525975553 implements MigrationInterface {
             `ALTER TABLE "users" DROP CONSTRAINT "FK_33bfeb7a2c68fef6c92fe5b77e8"`
         );
         await queryRunner.query(
-            `ALTER TABLE "users" RENAME COLUMN "current_queue_id" TO "current_feed_item_id"`
+            `ALTER TABLE "users" DROP COLUMN "current_queue_id"`
+        );
+        // add column current_feed_item_id
+        await queryRunner.query(
+            `ALTER TABLE "users" ADD "current_feed_item_id" uuid`
         );
         await queryRunner.query(
             `CREATE TABLE "feed_items" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "position" double precision NOT NULL, "is_queued" boolean NOT NULL DEFAULT false, "user_id" uuid NOT NULL, "content_id" uuid NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_81ae51f2d2a41a403bbc0471ed6" UNIQUE ("user_id", "content_id", "position"), CONSTRAINT "PK_9a33f003d604fbe4060d75c7be2" PRIMARY KEY ("id"))`
