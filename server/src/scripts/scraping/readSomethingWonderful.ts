@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 import { dataSource } from "src/core/infra/postgres";
 import { Author } from "src/core/infra/postgres/entities/Author/Author";
 import { Content } from "src/core/infra/postgres/entities/Content/Content";
+import { In } from "typeorm";
 
 const scrapeSomethingWonderful = async () => {
     await dataSource.initialize();
@@ -200,6 +201,56 @@ const scrapeSomethingWonderful = async () => {
             }
 
             batchNumber++;
+
+            // After processing the batch, let's check the relationships
+            if (newContentCount > 0) {
+                console.log("\nVerifying relationships:");
+
+                // Get the first author from this batch
+                const firstAuthorName = articles[0].author.split("&")[0].trim();
+                const author = await dataSource.getRepository(Author).findOne({
+                    where: { name: firstAuthorName },
+                    relations: ["contents"],
+                });
+
+                if (author) {
+                    console.log(`Author: ${author.name}`);
+                    console.log(
+                        `Number of associated contents: ${author.contents.length}`
+                    );
+
+                    if (author.contents.length > 0) {
+                        console.log("Titles of associated contents:");
+                        author.contents.forEach((content, index) => {
+                            console.log(`${index + 1}. ${content.title}`);
+                        });
+
+                        // Now let's verify the reverse relationship
+                        const firstContentId = author.contents[0].id;
+                        const content = await dataSource
+                            .getRepository(Content)
+                            .findOne({
+                                where: { id: firstContentId },
+                                relations: ["authors"],
+                            });
+
+                        if (content) {
+                            console.log(
+                                `\nVerifying reverse relationship for content: ${content.title}`
+                            );
+                            console.log(
+                                `Number of associated authors: ${content.authors.length}`
+                            );
+                            console.log("Names of associated authors:");
+                            content.authors.forEach((author, index) => {
+                                console.log(`${index + 1}. ${author.name}`);
+                            });
+                        }
+                    }
+                } else {
+                    console.log("No authors found in this batch.");
+                }
+            }
         } catch (error) {
             console.error(`Error during batch ${batchNumber}:`, error);
         }
