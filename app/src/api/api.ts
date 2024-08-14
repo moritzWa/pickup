@@ -239,6 +239,15 @@ const AddToQueue = gql`
   }
 `;
 
+const RemoveFromQueue = gql`
+  ${BaseFeedItemFields}
+  mutation RemoveFromQueue($contentId: ID!) {
+    removeFromQueue(contentId: $contentId) {
+      ...BaseFeedItemFields
+    }
+  }
+`;
+
 const ArchiveContent = gql`
   ${BaseFeedItemFields}
   mutation ArchiveContent($contentId: ID!) {
@@ -334,6 +343,7 @@ export const api = {
     bookmarks: GetBookmarks,
     bookmark: Bookmark,
     addToQueue: AddToQueue,
+    removeFromQueue: RemoveFromQueue,
     archive: ArchiveContent,
   },
   categories: {

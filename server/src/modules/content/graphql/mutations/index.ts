@@ -8,3 +8,4 @@ export * from "./bookmarkContent";
 export * from "./addToQueue";
 export * from "./archiveContent";
 export * from "./clearQueue";
+export * from "./removeFromQueue";

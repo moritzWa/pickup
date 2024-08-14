@@ -1,4 +1,4 @@
-import { createAction, createReducer } from "@reduxjs/toolkit";
+import { createAction, createReducer, createSelector } from "@reduxjs/toolkit";
 import { AudioState, AuthStatus, ReduxState, UserState } from "../types";
 import { Audio } from "expo-av";
 
@@ -93,3 +93,8 @@ export const getNextContent = (state: ReduxState): AudioState["nextContent"] =>
 
 export const getQueue = (state: ReduxState): AudioState["queue"] =>
   state.audio.queue;
+
+export const getQueueContentIdSet = createSelector(
+  getQueue,
+  (queue) => new Set(queue.map((content) => content.id))
+);

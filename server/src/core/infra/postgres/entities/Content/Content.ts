@@ -33,11 +33,11 @@ export class Content {
     context!: string;
 
     @Column({
-        nullable: false,
+        nullable: true,
         name: "content",
         type: "text",
     })
-    content!: string;
+    content!: string | null;
 
     @Column({
         nullable: true,

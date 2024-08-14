@@ -18,6 +18,7 @@ import {
   Mutation,
   MutationAddToQueueArgs,
   MutationArchiveContentArgs,
+  MutationRemoveFromQueueArgs,
   Query,
 } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
@@ -45,7 +46,12 @@ import {
 import { Impressions } from "../../views/Main/Home/Github";
 import FastImage from "react-native-fast-image";
 import { useSelector } from "react-redux";
-import { getCurrentContent, getIsPlaying } from "src/redux/reducers/audio";
+import {
+  getCurrentContent,
+  getIsPlaying,
+  getQueue,
+  getQueueContentIdSet,
+} from "src/redux/reducers/audio";
 import { noop } from "lodash";
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -62,15 +68,22 @@ export const ContentRow = ({
 }) => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
+
   const [startContent, { error }] = useMutation(api.content.start);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
+  const contentIds = useSelector(getQueueContentIdSet);
   const activeContent = useSelector(getCurrentContent);
   const isActive = activeContent?.id === c.id;
   const isPlaying = useSelector(getIsPlaying);
+  const isQueued = contentIds.has(c.id);
 
   const [addToQueue] = useMutation<Pick<Mutation, "addToQueue">>(
     api.content.addToQueue
+  );
+
+  const [removeFromQueue] = useMutation<Pick<Mutation, "removeFromQueue">>(
+    api.content.removeFromQueue
   );
 
   const [archiveContent] = useMutation<Pick<Mutation, "archiveContent">>(
@@ -96,16 +109,23 @@ export const ContentRow = ({
     }
   };
 
-  const onAddContentToQueue = async () => {
+  const onAddOrRemoveContentToQueue = async () => {
     try {
-      const variables: MutationAddToQueueArgs = {
+      const variables: MutationAddToQueueArgs | MutationRemoveFromQueueArgs = {
         contentId: c.id,
       };
 
-      await addToQueue({
-        variables,
-        refetchQueries: [api.content.addToQueue, api.queue.list],
-      });
+      if (isQueued) {
+        await removeFromQueue({
+          variables,
+          refetchQueries: [api.content.addToQueue, api.queue.list],
+        });
+      } else {
+        await addToQueue({
+          variables,
+          refetchQueries: [api.content.addToQueue, api.queue.list],
+        });
+      }
     } catch (err) {
       console.log(err);
     }
@@ -158,19 +178,18 @@ export const ContentRow = ({
         paddingHorizontal: 20,
         display: "flex",
         height: "100%",
-        backgroundColor: theme.bgPrimary,
+        backgroundColor: isQueued ? theme.bgRed : theme.bgPrimary,
         flexDirection: "row",
       }}
     >
       <TouchableOpacity
-        onPress={onAddContentToQueue}
+        onPress={onAddOrRemoveContentToQueue}
         activeOpacity={0.9}
         style={{
           justifyContent: "center",
           alignItems: "center",
           display: "flex",
           flexDirection: "row",
-          backgroundColor: theme.bgPrimary,
           width: 75,
           height: 75,
           borderRadius: 50,
@@ -178,15 +197,27 @@ export const ContentRow = ({
           marginBottom: 10,
         }}
       >
-        <Image
-          source={require("src/assets/icons/solid-list-circle-plus.png")}
-          tintColor={colors.primary}
-          resizeMode="contain"
-          style={{
-            width: 30,
-            height: 30,
-          }}
-        />
+        {isQueued ? (
+          <Image
+            source={require("src/assets/icons/solid-list-circle-minus.png")}
+            tintColor={colors.red50}
+            resizeMode="contain"
+            style={{
+              width: 30,
+              height: 30,
+            }}
+          />
+        ) : (
+          <Image
+            source={require("src/assets/icons/solid-list-circle-plus.png")}
+            tintColor={colors.primary}
+            resizeMode="contain"
+            style={{
+              width: 30,
+              height: 30,
+            }}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -223,6 +254,8 @@ export const ContentRow = ({
   );
 
   const estimatedLen = Math.ceil(c.lengthSeconds / 60);
+
+  console.log(contentIds, c.id, isQueued);
 
   return (
     <Swipeable

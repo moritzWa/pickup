@@ -23,27 +23,20 @@ export enum ActivityFilter {
   Unread = 'unread'
 }
 
+export type Author = {
+  __typename?: 'Author';
+  contents?: Maybe<Array<Maybe<Content>>>;
+  id: Scalars['String']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+};
+
 export type Category = {
   __typename?: 'Category';
   emoji: Scalars['String']['output'];
   name: Scalars['String']['output'];
   subcategories: Array<Scalars['String']['output']>;
 };
-
-export enum CategoryEnum {
-  ArtsCulture = 'ARTS___CULTURE',
-  BusinessModels = 'BUSINESS_MODELS',
-  CorporateTechnology = 'CORPORATE_TECHNOLOGY',
-  Entrepreneurship = 'ENTREPRENEURSHIP',
-  FinanceLegal = 'FINANCE___LEGAL',
-  HealthWellness = 'HEALTH___WELLNESS',
-  InternationalBusiness = 'INTERNATIONAL_BUSINESS',
-  Management = 'MANAGEMENT',
-  SoftwareEngineering = 'SOFTWARE_ENGINEERING',
-  Startups = 'STARTUPS',
-  TechnologySociety = 'TECHNOLOGY___SOCIETY',
-  VentureCapitalInvestment = 'VENTURE_CAPITAL___INVESTMENT'
-}
 
 export type CategorySection = {
   __typename?: 'CategorySection';
@@ -55,7 +48,8 @@ export type Content = {
   __typename?: 'Content';
   audioUrl: Scalars['String']['output'];
   authorImageUrl?: Maybe<Scalars['String']['output']>;
-  authorName: Scalars['String']['output'];
+  authorName?: Maybe<Scalars['String']['output']>;
+  authors?: Maybe<Array<Author>>;
   categories: Array<Scalars['String']['output']>;
   contentSession?: Maybe<ContentSession>;
   context: Scalars['String']['output'];
@@ -180,10 +174,13 @@ export type Mutation = {
   addToQueue: FeedItem;
   archiveContent: FeedItem;
   bookmarkContent: ContentSession;
+  clearQueue: Scalars['String']['output'];
+  createAuthor?: Maybe<Author>;
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
   recordInteraction: Interaction;
+  removeFromQueue: FeedItem;
   respondToContent: ContentRespondResponse;
   sendVerification: Scalars['String']['output'];
   setCommuteTime: User;
@@ -212,6 +209,12 @@ export type MutationBookmarkContentArgs = {
 };
 
 
+export type MutationCreateAuthorArgs = {
+  imageUrl?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+
 export type MutationCreateUserArgs = {
   email: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
@@ -224,6 +227,11 @@ export type MutationCreateUserArgs = {
 export type MutationRecordInteractionArgs = {
   contentId: Scalars['ID']['input'];
   eventType: InteractionTypeEnum;
+};
+
+
+export type MutationRemoveFromQueueArgs = {
+  contentId: Scalars['ID']['input'];
 };
 
 
@@ -302,6 +310,7 @@ export type Query = {
   __typename?: 'Query';
   checkCode: Scalars['Boolean']['output'];
   getActivity: Array<Content>;
+  getAuthor: Author;
   getBookmarks: Array<Content>;
   getCategories: Array<CategorySection>;
   getContent: Content;
@@ -328,6 +337,11 @@ export type QueryCheckCodeArgs = {
 
 export type QueryGetActivityArgs = {
   filter?: InputMaybe<ActivityFilter>;
+};
+
+
+export type QueryGetAuthorArgs = {
+  authorId: Scalars['ID']['input'];
 };
 
 
