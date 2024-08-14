@@ -1,6 +1,7 @@
 export { Notification } from "./Notification";
 export { User } from "./User";
 // content
+export { Author } from "./Author/Author";
 export { Content } from "./Content/Content";
 export { ContentSession } from "./Content/ContentSession";
 // curius
@@ -11,8 +12,8 @@ export { CuriusLinkChunk } from "./Curius/CuriusLinkChunk";
 export { CuriusMention } from "./Curius/CuriusMention";
 export { CuriusUser } from "./Curius/CuriusUser";
 // relationships
-export { Relationship } from "./Relationship";
-export { Interaction } from "./Interaction";
 export { FeedItem } from "./FeedItem";
+export { Interaction } from "./Interaction";
+export { Relationship } from "./Relationship";
 
 export * from "./types";

@@ -21,6 +21,7 @@ const ENTITIES = [
     entities.Relationship,
     entities.Interaction,
     entities.FeedItem,
+    entities.Author,
 ];
 
 function getMigrationDirectory() {

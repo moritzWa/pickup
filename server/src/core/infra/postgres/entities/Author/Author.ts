@@ -5,7 +5,7 @@ import {
     ManyToMany,
     PrimaryGeneratedColumn,
 } from "typeorm";
-import { Content } from "../Content";
+import { Content } from "../Content/Content";
 
 @Entity({
     name: "authors",
