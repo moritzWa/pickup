@@ -4,6 +4,8 @@ import { Author } from "src/core/infra/postgres/entities/Author/Author";
 import { Content } from "src/core/infra/postgres/entities/Content/Content";
 
 const scrapeSomethingWonderful = async () => {
+    await dataSource.initialize();
+
     const url = "https://www.readsomethinggreat.com";
     const distinctArticles = new Set<string>();
 
@@ -13,7 +15,7 @@ const scrapeSomethingWonderful = async () => {
     // Add this line to capture console logs from the browser
     page.on("console", (msg) => console.log("Browser Log:", msg.text()));
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 20; i++) {
         try {
             console.log(`Fetching URL: ${url}`);
             await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 }); // Added timeout
@@ -105,14 +107,14 @@ const scrapeSomethingWonderful = async () => {
 
             console.log("Debug Info:", JSON.stringify(debugInfo, null, 2));
 
-            articles.forEach(async (article) => {
+            for (const article of articles) {
                 if (
                     article.title.includes(
                         "AudioPen: Go from fuzzy thought to clear text"
                     )
                 ) {
                     console.log("Skipping AudioPen advertisement");
-                    return;
+                    continue;
                 }
 
                 distinctArticles.add(JSON.stringify(article));
@@ -131,21 +133,46 @@ const scrapeSomethingWonderful = async () => {
 
                     if (!author) {
                         author = new Author();
-                        author.id = name;
                         author.name = name;
-                        await dataSource.getRepository(Author).save(author);
+                        author = await dataSource
+                            .getRepository(Author)
+                            .save(author);
                     }
 
                     authors.push(author);
                 }
 
+                const durationInMinutes = parseInt(
+                    article.duration.split(" ")[0]
+                );
+                const durationInMs = durationInMinutes * 60 * 1000;
+
                 const content = new Content();
                 content.title = article.title;
-                content.context = article.excerpt;
+                content.summary = article.excerpt;
+                content.categories = [article.category];
+                content.lengthMs = durationInMs;
                 content.websiteUrl = article.url;
-                content.authors = authors;
-                await dataSource.getRepository(Content).save(content);
-            });
+                content.followUpQuestions = [];
+
+                // Save the content first
+                const savedContent = await dataSource
+                    .getRepository(Content)
+                    .save(content);
+
+                // Update the authors with the new content
+                for (const author of authors) {
+                    if (!author.contents) {
+                        author.contents = [];
+                    }
+                    author.contents.push(savedContent);
+                    await dataSource.getRepository(Author).save(author);
+                }
+
+                // Update the content with the authors
+                savedContent.authors = authors;
+                await dataSource.getRepository(Content).save(savedContent);
+            }
         } catch (error) {
             console.error(`Error during fetch: ${error}`);
         }
@@ -155,6 +182,35 @@ const scrapeSomethingWonderful = async () => {
 
     console.log(`Found ${distinctArticles.size} distinct articles.`);
     distinctArticles.forEach((article) => console.log(JSON.parse(article)));
+
+    // // Add this verification step
+    // try {
+    //     const contentRepository = dataSource.getRepository(Content);
+    //     const sampleContent = await contentRepository.findOneOrFail({
+    //         where: {},
+    //         relations: ["authors"],
+    //         order: { id: "DESC" },
+    //     });
+
+    //     console.log("Verification: Sample Content");
+    //     console.log("Title:", sampleContent.title);
+    //     console.log("Authors:");
+    //     if (sampleContent.authors && sampleContent.authors.length > 0) {
+    //         sampleContent.authors.forEach((author) => {
+    //             console.log(`- ${author.name}`);
+    //         });
+    //     } else {
+    //         console.log("No authors found for this content.");
+    //     }
+    // } catch (error) {
+    //     if (error instanceof Error) {
+    //         console.error("Error during verification:", error.message);
+    //     } else {
+    //         console.error("Error during verification:", error);
+    //     }
+    // }
+
+    await dataSource.destroy();
 };
 
 scrapeSomethingWonderful().catch(console.error);
