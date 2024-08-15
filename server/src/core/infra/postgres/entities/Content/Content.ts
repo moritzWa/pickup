@@ -97,9 +97,6 @@ export class Content {
     })
     summary!: string | null;
 
-    @Column({ type: "text", name: "full_text", nullable: true })
-    fullText?: string;
-
     @Column({
         nullable: false,
         name: "website_url",
@@ -160,6 +157,27 @@ export class Content {
         name: "deleted_at",
     })
     deletedAt?: Date;
+
+    // Content scraping related
+
+    @Column({ nullable: true })
+    excerpt?: string;
+
+    @Column({ nullable: true })
+    length?: number; // length in characters
+
+    // mozilla/readability
+    @Column({ nullable: true })
+    skippedNotProbablyReadable?: boolean;
+
+    @Column({ nullable: true })
+    skippedInaccessiblePDF?: boolean;
+
+    @Column({ nullable: true })
+    skippedErrorFetchingFullText?: boolean;
+
+    @Column({ nullable: true })
+    deadLink?: boolean;
 
     // TODO remove these?
 

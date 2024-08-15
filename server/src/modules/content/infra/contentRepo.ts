@@ -1,21 +1,20 @@
+import * as pgvector from "pgvector/pg";
 import {
     EntityManager,
     FindManyOptions,
     FindOneOptions,
-    getRepository,
+    IsNull,
+    Raw,
     Repository,
 } from "typeorm";
-import { sql } from "pg-sql";
-import * as pgvector from "pgvector/pg";
 
-import { success, failure, Maybe } from "src/core/logic";
-import { UnexpectedError, NotFoundError } from "src/core/logic/errors";
-import { DefaultErrors } from "src/core/logic/errors/default";
-import { FailureOrSuccess } from "src/core/logic";
-import { Content as ContentModel } from "src/core/infra/postgres/entities";
 import { dataSource } from "src/core/infra/postgres";
-import { Helpers } from "src/utils";
+import { Content as ContentModel } from "src/core/infra/postgres/entities";
+import { failure, FailureOrSuccess, success } from "src/core/logic";
+import { NotFoundError, UnexpectedError } from "src/core/logic/errors";
+import { DefaultErrors } from "src/core/logic/errors/default";
 import { DEFAULT_LINKS_RETURN } from "src/modules/curius/infra/linkRepo";
+import { Helpers } from "src/utils";
 
 type ContentResponse = FailureOrSuccess<DefaultErrors, ContentModel>;
 type ContentArrayResponse = FailureOrSuccess<DefaultErrors, ContentModel[]>;
@@ -67,6 +66,27 @@ export class PostgresContentRepository {
 
             return success(users);
         });
+    }
+
+    // get best content to add full text
+    async filterBestContentWithoutFullText(
+        limit: number
+    ): Promise<ContentArrayResponse> {
+        try {
+            const links = await this.repo.find({
+                where: {
+                    content: IsNull(),
+                    skippedInaccessiblePDF: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+                },
+                take: limit,
+            });
+            return success(links);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
     }
 
     async count(
@@ -174,6 +194,41 @@ export class PostgresContentRepository {
     async save(obj: ContentModel): Promise<ContentResponse> {
         try {
             return success(await this.repo.save(obj));
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async saveMany(
+        contents: ContentModel[]
+    ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> {
+        try {
+            return success(await this.repo.save(contents));
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async countContentsWithoutFullText(): Promise<
+        FailureOrSuccess<DefaultErrors, number>
+    > {
+        try {
+            const count = await this.repo.count({
+                where: {
+                    content: IsNull(),
+                    skippedErrorFetchingFullText: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedNotProbablyReadable: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedInaccessiblePDF: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+                },
+            });
+            return success(count);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }
