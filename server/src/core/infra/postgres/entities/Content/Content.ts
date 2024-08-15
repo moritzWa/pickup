@@ -40,14 +40,6 @@ export class Content {
     type!: ContentType;
 
     @Column({
-        // TODO: remove this column?
-        nullable: true,
-        name: "context",
-        type: "text",
-    })
-    context!: string;
-
-    @Column({
         nullable: true,
         name: "content",
         type: "text",
@@ -78,13 +70,6 @@ export class Content {
 
     @Column({
         nullable: true,
-        name: "source_image_url",
-        type: "text",
-    })
-    sourceImageUrl!: string | null; // not used
-
-    @Column({
-        nullable: true,
         name: "audio_url",
         type: "text",
     })
@@ -97,26 +82,6 @@ export class Content {
         type: "int",
     })
     lengthMs!: number | null;
-
-    @Column({
-        name: "embedding",
-        nullable: true,
-        type: "vector" as any,
-    })
-    embedding!: any | null;
-
-    @Column({
-        nullable: false,
-        name: "categories",
-        type: "jsonb",
-        default: "[]",
-    })
-    categories!: string[];
-
-    @ManyToMany(() => Author, (author) => author.contents, {
-        cascade: true,
-    })
-    authors!: Author[];
 
     @Column({
         nullable: false,
@@ -132,12 +97,28 @@ export class Content {
     })
     summary!: string | null;
 
+    @Column({ type: "text", name: "full_text", nullable: true })
+    fullText?: string;
+
     @Column({
         nullable: false,
         name: "website_url",
         type: "text",
     })
     websiteUrl!: string;
+
+    @Column({
+        nullable: false,
+        name: "categories",
+        type: "jsonb",
+        default: "[]",
+    })
+    categories!: string[];
+
+    @ManyToMany(() => Author, (author) => author.contents, {
+        cascade: true,
+    })
+    authors!: Author[];
 
     @Column({
         nullable: false,
@@ -179,4 +160,30 @@ export class Content {
         name: "deleted_at",
     })
     deletedAt?: Date;
+
+    // TODO remove these?
+
+    // this was intented to be the picture
+    @Column({
+        nullable: true,
+        name: "source_image_url",
+        type: "text",
+    })
+    sourceImageUrl!: string | null; // not used
+
+    @Column({
+        // remove (moved to ContentChunk)
+        name: "embedding",
+        nullable: true,
+        type: "vector" as any,
+    })
+    embedding!: any | null;
+
+    @Column({
+        // TODO: remove this column?
+        nullable: true,
+        name: "context",
+        type: "text",
+    })
+    context!: string;
 }

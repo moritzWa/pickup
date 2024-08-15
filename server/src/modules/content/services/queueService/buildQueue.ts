@@ -1,5 +1,6 @@
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
+import { ContentType } from "src/core/infra/postgres/entities/Content";
 import {
     DefaultErrors,
     failure,
@@ -116,6 +117,7 @@ const convertCuriusToContent = async (
         chunks: [],
         createdAt: new Date(),
         updatedAt: new Date(),
+        type: ContentType.ARTICLE,
     });
 
     if (contentResponse.isFailure()) {
