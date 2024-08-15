@@ -4,6 +4,7 @@ import {
     failure,
     FailureOrSuccess,
     success,
+    UnexpectedError,
 } from "src/core/logic";
 import { Datadog, openai } from "src/utils";
 import { inngest } from "../clients";
@@ -14,9 +15,12 @@ import { AudioService } from "src/shared/audioService";
 import axios from "axios";
 import { TranscribeService } from "src/modules/content/services/transcribeService";
 import { ContentService } from "src/modules/content/services/contentService";
-import { ContentChunk } from "src/core/infra/postgres/entities";
+import { Content, ContentChunk } from "src/core/infra/postgres/entities";
 import { v4 as uuidv4 } from "uuid";
 import { parseBuffer, parseFile } from "music-metadata";
+import * as pgvector from "pgvector/pg";
+
+const hash = require("object-hash");
 
 const NAME = "Process Content";
 const CONCURRENCY = 50;
@@ -80,7 +84,7 @@ export const _transcribeContent = async (contentId: string) => {
 
     const content = contentResponse.value;
 
-    if (!content.content) {
+    if (!!content.content) {
         return Promise.resolve();
     }
 
@@ -113,13 +117,18 @@ export const _transcribeContent = async (contentId: string) => {
 };
 
 export const _embedContent = async (contentId: string) => {
-    const contentResponse = await contentRepo.findById(contentId);
+    const contentResponse = await contentRepo.findById(contentId, {
+        relations: {
+            chunks: true,
+        },
+    });
 
     if (contentResponse.isFailure()) {
         throw contentResponse.error;
     }
 
     const content = contentResponse.value;
+
     const fullContent = content.content;
 
     const chunks = ContentService.chunkContent(fullContent || "");
@@ -135,12 +144,14 @@ export const _embedContent = async (contentId: string) => {
         }
 
         const embedding = embeddingResponse.value;
+        const idempotency = hash({ contentId, chunk });
 
         const contentChunk: ContentChunk = {
             id: uuidv4(),
+            idempotency,
             chunkIndex: i,
             transcript: chunk,
-            embedding,
+            embedding: pgvector.toSql(embedding),
             content,
             contentId: content.id,
         };
@@ -148,10 +159,16 @@ export const _embedContent = async (contentId: string) => {
         allChunks.push(contentChunk);
     }
 
-    const response = await contentChunkRepo.insert(allChunks);
+    const deleteResponse = await contentChunkRepo.deleteByContent(content.id);
 
-    if (response.isFailure()) {
-        throw response.error;
+    if (deleteResponse.isFailure()) {
+        throw deleteResponse.error;
+    }
+
+    const insertResponse = await contentChunkRepo.insert(allChunks);
+
+    if (insertResponse.isFailure()) {
+        throw insertResponse.error;
     }
 
     return Promise.resolve();
@@ -168,20 +185,13 @@ export const _convertToAudio = async (contentId: string) => {
 
     if (content.audioUrl) {
         if (!content.lengthMs) {
-            // get the audio length
-            const response = await axios.get(content.audioUrl, {
-                responseType: "arraybuffer",
-            });
+            const response = await _getAudioDuration(content);
 
-            const buffer = Buffer.from(response.data);
+            if (response.isFailure()) {
+                throw response.error;
+            }
 
-            // Parse the audio metadata
-            const metadata = await parseBuffer(buffer, "audio/mpeg");
-            const durationMS = (metadata.format.duration ?? 0) * 1_000;
-
-            await contentRepo.update(content.id, {
-                lengthMs: durationMS,
-            });
+            return Promise.resolve();
         }
 
         return Promise.resolve();
@@ -204,6 +214,36 @@ export const _convertToAudio = async (contentId: string) => {
     }
 
     return Promise.resolve();
+};
+
+const _getAudioDuration = async (
+    content: Content
+): Promise<FailureOrSuccess<DefaultErrors, null>> => {
+    try {
+        // get the audio length
+
+        if (!content.audioUrl) {
+            return success(null);
+        }
+
+        const response = await axios.get(content.audioUrl, {
+            responseType: "arraybuffer",
+        });
+
+        const buffer = Buffer.from(response.data);
+
+        // Parse the audio metadata
+        const metadata = await parseBuffer(buffer, "audio/mpeg");
+        const durationMS = Math.ceil((metadata.format.duration ?? 0) * 1_000);
+
+        await contentRepo.update(content.id, {
+            lengthMs: durationMS,
+        });
+
+        return success(null);
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
 };
 
 export const _markContentProcessed = async (contentId: string) => {

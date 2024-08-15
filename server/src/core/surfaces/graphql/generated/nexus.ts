@@ -160,7 +160,7 @@ export interface NexusGenFieldTypes {
     name: string; // String!
   }
   Content: { // field return type
-    audioUrl: string; // String!
+    audioUrl: string | null; // String
     authorImageUrl: string | null; // String
     authorName: string | null; // String
     authors: NexusGenRootTypes['Author'][] | null; // [Author!]
@@ -170,7 +170,7 @@ export interface NexusGenFieldTypes {
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][]; // [FollowUpQuestion!]!
     id: string; // String!
-    lengthMs: number; // Int!
+    lengthMs: number | null; // Int
     lengthSeconds: number; // Int!
     sourceImageUrl: string | null; // String
     summary: string | null; // String

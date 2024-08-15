@@ -186,6 +186,19 @@ export class PostgresContentChunkRepository {
         }
     }
 
+    deleteByContent = async (
+        contentId: string,
+        dbTxn?: EntityManager
+    ): Promise<ContentChunkArrayResponse> => {
+        return Helpers.trySuccessFail(async () => {
+            const res = dbTxn
+                ? await dbTxn.delete(this.model, { contentId })
+                : await this.repo.delete({ contentId });
+
+            return success(res);
+        });
+    };
+
     // hard delete
     async delete(userId: string): Promise<ContentChunkResponse> {
         try {

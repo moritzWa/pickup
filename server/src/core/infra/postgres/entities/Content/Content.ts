@@ -139,9 +139,8 @@ export class Content {
     })
     referenceId!: string | null;
 
-    @OneToMany(() => ContentChunk, (t) => t.content, {
-        eager: false,
-    })
+    @OneToMany(() => ContentChunk, (t) => t.content)
+    // join on the content_id column of the chunks table
     chunks!: Relation<ContentChunk[]>;
 
     @Column({

@@ -1,6 +1,7 @@
 import {
     Column,
     Entity,
+    JoinColumn,
     ManyToOne,
     PrimaryGeneratedColumn,
     Relation,
@@ -17,6 +18,15 @@ export class ContentChunk {
         type: "text",
     })
     chunkIndex!: number;
+
+    @Column({
+        name: "idempotency",
+        type: "text",
+        unique: true,
+        // generate uuid v4
+        default: () => "uuid_generate_v4()",
+    })
+    idempotency!: string;
 
     @Column({
         name: "transcript",
@@ -36,6 +46,7 @@ export class ContentChunk {
     })
     contentId!: string;
 
-    @ManyToOne(() => Content, (c) => c.chunks, { lazy: true })
+    @ManyToOne(() => Content, (c) => c.chunks)
+    @JoinColumn({ name: "content_id" })
     content!: Relation<Content>;
 }
