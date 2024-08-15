@@ -57,8 +57,8 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
       {currentContent ? <CurrentAudio content={currentContent} /> : null}
 
       <BlurView
-        intensity={50} // You can adjust the intensity of the blur
-        tint={theme}
+        intensity={75} // You can adjust the intensity of the blur
+        tint={theme === "light" ? "extraLight" : "dark"}
         style={{
           flexDirection: "column",
           width: "100%",
@@ -77,7 +77,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
           style={{
             paddingTop: 20,
             paddingHorizontal: 20,
-            maxWidth: 325,
+            maxWidth: 375,
             alignSelf: "center",
             flexDirection: "row",
             paddingBottom: 0,
@@ -186,7 +186,7 @@ const SingleTab = ({
           height: 24,
         }}
         resizeMode="contain"
-        tintColor={isFocused ? fullTheme.textPrimary : fullTheme.textSubtle}
+        tintColor={isFocused ? fullTheme.textPrimary : fullTheme.text}
         source={isFocused ? image?.active : image?.image}
       />
 

@@ -20,7 +20,7 @@ import {
   QueryGetActivityArgs,
 } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
-import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
+import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -57,9 +57,7 @@ const Activity = () => {
     api.content.activity
   );
 
-  const [startCourse] = useMutation(api.courses.start);
-
-  const content = (data?.getActivity ?? []) as BaseContentFields[];
+  const content = [] as any[];
 
   const onRefresh = async () => {
     await refetch();
@@ -71,9 +69,7 @@ const Activity = () => {
         style={{
           alignItems: "center",
         }}
-      >
-        <Options />
-      </View>
+      ></View>
 
       <FlatList
         data={content}

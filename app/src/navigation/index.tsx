@@ -40,6 +40,7 @@ import Signup from "../views/Authentication/Signup";
 import { LINKING } from "./linking";
 import { TabBar } from "./TabBar";
 import Queue from "src/views/Main/Queue";
+import Activity from "src/views/Main/Activity";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -190,13 +191,13 @@ const MainTabNavigation = () => {
         component={ContentSession}
       /> */}
 
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="Activity"
         options={{
           headerShown: false,
         }}
         component={Activity}
-      /> */}
+      />
 
       <Tabs.Screen
         name="Profile"
