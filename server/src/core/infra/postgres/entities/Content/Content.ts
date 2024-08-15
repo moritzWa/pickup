@@ -165,4 +165,11 @@ export class Content {
         name: "deleted_at",
     })
     deletedAt?: Date;
+
+    @Column({
+        name: "published_at",
+        nullable: true,
+        type: "timestamp",
+    })
+    publishedAt!: Date | null;
 }

@@ -17,7 +17,7 @@ const scrapeSomethingWonderful = async () => {
     let totalNewAuthors = 0;
     let consecutiveEmptyBatches = 0;
 
-    while (consecutiveEmptyBatches < 3) {
+    while (consecutiveEmptyBatches < 10) {
         console.log(`Starting batch ${batchNumber}`);
         try {
             await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
@@ -125,7 +125,6 @@ const scrapeSomethingWonderful = async () => {
                     .getRepository(Content)
                     .findOne({
                         where: {
-                            title: article.title,
                             websiteUrl: article.url,
                         },
                     });
