@@ -79,12 +79,15 @@ export class PostgresContentRepository {
         });
     }
 
-    async findById(userId: string): Promise<ContentResponse> {
+    async findById(
+        userId: string,
+        opts?: FindOneOptions<ContentModel>
+    ): Promise<ContentResponse> {
         try {
-            const user = await this.repo
-                .createQueryBuilder()
-                .where("id = :userId", { userId })
-                .getOne();
+            const user = await this.repo.findOne({
+                ...opts,
+                where: { ...opts?.where, id: userId },
+            });
 
             if (!user) {
                 return failure(new NotFoundError("Content not found."));

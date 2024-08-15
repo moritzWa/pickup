@@ -4,6 +4,7 @@ import {
     failure,
     FailureOrSuccess,
     success,
+    UnexpectedError,
 } from "src/core/logic";
 import { Datadog, openai } from "src/utils";
 import { inngest } from "../clients";
@@ -12,11 +13,17 @@ import { NonRetriableError, slugify } from "inngest";
 import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
 import axios from "axios";
-import { TranscribeService } from "src/modules/content/services/transcribeService";
+import {
+    AudioDataChunk,
+    TranscribeService,
+} from "src/modules/content/services/transcribeService";
 import { ContentService } from "src/modules/content/services/contentService";
-import { ContentChunk } from "src/core/infra/postgres/entities";
+import { Content, ContentChunk } from "src/core/infra/postgres/entities";
 import { v4 as uuidv4 } from "uuid";
 import { parseBuffer, parseFile } from "music-metadata";
+import * as pgvector from "pgvector/pg";
+
+const hash = require("object-hash");
 
 const NAME = "Process Content";
 const CONCURRENCY = 50;
@@ -37,11 +44,13 @@ const processContent = inngest.createFunction(
             _checkIfProcessed(contentId)
         );
 
-        await step.run("transcribe-content", async () =>
+        const chunks = await step.run("transcribe-content", async () =>
             _transcribeContent(contentId)
         );
 
-        await step.run("embed-content", async () => _embedContent(contentId));
+        await step.run("embed-content", async () =>
+            _embedContent(contentId, chunks)
+        );
 
         await step.run("generated-audio", async () =>
             _convertToAudio(contentId)
@@ -71,7 +80,9 @@ const _checkIfProcessed = async (contentId: string) => {
     return Promise.resolve();
 };
 
-const _transcribeContent = async (contentId: string) => {
+export const _transcribeContent = async (
+    contentId: string
+): Promise<AudioDataChunk[]> => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
@@ -80,13 +91,15 @@ const _transcribeContent = async (contentId: string) => {
 
     const content = contentResponse.value;
 
-    if (!content.content) {
-        return Promise.resolve();
-    }
+    // if (!!content.content) {
+    //     return [];
+    // }
 
     if (!content.audioUrl) {
         throw new NonRetriableError("No audio URL to transcribe");
     }
+
+    // debugger;
 
     // get the transcript. and then store it. don't need to chunk it
     const transcriptResponse = await TranscribeService.transcribeAudioUrl(
@@ -97,48 +110,61 @@ const _transcribeContent = async (contentId: string) => {
         throw transcriptResponse.error;
     }
 
-    const transcript = transcriptResponse.value;
+    const fullTranscript = transcriptResponse.value
+        .map((t) => t.transcript)
+        .join(" ");
 
     const updateTranscriptResponse = await contentRepo.update(content.id, {
-        content: transcript,
+        content: fullTranscript,
     });
 
     if (updateTranscriptResponse.isFailure()) {
         throw updateTranscriptResponse.error;
     }
 
-    return Promise.resolve();
+    return transcriptResponse.value;
 };
 
-const _embedContent = async (contentId: string) => {
-    const contentResponse = await contentRepo.findById(contentId);
+export const _embedContent = async (
+    contentId: string,
+    chunks: AudioDataChunk[]
+) => {
+    const contentResponse = await contentRepo.findById(contentId, {
+        relations: {
+            chunks: true,
+        },
+    });
 
     if (contentResponse.isFailure()) {
         throw contentResponse.error;
     }
 
     const content = contentResponse.value;
-    const fullContent = content.content;
-
-    const chunks = ContentService.chunkContent(fullContent || "");
 
     const allChunks: ContentChunk[] = [];
 
     for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
-        const embeddingResponse = await openai.embeddings.create(chunk);
+        const embeddingResponse = await openai.embeddings.create(
+            chunk.transcript
+        );
 
         if (embeddingResponse.isFailure()) {
             throw embeddingResponse.error;
         }
 
         const embedding = embeddingResponse.value;
+        const idempotency = hash({ contentId, chunk });
 
         const contentChunk: ContentChunk = {
             id: uuidv4(),
+            idempotency,
             chunkIndex: i,
-            transcript: chunk,
-            embedding,
+            audioUrl: chunk.firebaseUrl,
+            startTimeMs: Math.floor(chunk.start * 1_000),
+            endTimeMs: Math.floor(chunk.end * 1_000),
+            transcript: chunk.transcript,
+            embedding: pgvector.toSql(embedding),
             content,
             contentId: content.id,
         };
@@ -146,16 +172,22 @@ const _embedContent = async (contentId: string) => {
         allChunks.push(contentChunk);
     }
 
-    const response = await contentChunkRepo.insert(allChunks);
+    const deleteResponse = await contentChunkRepo.deleteByContent(content.id);
 
-    if (response.isFailure()) {
-        throw response.error;
+    if (deleteResponse.isFailure()) {
+        throw deleteResponse.error;
+    }
+
+    const insertResponse = await contentChunkRepo.insert(allChunks);
+
+    if (insertResponse.isFailure()) {
+        throw insertResponse.error;
     }
 
     return Promise.resolve();
 };
 
-const _convertToAudio = async (contentId: string) => {
+export const _convertToAudio = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
@@ -166,20 +198,13 @@ const _convertToAudio = async (contentId: string) => {
 
     if (content.audioUrl) {
         if (!content.lengthMs) {
-            // get the audio length
-            const response = await axios.get(content.audioUrl, {
-                responseType: "arraybuffer",
-            });
+            const response = await _getAudioDuration(content);
 
-            const buffer = Buffer.from(response.data);
+            if (response.isFailure()) {
+                throw response.error;
+            }
 
-            // Parse the audio metadata
-            const metadata = await parseBuffer(buffer, "audio/mpeg");
-            const durationMS = (metadata.format.duration ?? 0) * 1_000;
-
-            await contentRepo.update(content.id, {
-                lengthMs: durationMS,
-            });
+            return Promise.resolve();
         }
 
         return Promise.resolve();
@@ -204,7 +229,37 @@ const _convertToAudio = async (contentId: string) => {
     return Promise.resolve();
 };
 
-const _markContentProcessed = async (contentId: string) => {
+const _getAudioDuration = async (
+    content: Content
+): Promise<FailureOrSuccess<DefaultErrors, null>> => {
+    try {
+        // get the audio length
+
+        if (!content.audioUrl) {
+            return success(null);
+        }
+
+        const response = await axios.get(content.audioUrl, {
+            responseType: "arraybuffer",
+        });
+
+        const buffer = Buffer.from(response.data);
+
+        // Parse the audio metadata
+        const metadata = await parseBuffer(buffer, "audio/mpeg");
+        const durationMS = Math.ceil((metadata.format.duration ?? 0) * 1_000);
+
+        await contentRepo.update(content.id, {
+            lengthMs: durationMS,
+        });
+
+        return success(null);
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
+export const _markContentProcessed = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
