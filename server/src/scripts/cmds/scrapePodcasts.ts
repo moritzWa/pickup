@@ -1,6 +1,7 @@
 import { connect } from "src/core/infra/postgres";
 import { contentRepo } from "src/modules/content/infra";
 import { RSSFeedService } from "src/modules/content/services/rss/rssFeedService";
+import { ContentType } from "src/core/infra/postgres/entities/Content/Content";
 
 // https://pod.link/
 export const PODCASTS = [
@@ -97,7 +98,8 @@ const scrapePodcasts = async () => {
     for (const podcast of PODCASTS) {
         const contentResponse = await RSSFeedService.scrapeRssFeed(
             podcast.url,
-            podcast.name
+            podcast.name,
+            ContentType.PODCAST
         );
 
         if (contentResponse.isFailure()) {

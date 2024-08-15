@@ -18,6 +18,11 @@ export type FollowUpQuestion = {
     answer: string;
 };
 
+export enum ContentType {
+    ARTICLE = "article",
+    PODCAST = "podcast",
+}
+
 @Entity({
     name: "content",
 })
@@ -26,6 +31,16 @@ export class Content {
     id!: string;
 
     @Column({
+        nullable: false,
+        name: "type",
+        type: "enum",
+        enum: ContentType,
+        default: ContentType.ARTICLE,
+    })
+    type!: ContentType;
+
+    @Column({
+        // TODO: remove this column?
         nullable: true,
         name: "context",
         type: "text",
@@ -66,7 +81,7 @@ export class Content {
         name: "source_image_url",
         type: "text",
     })
-    sourceImageUrl!: string | null; // // not used
+    sourceImageUrl!: string | null; // not used
 
     @Column({
         nullable: true,

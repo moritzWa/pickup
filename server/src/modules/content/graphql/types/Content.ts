@@ -14,10 +14,7 @@ export const Content = objectType({
     name: "Content",
     definition(t) {
         t.nonNull.string("id");
-        t.nonNull.string("context");
-        // t.nonNull.string("audioUrl", {
-        //     resolve: (parent) => parent.audioUrl || "",
-        // });
+        t.nonNull.string("context"); // not used
         t.nullable.string("audioUrl");
         t.nullable.string("authorName", {
             resolve: (p) => (p.authors || [])[0]?.name,
@@ -35,11 +32,6 @@ export const Content = objectType({
         // categories list of string
         t.nonNull.list.nonNull.string("categories");
         t.nullable.string("summary");
-        // t.nonNull.int("lengthMs", {
-        //     resolve: (parent) => parent.lengthMs || 0,
-        // });
-        // t.nonNull.int("lengthSeconds", {
-        //     resolve: (content) => Math.ceil((content.lengthMs || 0) / 1000),
         t.nullable.int("lengthMs");
         t.nonNull.int("lengthSeconds", {
             resolve: (content) => Math.ceil(content.lengthMs ?? 0 / 1000),

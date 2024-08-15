@@ -1,5 +1,6 @@
 import * as Parser from "rss-parser";
 import { Content } from "src/core/infra/postgres/entities";
+import { ContentType } from "src/core/infra/postgres/entities/Content";
 import { DefaultErrors, FailureOrSuccess, success } from "src/core/logic";
 import { v4 as uuidv4 } from "uuid";
 
@@ -8,6 +9,7 @@ const parser = new Parser();
 const scrapeRssFeed = async (
     url: string,
     name: string,
+    contentType: ContentType = ContentType.PODCAST,
     _insertionId?: string
 ): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
     let insertionId = _insertionId || uuidv4();
@@ -43,6 +45,7 @@ const scrapeRssFeed = async (
             createdAt: new Date(),
             updatedAt: new Date(),
             chunks: [],
+            type: contentType,
         };
 
         allContent.push(content);
