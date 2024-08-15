@@ -435,7 +435,7 @@ const SingleFilter = ({
         style={{
           color: isActive ? theme.header : theme.text,
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 18,
+          fontSize: 24,
         }}
       >
         {label}
@@ -601,7 +601,7 @@ const Options = () => {
           <SingleFilter
             onPress={() => onPress(ContentFeedFilter.ForYou)}
             isActive={filter === ContentFeedFilter.ForYou}
-            label="Feed"
+            label="Your Feed"
           />
 
           {/* <SingleFilter
@@ -610,12 +610,12 @@ const Options = () => {
           label="Popular"
         /> */}
 
-          <SingleFilter
+          {/* <SingleFilter
             onPress={() => onPress(ContentFeedFilter.Queue)}
             isActive={filter === ContentFeedFilter.Queue}
             label="Queue"
             count={queueCount}
-          />
+          /> */}
 
           {/* <SingleFilter
             onPress={() => onPress(ContentFeedFilter.Archived)}

@@ -73,6 +73,7 @@ import {
   getQueue,
   setCurrentContent,
 } from "src/redux/reducers/audio";
+import { ContentRowImage } from "src/components/Content/ContentRow";
 
 const SIZE = 100;
 
@@ -259,21 +260,9 @@ const AudioPlayer = () => {
             padding: 10,
           }}
         >
-          {content?.thumbnailImageUrl ? (
-            <FastImage
-              source={{
-                uri: content?.thumbnailImageUrl,
-              }}
-              style={{
-                width: 50,
-                marginRight: 10,
-                height: 50,
-                borderRadius: 10,
-              }}
-            />
-          ) : null}
+          {content ? <ContentRowImage content={content} /> : null}
 
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, marginLeft: 10 }}>
             <Text
               style={{
                 color: theme.header,

@@ -58,7 +58,7 @@ import { useAudio } from "src/hooks/useAudio";
 import BigNumber from "bignumber.js";
 import { Track } from "react-native-track-player";
 
-export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
+export const CurrentAudio = () => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProps>();
 
@@ -158,7 +158,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
     return false;
   }, [activeContent, percentFinished]);
 
-  if (shouldHide) {
+  if (shouldHide || !activeContent) {
     return null;
   }
 
@@ -250,7 +250,7 @@ export const CurrentAudio = ({ content }: { content: BaseContentFields }) => {
           }}
           activeOpacity={1}
         >
-          <ContentRowImage content={content} />
+          <ContentRowImage content={activeContent} />
 
           <View
             style={{
@@ -357,6 +357,7 @@ const screenWidth = Dimensions.get("window").width;
 const MarqueeText = ({ title }: { title: string }) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
   const [textWidth, setTextWidth] = useState(0);
+  const theme = useTheme();
 
   useEffect(() => {
     if (title.length < 40) {
@@ -396,6 +397,7 @@ const MarqueeText = ({ title }: { title: string }) => {
         style={[
           styles.text,
           {
+            color: theme.header,
             // transform: [{ translateX }],
           },
         ]}
