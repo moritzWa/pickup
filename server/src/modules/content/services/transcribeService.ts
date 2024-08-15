@@ -20,7 +20,7 @@ console.log(ffmpegStatic);
 
 ffmpeg.setFfmpegPath(ffmpegStatic);
 
-const CHUNK_SIZE_SECONDS = 300; // 5 minutes
+const CHUNK_SIZE_SECONDS = 30; // 5 minutes
 
 async function splitAudio(
     filePath: string,
@@ -41,11 +41,11 @@ async function splitAudio(
                 .outputOptions(outputOptions)
                 .save(path.join(outputDir, "output%03d.m4a"))
                 .on("end", () => {
-                    debugger;
+                    // debugger;
                     resolve(success(null));
                 })
                 .on("error", (err) => {
-                    debugger;
+                    // debugger;
                     resolve(failure(new UnexpectedError(err)));
                 });
         } catch (err) {
@@ -104,7 +104,10 @@ const transcribeAudioUrl = async (
             );
 
             if (transcriptionResponse.isFailure()) {
-                return failure(transcriptionResponse.error);
+                debugger;
+                fullTranscript.push("MISSING SECTION");
+                continue; // FIXME:
+                // return failure(transcriptionResponse.error);
             }
 
             const transcript = transcriptionResponse.value;
@@ -118,8 +121,11 @@ const transcribeAudioUrl = async (
         // delete all files under the outputDir and the temp dir
         await fs.promises.unlink(tempFilePath);
 
+        debugger;
+
         return success(fullTranscript.join(" "));
     } catch (err) {
+        debugger;
         return failure(new UnexpectedError(err));
     }
 };
