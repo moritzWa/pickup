@@ -3,13 +3,18 @@ import {
     EntityManager,
     FindManyOptions,
     FindOneOptions,
+    In,
     IsNull,
+    Not,
     Raw,
     Repository,
 } from "typeorm";
 
 import { dataSource } from "src/core/infra/postgres";
-import { Content as ContentModel } from "src/core/infra/postgres/entities";
+import {
+    ContentChunk,
+    Content as ContentModel,
+} from "src/core/infra/postgres/entities";
 import { failure, FailureOrSuccess, success } from "src/core/logic";
 import { NotFoundError, UnexpectedError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
@@ -167,6 +172,87 @@ export class PostgresContentRepository {
         }
     }
 
+    async findSimilarContentFromChunks(
+        vector: number[],
+        limit: number = DEFAULT_LINKS_RETURN,
+        idsToExclude: string[]
+    ): Promise<SimilarContentWithDistanceResponse> {
+        try {
+            const result = await this.repo
+                .createQueryBuilder("content")
+                .select("content")
+                .addSelect(
+                    "AVG(chunks.embedding <-> :embedding)",
+                    "average_distance"
+                )
+                .addSelect(
+                    "MIN(chunks.embedding <-> :embedding)",
+                    "min_distance"
+                )
+                .innerJoin(
+                    ContentChunk,
+                    "chunks",
+                    "content.id = chunks.content_id"
+                )
+                .where({
+                    id: Not(In(idsToExclude)),
+                })
+                .setParameter("embedding", pgvector.toSql(vector))
+                .groupBy("content.id")
+                .orderBy("min_distance", "ASC")
+                .limit(limit)
+                .getRawAndEntities();
+
+            const linksWithDistance = result.entities.map((entity, index) => ({
+                ...entity,
+                averageDistance: parseFloat(result.raw[index].average_distance),
+                minDistance: parseFloat(result.raw[index].min_distance),
+            }));
+
+            return success(linksWithDistance);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async findSimilarContent(
+        vector: number[],
+        limit: number = DEFAULT_LINKS_RETURN,
+        idsToExclude: string[]
+    ): Promise<SimilarContentWithDistanceResponse> {
+        try {
+            const result = await this.repo
+                .createQueryBuilder("content")
+                .select("content")
+                .addSelect(
+                    "AVG(content.embedding <-> :embedding)",
+                    "average_distance"
+                )
+                .addSelect(
+                    "MIN(content.embedding <-> :embedding)",
+                    "min_distance"
+                )
+                .where({
+                    id: Not(In(idsToExclude)),
+                })
+                .setParameter("embedding", pgvector.toSql(vector))
+                .groupBy("content.id")
+                .orderBy("min_distance", "ASC")
+                .limit(limit)
+                .getRawAndEntities();
+
+            const linksWithDistance = result.entities.map((entity, index) => ({
+                ...entity,
+                averageDistance: parseFloat(result.raw[index].average_distance),
+                minDistance: parseFloat(result.raw[index].min_distance),
+            }));
+
+            return success(linksWithDistance);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async bulkUpdate(
         userIds: string[],
         updates: Partial<ContentModel>
@@ -276,38 +362,4 @@ export class PostgresContentRepository {
             return success(res);
         });
     };
-
-    async findSimilarContent(
-        vector: number[],
-        limit: number = DEFAULT_LINKS_RETURN
-    ): Promise<SimilarContentWithDistanceResponse> {
-        try {
-            const result = await this.repo
-                .createQueryBuilder("content")
-                .select("content")
-                .addSelect(
-                    "AVG(content.embedding <-> :embedding)",
-                    "average_distance"
-                )
-                .addSelect(
-                    "MIN(content.embedding <-> :embedding)",
-                    "min_distance"
-                )
-                .setParameter("embedding", pgvector.toSql(vector))
-                .groupBy("content.id")
-                .orderBy("min_distance", "ASC")
-                .limit(limit)
-                .getRawAndEntities();
-
-            const linksWithDistance = result.entities.map((entity, index) => ({
-                ...entity,
-                averageDistance: parseFloat(result.raw[index].average_distance),
-                minDistance: parseFloat(result.raw[index].min_distance),
-            }));
-
-            return success(linksWithDistance);
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
-    }
 }

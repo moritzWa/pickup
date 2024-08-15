@@ -9,7 +9,7 @@ import {
   Image,
   Animated,
 } from "react-native";
-import React, { useMemo, useRef } from "react";
+import React, { useContext, useMemo, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
@@ -20,7 +20,7 @@ import {
   QueryGetActivityArgs,
 } from "src/api/generated/types";
 import { NavigationProps } from "src/navigation";
-import { BaseContentFields, BaseCourseFields } from "src/api/fragments";
+import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -44,35 +44,113 @@ import {
 } from "src/redux/reducers/globalState";
 import * as Haptics from "expo-haptics";
 import { CurrentAudio } from "src/components/CurrentAudio";
+import { hasValue } from "src/core";
+import { AppContext } from "context";
+import { setCurrentContent } from "src/redux/reducers/audio";
 
 const Activity = () => {
   const navigation = useNavigation<NavigationProps>();
   const theme = useTheme();
 
-  const filter = useSelector(getActivityFilter);
+  const dispatch = useDispatch();
+  const { downloadAndPlayContent, toggle } = useContext(AppContext).audio!;
+  const [clear] = useMutation(api.queue.clear);
 
-  const variables = useMemo((): QueryGetActivityArgs => ({}), [filter]);
+  const {
+    data: queueData,
+    error: queueError,
+    refetch: refetchQueue,
+  } = useQuery<Pick<Query, "getQueue">>(api.queue.list, {
+    variables: {},
+    fetchPolicy: "cache-and-network",
+  });
 
-  const { data, refetch, error } = useQuery<Pick<Query, "getActivity">>(
-    api.content.activity
-  );
+  const content = useMemo((): BaseContentFields[] => {
+    return (queueData?.getQueue?.queue ?? [])
+      .map((q) => q.content as BaseContentFields)
+      .filter(hasValue);
+  }, [queueData?.getQueue?.queue]);
 
-  const [startCourse] = useMutation(api.courses.start);
+  const count = queueData?.getQueue?.total ?? 0;
 
-  const content = (data?.getActivity ?? []) as BaseContentFields[];
+  const onPlayContent = async (content: BaseContentFields) => {
+    // alert("play");
+    await downloadAndPlayContent(content);
+  };
+
+  const onTogglePlayOrPause = async (content: BaseContentFields) => {
+    // alert("toggle");
+    await toggle();
+    dispatch(setCurrentContent(content));
+  };
+
+  const clearQueue = async () => {
+    await clear({
+      refetchQueries: [api.queue.list, api.content.feed],
+    });
+  };
+
+  const onPressContent = async (content: BaseContentFields) => {
+    navigation.navigate("AudioPlayer", {
+      contentId: content.id,
+    });
+  };
 
   const onRefresh = async () => {
-    await refetch();
+    await refetchQueue();
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
         style={{
+          flexDirection: "row",
+          display: "flex",
           alignItems: "center",
+          padding: 10,
+          paddingHorizontal: 20,
         }}
       >
-        <Options />
+        <Text
+          style={{
+            color: theme.header,
+            fontFamily: "Raleway-Bold",
+            fontSize: 24,
+          }}
+        >
+          Your Queue
+        </Text>
+
+        {count ? (
+          <View
+            style={{
+              backgroundColor: colors.primary,
+              borderRadius: 100,
+              width: 20,
+              position: "relative",
+              top: 1,
+              height: 20,
+              marginLeft: 7,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: colors.white,
+                fontFamily: "sans-serif",
+                fontSize: 12,
+                fontWeight: "900",
+                position: "relative",
+                top: 0,
+              }}
+            >
+              {count}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       <FlatList
@@ -88,316 +166,38 @@ const Activity = () => {
         // hide scrollbar
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          padding: 10,
-          paddingTop: 15,
+          paddingTop: 5,
           paddingBottom: 150,
         }}
-        renderItem={({ item: c }) => <ContentRow content={c} />}
-      />
-
-      {/* <CurrentAudio content={content} /> */}
-    </SafeAreaView>
-  );
-};
-
-const SingleFilter = ({
-  label,
-  onPress,
-  isActive,
-}: {
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-}) => {
-  const theme = useTheme();
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.9}
-      style={{ flexDirection: "row", padding: 10 }}
-    >
-      <Text
-        style={{
-          color: isActive ? theme.header : theme.text,
-          fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 18,
-        }}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-};
-
-export enum DiscoveryTab {
-  All = "all",
-  Unread = "unread",
-  Popular = "popular",
-}
-
-const Options = () => {
-  const theme = useTheme();
-  const activeTab = useSelector(getActivityFilter);
-  const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
-  const dispatch = useDispatch();
-
-  const onPressIn = () => {
-    Animated.spring(animation, {
-      toValue: 0.9, // Scale down to 90%
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const onPressOut = () => {
-    Animated.spring(animation, {
-      toValue: 1, // Scale back to original size
-      friction: 3,
-      tension: 40,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const onPress = (tab: ActivityFilter) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    dispatch(setActivityFilter(tab));
-  };
-
-  return (
-    <View
-      style={{
-        paddingHorizontal: 5,
-        paddingBottom: 5,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "flex-start",
-        }}
-      >
-        <SingleFilter
-          onPress={() => onPress(ActivityFilter.New)}
-          isActive={ActivityFilter.New === activeTab}
-          label="New"
-        />
-
-        <SingleFilter
-          onPress={() => onPress(ActivityFilter.Unread)}
-          isActive={ActivityFilter.Unread === activeTab}
-          label="Unread only"
-        />
-      </View>
-
-      <TouchableOpacity
-        onPress={() => Alert.alert("hi")}
-        onPressIn={onPressIn}
-        onPressOut={onPressOut}
-        activeOpacity={0.9}
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          right: 15,
-          top: 0,
-          height: 35,
-          width: 35,
-          borderRadius: 100,
-          position: "absolute",
-          backgroundColor: colors.primary,
-        }}
-      >
-        <FontAwesomeIcon icon={faPlus} color={colors.white} size={18} />
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const old__CurrentAudio = ({ content }: { content: BaseContentFields[] }) => {
-  const theme = useTheme();
-  const navigation = useNavigation<NavigationProps>();
-
-  const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
-
-  const color = colors.purple90;
-
-  const handlePressIn = () => {
-    Animated.spring(animation, {
-      toValue: 0.8, // Scale down to 90%
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(animation, {
-      toValue: 1, // Scale back to original size
-      friction: 3,
-      tension: 40,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  return (
-    <BlurView
-      style={{
-        position: "absolute",
-        bottom: 92,
-        overflow: "hidden",
-        padding: 15,
-        paddingHorizontal: 0,
-        paddingBottom: 2,
-        // backgroundColor: colors.pink90,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        width: "100%",
-        borderTopColor: theme.border,
-        borderTopWidth: 1,
-      }}
-      intensity={75} // You can adjust the intensity of the blur
-      tint={theme.theme}
-      // colors={
-      //   theme.theme === "dark"
-      //     ? [colors.back, colors.primary, colors.pink70]
-      //     : [colors.pink70, colors.primary, colors.pink70]
-      // }
-      // start={{ x: 0, y: 0 }}
-      // end={{ x: 1, y: 0 }}
-    >
-      <TouchableOpacity
-        onPress={() => {
-          // just go to the first content
-          navigation.navigate("CarMode", {
-            contentId: content[0]?.id || "",
-            isCarMode: true,
-          });
-        }}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={{
-          paddingHorizontal: 10,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "100%",
-          flexDirection: "row",
-        }}
-        activeOpacity={1}
-      >
-        <Image
-          source={{
-            uri: "https://firebasestorage.googleapis.com/v0/b/learning-dev-ai.appspot.com/o/uploads%2Fpm.png?alt=media&token=3581d334-5f19-4ecc-a465-f7628b678a50",
-          }}
-          style={{ width: 40, height: 40, borderRadius: 10 }}
-        />
-
-        <View
-          style={{
-            marginLeft: 10,
-            flex: 1,
-            alignItems: "flex-start",
-          }}
-        >
-          <Text
-            style={{
-              flex: 1,
-              color: theme.text,
-              fontFamily: "Raleway-SemiBold",
-              textAlign: "center",
-              fontSize: 16,
-            }}
-            numberOfLines={1}
-          >
-            Social game: how to win and influencer
-          </Text>
-
+        ListEmptyComponent={
           <View
             style={{
-              display: "flex",
-              marginTop: 5,
-              flexDirection: "row",
+              flex: 1,
+              justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <FontAwesomeIcon
-              icon={faHeadphonesAlt}
-              color={theme.text}
-              size={12}
-              style={{ marginRight: 5 }}
-            />
-
             <Text
               style={{
                 color: theme.text,
-                fontFamily: "Raleway-Medium",
-                textAlign: "center",
-                fontSize: 14,
+                fontFamily: "Raleway-Bold",
+                fontSize: 16,
               }}
-              numberOfLines={1}
             >
-              2min left
+              Your queue is empty
             </Text>
           </View>
-        </View>
-
-        <Animated.View
-          style={{
-            marginLeft: 15,
-            width: 40,
-            height: 40,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 100,
-            backgroundColor: colors.primary,
-            alignSelf: "center",
-            transform: [{ scale: animation }],
-          }}
-        >
-          <FontAwesomeIcon
-            icon={faPlay}
-            color={colors.white}
-            size={18}
-            style={{ position: "relative", right: -2 }}
+        }
+        renderItem={({ item: c }) => (
+          <ContentRow
+            onPlay={() => onPlayContent(c)}
+            togglePlayOrPause={() => onTogglePlayOrPause(c)}
+            onPress={() => onPressContent(c)}
+            content={c}
           />
-        </Animated.View>
-      </TouchableOpacity>
-
-      {/* make a progress bar */}
-      <View
-        style={{
-          width: "95%",
-          height: 4,
-          marginBottom: 1,
-          marginHorizontal: 5,
-          alignSelf: "center",
-          backgroundColor: theme.border,
-          borderRadius: 10,
-          marginTop: 10,
-          overflow: "hidden",
-        }}
-      >
-        <LinearGradient
-          colors={[colors.purple80, colors.primary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{
-            width: "30%",
-            height: 4,
-            borderTopRightRadius: 10,
-            borderBottomRightRadius: 10,
-          }}
-        />
-      </View>
-    </BlurView>
+        )}
+      />
+    </SafeAreaView>
   );
 };
 

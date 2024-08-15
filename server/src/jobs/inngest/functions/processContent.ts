@@ -102,9 +102,11 @@ export const _transcribeContent = async (
     // debugger;
 
     // get the transcript. and then store it. don't need to chunk it
+    console.time("transcribe-" + content.id);
     const transcriptResponse = await TranscribeService.transcribeAudioUrl(
         content.audioUrl
     );
+    console.timeEnd("transcribe-" + content.id);
 
     if (transcriptResponse.isFailure()) {
         throw transcriptResponse.error;
@@ -210,7 +212,8 @@ export const _convertToAudio = async (contentId: string) => {
         return Promise.resolve();
     }
 
-    const audioResponse = await AudioService.generate(content.context);
+    // FIXME: need to test this
+    const audioResponse = await AudioService.generate(content.content || "");
 
     if (audioResponse.isFailure()) {
         throw audioResponse.error;

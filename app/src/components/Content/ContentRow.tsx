@@ -111,6 +111,8 @@ export const ContentRow = ({
           api.content.feed,
         ],
       });
+
+      swipeableRef.current?.close();
     } catch (err) {
       console.log(err);
     }
@@ -135,6 +137,8 @@ export const ContentRow = ({
         });
         console.log("added to queue");
       }
+
+      swipeableRef.current?.close();
     } catch (err) {
       console.log(err);
     }
@@ -187,7 +191,7 @@ export const ContentRow = ({
         paddingHorizontal: 20,
         display: "flex",
         height: "100%",
-        backgroundColor: isQueued ? theme.bgRed : theme.bgPrimary,
+        backgroundColor: theme.secondaryBackground,
         flexDirection: "row",
       }}
     >
@@ -199,49 +203,38 @@ export const ContentRow = ({
           alignItems: "center",
           display: "flex",
           flexDirection: "row",
-          width: 75,
-          height: 75,
+          backgroundColor: isQueued ? colors.red50 : colors.primary,
+          width: 55,
+          height: 55,
           borderRadius: 50,
           marginTop: 10,
+          marginRight: 15,
           marginBottom: 10,
         }}
       >
         {isQueued ? (
           <Image
             source={require("src/assets/icons/solid-list-circle-minus.png")}
-            tintColor={colors.red50}
+            tintColor={theme.secondaryBackground}
             resizeMode="contain"
             style={{
-              width: 30,
-              height: 30,
+              width: 22,
+              height: 22,
             }}
           />
         ) : (
           <Image
             source={require("src/assets/icons/solid-list-circle-plus.png")}
-            tintColor={colors.primary}
+            tintColor={theme.secondaryBackground}
             resizeMode="contain"
             style={{
-              width: 30,
-              height: 30,
+              width: 22,
+              height: 22,
             }}
           />
         )}
       </TouchableOpacity>
-    </View>
-  );
 
-  const renderLeftActions = () => (
-    <View
-      style={{
-        alignItems: "center",
-        paddingHorizontal: 20,
-        display: "flex",
-        height: "100%",
-        backgroundColor: theme.medBackground,
-        flexDirection: "row",
-      }}
-    >
       <TouchableOpacity
         onPress={onArchiveContent}
         activeOpacity={0.9}
@@ -250,14 +243,19 @@ export const ContentRow = ({
           alignItems: "center",
           display: "flex",
           flexDirection: "row",
-          width: 75,
-          height: 75,
+          backgroundColor: isActive ? theme.text : theme.text,
+          width: 55,
+          height: 55,
           borderRadius: 50,
           marginTop: 10,
           marginBottom: 10,
         }}
       >
-        <FontAwesomeIcon icon={faArchive} color={theme.text} size={24} />
+        <FontAwesomeIcon
+          icon={faArchive}
+          color={theme.secondaryBackground}
+          size={22}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -270,31 +268,30 @@ export const ContentRow = ({
 
   return (
     <Swipeable
-      renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
       overshootRight={false}
-      overshootLeft={false}
       ref={swipeableRef}
+      containerStyle={{
+        marginBottom: 10,
+        marginHorizontal: 10,
+        borderRadius: 15,
+        backgroundColor: theme.secondaryBackground,
+        borderColor: isActive ? theme.border : theme.border,
+        borderWidth: 1,
+      }}
     >
       <View
         style={{
+          shadowOffset: {
+            width: 0,
+            height: 0,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+          elevation: 5,
+          shadowColor: "#000",
           padding: 20,
-          borderRadius: 0,
-          borderColor: isActive
-            ? theme.bgPrimaryLight
-            : theme.secondaryBackground,
-          borderBottomWidth: 1,
           backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,
-          // shadow
-          // shadowColor: "#000",
-          // shadowOffset: {
-          //   width: 0,
-          //   height: 0,
-          // },
-          // shadowOpacity: 0.05,
-          // shadowRadius: 4,
-          // elevation: 5,
-          // marginBottom: 15,
         }}
       >
         <View>
@@ -390,7 +387,7 @@ export const ContentRow = ({
 
                 <View
                   style={{
-                    marginTop: 15,
+                    marginTop: 10,
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",

@@ -14,10 +14,24 @@ import { InngestEventName } from "src/jobs/inngest/types";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { LessThan, MoreThan, MoreThanOrEqual } from "typeorm";
 
-const getSimilarContent = async (
-    query: string
+const getSimilarContentFromQuery = async (
+    user: User,
+    query: string,
+    limit: number
 ): Promise<SimilarContentWithDistanceResponse> => {
     try {
+        const feedResponse = await feedRepo.findForUser(user.id, {
+            select: { contentId: true },
+        });
+
+        if (feedResponse.isFailure()) {
+            return failure(feedResponse.error);
+        }
+
+        const contentIds = new Set<string>(
+            feedResponse.value.map((f) => f.contentId)
+        );
+
         const embeddingResponse = await openai.embeddings.create(query);
 
         if (embeddingResponse.isFailure()) {
@@ -27,7 +41,45 @@ const getSimilarContent = async (
         const embedding = embeddingResponse.value;
 
         const similarContentResponse = await contentRepo.findSimilarContent(
-            embedding
+            embedding,
+            limit,
+            Array.from(contentIds)
+        );
+
+        return similarContentResponse;
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
+const getSimilarContent = async (
+    user: User,
+    content: Content,
+    limit: number
+): Promise<SimilarContentWithDistanceResponse> => {
+    try {
+        const feedResponse = await feedRepo.findForUser(user.id, {
+            select: { contentId: true },
+        });
+
+        if (feedResponse.isFailure()) {
+            return failure(feedResponse.error);
+        }
+
+        if (!content.embedding) {
+            return failure(
+                new UnexpectedError("Content does not have an embedding")
+            );
+        }
+
+        const contentIds = new Set<string>(
+            feedResponse.value.map((f) => f.contentId)
+        );
+
+        const similarContentResponse = await contentRepo.findSimilarContent(
+            content.embedding,
+            limit,
+            Array.from(contentIds)
         );
 
         return similarContentResponse;
@@ -200,6 +252,7 @@ const prev = async (
 
 export const ContentService = {
     getSimilarContent,
+    getSimilarContentFromQuery,
     enqueueContentForProcessing,
     chunkContent: splitTextIntoChunks,
     next,

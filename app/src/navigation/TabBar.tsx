@@ -15,6 +15,7 @@ import { hasIn, isNil } from "lodash";
 import { CurrentAudio } from "src/components/CurrentAudio";
 import { useSelector } from "react-redux";
 import { getCurrentContent } from "src/redux/reducers/audio";
+import { Query } from "src/api/generated/types";
 
 const HomeIcon = require("src/assets/icons/home.png");
 const HomeIconFilled = require("src/assets/icons/home-filled.png");
@@ -50,15 +51,23 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
     header,
   } = fullTheme;
   const { me } = useMe();
-  const currentContent = useSelector(getCurrentContent);
+
+  const { data: queueData, refetch: refetchQueue } = useQuery<
+    Pick<Query, "getQueue">
+  >(api.queue.list, {
+    variables: {},
+    fetchPolicy: "cache-and-network",
+  });
+
+  const queueCount = queueData?.getQueue?.queue?.length ?? 0;
 
   return (
     <>
-      {currentContent ? <CurrentAudio content={currentContent} /> : null}
+      <CurrentAudio />
 
       <BlurView
-        intensity={50} // You can adjust the intensity of the blur
-        tint={theme}
+        intensity={75} // You can adjust the intensity of the blur
+        tint={theme === "light" ? "extraLight" : "dark"}
         style={{
           flexDirection: "column",
           width: "100%",
@@ -77,7 +86,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
           style={{
             paddingTop: 20,
             paddingHorizontal: 20,
-            maxWidth: 325,
+            maxWidth: 375,
             alignSelf: "center",
             flexDirection: "row",
             paddingBottom: 0,
@@ -90,8 +99,8 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
                 index={index}
                 tabBarProps={tabBarProps}
                 route={route}
-                badgeCount={null}
-                badgeColor={index === 2 ? colors.yellow50 : null}
+                badgeCount={index === 1 ? queueCount : null}
+                badgeColor={index === 1 ? colors.primary : null}
               />
             );
           })}
@@ -186,15 +195,15 @@ const SingleTab = ({
           height: 24,
         }}
         resizeMode="contain"
-        tintColor={isFocused ? fullTheme.textPrimary : fullTheme.textSubtle}
+        tintColor={isFocused ? fullTheme.textPrimary : fullTheme.text}
         source={isFocused ? image?.active : image?.image}
       />
 
       {hasBadge ? (
         <View
           style={{
-            width: 18,
-            height: 18,
+            width: 20,
+            height: 20,
             backgroundColor: badgeColor ?? colors.red50,
             display: "flex",
             flexDirection: "row",
@@ -202,17 +211,20 @@ const SingleTab = ({
             justifyContent: "center",
             borderRadius: 100,
             position: "absolute",
-            right: 15,
-            bottom: paddingBottom - 8,
+            right: 30,
+            bottom: paddingBottom - 10,
+            borderColor: fullTheme.background,
+            borderWidth: 1,
           }}
         >
           {/* hack for friends tab to not show color */}
           {badgeColor !== colors.yellow50 ? (
             <Text
               style={{
-                fontFamily: "Raleway-Bold",
-                color: badgeColor ? colors.black : colors.white,
-                fontSize: 11,
+                fontFamily: "sans-serif",
+                color: colors.white,
+                fontSize: 12,
+                fontWeight: "900",
               }}
             >
               {badgeCount}
