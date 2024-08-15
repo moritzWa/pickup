@@ -66,7 +66,7 @@ export class Content {
         name: "source_image_url",
         type: "text",
     })
-    sourceImageUrl!: string | null;
+    sourceImageUrl!: string | null; // // not used
 
     @Column({
         nullable: true,
@@ -145,7 +145,7 @@ export class Content {
     chunks!: Relation<ContentChunk[]>;
 
     @Column({
-        name: "released_at",
+        name: "released_at", // aka published at
         nullable: true,
         type: "timestamp",
     })
@@ -165,11 +165,4 @@ export class Content {
         name: "deleted_at",
     })
     deletedAt?: Date;
-
-    @Column({
-        name: "published_at",
-        nullable: true,
-        type: "timestamp",
-    })
-    publishedAt!: Date | null;
 }

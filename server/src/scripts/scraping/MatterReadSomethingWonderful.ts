@@ -71,7 +71,7 @@ const scrapeMatterReadSomethingWonderful = async () => {
             content.title = article.title;
             content.websiteUrl = article.url;
             content.followUpQuestions = [];
-            content.publishedAt = new Date(article.publication_date);
+            content.releasedAt = new Date(article.publication_date);
             content.authors = author ? [author] : [];
 
             // Save the content entity

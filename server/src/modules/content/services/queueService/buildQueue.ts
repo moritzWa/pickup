@@ -116,7 +116,6 @@ const convertCuriusToContent = async (
         chunks: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-        publishedAt: link.createdDate,
     });
 
     if (contentResponse.isFailure()) {
