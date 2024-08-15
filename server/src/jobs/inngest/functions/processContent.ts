@@ -13,7 +13,10 @@ import { NonRetriableError, slugify } from "inngest";
 import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
 import axios from "axios";
-import { TranscribeService } from "src/modules/content/services/transcribeService";
+import {
+    AudioDataChunk,
+    TranscribeService,
+} from "src/modules/content/services/transcribeService";
 import { ContentService } from "src/modules/content/services/contentService";
 import { Content, ContentChunk } from "src/core/infra/postgres/entities";
 import { v4 as uuidv4 } from "uuid";
@@ -41,11 +44,13 @@ const processContent = inngest.createFunction(
             _checkIfProcessed(contentId)
         );
 
-        await step.run("transcribe-content", async () =>
+        const chunks = await step.run("transcribe-content", async () =>
             _transcribeContent(contentId)
         );
 
-        await step.run("embed-content", async () => _embedContent(contentId));
+        await step.run("embed-content", async () =>
+            _embedContent(contentId, chunks)
+        );
 
         await step.run("generated-audio", async () =>
             _convertToAudio(contentId)
@@ -75,7 +80,9 @@ const _checkIfProcessed = async (contentId: string) => {
     return Promise.resolve();
 };
 
-export const _transcribeContent = async (contentId: string) => {
+export const _transcribeContent = async (
+    contentId: string
+): Promise<AudioDataChunk[]> => {
     const contentResponse = await contentRepo.findById(contentId);
 
     if (contentResponse.isFailure()) {
@@ -84,9 +91,9 @@ export const _transcribeContent = async (contentId: string) => {
 
     const content = contentResponse.value;
 
-    if (!!content.content) {
-        return Promise.resolve();
-    }
+    // if (!!content.content) {
+    //     return [];
+    // }
 
     if (!content.audioUrl) {
         throw new NonRetriableError("No audio URL to transcribe");
@@ -103,20 +110,25 @@ export const _transcribeContent = async (contentId: string) => {
         throw transcriptResponse.error;
     }
 
-    const transcript = transcriptResponse.value;
+    const fullTranscript = transcriptResponse.value
+        .map((t) => t.transcript)
+        .join(" ");
 
     const updateTranscriptResponse = await contentRepo.update(content.id, {
-        content: transcript,
+        content: fullTranscript,
     });
 
     if (updateTranscriptResponse.isFailure()) {
         throw updateTranscriptResponse.error;
     }
 
-    return Promise.resolve();
+    return transcriptResponse.value;
 };
 
-export const _embedContent = async (contentId: string) => {
+export const _embedContent = async (
+    contentId: string,
+    chunks: AudioDataChunk[]
+) => {
     const contentResponse = await contentRepo.findById(contentId, {
         relations: {
             chunks: true,
@@ -129,15 +141,13 @@ export const _embedContent = async (contentId: string) => {
 
     const content = contentResponse.value;
 
-    const fullContent = content.content;
-
-    const chunks = ContentService.chunkContent(fullContent || "");
-
     const allChunks: ContentChunk[] = [];
 
     for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
-        const embeddingResponse = await openai.embeddings.create(chunk);
+        const embeddingResponse = await openai.embeddings.create(
+            chunk.transcript
+        );
 
         if (embeddingResponse.isFailure()) {
             throw embeddingResponse.error;
@@ -150,7 +160,10 @@ export const _embedContent = async (contentId: string) => {
             id: uuidv4(),
             idempotency,
             chunkIndex: i,
-            transcript: chunk,
+            audioUrl: chunk.firebaseUrl,
+            startTimeMs: Math.floor(chunk.start * 1_000),
+            endTimeMs: Math.floor(chunk.end * 1_000),
+            transcript: chunk.transcript,
             embedding: pgvector.toSql(embedding),
             content,
             contentId: content.id,

@@ -20,6 +20,28 @@ export class ContentChunk {
     chunkIndex!: number;
 
     @Column({
+        name: "start_time_ms",
+        type: "integer",
+        nullable: true,
+    })
+    startTimeMs!: number | null;
+
+    @Column({
+        name: "end_time_ms",
+        type: "integer",
+        nullable: true,
+    })
+    endTimeMs!: number | null;
+
+    // the file url
+    @Column({
+        name: "audio_url",
+        type: "text",
+        nullable: true,
+    })
+    audioUrl!: string | null;
+
+    @Column({
         name: "idempotency",
         type: "text",
         unique: true,

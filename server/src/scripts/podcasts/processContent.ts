@@ -15,9 +15,9 @@ import {
 import { connect } from "src/core/infra/postgres";
 
 const processContent = async (contentId: string) => {
-    await _transcribeContent(contentId);
+    const chunks = await _transcribeContent(contentId);
 
-    await _embedContent(contentId);
+    await _embedContent(contentId, chunks);
 
     await _convertToAudio(contentId);
 
