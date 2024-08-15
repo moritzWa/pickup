@@ -1,11 +1,4 @@
 import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
-import { AudioService } from "src/shared/audioService";
-import axios from "axios";
-import { TranscribeService } from "src/modules/content/services/transcribeService";
-import { ContentService } from "src/modules/content/services/contentService";
-import { ContentChunk } from "src/core/infra/postgres/entities";
-import { v4 as uuidv4 } from "uuid";
-import { parseBuffer, parseFile } from "music-metadata";
 import {
     _convertToAudio,
     _embedContent,
@@ -13,33 +6,105 @@ import {
     _transcribeContent,
 } from "src/jobs/inngest/functions/processContent";
 import { connect } from "src/core/infra/postgres";
+import { parallel } from "radash";
+import { failure, success, UnexpectedError } from "src/core/logic";
+import { openai } from "src/utils";
+import * as pgvector from "pgvector/pg";
+import { chunk } from "lodash";
 
 const processContent = async (contentId: string) => {
-    const chunks = await _transcribeContent(contentId);
+    try {
+        const chunks = await _transcribeContent(contentId);
 
-    await _embedContent(contentId, chunks);
+        await _embedContent(contentId, chunks);
 
-    await _convertToAudio(contentId);
+        await _convertToAudio(contentId);
 
-    await _markContentProcessed(contentId);
+        await _markContentProcessed(contentId);
 
-    return Promise.resolve();
+        return success(null);
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
+const _embedContentV2 = async (contentId: string) => {
+    const contentResponse = await contentRepo.findById(contentId);
+
+    if (contentResponse.isFailure()) {
+        return failure(contentResponse.error);
+    }
+
+    const content = contentResponse.value;
+
+    if (!content.summary) {
+        console.log(`[no summary for ${content.title}]`);
+        return Promise.resolve();
+    }
+    const embeddingResponse = await openai.embeddings.create(
+        `Title: ${content.title}. Summary: ${content.summary || ""}`
+    );
+
+    if (embeddingResponse.isFailure()) {
+        throw embeddingResponse.error;
+    }
+
+    const embedding = embeddingResponse.value;
+
+    await contentRepo.update(content.id, {
+        embedding: pgvector.toSql(embedding),
+    });
+
+    return content.id;
+};
+
+const processContentV2 = async (contentId: string) => {
+    try {
+        await _embedContentV2(contentId);
+
+        await _markContentProcessed(contentId);
+
+        return success(null);
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
 };
 
 const run = async () => {
     const contentResponse = await contentRepo.find({
         where: {
-            id: "fd31ac8c-138c-40b0-a65a-2c9d28854298",
-            // isProcessed: false,
+            isProcessed: false,
         },
-        take: 1,
+        select: { id: true },
+        // take: 250,
     });
 
     const content = contentResponse.value;
 
-    for (const c of content) {
-        await processContent(c.id);
+    console.time("processContent");
+
+    // chunks of 10
+    const results = chunk(content, 10);
+
+    console.time("processContent");
+
+    let completed = 0;
+    for (let i = 0; i < results.length; i++) {
+        // every 100, log completion out of total
+        if (completed % 50 === 0) {
+            console.log(`completed ${completed} of ${content.length}`);
+        }
+
+        const chunk = results[i];
+
+        await Promise.all(chunk.map(async (c) => processContentV2(c.id)));
+
+        completed += chunk.length;
     }
+
+    console.timeEnd("processContent");
+
+    debugger;
 };
 
 // if main file, run it

@@ -4,6 +4,7 @@ import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
+    hasValue,
     success,
 } from "src/core/logic";
 import { authorRepo } from "src/modules/author/infra";
@@ -15,8 +16,13 @@ import {
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, feedRepo } from "../../infra";
+import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
 import moment = require("moment");
+import { openai } from "src/utils";
+import { ContentWithDistance } from "../../infra/contentRepo";
+import { ContentService } from "../contentService";
+import { orderBy } from "lodash";
+import { MoreThan } from "typeorm";
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -25,20 +31,89 @@ export const buildQueue = async (
 ): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
     const categories = user.interestCategories.join(" ");
     const description = user.interestDescription;
-    const rawQuery = `${categories} ${description}`;
 
-    // TODO:
-    const similarContentResponse = await contentRepo.find({
+    const feedResponse = await feedRepo.findForUser(user.id, {
+        select: { contentId: true },
+    });
+
+    if (feedResponse.isFailure()) {
+        return failure(feedResponse.error);
+    }
+
+    const recentlyLikedContentResponse = await contentSessionRepo.find({
+        where: {
+            userId: user.id,
+            isBookmarked: true,
+            isLiked: true,
+            currentMs: MoreThan(15_000),
+        },
+        select: {
+            id: true,
+        },
+        relations: { content: true },
+        order: {
+            lastListenedAt: "desc",
+        },
         take: 10,
     });
 
-    if (similarContentResponse.isFailure()) {
-        return failure(similarContentResponse.error);
+    if (recentlyLikedContentResponse.isFailure()) {
+        return failure(recentlyLikedContentResponse.error);
     }
 
-    const similarContent = similarContentResponse.value;
+    const recentlyLikedContent = recentlyLikedContentResponse.value.map(
+        (c) => c.content
+    );
 
-    const queueResponse = await buildQueueFromContent(user, similarContent);
+    const queries = [
+        (description || "").slice(0, 4_000),
+        ...user.interestCategories.map((c) => c.toLowerCase()),
+    ];
+
+    const allContent: { content: ContentWithDistance[]; query: string }[] = [];
+
+    // FIXME: at some point maybe cache these bc they cost money to do
+    for (const query of queries) {
+        const similarContentResponse =
+            await ContentService.getSimilarContentFromQuery(user, query, 10);
+
+        if (similarContentResponse.isFailure()) {
+            continue;
+        }
+
+        allContent.push({
+            content: similarContentResponse.value,
+            query,
+        });
+    }
+
+    for (const content of recentlyLikedContent) {
+        const similarContentResponse = await ContentService.getSimilarContent(
+            user,
+            content,
+            10
+        );
+
+        if (similarContentResponse.isFailure()) {
+            continue;
+        }
+
+        allContent.push({
+            content: similarContentResponse.value,
+            query: `Content like: ${content.title}`,
+        });
+    }
+
+    // relevant to not as relevant
+    const rankedContent = orderBy(
+        allContent.flatMap((c) => c.content),
+        (c) => c.averageDistance,
+        "asc"
+    ).slice(0, limit);
+
+    debugger;
+
+    const queueResponse = await buildQueueFromContent(user, rankedContent);
 
     return queueResponse;
 };
@@ -47,12 +122,11 @@ const buildQueueFromContent = async (
     user: User,
     content: Content[]
 ): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
-    // TODO: we need to then make a queue here
     const queueResponses = await Promise.all(
-        content.map((c, i) =>
+        content.reverse().map((c, i) =>
             feedRepo.create({
                 id: uuidv4(),
-                position: i,
+                position: Date.now() + i, // date + the index
                 isQueued: false,
                 isArchived: false,
                 queuedAt: null,

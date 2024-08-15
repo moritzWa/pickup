@@ -99,7 +99,7 @@ async function uploadBufferToFirebase(
 
         return success({ originalUrl });
     } catch (error) {
-        debugger;
+        // debugger;
 
         return failure(new UnexpectedError(error));
     }

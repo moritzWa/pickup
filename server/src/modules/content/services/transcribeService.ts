@@ -13,7 +13,7 @@ import {
 } from "src/core/logic";
 import * as ffmpeg from "fluent-ffmpeg";
 import { v4 as uuidv4 } from "uuid";
-import { parallel } from "radash";
+import { performance } from "perf_hooks";
 
 // const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpegStatic = require("ffmpeg-static");
@@ -65,6 +65,9 @@ async function splitAudio(
 const transcribeAudioUrl = async (
     url: string
 ): Promise<FailureOrSuccess<DefaultErrors, AudioDataChunk[]>> => {
+    const startTime = performance.now();
+    console.log(`[Performance] Starting transcription for URL: ${url}`);
+
     try {
         const audioResponse = await axios({
             method: "get",
@@ -86,11 +89,23 @@ const transcribeAudioUrl = async (
         // Write the audio data to the temporary file
         await fs.promises.writeFile(tempFilePath, Buffer.from(data));
 
+        console.log(
+            `[Performance] Audio download completed in ${
+                performance.now() - startTime
+            }ms`
+        );
+
         const splitAudioResponse = await splitAudio(tempFilePath, outputDir);
 
         if (splitAudioResponse.isFailure()) {
             return failure(splitAudioResponse.error);
         }
+
+        console.log(
+            `[Performance] Audio splitting completed in ${
+                performance.now() - startTime
+            }ms`
+        );
 
         const files = fs
             .readdirSync(outputDir)
@@ -101,10 +116,9 @@ const transcribeAudioUrl = async (
             index: i,
         }));
 
-        const chunks = await parallel(
-            5,
-            filesWithIndex,
-            async (fileWithIndex): Promise<AudioDataChunk | null> => {
+        const chunkStartTime = performance.now();
+        const chunks = await Promise.all(
+            filesWithIndex.map(async (fileWithIndex) => {
                 const fileName = fileWithIndex.name;
                 const i = fileWithIndex.index;
 
@@ -148,20 +162,40 @@ const transcribeAudioUrl = async (
                     end,
                     firebaseUrl: storedFile.originalUrl,
                 };
-            }
+            })
+        );
+
+        console.log(
+            `[Performance] Chunk processing completed in ${
+                performance.now() - chunkStartTime
+            }ms`
         );
 
         const failures = chunks.filter((c) => c === null);
 
         if (failures.length > 0) {
             console.log(`[failures for content ${url}]`);
+            console.log(failures);
+            debugger;
         }
 
         // delete all files under the outputDir and the temp dir
-        await fs.promises.unlink(tempFilePath);
+        await Promise.all([
+            fs.promises.unlink(tempFilePath),
+            fs.promises.rmdir(outputDir, { recursive: true }),
+        ]);
+
+        const endTime = performance.now();
+        console.log(
+            `[Performance] Total transcription time: ${endTime - startTime}ms`
+        );
 
         return success(chunks.filter(hasValue));
     } catch (err) {
+        const endTime = performance.now();
+        console.error(
+            `[Performance] Transcription failed after ${endTime - startTime}ms`
+        );
         return failure(new UnexpectedError(err));
     }
 };

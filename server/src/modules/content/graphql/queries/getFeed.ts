@@ -41,8 +41,7 @@ export const getFeed = queryField("getFeed", {
             take: limit ?? 0,
             relations: { content: true },
             order: {
-                position: "asc",
-                createdAt: "desc",
+                position: "desc",
             },
         });
 

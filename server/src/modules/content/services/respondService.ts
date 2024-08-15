@@ -40,7 +40,7 @@ const respond = async (
         },
         {
             role: "user",
-            content: transcription,
+            content: "",
         },
     ];
 
@@ -82,7 +82,7 @@ const respond = async (
     const upload = uploadResponse.value;
 
     return success({
-        transcription: transcription,
+        transcription: "",
         response: response,
         responseAudioUrl: upload.originalUrl,
     });
@@ -146,7 +146,7 @@ const respondToContent = async (
         // ),
         {
             role: "user",
-            content: transcription,
+            content: "",
         },
     ];
 
@@ -214,7 +214,7 @@ const respondToContent = async (
     // });
 
     return success({
-        transcription: transcription,
+        transcription: "",
         response: response,
         responseAudioUrl: upload.originalUrl,
     });
