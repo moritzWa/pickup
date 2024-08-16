@@ -200,7 +200,7 @@ export const _convertToAudio = async (contentId: string) => {
 
     if (content.audioUrl) {
         if (!content.lengthMs) {
-            const response = await _getAudioDuration(content);
+            const response = await _updateAudioDuration(content);
 
             if (response.isFailure()) {
                 throw response.error;
@@ -232,9 +232,9 @@ export const _convertToAudio = async (contentId: string) => {
     return Promise.resolve();
 };
 
-const _getAudioDuration = async (
-    content: Content
-): Promise<FailureOrSuccess<DefaultErrors, null>> => {
+export const _updateAudioDuration = async (
+    content: Pick<Content, "id" | "audioUrl">
+): Promise<FailureOrSuccess<DefaultErrors, Content | null>> => {
     try {
         // get the audio length
 
@@ -252,11 +252,9 @@ const _getAudioDuration = async (
         const metadata = await parseBuffer(buffer, "audio/mpeg");
         const durationMS = Math.ceil((metadata.format.duration ?? 0) * 1_000);
 
-        await contentRepo.update(content.id, {
+        return await contentRepo.update(content.id, {
             lengthMs: durationMS,
         });
-
-        return success(null);
     } catch (err) {
         return failure(new UnexpectedError(err));
     }

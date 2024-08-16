@@ -100,6 +100,8 @@ const Activity = () => {
     await refetchQueue();
   };
 
+  console.log(queueError);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View

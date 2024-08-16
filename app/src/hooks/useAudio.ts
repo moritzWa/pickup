@@ -234,22 +234,21 @@ const useAudioHook = () => {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
+    if (hours === 0 && minutes === 0) {
+      return `${seconds}s`;
+    }
+
     let timeString = "";
 
     if (hours > 0) {
       timeString += `${hours}:`;
     }
 
-    if (minutes > 0 || hours > 0) {
-      // include minutes if hours are present
-      timeString += `${minutes}:`;
-    }
+    // Ensure minutes are always displayed if there are hours
+    timeString += `${hours > 0 ? String(minutes).padStart(2, "0") : minutes}:`;
 
-    timeString += `${seconds}`;
-
-    if (timeString === seconds.toString()) {
-      return `${timeString}s`;
-    }
+    // Always pad seconds to 2 digits
+    timeString += String(seconds).padStart(2, "0");
 
     return timeString;
   }, [leftMs]);

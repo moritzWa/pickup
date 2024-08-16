@@ -166,10 +166,11 @@ export interface NexusGenFieldTypes {
     authors: NexusGenRootTypes['Author'][] | null; // [Author!]
     categories: string[]; // [String!]!
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
-    context: string; // String!
+    context: string | null; // String
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][] | null; // [FollowUpQuestion!]
     id: string; // String!
+    lengthFormatted: string | null; // String
     lengthMs: number | null; // Int
     lengthSeconds: number; // Int!
     sourceImageUrl: string | null; // String
@@ -374,6 +375,7 @@ export interface NexusGenFieldTypeNames {
     createdAt: 'Date'
     followUpQuestions: 'FollowUpQuestion'
     id: 'String'
+    lengthFormatted: 'String'
     lengthMs: 'Int'
     lengthSeconds: 'Int'
     sourceImageUrl: 'String'

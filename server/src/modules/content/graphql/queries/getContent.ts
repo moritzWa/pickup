@@ -20,7 +20,11 @@ export const getContent = queryField("getContent", {
 
         const contentId = args.contentId;
 
-        const contentResponse = await contentRepo.findById(contentId);
+        const contentResponse = await contentRepo.findById(contentId, {
+            relations: {
+                authors: true,
+            },
+        });
 
         throwIfError(contentResponse);
 

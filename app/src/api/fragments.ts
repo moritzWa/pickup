@@ -71,6 +71,8 @@ export type BaseContentFields = Pick<
   | "categories"
   | "thumbnailImageUrl"
   | "sourceImageUrl"
+  | "lengthMs"
+  | "lengthFormatted"
 > & {
   contentSession?: Pick<
     ContentSession,
@@ -101,6 +103,8 @@ export const BaseContentFields = gql`
     summary
     websiteUrl
     lengthSeconds
+    lengthMs
+    lengthFormatted
     categories
     thumbnailImageUrl
     sourceImageUrl
