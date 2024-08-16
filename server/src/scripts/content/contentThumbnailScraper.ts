@@ -35,6 +35,11 @@ const scrapeAndUploadThumbnail = async (content: Content) => {
                 ? result.ogImage[0].url
                 : null;
 
+        if (imageUrl && !imageUrl.startsWith("http") && result.requestUrl) {
+            const baseUrl = new URL(result.requestUrl);
+            imageUrl = new URL(imageUrl, baseUrl).toString();
+        }
+
         if (!imageUrl) {
             Logger.info(
                 `No og:image found for content: ${content.websiteUrl}, falling back to favicon`
