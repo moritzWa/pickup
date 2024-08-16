@@ -192,6 +192,7 @@ const convertCuriusToContent = async (
         createdAt: new Date(),
         updatedAt: new Date(),
         type: ContentType.ARTICLE,
+        ogDescription: null,
     });
 
     if (contentResponse.isFailure()) {
