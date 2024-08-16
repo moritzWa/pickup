@@ -131,6 +131,17 @@ export class PostgresContentRepository {
             const contents = await this.repo.find({
                 where: {
                     thumbnailImageUrl: IsNull(),
+                    // skip bad links
+                    skippedErrorFetchingFullText: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedNotProbablyReadable: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedInaccessiblePDF: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
                 },
                 order: {
                     createdAt: "asc",

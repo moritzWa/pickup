@@ -105,6 +105,13 @@ export class Content {
     summary!: string | null;
 
     @Column({
+        nullable: true,
+        name: "og_description",
+        type: "text",
+    })
+    ogDescription!: string | null;
+
+    @Column({
         nullable: false,
         name: "website_url",
         type: "text",
