@@ -52,6 +52,20 @@ const scrapeAndUploadThumbnail = async (content: Content) => {
         Logger.info(`Image URL for content ${content.websiteUrl}: ${imageUrl}`);
         let uploadResult = await firebase.storage.upload(imageUrl);
 
+        if (
+            !isSuccess(uploadResult) &&
+            imageUrl &&
+            !imageUrl.includes("www.")
+        ) {
+            Logger.info(
+                `Retrying upload with www for content: ${content.websiteUrl}`
+            );
+            const urlWithWww = new URL(imageUrl);
+            urlWithWww.hostname = `www.${urlWithWww.hostname}`;
+            imageUrl = urlWithWww.toString();
+            uploadResult = await firebase.storage.upload(imageUrl);
+        }
+
         if (!isSuccess(uploadResult)) {
             Logger.error(
                 `Failed to upload thumbnail for content: ${content.websiteUrl}, retrying with favicon`
