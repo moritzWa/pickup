@@ -144,8 +144,6 @@ const addFullTextToContent = async () => {
         }
 
         Logger.info(`Finished processing ${totalProcessed} contents in total.`);
-
-        debugger;
     } catch (error) {
         Logger.error("Unexpected error:", error);
     } finally {
