@@ -41,9 +41,9 @@ import DatePicker from "react-native-date-picker";
 import moment from "moment";
 import { hasValue } from "src/core";
 import { AppContext } from "context";
-import { uniqBy } from "lodash";
+import { throttle, uniqBy } from "lodash";
 
-const LIMIT = 10;
+const LIMIT = 5;
 
 const Home = () => {
   const theme = useTheme();
@@ -55,8 +55,10 @@ const Home = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
 
+  const [list, setList] = useState<Content[]>([]);
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [clear] = useMutation(api.queue.clear);
 
@@ -76,38 +78,41 @@ const Home = () => {
     fetchPolicy: "cache-and-network",
     onCompleted: (newData) => {
       const newItems = newData.getFeed ?? [];
+      if (page === 0) {
+        setList(newItems);
+      } else {
+        setList((prevList) => uniqBy([...prevList, ...newItems], (i) => i.id));
+      }
       setHasMore(newItems.length === LIMIT); // Assume that if fewer items than the limit are returned, there's no more data
     },
   });
 
-  const loadMore = () => {
-    if (loading || !hasMore) return;
+  const loadMoreData = throttle(() => {
+    if (!loading && hasMore) {
+      console.log(`[fetching page ${page + 1}]`);
+      console.log(`[total items: ${list.length}]`);
 
-    const variables = { page: page + 1, limit: LIMIT };
+      fetchMore({
+        variables: {
+          page: page + 1,
+          limit: LIMIT,
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return previousResult;
 
-    console.log(variables);
+          const newItems = fetchMoreResult.getFeed ?? [];
+          setPage(page + 1);
+          setList((prev) => uniqBy([...prev, ...newItems], (i) => i.id));
 
-    setPage((prevPage) => prevPage + 1);
+          if (newItems.length < LIMIT) {
+            setHasMore(false);
+          }
 
-    fetchMore({
-      variables: variables,
-      updateQuery: (prevResult, { fetchMoreResult }) => {
-        if (!fetchMoreResult) return prevResult;
-
-        const newItems = fetchMoreResult?.getFeed ?? [];
-
-        if (newItems.length < LIMIT) {
-          setHasMore(false);
-        }
-
-        const newFeed = [...prevResult.getFeed, ...newItems];
-
-        return {
-          getFeed: newFeed,
-        };
-      },
-    });
-  };
+          return fetchMoreResult;
+        },
+      });
+    }
+  }, 300); // 300ms throttle to prevent rapid firing
 
   const onShowMorePress = async () => {
     await showMore({
@@ -143,14 +148,25 @@ const Home = () => {
   };
 
   const onRefresh = async () => {
-    setPage(0);
-    setHasMore(true);
-    refetch();
-    // restart the whole feed
+    setIsRefreshing(true);
+    try {
+      setPage(0);
+      setHasMore(true);
+      await refetch({
+        variables: { page: 0, limit: LIMIT },
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-    apolloClient.refetchQueries({
-      include: [api.content.current, api.users.me],
-    });
+  const renderFooter = () => {
+    if (!loading) return null;
+    return (
+      <View style={{ padding: 10 }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   };
 
   return (
@@ -164,11 +180,11 @@ const Home = () => {
       </View>
 
       <FlatList
-        data={content}
+        data={list}
         refreshControl={
           <RefreshControl
             tintColor={theme.activityIndicator}
-            refreshing={false}
+            refreshing={isRefreshing}
             onRefresh={onRefresh}
           />
         }
@@ -279,12 +295,12 @@ const Home = () => {
         //     </TouchableOpacity>
         //   ) : null
         // }
-        onEndReached={loadMore}
+        onEndReached={loadMoreData}
         onEndReachedThreshold={0.5} // Adjust this value based on when you want to trigger loading more data
         ListFooterComponent={
-          loading ? (
-            <ActivityIndicator color={theme.activityIndicator} />
-          ) : !hasMore ? (
+          hasMore ? (
+            renderFooter()
+          ) : (
             <Text
               style={{
                 textAlign: "center",
@@ -296,7 +312,7 @@ const Home = () => {
             >
               No more data
             </Text>
-          ) : null
+          )
         }
       />
 

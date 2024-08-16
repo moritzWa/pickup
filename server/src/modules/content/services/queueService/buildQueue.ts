@@ -31,7 +31,6 @@ export const buildQueue = async (
     user: User,
     limit: number
 ): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
-    const categories = user.interestCategories.join(" ");
     const description = user.interestDescription;
 
     const feedResponse = await feedRepo.findForUser(user.id, {
@@ -95,7 +94,7 @@ export const buildQueue = async (
     // FIXME: at some point maybe cache these bc they cost money to do
     for (const query of queries) {
         const similarContentResponse =
-            await ContentService.getSimilarContentFromQuery(user, query, 10);
+            await ContentService.getSimilarContentFromQuery(user, query, limit);
 
         if (similarContentResponse.isFailure()) {
             continue;
@@ -111,7 +110,7 @@ export const buildQueue = async (
         const similarContentResponse = await ContentService.getSimilarContent(
             user,
             content,
-            10
+            limit
         );
 
         if (similarContentResponse.isFailure()) {

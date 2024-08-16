@@ -21,6 +21,7 @@ import { DEFAULT_LINKS_RETURN } from "src/modules/curius/infra/linkRepo";
 const NAME = "Build User Queue";
 const CONCURRENCY = 50;
 const RETRIES = 3;
+const DEFAULT_NUMBER = 10;
 
 const buildUserQueue = inngest.createFunction(
     {
@@ -39,7 +40,7 @@ const buildUserQueue = inngest.createFunction(
             const userResponse = await pgUserRepo.findById(userId);
             if (userResponse.isFailure()) throw userResponse.error;
             const user = userResponse.value;
-            const response = await buildQueue(user, DEFAULT_LINKS_RETURN);
+            const response = await buildQueue(user, DEFAULT_NUMBER);
             if (response.isFailure()) throw response.error;
             return Promise.resolve();
         });

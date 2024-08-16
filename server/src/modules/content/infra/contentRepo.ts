@@ -269,6 +269,7 @@ export class PostgresContentRepository {
                 )
                 .where({
                     id: Not(In(idsToExclude)),
+                    audioUrl: Not(IsNull()),
                 })
                 .setParameter("embedding", pgvector.toSql(vector))
                 .groupBy("content.id")

@@ -7,8 +7,8 @@ import { InngestEventName } from "../../types";
 import moment from "moment";
 import { parallel } from "radash";
 
-// cron to run at 3am UTC
-const CRON = "0 3 * * *";
+// cron to run at 7am UTC
+const CRON = "0 7 * * *";
 const NAME = "Build Daily Queue Cron";
 
 const buildDailyQueueCron = inngest.createFunction(
