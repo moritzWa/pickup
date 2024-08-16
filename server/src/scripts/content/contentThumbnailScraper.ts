@@ -6,7 +6,7 @@ import { Logger } from "src/utils/logger";
 import { contentRepo } from "../../modules/content/infra";
 import { firebase } from "../../utils/firebase";
 
-const BATCH_SIZE = 100;
+const BATCH_SIZE = 10;
 
 const scrapeAndUploadThumbnail = async (content: Content) => {
     try {
@@ -55,7 +55,7 @@ const addThumbnailsToContent = async () => {
         await dataSource.initialize();
 
         const contentsResponse =
-            await contentRepo.filterConΓtentWithoutThumbnail();
+            await contentRepo.filterContentWithoutThumbnail();
 
         if (!isSuccess(contentsResponse)) {
             Logger.error(
