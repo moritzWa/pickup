@@ -91,7 +91,6 @@ export const buildQueue = async (
 
     const allContent: { content: ContentWithDistance[]; query: string }[] = [];
 
-    // FIXME: at some point maybe cache these bc they cost money to do
     for (const query of queries) {
         const similarContentResponse =
             await ContentService.getSimilarContentFromQuery(user, query, limit);
@@ -124,13 +123,38 @@ export const buildQueue = async (
     }
 
     // relevant to not as relevant
-    const rankedContent = orderBy(
+    let rankedContent = orderBy(
         allContent.flatMap((c) => c.content),
         (c) => c.averageDistance,
         "asc"
     ).slice(0, limit);
 
     debugger;
+
+    // this is possible if no interests were filled out
+    // but we still want to be able to show the user something
+    if (!rankedContent.length) {
+        const topContentResponse = await contentRepo.find({
+            order: {
+                releasedAt: "desc",
+            },
+            take: limit,
+        });
+
+        if (topContentResponse.isFailure()) {
+            return failure(topContentResponse.error);
+        }
+
+        const randomContent = topContentResponse.value.map(
+            (c): ContentWithDistance => ({
+                ...c,
+                minDistance: 1,
+                averageDistance: 1,
+            })
+        );
+
+        rankedContent = randomContent;
+    }
 
     const queueResponse = await buildQueueFromContent(user, rankedContent);
 
