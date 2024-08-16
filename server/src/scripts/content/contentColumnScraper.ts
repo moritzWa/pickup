@@ -64,7 +64,7 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
-const BATCH_SIZE = 30; // Increased batch size // move back to 60
+const BATCH_SIZE = 500; // Increased batch size // move back to 60
 const CONCURRENCY_LIMIT = 10; // Number of contents to process concurrently // move back to 20
 const MAX_CONTENTS_TO_PROCESS = 687;
 
@@ -107,6 +107,15 @@ const addFullTextToContent = async () => {
             }
 
             const contents = contentsResponse.value;
+
+            const hasContent = contents.find(
+                (c) => c.id === "81b29e74-e409-44ba-99ec-64d1a7f8a954"
+            );
+
+            if (hasContent) {
+                debugger;
+            }
+
             if (contents.length === 0) {
                 Logger.info("No more contents to process. Exiting.");
                 break;

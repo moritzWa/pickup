@@ -59,7 +59,7 @@ const dataSourceConfig: DataSourceOptions = {
         query_timeout: 15 * 60 * 1000, // 15 minutes max query
     },
     logging: false, // logging: ["error"],
-    logger: process.env.NO_LOGGER ? undefined : new SlowQueryLogger(),
+    // logger: process.env.NO_LOGGER ? undefined : new SlowQueryLogger(),
 
     // cache: {
     //     // FIXME: don't know if this works

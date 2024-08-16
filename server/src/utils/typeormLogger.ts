@@ -11,12 +11,12 @@ export class SlowQueryLogger extends AbstractLogger {
         logMessage: LogMessage | LogMessage[],
         queryRunner?: QueryRunner
     ) {
-        console.log(logMessage);
+        // console.log(logMessage);
         const messages = this.prepareLogMessages(logMessage, {
             highlightSql: false,
         });
 
-        console.log(messages);
+        // console.log(messages);
 
         for (let message of messages) {
             switch (message.type ?? level) {

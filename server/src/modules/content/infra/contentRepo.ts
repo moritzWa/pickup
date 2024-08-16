@@ -97,14 +97,17 @@ export class PostgresContentRepository {
         try {
             const links = await this.repo.find({
                 where: {
-                    // content: IsNull(),
-                    // skippedInaccessiblePDF: Raw(
-                    //     (alias) => `${alias} IS NOT TRUE`
-                    // ),
+                    content: IsNull(),
+                    skippedInaccessiblePDF: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
                     deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
                 },
                 take: limit,
                 skip,
+                order: {
+                    createdAt: "asc",
+                },
             });
             return success(links);
         } catch (err) {
@@ -307,7 +310,11 @@ export class PostgresContentRepository {
         contents: ContentModel[]
     ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> {
         try {
-            return success(await this.repo.save(contents));
+            return success(
+                await this.repo.save(contents, {
+                    chunk: 1,
+                })
+            );
         } catch (err) {
             return failure(new UnexpectedError(err));
         }
@@ -319,13 +326,13 @@ export class PostgresContentRepository {
         try {
             const count = await this.repo.count({
                 where: {
-                    // content: IsNull(),
-                    // skippedErrorFetchingFullText: Raw(
-                    //     (alias) => `${alias} IS NOT TRUE`
-                    // ),
-                    // skippedNotProbablyReadable: Raw(
-                    //     (alias) => `${alias} IS NOT TRUE`
-                    // ),
+                    content: IsNull(),
+                    skippedErrorFetchingFullText: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedNotProbablyReadable: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
                     skippedInaccessiblePDF: Raw(
                         (alias) => `${alias} IS NOT TRUE`
                     ),
