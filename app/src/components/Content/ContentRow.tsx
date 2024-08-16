@@ -57,6 +57,9 @@ import {
 import { noop } from "lodash";
 import { Swipeable } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
+import Toast from "react-native-toast-message";
+
+const IMAGE_SIZE = 32;
 
 export const ContentRow = ({
   content: c,
@@ -103,16 +106,33 @@ export const ContentRow = ({
         contentId: c.id,
       };
 
-      await archiveContent({
-        variables,
-        refetchQueries: [
-          api.content.addToQueue,
-          api.queue.list,
-          api.content.feed,
-        ],
-      });
+      // prompt to make sure
+      Alert.alert(
+        "Archive Content",
+        `Are you sure you want to archive ${c.title}?`,
+        [
+          {
+            text: "No",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+          {
+            text: "Yes, archive",
+            onPress: async () => {
+              swipeableRef.current?.close();
 
-      swipeableRef.current?.close();
+              await archiveContent({
+                variables,
+                refetchQueries: [
+                  api.content.addToQueue,
+                  api.queue.list,
+                  api.content.feed,
+                ],
+              });
+            },
+          },
+        ]
+      );
     } catch (err) {
       console.log(err);
     }
@@ -124,21 +144,32 @@ export const ContentRow = ({
         contentId: c.id,
       };
 
+      swipeableRef.current?.close();
+
       if (isQueued) {
         const response = await removeFromQueue({
           variables,
           refetchQueries: [api.content.addToQueue, api.queue.list],
         });
         console.log("removed from queue");
+
+        Toast.show({
+          type: "success",
+          text1: "Removed from queue",
+          position: "bottom",
+        });
       } else {
         await addToQueue({
           variables,
           refetchQueries: [api.content.addToQueue, api.queue.list],
         });
         console.log("added to queue");
+        Toast.show({
+          type: "success",
+          text1: "Added to queue ✅",
+          position: "bottom",
+        });
       }
-
-      swipeableRef.current?.close();
     } catch (err) {
       console.log(err);
     }
@@ -196,6 +227,29 @@ export const ContentRow = ({
       }}
     >
       <TouchableOpacity
+        onPress={onArchiveContent}
+        activeOpacity={0.9}
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "row",
+          backgroundColor: isActive ? theme.text : theme.text,
+          width: 55,
+          height: 55,
+          borderRadius: 50,
+          marginTop: 10,
+          marginBottom: 10,
+        }}
+      >
+        <FontAwesomeIcon
+          icon={faArchive}
+          color={theme.secondaryBackground}
+          size={22}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
         onPress={onAddOrRemoveContentToQueue}
         activeOpacity={0.9}
         style={{
@@ -208,7 +262,7 @@ export const ContentRow = ({
           height: 55,
           borderRadius: 50,
           marginTop: 10,
-          marginRight: 15,
+          marginLeft: 15,
           marginBottom: 10,
         }}
       >
@@ -234,29 +288,6 @@ export const ContentRow = ({
           />
         )}
       </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={onArchiveContent}
-        activeOpacity={0.9}
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          display: "flex",
-          flexDirection: "row",
-          backgroundColor: isActive ? theme.text : theme.text,
-          width: 55,
-          height: 55,
-          borderRadius: 50,
-          marginTop: 10,
-          marginBottom: 10,
-        }}
-      >
-        <FontAwesomeIcon
-          icon={faArchive}
-          color={theme.secondaryBackground}
-          size={22}
-        />
-      </TouchableOpacity>
     </View>
   );
 
@@ -275,7 +306,7 @@ export const ContentRow = ({
         marginBottom: 10,
         marginHorizontal: 10,
         borderRadius: 15,
-        backgroundColor: theme.secondaryBackground,
+        backgroundColor: theme.medBackground,
         borderColor: isActive ? theme.border : theme.border,
         borderWidth: 1,
       }}
@@ -290,7 +321,7 @@ export const ContentRow = ({
           shadowRadius: 5,
           elevation: 5,
           shadowColor: "#000",
-          padding: 20,
+          padding: 15,
           backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,
         }}
       >
@@ -334,8 +365,8 @@ export const ContentRow = ({
 
             <Animated.View
               style={{
-                width: 37,
-                height: 37,
+                width: IMAGE_SIZE,
+                height: IMAGE_SIZE,
                 marginRight: 0,
                 flexDirection: "row",
                 alignItems: "center",
@@ -509,8 +540,8 @@ export const ContentRowImage = ({
           uri: c.thumbnailImageUrl,
         }}
         style={{
-          width: 37,
-          height: 37,
+          width: IMAGE_SIZE,
+          height: IMAGE_SIZE,
           borderRadius: 5,
         }}
       />
@@ -521,8 +552,8 @@ export const ContentRowImage = ({
     <LinearGradient
       colors={gradient}
       style={{
-        width: 37,
-        height: 37,
+        width: IMAGE_SIZE,
+        height: IMAGE_SIZE,
         borderRadius: 5,
         display: "flex",
         flexDirection: "row",
@@ -533,7 +564,7 @@ export const ContentRowImage = ({
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <FontAwesomeIcon icon={faPodcast} color={"white"} size={24} />
+      <FontAwesomeIcon icon={faPodcast} color={"white"} size={18} />
     </LinearGradient>
   );
 };

@@ -1,6 +1,13 @@
 import * as Parser from "rss-parser";
 import { Content } from "src/core/infra/postgres/entities";
-import { DefaultErrors, FailureOrSuccess, success } from "src/core/logic";
+import {
+    DefaultErrors,
+    failure,
+    FailureOrSuccess,
+    success,
+} from "src/core/logic";
+import { authorRepo } from "src/modules/author/infra";
+import { AuthorService } from "src/modules/author/services/authorService";
 import { v4 as uuidv4 } from "uuid";
 
 const parser = new Parser();
@@ -14,6 +21,15 @@ const scrapeRssFeed = async (
 
     const feed = await parser.parseURL(url);
 
+    const authorResponse = await AuthorService.findOrCreate(name, {
+        imageUrl: feed.image?.url || "",
+    });
+
+    if (authorResponse.isFailure()) {
+        return failure(authorResponse.error);
+    }
+
+    const author = authorResponse.value;
     const items = feed.items;
     const websiteUrl = feed.link;
     const allContent: Content[] = [];
@@ -27,18 +43,20 @@ const scrapeRssFeed = async (
             content: item.content || "",
             context: item.content || "",
             insertionId,
-            sourceImageUrl: "",
+            sourceImageUrl: feed.image?.url || "",
             audioUrl: item.enclosure?.url || "",
-            lengthMs: 0, // TODO: this needs to be processed async
-            embedding: null, // TODO:
+            lengthMs: item.enclosure?.length
+                ? parseInt(item.enclosure.length.toString())
+                : 0,
+            embedding: null, // done later
             categories,
-            thumbnailImageUrl: "",
+            thumbnailImageUrl: item.itunes?.image || feed.image?.url || "",
             referenceId: item.guid || uuidv4(),
             title: item.title || "",
             summary: item.contentSnippet || "",
             followUpQuestions: [],
             websiteUrl: websiteUrl || "",
-            authors: [], // TODO:
+            authors: [author],
             releasedAt: item.isoDate ? new Date(item.isoDate) : null,
             createdAt: new Date(),
             updatedAt: new Date(),

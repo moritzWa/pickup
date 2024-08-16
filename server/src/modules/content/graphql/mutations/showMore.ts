@@ -28,7 +28,9 @@ export const showMore = mutationField("showMore", {
 
         const user = ctx.me!;
 
-        await buildQueue(user, 10);
+        const response = await buildQueue(user, 10);
+
+        console.log(response);
 
         return "Requested more queue items.";
     },

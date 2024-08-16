@@ -1,6 +1,11 @@
+import { Dictionary, keyBy } from "lodash";
+import { fork } from "radash";
 import { connect } from "src/core/infra/postgres";
+import { Content } from "src/core/infra/postgres/entities";
 import { contentRepo } from "src/modules/content/infra";
 import { RSSFeedService } from "src/modules/content/services/rss/rssFeedService";
+import { In } from "typeorm";
+import { v4 as uuidv4 } from "uuid";
 
 // https://pod.link/
 export const PODCASTS = [
@@ -92,7 +97,7 @@ export const PODCASTS = [
 const scrapePodcasts = async () => {
     console.log(`[scraping ${PODCASTS.length} podcasts]`);
 
-    debugger;
+    // debugger;
 
     for (const podcast of PODCASTS) {
         const contentResponse = await RSSFeedService.scrapeRssFeed(
@@ -105,8 +110,52 @@ const scrapePodcasts = async () => {
             continue;
         }
 
-        const response = await contentRepo.bulkInsert(contentResponse.value);
+        const referenceIds = contentResponse.value.map((c) => c.referenceId);
 
+        const referencedContentResponse = await contentRepo.find({
+            where: {
+                referenceId: In(referenceIds),
+            },
+        });
+
+        const referencedContentByRefId = keyBy<Content>(
+            referencedContentResponse.value,
+            (c: Content) => c.referenceId || uuidv4()
+        );
+
+        const [contentToAdd, contentToUpdate] = fork(
+            contentResponse.value,
+            (c) => !referencedContentByRefId[c.referenceId || ""]
+        );
+
+        // backfill content already added
+        await Promise.all(
+            contentToUpdate.map(async (c) => {
+                const refContent =
+                    referencedContentByRefId[c.referenceId || ""]!;
+
+                if (refContent) {
+                    // update that content with the fields
+                    const newContent = { ...refContent };
+                    newContent.id = refContent.id;
+                    newContent.thumbnailImageUrl = c.thumbnailImageUrl;
+                    newContent.authors = c.authors;
+                    newContent.sourceImageUrl = c.sourceImageUrl;
+                    newContent.referenceId = c.referenceId;
+
+                    const response = await contentRepo.save(newContent);
+
+                    if (response.isFailure()) {
+                        debugger;
+                    }
+                }
+            })
+        );
+
+        const response = await contentRepo.bulkInsert(contentToAdd);
+
+        console.log(`[inserted ${contentToAdd.length} content]`);
+        console.log(`[updated ${contentToUpdate.length} content]`);
         console.log(`[finished ${podcast.name}]`);
     }
 
