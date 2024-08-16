@@ -80,22 +80,22 @@ const startInngest = async () => {
     app.use("/inngest", (req, res, next) => {
         return serve({
             client: inngest,
-            functions: inngestFunctions,
+            functions: [...inngestFunctions, ...cronInngestFunctions],
             signingKey: config.inngest.signingKey,
             baseUrl: config.inngest.baseInngestUrl,
             id: "pickup-workers",
         })(req, res, next);
     });
 
-    app.use("/inngest-crons", (req, res, next) => {
-        return serve({
-            client: cronsInngest,
-            functions: cronInngestFunctions,
-            signingKey: config.inngest.signingKey,
-            baseUrl: config.inngest.baseInngestUrl,
-            id: "pickup-workers",
-        })(req, res, next);
-    });
+    // app.use("/inngest-crons", (req, res, next) => {
+    //     return serve({
+    //         client: cronsInngest,
+    //         functions: cronInngestFunctions,
+    //         signingKey: config.inngest.signingKey,
+    //         baseUrl: config.inngest.baseInngestUrl,
+    //         id: "pickup-workers",
+    //     })(req, res, next);
+    // });
 
     app.use(Sentry.Handlers.errorHandler());
     app.use(exceptionHandler);

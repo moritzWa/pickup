@@ -187,6 +187,7 @@ type Profile {
 type Query {
   checkCode(referralCode: String!): Boolean!
   getActivity(filter: ActivityFilter): [Content!]!
+  getArchived: [Content!]!
   getAuthor(authorId: ID!): Author!
   getBookmarks(limit: Int, page: Int): [Content!]!
   getCategories: [CategorySection!]!

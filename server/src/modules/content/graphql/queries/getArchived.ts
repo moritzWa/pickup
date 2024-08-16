@@ -5,43 +5,33 @@ import {
 } from "src/core/surfaces/graphql/context";
 import { stripe } from "src/utils";
 import { throwIfError } from "src/core/surfaces/graphql/common";
-import { contentRepo, contentSessionRepo } from "../../infra";
+import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
 import { keyBy, omit, uniqBy } from "lodash";
 import { In } from "typeorm";
 
-export const ActivityFilter = enumType({
-    name: "ActivityFilter",
-    members: ["unread", "new"],
-});
-
-export const getActivity = queryField("getActivity", {
+export const getArchived = queryField("getArchived", {
     type: nonNull(list(nonNull("Content"))),
-    args: {
-        filter: nullable("ActivityFilter"),
-    },
     resolve: async (_parent, args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);
 
         const user = ctx.me!;
 
-        const contentSessionsResponse = await contentSessionRepo.findForUser(
-            user.id,
-            {
-                relations: {
-                    content: true,
-                },
-                order: {
-                    lastListenedAt: "desc",
-                },
-            }
-        );
+        const feedResponse = await feedRepo.findForUser(user.id, {
+            where: {
+                isArchived: true,
+            },
+            order: {
+                updatedAt: "desc",
+            },
+            take: 100,
+        });
 
-        throwIfError(contentSessionsResponse);
+        throwIfError(feedResponse);
 
         // find the content and populate the feed
         const contentResponse = await contentRepo.find({
             where: {
-                id: In(contentSessionsResponse.value.map((f) => f.contentId)),
+                id: In(feedResponse.value.map((f) => f.contentId)),
             },
             relations: { authors: true },
         });
@@ -50,13 +40,10 @@ export const getActivity = queryField("getActivity", {
 
         const contentById = keyBy(contentResponse.value, (v) => v.id);
 
-        const content = contentSessionsResponse.value.map((f) => {
+        const content = feedResponse.value.map((f) => {
             const c = contentById[f.contentId];
 
-            return {
-                ...c,
-                contentSession: f,
-            };
+            return c;
         });
 
         return uniqBy(content, (v) => v.id);

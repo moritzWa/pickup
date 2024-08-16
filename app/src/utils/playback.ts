@@ -31,8 +31,8 @@ export const PlaybackService = async function () {
 
   TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async (e) => {
     // console.log("PlaybackProgressUpdated", e);
-    store.dispatch(setCurrentMs(Math.ceil(e.position * 1_000)));
-    store.dispatch(setDurationMs(Math.ceil(e.duration * 1_000)));
+    // store.dispatch(setCurrentMs(Math.ceil(e.position * 1_000)));
+    // store.dispatch(setDurationMs(Math.ceil(e.duration * 1_000)));
   });
 
   TrackPlayer.addEventListener(Event.RemoteSeek, async (e) => {

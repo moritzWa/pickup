@@ -55,7 +55,7 @@ const Home = () => {
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
       filter: ContentFeedFilter.ForYou,
-      limit: 100,
+      limit: 250,
     }),
     []
   );

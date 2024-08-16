@@ -312,6 +312,7 @@ export type Query = {
   __typename?: 'Query';
   checkCode: Scalars['Boolean']['output'];
   getActivity: Array<Content>;
+  getArchived: Array<Content>;
   getAuthor: Author;
   getBookmarks: Array<Content>;
   getCategories: Array<CategorySection>;

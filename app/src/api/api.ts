@@ -222,6 +222,15 @@ const GetBookmarks = gql`
   }
 `;
 
+const GetArchived = gql`
+  ${BaseContentFields}
+  query GetArchived {
+    getArchived {
+      ...BaseContentFields
+    }
+  }
+`;
+
 const Bookmark = gql`
   mutation bookmarkContent($contentId: ID!) {
     bookmarkContent(contentId: $contentId) {
@@ -371,6 +380,7 @@ export const api = {
     get: GetContent,
     startListening: StartListening,
     bookmarks: GetBookmarks,
+    archived: GetArchived,
     bookmark: Bookmark,
     addToQueue: AddToQueue,
     removeFromQueue: RemoveFromQueue,

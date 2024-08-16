@@ -9,3 +9,4 @@ export * from "./getCategories";
 export * from "./getNextContent";
 export * from "./getPrevContent";
 export * from "./getQueue";
+export * from "./getArchived";

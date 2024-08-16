@@ -121,6 +121,7 @@ export class Content {
 
     @ManyToMany(() => Author, (author) => author.contents, {
         cascade: true,
+        eager: true,
     })
     authors!: Author[];
 

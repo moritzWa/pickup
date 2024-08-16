@@ -33,6 +33,7 @@ export type AudioState = {
 export enum ProfileTabFilter {
   All = "all",
   Bookmarks = "bookmarks",
+  Archived = "archived",
 }
 
 export type GlobalState = {

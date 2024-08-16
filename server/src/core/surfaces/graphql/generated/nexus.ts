@@ -286,6 +286,7 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     checkCode: boolean; // Boolean!
     getActivity: NexusGenRootTypes['Content'][]; // [Content!]!
+    getArchived: NexusGenRootTypes['Content'][]; // [Content!]!
     getAuthor: NexusGenRootTypes['Author']; // Author!
     getBookmarks: NexusGenRootTypes['Content'][]; // [Content!]!
     getCategories: NexusGenRootTypes['CategorySection'][]; // [CategorySection!]!
@@ -491,6 +492,7 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     checkCode: 'Boolean'
     getActivity: 'Content'
+    getArchived: 'Content'
     getAuthor: 'Author'
     getBookmarks: 'Content'
     getCategories: 'CategorySection'

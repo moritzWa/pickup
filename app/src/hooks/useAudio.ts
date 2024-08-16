@@ -41,7 +41,6 @@ import {
   setAudioUrl,
   setCurrentContent,
   setCurrentMs,
-  setDurationMs,
   setIsPlaying,
   setQueue,
   setSpeed,
@@ -264,6 +263,8 @@ const useAudioHook = () => {
       ),
     [currentMs, durationMs]
   );
+
+  console.log(currentMs, durationMs);
 
   const skip = async (seconds: number) => {
     // track player to skip

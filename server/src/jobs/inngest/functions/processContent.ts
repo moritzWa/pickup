@@ -40,16 +40,14 @@ const processContent = inngest.createFunction(
     async ({ event, step }) => {
         const contentId = event.data.contentId;
 
-        await step.run("check-if-already-processed", async () =>
-            _checkIfProcessed(contentId)
-        );
+        // const chunks = await step.run("transcribe-content", async () =>
+        //     _transcribeContent(contentId)
+        // );
 
-        const chunks = await step.run("transcribe-content", async () =>
-            _transcribeContent(contentId)
-        );
+        await step.run("embed-content", async () => _embedContent(contentId));
 
-        await step.run("embed-content", async () =>
-            _embedContent(contentId, chunks)
+        await step.run("save-audio-duration", async () =>
+            _saveAudioDuration(contentId)
         );
 
         await step.run("generated-audio", async () =>
@@ -63,22 +61,6 @@ const processContent = inngest.createFunction(
         return Promise.resolve();
     }
 );
-
-const _checkIfProcessed = async (contentId: string) => {
-    const contentResponse = await contentRepo.findById(contentId);
-
-    if (contentResponse.isFailure()) {
-        throw contentResponse.error;
-    }
-
-    const content = contentResponse.value;
-
-    if (content.isProcessed) {
-        throw new NonRetriableError("Content is already processed.");
-    }
-
-    return Promise.resolve();
-};
 
 export const _transcribeContent = async (
     contentId: string
@@ -127,7 +109,37 @@ export const _transcribeContent = async (
     return transcriptResponse.value;
 };
 
-export const _embedContent = async (
+const _embedContent = async (contentId: string) => {
+    const contentResponse = await contentRepo.findById(contentId);
+
+    if (contentResponse.isFailure()) {
+        return failure(contentResponse.error);
+    }
+
+    const content = contentResponse.value;
+
+    if (!content.summary) {
+        console.log(`[no summary for ${content.title}]`);
+        return Promise.resolve();
+    }
+    const embeddingResponse = await openai.embeddings.create(
+        `Title: ${content.title}. Summary: ${content.summary || ""}`
+    );
+
+    if (embeddingResponse.isFailure()) {
+        throw embeddingResponse.error;
+    }
+
+    const embedding = embeddingResponse.value;
+
+    await contentRepo.update(content.id, {
+        embedding: pgvector.toSql(embedding),
+    });
+
+    return content.id;
+};
+
+export const _embedContentIntoChunks = async (
     contentId: string,
     chunks: AudioDataChunk[]
 ) => {
@@ -189,6 +201,32 @@ export const _embedContent = async (
     return Promise.resolve();
 };
 
+export const _saveAudioDuration = async (contentId: string) => {
+    const contentResponse = await contentRepo.findById(contentId);
+
+    if (contentResponse.isFailure()) {
+        throw contentResponse.error;
+    }
+
+    const content = contentResponse.value;
+
+    if (!content.audioUrl) {
+        return Promise.resolve();
+    }
+
+    if (content.lengthMs && content.lengthMs > 0) {
+        return Promise.resolve();
+    }
+
+    const response = await _updateAudioDuration(content);
+
+    if (response.isFailure()) {
+        throw response.error;
+    }
+
+    return Promise.resolve();
+};
+
 export const _convertToAudio = async (contentId: string) => {
     const contentResponse = await contentRepo.findById(contentId);
 
@@ -199,16 +237,6 @@ export const _convertToAudio = async (contentId: string) => {
     const content = contentResponse.value;
 
     if (content.audioUrl) {
-        if (!content.lengthMs) {
-            const response = await _updateAudioDuration(content);
-
-            if (response.isFailure()) {
-                throw response.error;
-            }
-
-            return Promise.resolve();
-        }
-
         return Promise.resolve();
     }
 
