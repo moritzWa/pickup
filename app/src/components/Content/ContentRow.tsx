@@ -295,8 +295,6 @@ export const ContentRow = ({
     swipeableRef.current?.close();
   }, [filter]);
 
-  const estimatedLen = Math.ceil(c.lengthSeconds / 60);
-
   return (
     <Swipeable
       renderRightActions={renderRightActions}
@@ -485,7 +483,7 @@ export const ContentRow = ({
                         fontFamily: "Raleway-Medium",
                       }}
                     >
-                      {estimatedLen}m
+                      {c.lengthFormatted}
                     </Text>
                   </View>
 

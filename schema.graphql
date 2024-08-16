@@ -32,10 +32,11 @@ type Content {
   authors: [Author!]
   categories: [String!]!
   contentSession: ContentSession
-  context: String!
+  context: String
   createdAt: Date!
   followUpQuestions: [FollowUpQuestion!]
   id: String!
+  lengthFormatted: String
   lengthMs: Int
   lengthSeconds: Int!
   sourceImageUrl: String

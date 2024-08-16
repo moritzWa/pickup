@@ -4,6 +4,7 @@ import {
     _embedContent,
     _markContentProcessed,
     _transcribeContent,
+    _updateAudioDuration,
 } from "src/jobs/inngest/functions/processContent";
 import { connect } from "src/core/infra/postgres";
 import { parallel } from "radash";
@@ -73,9 +74,9 @@ const processContentV2 = async (contentId: string) => {
 const run = async () => {
     const contentResponse = await contentRepo.find({
         where: {
-            isProcessed: false,
+            lengthMs: 0,
         },
-        select: { id: true },
+        select: { id: true, audioUrl: true },
         // take: 250,
     });
 
@@ -84,9 +85,11 @@ const run = async () => {
     console.time("processContent");
 
     // chunks of 10
-    const results = chunk(content, 10);
+    const results = chunk(content, 250);
 
     console.time("processContent");
+
+    debugger;
 
     let completed = 0;
     for (let i = 0; i < results.length; i++) {
@@ -97,7 +100,11 @@ const run = async () => {
 
         const chunk = results[i];
 
-        await Promise.all(chunk.map(async (c) => processContentV2(c.id)));
+        console.time("processContentChunk-" + i);
+        const response = await Promise.all(
+            chunk.map(async (c) => _updateAudioDuration(c))
+        );
+        console.timeEnd("processContentChunk-" + i);
 
         completed += chunk.length;
     }

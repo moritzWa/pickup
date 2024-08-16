@@ -46,17 +46,18 @@ export type CategorySection = {
 
 export type Content = {
   __typename?: 'Content';
-  audioUrl: Scalars['String']['output'];
+  audioUrl?: Maybe<Scalars['String']['output']>;
   authorImageUrl?: Maybe<Scalars['String']['output']>;
   authorName?: Maybe<Scalars['String']['output']>;
   authors?: Maybe<Array<Author>>;
   categories: Array<Scalars['String']['output']>;
   contentSession?: Maybe<ContentSession>;
-  context: Scalars['String']['output'];
+  context?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['Date']['output'];
-  followUpQuestions: Array<FollowUpQuestion>;
+  followUpQuestions?: Maybe<Array<FollowUpQuestion>>;
   id: Scalars['String']['output'];
-  lengthMs: Scalars['Int']['output'];
+  lengthFormatted?: Maybe<Scalars['String']['output']>;
+  lengthMs?: Maybe<Scalars['Int']['output']>;
   lengthSeconds: Scalars['Int']['output'];
   sourceImageUrl?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;

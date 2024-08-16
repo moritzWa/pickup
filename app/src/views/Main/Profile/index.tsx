@@ -131,8 +131,6 @@ export const UserProfile = () => {
     return activity;
   }, [bookmarks, activity, profileFilter]);
 
-  console.log(activity);
-
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {
       contentId: content.id,

@@ -51,6 +51,22 @@ export class PostgresContentRepository {
         });
     }
 
+    findForIdsWithAuthor = async (
+        ids: string[]
+    ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> => {
+        try {
+            const contentResponse = await this.repo
+                .createQueryBuilder("content")
+                .leftJoinAndSelect("content.authors", "author")
+                .where("content.id IN (:...ids)", { ids })
+                .getMany();
+
+            return success(contentResponse);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
+
     async findOne(
         options: FindOneOptions<ContentModel>
     ): Promise<ContentResponse> {

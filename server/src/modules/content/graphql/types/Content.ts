@@ -14,7 +14,7 @@ export const Content = objectType({
     name: "Content",
     definition(t) {
         t.nonNull.string("id");
-        t.nonNull.string("context"); // not used
+        t.nullable.string("context"); // not used
         t.nullable.string("audioUrl");
         t.nullable.string("authorName", {
             resolve: (p) => (p.authors || [])[0]?.name,
@@ -35,6 +35,26 @@ export const Content = objectType({
         t.nullable.int("lengthMs");
         t.nonNull.int("lengthSeconds", {
             resolve: (content) => Math.ceil(content.lengthMs ?? 0 / 1000),
+        });
+        t.nullable.string("lengthFormatted", {
+            resolve: (content) => {
+                const lengthMs = content.lengthMs;
+
+                if (lengthMs == null) return null;
+
+                const totalSeconds = Math.floor(lengthMs / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const seconds = totalSeconds % 60;
+
+                if (hours > 0) {
+                    return `${hours}h ${minutes % 60}m`;
+                } else if (minutes > 0) {
+                    return `${minutes}m`;
+                } else {
+                    return `${seconds}s`;
+                }
+            },
         });
         t.nonNull.string("websiteUrl");
         t.nullable.field("contentSession", {
