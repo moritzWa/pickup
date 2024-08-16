@@ -15,7 +15,12 @@ export function getFaviconURL(url: string): string {
 
 function getRootOfURL(url: string): string {
     try {
-        return new URL(url).hostname;
+        const parsedUrl = new URL(url);
+        // If the URL ends with .pdf, return the origin (root URL)
+        if (parsedUrl.pathname.endsWith(".pdf")) {
+            return parsedUrl.origin;
+        }
+        return parsedUrl.hostname;
     } catch (e) {
         return "";
     }
