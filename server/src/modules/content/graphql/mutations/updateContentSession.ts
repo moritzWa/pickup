@@ -42,16 +42,17 @@ export const updateContentSession = mutationField("updateContentSession", {
 
         const contentSessionResponse = await contentSessionRepo.findById(
             contentSessionId,
-            {}
+            { relations: { content: true } }
         );
 
         throwIfError(contentSessionResponse);
 
         const contentSession = contentSessionResponse.value;
+        const durationMs = contentSession.content.lengthMs;
 
         const percentFinishedRaw = new BigNumber(
             contentSession.currentMs ?? 0
-        ).div(contentSession.durationMs ?? 0);
+        ).div(durationMs ?? 0);
 
         const percentFinished = !percentFinishedRaw.isNaN()
             ? percentFinishedRaw.multipliedBy(100).dp(0)
@@ -76,10 +77,17 @@ export const updateContentSession = mutationField("updateContentSession", {
 
         const session = updateSessionResponse.value;
 
-        if (session.currentMs && session.currentMs > 15_000) {
-            await interactionRepo.create({
+        // console.log(session.currentMs);
+
+        // FIXME: just so it doesnt always try to create this event and fail (just tries between 15 - 30 second mark)
+        if (
+            session.currentMs &&
+            new BigNumber(session.currentMs).gt(15_000) &&
+            new BigNumber(session.currentMs).lt(30_000)
+        ) {
+            const response = await interactionRepo.create({
                 id: uuidv4(),
-                contentId: session.id,
+                contentId: session.contentId,
                 userId: user.id,
                 type: InteractionType.ListenedToBeginning,
                 createdAt: new Date(),
@@ -87,10 +95,14 @@ export const updateContentSession = mutationField("updateContentSession", {
             });
         }
 
-        if (percentFinished && percentFinished.gte(70)) {
+        if (
+            percentFinished &&
+            percentFinished.gte(70) &&
+            percentFinished.lte(100)
+        ) {
             await interactionRepo.create({
                 id: uuidv4(),
-                contentId: session.id,
+                contentId: session.contentId,
                 userId: user.id,
                 type: InteractionType.Finished,
                 createdAt: new Date(),

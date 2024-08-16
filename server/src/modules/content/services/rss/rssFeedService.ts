@@ -52,6 +52,7 @@ const scrapeRssFeed = async (
             contentAsMarkdown: item.content || "",
             context: item.content || "",
             insertionId,
+            ogDescription: item.summary || null,
             sourceImageUrl: feed.image?.url || "",
             audioUrl: item.enclosure?.url || "",
             lengthMs: item.enclosure?.length
