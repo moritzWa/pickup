@@ -1,6 +1,10 @@
 // https://pod.link/
 export const PODCASTS = [
     {
+        url: "https://nathanlatkathetop.libsyn.com/rss",
+        name: "SaaS Interviews with CEOs, Startups, Founders",
+    },
+    {
         // MFM
         url: "https://feeds.megaphone.fm/HS2300184645",
         name: "My First Million",
@@ -34,10 +38,6 @@ export const PODCASTS = [
     {
         url: "https://rss.art19.com/business-wars",
         name: "Business Wars",
-    },
-    {
-        url: "https://nathanlatkathetop.libsyn.com/rss",
-        name: "SaaS Interviews with CEOs, Startups, Founders",
     },
     {
         url: "https://allinchamathjason.libsyn.com/rss",

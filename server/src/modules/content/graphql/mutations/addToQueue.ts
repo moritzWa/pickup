@@ -32,6 +32,15 @@ export const addToQueue = mutationField("addToQueue", {
 
         const content = contentResponse.value;
 
+        await interactionRepo.create({
+            id: uuidv4(),
+            contentId: content.id,
+            userId: user.id,
+            type: InteractionType.Queued,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+
         const feedItemExistsResponse = await feedRepo.findOne({
             where: {
                 userId: user.id,

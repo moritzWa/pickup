@@ -1,10 +1,18 @@
-// TODO: fill this in and then hook it up
-const interact = async () => {
+import { ContentSession, User } from "src/core/infra/postgres/entities";
+import { interactionRepo } from "../infra";
+import { v4 as uuidv4 } from "uuid";
+import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
+
+const recordProgress = async (
+    user: User,
+    session: ContentSession,
+    currentMs: number
+) => {
     // if current ms is less than 15 seconds, record interaction of skipping the content
-    //  if (args.currentMs && args.currentMs < 15000) {
-    //     await interactionRepo.create({
+    //  if (currentMs && currentMs < 15000) {
+    //     return await interactionRepo.create({
     //         id: uuidv4(),
-    //         contentId: content.id,
+    //         contentId: session.contentId,
     //         userId: user.id,
     //         type: InteractionType.Skipped,
     //         createdAt: new Date(),
@@ -38,5 +46,5 @@ const interact = async () => {
 };
 
 export const ContentInteractionService = {
-    interact,
+    recordProgress,
 };

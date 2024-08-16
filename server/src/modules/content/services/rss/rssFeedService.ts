@@ -73,6 +73,10 @@ const scrapeRssFeed = async (
             type: contentType,
         };
 
+        if (item.guid === "3f3b8de588e81111bfc76bfc629ce0cb") {
+            debugger;
+        }
+
         allContent.push(content);
     }
 
@@ -134,6 +138,10 @@ const upsertRssFeed = async (
                         c.referenceId || newContent.referenceId;
 
                     const response = await contentRepo.save(newContent);
+
+                    if (!c.authors.length) {
+                        debugger;
+                    }
 
                     if (response.isFailure()) {
                         return failure(response.error);

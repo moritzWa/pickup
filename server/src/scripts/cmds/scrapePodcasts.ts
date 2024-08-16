@@ -12,7 +12,7 @@ import { PODCASTS } from "src/modules/content/services/podcasts/constants";
 const scrapePodcasts = async () => {
     console.log(`[scraping ${PODCASTS.length} podcasts]`);
 
-    // debugger;
+    debugger;
 
     for (const podcast of PODCASTS) {
         const contentResponse = await RSSFeedService.scrapeRssFeed(
@@ -29,6 +29,11 @@ const scrapePodcasts = async () => {
         const content = contentResponse.value;
 
         const rssFeedResponse = await RSSFeedService.upsertRssFeed(content);
+
+        if (rssFeedResponse.isFailure()) {
+            debugger;
+            continue;
+        }
 
         const rssFeed = rssFeedResponse.value;
 
