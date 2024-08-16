@@ -28,7 +28,9 @@ export class Author {
     })
     imageUrl!: string | null;
 
-    @ManyToMany(() => Content, (content) => content.authors)
+    @ManyToMany(() => Content, (content) => content.authors, {
+        eager: true,
+    })
     @JoinTable({
         name: "content_authors",
         joinColumn: { name: "author_id", referencedColumnName: "id" },

@@ -1,4 +1,4 @@
-import { list, nonNull, nullable, objectType } from "nexus";
+import { nonNull, nullable, objectType } from "nexus";
 import { Author } from "src/modules/author/graphql";
 
 export const FollowUpQuestion = objectType({
@@ -14,7 +14,7 @@ export const Content = objectType({
     name: "Content",
     definition(t) {
         t.nonNull.string("id");
-        t.nonNull.string("context");
+        t.nonNull.string("context"); // not used
         t.nullable.string("audioUrl");
         t.nullable.string("authorName", {
             resolve: (p) => (p.authors || [])[0]?.name,
@@ -24,9 +24,10 @@ export const Content = objectType({
         });
         t.list.field("authors", {
             type: nonNull(Author),
+            resolve: (parent) => parent.authors || [],
         });
         t.nullable.string("thumbnailImageUrl");
-        t.nullable.string("sourceImageUrl");
+        t.nullable.string("sourceImageUrl"); // not used
         t.nonNull.string("title");
         // categories list of string
         t.nonNull.list.nonNull.string("categories");
@@ -39,8 +40,18 @@ export const Content = objectType({
         t.nullable.field("contentSession", {
             type: nullable("ContentSession"),
         });
-        t.field("followUpQuestions", {
-            type: nonNull(list(nonNull("FollowUpQuestion"))),
+        t.list.field("followUpQuestions", {
+            type: nonNull(FollowUpQuestion),
+            resolve: (parent) => parent.followUpQuestions || [],
+        });
+        t.nonNull.date("createdAt");
+        t.nonNull.date("updatedAt");
+        t.nullable.field("contentSession", {
+            type: nullable("ContentSession"),
+        });
+        t.list.field("followUpQuestions", {
+            type: nonNull(FollowUpQuestion),
+            resolve: (parent) => parent.followUpQuestions || [],
         });
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");

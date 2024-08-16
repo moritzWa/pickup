@@ -1,8 +1,8 @@
+export * from "./codec";
+export * from "./errors";
+export * from "./Exception";
 export * from "./FailureOrSuccess";
 export * from "./SwitchGuard";
-export * from "./Exception";
-export * from "./errors";
-export * from "./codec";
 
 export type Maybe<T> = T | null;
 

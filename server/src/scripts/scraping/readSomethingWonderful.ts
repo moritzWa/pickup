@@ -1,20 +1,26 @@
 import puppeteer from "puppeteer";
+import { dataSource } from "src/core/infra/postgres";
+import { Author } from "src/core/infra/postgres/entities/Author/Author";
+import { Content } from "src/core/infra/postgres/entities/Content/Content";
 
 const scrapeSomethingWonderful = async () => {
-    const url = "https://www.readsomethinggreat.com";
-    const distinctArticles = new Set<string>();
+    await dataSource.initialize();
 
-    const browser = await puppeteer.launch({ headless: false }); // Set headless to false
+    const url = "https://www.readsomethinggreat.com";
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    // Add this line to capture console logs from the browser
     page.on("console", (msg) => console.log("Browser Log:", msg.text()));
 
-    for (let i = 0; i < 2; i++) {
-        try {
-            console.log(`Fetching URL: ${url}`);
-            await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 }); // Added timeout
+    let batchNumber = 1;
+    let totalNewContent = 0;
+    let totalNewAuthors = 0;
+    let consecutiveEmptyBatches = 0;
 
+    while (consecutiveEmptyBatches < 10) {
+        console.log(`Starting batch ${batchNumber}`);
+        try {
+            await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
             await page.waitForSelector(".bubble-element.Group");
 
             const { articles, debugInfo } = await page.evaluate(() => {
@@ -69,14 +75,6 @@ const scrapeSomethingWonderful = async () => {
 
                     // Debug information
                     debugInfo[`article_${index}`] = {
-                        // category: {
-                        //     text: category,
-                        //     html: removeStyles(
-                        //         element.querySelector(
-                        //             ".bubble-element.Text:first-child"
-                        //         )?.outerHTML || ""
-                        //     ),
-                        // },
                         title: {
                             selector:
                                 ".bubble-element.Group[id^='GroupArticle'] > .bubble-element.Group.cmaUaZh > .bubble-element.Text:nth-of-type(1)", // Updated selector to target the title correctly
@@ -84,15 +82,6 @@ const scrapeSomethingWonderful = async () => {
                             text: title,
                             html: removeStyles(titleElement?.outerHTML || ""),
                         },
-                        // authorAndDuration: {
-                        //     text: authorAndDuration,
-                        //     html: removeStyles(authorElement?.outerHTML || ""),
-                        // },
-                        // excerpt: {
-                        //     text: excerpt,
-                        //     html: removeStyles(excerptElement?.outerHTML || ""),
-                        // },
-                        // fullHtml: removeStyles(element.outerHTML),
                     };
 
                     if (
@@ -117,20 +106,114 @@ const scrapeSomethingWonderful = async () => {
                 return { articles, debugInfo };
             });
 
-            console.log("Debug Info:", JSON.stringify(debugInfo, null, 2));
+            // console.log("Debug Info:", JSON.stringify(debugInfo, null, 2));
 
-            articles.forEach((article) => {
-                distinctArticles.add(JSON.stringify(article));
-            });
+            let newContentCount = 0;
+            let newAuthorCount = 0;
+
+            for (const article of articles) {
+                if (
+                    article.title.includes(
+                        "AudioPen: Go from fuzzy thought to clear text"
+                    )
+                ) {
+                    console.log("Skipping AudioPen advertisement");
+                    continue;
+                }
+
+                const existingContent = await dataSource
+                    .getRepository(Content)
+                    .findOne({
+                        where: {
+                            websiteUrl: article.url,
+                        },
+                    });
+
+                if (existingContent) {
+                    console.log(`Skipping existing content: ${article.title}`);
+                    continue;
+                }
+
+                newContentCount++;
+
+                const authorNames = article.author
+                    .split("&")
+                    .map((name) => name.trim());
+                const authors: Author[] = [];
+
+                for (const name of authorNames) {
+                    let author = await dataSource
+                        .getRepository(Author)
+                        .findOne({
+                            where: { name },
+                        });
+
+                    if (!author) {
+                        author = new Author();
+                        author.name = name;
+                        author = await dataSource
+                            .getRepository(Author)
+                            .save(author);
+                        newAuthorCount++;
+                    }
+
+                    authors.push(author);
+                }
+
+                const durationInMinutes = parseInt(
+                    article.duration.split(" ")[0]
+                );
+                const durationInMs = durationInMinutes * 60 * 1000;
+
+                const content = new Content();
+                content.title = article.title;
+                content.summary = article.excerpt;
+                content.categories = [article.category];
+                content.lengthMs = durationInMs;
+                content.websiteUrl = article.url;
+                content.followUpQuestions = [];
+                content.authors = authors;
+
+                // Save the content entity
+                await dataSource.getRepository(Content).save(content);
+
+                // Update the authors with the new content
+                for (const author of authors) {
+                    author.contents = author.contents || [];
+                    author.contents.push(content);
+                    await dataSource.getRepository(Author).save(author);
+                }
+            }
+
+            console.log(`Batch ${batchNumber} results:`);
+            console.log(`New content added: ${newContentCount}`);
+            console.log(`New authors added: ${newAuthorCount}`);
+
+            totalNewContent += newContentCount;
+            totalNewAuthors += newAuthorCount;
+
+            if (newContentCount === 0) {
+                consecutiveEmptyBatches++;
+            } else {
+                consecutiveEmptyBatches = 0;
+            }
+
+            batchNumber++;
         } catch (error) {
-            console.error(`Error during fetch: ${error}`);
+            console.error(`Error during batch ${batchNumber}:`, error);
         }
+
+        // Wait for 5 seconds before the next batch
+        await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     await browser.close();
 
-    console.log(`Found ${distinctArticles.size} distinct articles.`);
-    distinctArticles.forEach((article) => console.log(JSON.parse(article)));
+    console.log("Scraping completed:");
+    console.log(`Total new content added: ${totalNewContent}`);
+    console.log(`Total new authors added: ${totalNewAuthors}`);
+
+    await dataSource.destroy();
 };
 
 scrapeSomethingWonderful().catch(console.error);

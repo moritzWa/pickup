@@ -18,6 +18,11 @@ export type FollowUpQuestion = {
     answer: string;
 };
 
+export enum ContentType {
+    ARTICLE = "article",
+    PODCAST = "podcast",
+}
+
 @Entity({
     name: "content",
 })
@@ -27,10 +32,12 @@ export class Content {
 
     @Column({
         nullable: false,
-        name: "context",
-        type: "text",
+        name: "type",
+        type: "enum",
+        enum: ContentType,
+        default: ContentType.ARTICLE,
     })
-    context!: string;
+    type!: ContentType;
 
     @Column({
         nullable: true,
@@ -63,13 +70,6 @@ export class Content {
 
     @Column({
         nullable: true,
-        name: "source_image_url",
-        type: "text",
-    })
-    sourceImageUrl!: string | null;
-
-    @Column({
-        nullable: true,
         name: "audio_url",
         type: "text",
     })
@@ -82,26 +82,6 @@ export class Content {
         type: "int",
     })
     lengthMs!: number | null;
-
-    @Column({
-        name: "embedding",
-        nullable: true,
-        type: "vector" as any,
-    })
-    embedding!: any | null;
-
-    @Column({
-        nullable: false,
-        name: "categories",
-        type: "jsonb",
-        default: "[]",
-    })
-    categories!: string[];
-
-    @ManyToMany(() => Author, (author) => author.contents, {
-        cascade: true,
-    })
-    authors!: Author[];
 
     @Column({
         nullable: false,
@@ -126,6 +106,19 @@ export class Content {
 
     @Column({
         nullable: false,
+        name: "categories",
+        type: "jsonb",
+        default: "[]",
+    })
+    categories!: string[];
+
+    @ManyToMany(() => Author, (author) => author.contents, {
+        cascade: true,
+    })
+    authors!: Author[];
+
+    @Column({
+        nullable: false,
         name: "follow_up_questions",
         type: "jsonb",
     })
@@ -144,7 +137,7 @@ export class Content {
     chunks!: Relation<ContentChunk[]>;
 
     @Column({
-        name: "released_at",
+        name: "released_at", // aka published at
         nullable: true,
         type: "timestamp",
     })
@@ -164,4 +157,51 @@ export class Content {
         name: "deleted_at",
     })
     deletedAt?: Date;
+
+    // Content scraping related
+
+    @Column({ nullable: true })
+    excerpt?: string;
+
+    @Column({ nullable: true })
+    length?: number; // length in characters
+
+    // mozilla/readability
+    @Column({ nullable: true })
+    skippedNotProbablyReadable?: boolean;
+
+    @Column({ nullable: true })
+    skippedInaccessiblePDF?: boolean;
+
+    @Column({ nullable: true })
+    skippedErrorFetchingFullText?: boolean;
+
+    @Column({ nullable: true })
+    deadLink?: boolean;
+
+    // TODO remove these?
+
+    // this was intented to be the picture
+    @Column({
+        nullable: true,
+        name: "source_image_url",
+        type: "text",
+    })
+    sourceImageUrl!: string | null; // not used
+
+    @Column({
+        // remove (moved to ContentChunk)
+        name: "embedding",
+        nullable: true,
+        type: "vector" as any,
+    })
+    embedding!: any | null;
+
+    @Column({
+        // TODO: remove this column?
+        nullable: true,
+        name: "context",
+        type: "text",
+    })
+    context!: string;
 }

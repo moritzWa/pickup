@@ -8,6 +8,7 @@ import {
 } from "src/core/logic";
 import { authorRepo } from "src/modules/author/infra";
 import { AuthorService } from "src/modules/author/services/authorService";
+import { ContentType } from "src/core/infra/postgres/entities/Content";
 import { v4 as uuidv4 } from "uuid";
 
 const parser = new Parser();
@@ -15,6 +16,7 @@ const parser = new Parser();
 const scrapeRssFeed = async (
     url: string,
     name: string,
+    contentType: ContentType = ContentType.PODCAST,
     _insertionId?: string
 ): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
     let insertionId = _insertionId || uuidv4();
@@ -61,6 +63,7 @@ const scrapeRssFeed = async (
             createdAt: new Date(),
             updatedAt: new Date(),
             chunks: [],
+            type: contentType,
         };
 
         allContent.push(content);

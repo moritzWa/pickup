@@ -1,5 +1,6 @@
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
+import { ContentType } from "src/core/infra/postgres/entities/Content";
 import {
     DefaultErrors,
     failure,
@@ -9,10 +10,7 @@ import {
 } from "src/core/logic";
 import { authorRepo } from "src/modules/author/infra";
 import { curiusLinkRepo } from "src/modules/curius/infra";
-import {
-    DEFAULT_LINKS_RETURN,
-    LinkWithDistance,
-} from "src/modules/curius/infra/linkRepo";
+import { LinkWithDistance } from "src/modules/curius/infra/linkRepo";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
 import { v4 as uuidv4 } from "uuid";
@@ -190,6 +188,7 @@ const convertCuriusToContent = async (
         chunks: [],
         createdAt: new Date(),
         updatedAt: new Date(),
+        type: ContentType.ARTICLE,
     });
 
     if (contentResponse.isFailure()) {

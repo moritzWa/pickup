@@ -1,9 +1,14 @@
-import { Datadog, Slack, SlackChannel } from "src/utils";
-import { Sentry } from "src/utils/sentry";
-import { Maybe, UnexpectedError } from ".";
+import { Slack, SlackChannel } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
+import { UnexpectedError } from ".";
 
 export type FailureOrSuccess<E, V> = Failure<E, never> | Success<never, V>;
+
+export const isSuccess = <E, V>(
+    result: FailureOrSuccess<E, V>
+): result is Success<never, V> => {
+    return result.isSuccess();
+};
 
 export class Failure<E, V> {
     readonly _value: E;
