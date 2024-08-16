@@ -315,6 +315,8 @@ const HomeHeader = () => {
     return null;
   }
 
+  return null;
+
   return (
     <>
       <DatePicker
@@ -624,7 +626,7 @@ const Options = () => {
           /> */}
         </View>
 
-        {commuteTime ? (
+        {/* {commuteTime ? (
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => setOpen(true)}
@@ -655,7 +657,7 @@ const Options = () => {
               {commuteTime.formatted}
             </Text>
           </TouchableOpacity>
-        ) : null}
+        ) : null} */}
       </View>
     </>
   );
