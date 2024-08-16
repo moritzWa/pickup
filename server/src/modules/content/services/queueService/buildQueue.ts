@@ -46,6 +46,11 @@ export const buildQueue = async (
             // TODO: has listened to a chunk of it...
         },
         relations: { content: true },
+        select: {
+            content: {
+                embedding: true,
+            },
+        },
         order: {
             lastListenedAt: "desc",
         },

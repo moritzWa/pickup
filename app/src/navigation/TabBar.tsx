@@ -195,7 +195,7 @@ const SingleTab = ({
           height: 24,
         }}
         resizeMode="contain"
-        tintColor={isFocused ? fullTheme.textPrimary : fullTheme.text}
+        tintColor={isFocused ? fullTheme.textPrimary : fullTheme.textSubtle}
         source={isFocused ? image?.active : image?.image}
       />
 

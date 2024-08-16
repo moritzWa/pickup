@@ -57,7 +57,7 @@ export const getFeed = queryField("getFeed", {
             relations: { authors: true },
         });
 
-        console.log(contentResponse.value);
+        // console.log(contentResponse.value);
 
         throwIfError(contentResponse);
         // Note: just doing in memory, lil easier than fiddling with typeorm
