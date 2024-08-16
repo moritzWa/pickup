@@ -47,6 +47,7 @@ export const archiveContent = mutationField("archiveContent", {
             {
                 isArchived: true,
                 isQueued: false,
+                updatedAt: new Date(),
             }
         );
 

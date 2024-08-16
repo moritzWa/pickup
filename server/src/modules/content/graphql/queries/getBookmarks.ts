@@ -5,8 +5,9 @@ import {
 } from "src/core/surfaces/graphql/context";
 import { stripe } from "src/utils";
 import { throwIfError } from "src/core/surfaces/graphql/common";
-import { contentSessionRepo } from "../../infra";
-import { omit } from "lodash";
+import { contentRepo, contentSessionRepo } from "../../infra";
+import { keyBy, omit, uniqBy } from "lodash";
+import { In } from "typeorm";
 
 export const getBookmarks = queryField("getBookmarks", {
     type: nonNull(list(nonNull("Content"))),
@@ -26,17 +27,32 @@ export const getBookmarks = queryField("getBookmarks", {
                 take: limit ?? 20,
                 skip: page ?? 0,
                 order: { bookmarkedAt: "desc" },
-                relations: { content: true },
             }
         );
 
         throwIfError(contentSessionsResponse);
 
-        const content = contentSessionsResponse.value.map((cs) => ({
-            ...cs.content,
-            contentSession: omit(cs, ["content"]),
-        }));
+        // find the content and populate the feed
+        const contentResponse = await contentRepo.find({
+            where: {
+                id: In(contentSessionsResponse.value.map((f) => f.contentId)),
+            },
+            relations: { authors: true },
+        });
 
-        return content;
+        throwIfError(contentResponse);
+
+        const contentById = keyBy(contentResponse.value, (v) => v.id);
+
+        const content = contentSessionsResponse.value.map((f) => {
+            const c = contentById[f.contentId];
+
+            return {
+                ...c,
+                contentSession: f,
+            };
+        });
+
+        return uniqBy(content, (v) => v.id);
     },
 });

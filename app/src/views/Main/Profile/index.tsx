@@ -112,24 +112,42 @@ export const UserProfile = () => {
     refetch: refetchActivity,
   } = useQuery<Pick<Query, "getActivity">>(api.content.activity);
 
-  const { data: bookmarksData } = useQuery<Pick<Query, "getBookmarks">>(
-    api.content.bookmarks
-  );
+  const { data: bookmarksData, refetch: refetchBookmarks } = useQuery<
+    Pick<Query, "getBookmarks">
+  >(api.content.bookmarks);
+
+  const { data: archivedData, refetch: refetchArchived } = useQuery<
+    Pick<Query, "getArchived">
+  >(api.content.archived);
 
   const dispatch = useDispatch();
 
   const bookmarks = (bookmarksData?.getBookmarks ?? []) as BaseContentFields[];
   const activity = (data?.getActivity ?? []) as BaseContentFields[];
+  const archived = (archivedData?.getArchived ?? []) as BaseContentFields[];
 
-  useEffect(() => void refetchActivity(), [isFocused]);
+  useEffect(() => {
+    void refetchActivity();
+    void refetchBookmarks();
+    void refetchArchived();
+  }, [isFocused]);
 
   const content = useMemo(() => {
     if (profileFilter === ProfileTabFilter.Bookmarks) {
       return bookmarks;
     }
 
+    if (profileFilter === ProfileTabFilter.Archived) {
+      return archived;
+    }
+
     return activity;
-  }, [bookmarks, activity, profileFilter]);
+  }, [
+    JSON.stringify(bookmarks),
+    JSON.stringify(activity),
+    JSON.stringify(archived),
+    profileFilter,
+  ]);
 
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {
@@ -155,7 +173,12 @@ export const UserProfile = () => {
       await Promise.all([
         refetchMe(),
         apolloClient.refetchQueries({
-          include: [api.users.getProfile, api.users.me, api.content.bookmarks],
+          include: [
+            api.users.getProfile,
+            api.users.me,
+            api.content.bookmarks,
+            api.content.archived,
+          ],
         }),
       ]);
     } catch (err) {
@@ -228,6 +251,11 @@ export const UserProfile = () => {
         name: "Bookmarks",
         onClick: () => _onPressTab(ProfileTabFilter.Bookmarks),
         isActive: profileFilter === ProfileTabFilter.Bookmarks,
+      },
+      {
+        name: "Archived",
+        onClick: () => _onPressTab(ProfileTabFilter.Archived),
+        isActive: profileFilter === ProfileTabFilter.Archived,
       },
     ];
   }, [profileFilter]);
