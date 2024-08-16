@@ -5,9 +5,6 @@ export class InteractionTypes1723831694344 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(
-            `ALTER TABLE "content" DROP COLUMN "published_at"`
-        );
-        await queryRunner.query(
             `DROP INDEX "public"."IDX_edf0676ed89862b0c4f8a3a88e"`
         );
         await queryRunner.query(
