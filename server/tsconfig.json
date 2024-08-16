@@ -26,7 +26,8 @@
             "src/*": ["./src/*"],
             "shared/*": ["../shared/*"]
         },
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "esModuleInterop": true
     },
     "filesGlob": ["./src/**/*.ts", "./src/**/*.json", "./src/**/*.pdf"],
     "include": ["src/**/*", "src/**/*.json", "src/**/*.pdf", "../shared"],
