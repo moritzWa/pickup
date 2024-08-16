@@ -47,7 +47,7 @@ import { hasValue } from "src/core";
 import { AppContext } from "context";
 import { throttle, uniqBy } from "lodash";
 
-const LIMIT = 5;
+const LIMIT = 10;
 
 const Home = () => {
   const theme = useTheme();
@@ -202,7 +202,7 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           // padding: 10,
-          // paddingTop: 15,
+          paddingTop: 15,
           paddingBottom: 150,
         }}
         ListHeaderComponent={
