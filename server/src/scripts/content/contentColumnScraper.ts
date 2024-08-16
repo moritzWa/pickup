@@ -18,6 +18,37 @@ const sanitizeText = (text: string) => {
     return text.replace(/\0/g, ""); // Remove null bytes
 };
 
+type ReadabilityResult = {
+    title: string;
+
+    /** HTML string of processed article content */
+    content: string;
+
+    /** text content of the article, with all the HTML tags removed */
+    textContent: string;
+
+    /** length of an article, in characters */
+    length: number;
+
+    /** article description, or short excerpt from the content */
+    excerpt: string;
+
+    /** author metadata */
+    byline: string;
+
+    /** content direction */
+    dir: string;
+
+    /** name of the site */
+    siteName: string;
+
+    /** content language */
+    lang: string;
+
+    /** published time */
+    publishedTime: string;
+};
+
 const originalConsoleError = console.error;
 console.error = (...args) => {
     const errorMessages = [
@@ -33,9 +64,9 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
-const BATCH_SIZE = 5; // Increased batch size // move back to 60
+const BATCH_SIZE = 20; // Increased batch size // move back to 60
 const CONCURRENCY_LIMIT = 10; // Number of contents to process concurrently // move back to 20
-const MAX_CONTENTS_TO_PROCESS = 10;
+const MAX_CONTENTS_TO_PROCESS = 687;
 
 const addFullTextToContent = async () => {
     try {
@@ -191,7 +222,6 @@ const handleHTMLContentProcessingError = (content: Content, error: Error) => {
             String(error)
         );
     }
-    Logger.info(`now setting markSkip with ${content.id} (${content.title})`);
     markSkip(content, "skippedErrorFetchingFullText");
 };
 
@@ -207,18 +237,16 @@ const updateContentWithParsedContent = (content: Content, result) => {
         length: result.length,
         excerpt: result.excerpt,
         author: result.byline,
-        // dir: result.dir,
-        // siteName: result.siteName,
         lang: result.lang,
         releasedAt: result.publishedTime,
         title: result.title || content.title,
-        // results.content has the html as well
-        content: NodeHtmlMarkdown.translate(result.content || ""),
-        storedTextAsMarkdown: true,
+        content: result.textContent,
+        // we might need this later to give the TTS info about what to emphasize etc
+        contentAsMarkdown: NodeHtmlMarkdown.translate(result.content || ""),
     });
 };
 
-const FETCH_TIMEOUT = 120000; // Increase to 60 seconds
+const FETCH_TIMEOUT = 120000; // Increase to 2m
 const processHTMLContent = async (content: Content) => {
     try {
         Logger.info(
@@ -254,7 +282,9 @@ const processHTMLContent = async (content: Content) => {
 
         const { window } = new JSDOM(html);
 
-        const result = new Readability(window.document).parse();
+        const result: ReadabilityResult | null = new Readability(
+            window.document
+        ).parse();
         if (!result || !result.content) {
             Logger.info(
                 `Readability parsing failed for ${content.id} (${content.title})`
@@ -277,7 +307,7 @@ const processHTMLContent = async (content: Content) => {
     }
 };
 
-const processPDFContent = async (content) => {
+const processPDFContent = async (content: Content) => {
     const response = await fetch(content.websiteUrl);
     if (
         !response.ok ||
@@ -290,7 +320,7 @@ const processPDFContent = async (content) => {
 
     const pdfBuffer = await response.arrayBuffer();
     const parsedPDF = await pdf(Buffer.from(pdfBuffer), { max: 20 });
-    content.fullText = sanitizeText(parsedPDF.text);
+    content.content = sanitizeText(parsedPDF.text);
     content.totalPagesIfPDF = parsedPDF.numpages;
     content.fetchedPagesIfPDF = parsedPDF.numrender;
 };

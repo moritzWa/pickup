@@ -48,6 +48,13 @@ export class Content {
 
     @Column({
         nullable: true,
+        name: "content_as_markdown",
+        type: "text",
+    })
+    contentAsMarkdown!: string | null;
+
+    @Column({
+        nullable: true,
         name: "insertion_id",
         type: "text",
     })
@@ -179,8 +186,12 @@ export class Content {
     @Column({ nullable: true })
     deadLink?: boolean;
 
+    // pdf
     @Column({ nullable: true })
-    storedTextAsMarkdown?: boolean;
+    totalPagesIfPDF?: number;
+
+    @Column({ nullable: true })
+    fetchedPagesIfPDF?: number;
 
     // TODO remove these?
 

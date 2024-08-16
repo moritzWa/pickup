@@ -80,10 +80,10 @@ export class PostgresContentRepository {
         try {
             const links = await this.repo.find({
                 where: {
-                    content: IsNull(),
-                    skippedInaccessiblePDF: Raw(
-                        (alias) => `${alias} IS NOT TRUE`
-                    ),
+                    // content: IsNull(),
+                    // skippedInaccessiblePDF: Raw(
+                    //     (alias) => `${alias} IS NOT TRUE`
+                    // ),
                     deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
                 },
                 take: limit,
@@ -301,17 +301,20 @@ export class PostgresContentRepository {
         try {
             const count = await this.repo.count({
                 where: {
-                    content: IsNull(),
-                    skippedErrorFetchingFullText: Raw(
-                        (alias) => `${alias} IS NOT TRUE`
-                    ),
-                    skippedNotProbablyReadable: Raw(
-                        (alias) => `${alias} IS NOT TRUE`
-                    ),
+                    // content: IsNull(),
+                    // skippedErrorFetchingFullText: Raw(
+                    //     (alias) => `${alias} IS NOT TRUE`
+                    // ),
+                    // skippedNotProbablyReadable: Raw(
+                    //     (alias) => `${alias} IS NOT TRUE`
+                    // ),
                     skippedInaccessiblePDF: Raw(
                         (alias) => `${alias} IS NOT TRUE`
                     ),
                     deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+
+                    // get all articles that are not yet pod
+                    audioUrl: IsNull(),
                 },
             });
             return success(count);
