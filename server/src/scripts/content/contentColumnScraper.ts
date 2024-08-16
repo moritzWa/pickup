@@ -64,7 +64,7 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
-const BATCH_SIZE = 20; // Increased batch size // move back to 60
+const BATCH_SIZE = 30; // Increased batch size // move back to 60
 const CONCURRENCY_LIMIT = 10; // Number of contents to process concurrently // move back to 20
 const MAX_CONTENTS_TO_PROCESS = 687;
 
@@ -72,16 +72,26 @@ const addFullTextToContent = async () => {
     try {
         await dataSource.initialize();
 
-        let totalProcessed = 0;
-
-        // log countContentsWithoutFullText
         const countContentsWithoutFullText =
             await contentRepo.countContentsWithoutFullText();
-        Logger.info(
-            `Count of contents without full text: ${countContentsWithoutFullText.value}`
+        const totalToProcess = Math.min(
+            countContentsWithoutFullText.value,
+            MAX_CONTENTS_TO_PROCESS
         );
 
-        while (totalProcessed < MAX_CONTENTS_TO_PROCESS) {
+        // New logic to ensure we don't exceed available contents
+        const actualTotalToProcess = Math.min(
+            totalToProcess,
+            countContentsWithoutFullText.value
+        );
+
+        Logger.info(
+            `Will process up to ${actualTotalToProcess} contents out of ${countContentsWithoutFullText.value} available`
+        );
+
+        let totalProcessed = 0;
+
+        while (totalProcessed < actualTotalToProcess) {
             const contentsResponse =
                 await contentRepo.filterBestContentWithoutFullText(
                     BATCH_SIZE,
@@ -125,9 +135,9 @@ const addFullTextToContent = async () => {
                 )}s. Total: ${totalProcessed}`
             );
 
-            if (totalProcessed >= MAX_CONTENTS_TO_PROCESS) {
+            if (totalProcessed >= actualTotalToProcess) {
                 Logger.info(
-                    `Reached the maximum number of contents to process (${MAX_CONTENTS_TO_PROCESS}). Exiting.`
+                    `Reached the maximum number of contents to process (${actualTotalToProcess}). Exiting.`
                 );
                 break;
             }
