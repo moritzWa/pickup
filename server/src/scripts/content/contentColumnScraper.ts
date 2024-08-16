@@ -176,12 +176,14 @@ const handleNonOkResponse = (content, response) => {
 const handleHTMLContentProcessingError = (content: Content, error: Error) => {
     if (error instanceof Error) {
         if (error.message === "Fetch timeout") {
-            // Logger.info(`Timeout fetching content: ${content.id} (${content.title})`);
+            Logger.info(
+                `Timeout fetching content: ${content.id} (${content.title})`
+            );
         } else {
-            // Logger.error(
-            //     `Error processing HTML content ${content.id}:`,
-            //     getErrorMessage(error)
-            // );
+            Logger.error(
+                `Error processing HTML content ${content.id}:`,
+                error.message
+            );
         }
     } else {
         Logger.error(
@@ -189,11 +191,17 @@ const handleHTMLContentProcessingError = (content: Content, error: Error) => {
             String(error)
         );
     }
+    Logger.info(`now setting markSkip with ${content.id} (${content.title})`);
     markSkip(content, "skippedErrorFetchingFullText");
 };
 
 const updateContentWithParsedContent = (content: Content, result) => {
-    Logger.info(result.content.substring(0, 50));
+    if (result.content) {
+        content.skippedErrorFetchingFullText = false;
+        content.skippedNotProbablyReadable = false;
+        content.skippedInaccessiblePDF = false;
+        content.deadLink = false;
+    }
 
     Object.assign(content, {
         length: result.length,
@@ -206,10 +214,11 @@ const updateContentWithParsedContent = (content: Content, result) => {
         title: result.title || content.title,
         // results.content has the html as well
         content: NodeHtmlMarkdown.translate(result.content || ""),
+        storedTextAsMarkdown: true,
     });
 };
 
-const FETCH_TIMEOUT = 60000; // Increase to 60 seconds
+const FETCH_TIMEOUT = 120000; // Increase to 60 seconds
 const processHTMLContent = async (content: Content) => {
     try {
         Logger.info(
@@ -246,7 +255,7 @@ const processHTMLContent = async (content: Content) => {
         const { window } = new JSDOM(html);
 
         const result = new Readability(window.document).parse();
-        if (!result) {
+        if (!result || !result.content) {
             Logger.info(
                 `Readability parsing failed for ${content.id} (${content.title})`
             );
@@ -255,7 +264,10 @@ const processHTMLContent = async (content: Content) => {
         }
 
         updateContentWithParsedContent(content, result);
-        // Logger.info(`Successfully processed content: ${content.id} (${content.title})`);
+        content.skippedErrorFetchingFullText = false; // Explicitly set to false after successful parsing
+        Logger.info(
+            `Successfully processed content: ${content.id} (${content.title})`
+        );
     } catch (error) {
         Logger.error(
             `Error processing HTML content for ${content.websiteUrl} (${content.title})`,

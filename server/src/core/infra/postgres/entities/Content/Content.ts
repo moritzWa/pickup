@@ -179,6 +179,9 @@ export class Content {
     @Column({ nullable: true })
     deadLink?: boolean;
 
+    @Column({ nullable: true })
+    storedTextAsMarkdown?: boolean;
+
     // TODO remove these?
 
     // this was intented to be the picture
