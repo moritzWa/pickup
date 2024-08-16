@@ -43,12 +43,14 @@ export const buildQueue = async (
             userId: user.id,
             isBookmarked: true,
             isLiked: true,
-            currentMs: MoreThan(15_000),
-        },
-        select: {
-            id: true,
+            // TODO: has listened to a chunk of it...
         },
         relations: { content: true },
+        select: {
+            content: {
+                embedding: true,
+            },
+        },
         order: {
             lastListenedAt: "desc",
         },
@@ -66,7 +68,7 @@ export const buildQueue = async (
     const queries = [
         (description || "").slice(0, 4_000),
         ...user.interestCategories.map((c) => c.toLowerCase()),
-    ];
+    ].filter((v) => !!v);
 
     const allContent: { content: ContentWithDistance[]; query: string }[] = [];
 

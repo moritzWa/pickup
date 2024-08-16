@@ -168,7 +168,7 @@ export interface NexusGenFieldTypes {
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
-    followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][]; // [FollowUpQuestion!]!
+    followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][] | null; // [FollowUpQuestion!]
     id: string; // String!
     lengthMs: number | null; // Int
     lengthSeconds: number; // Int!

@@ -34,6 +34,23 @@ export class PostgresAuthorRepository {
         });
     }
 
+    findForName = async (name: string): Promise<AuthorResponse> => {
+        try {
+            const authors = await this.repo
+                .createQueryBuilder()
+                .where("name = :name", { name })
+                .getOne();
+
+            if (!authors) {
+                return failure(new NotFoundError("Author not found."));
+            }
+
+            return success(authors);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
+
     async findById(userId: string): Promise<AuthorResponse> {
         try {
             const author = await this.repo

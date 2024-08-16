@@ -26,7 +26,7 @@ export const useTheme = () => {
       bgRed: theme === "light" ? colors.red100 : colors.red10,
       bgPrimaryLight: theme === "light" ? "#F4F2FF" : "#1A093D",
       background: theme === "light" ? colors.white : colors.black,
-      medBackground: theme === "light" ? colors.gray90 : colors.gray05,
+      medBackground: theme === "light" ? colors.gray90 : colors.gray00,
       blueBackground:
         theme === "light" ? colors.lightBlue100 : colors.lightBlue10,
       greenBackground: theme === "light" ? colors.green100 : colors.green10,

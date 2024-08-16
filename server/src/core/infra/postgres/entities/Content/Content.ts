@@ -208,14 +208,16 @@ export class Content {
         name: "embedding",
         nullable: true,
         type: "vector" as any,
+        // select: false,
     })
-    embedding!: any | null;
+    embedding?: any | null;
 
     @Column({
         // TODO: remove this column?
         nullable: true,
         name: "context",
         type: "text",
+        select: false,
     })
-    context!: string;
+    context?: string;
 }

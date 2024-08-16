@@ -218,20 +218,29 @@ function App() {
 
   const toastConfig: ToastConfig = {
     success: (props) => (
-      <BaseToast
-        {...props}
-        style={{ borderLeftColor: colors.positive }}
-        contentContainerStyle={{
-          paddingHorizontal: 15,
-          paddingVertical: 10,
-          backgroundColor: secondaryBackground,
+      <View
+        style={{
+          height: 45,
+          borderRadius: 10,
+          display: "flex",
+          bottom: insets.bottom + 25,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "95%",
+          backgroundColor: header,
         }}
-        text1Style={{
-          fontSize: 14,
-          color: header,
-          fontFamily: "Poppins-Semibold",
-        }}
-      />
+      >
+        <Text
+          style={{
+            color: background,
+            fontSize: 16,
+            fontFamily: "Raleway-Semibold",
+          }}
+        >
+          {props.text1}
+        </Text>
+      </View>
     ),
   };
 
