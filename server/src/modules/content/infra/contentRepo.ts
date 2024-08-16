@@ -91,7 +91,8 @@ export class PostgresContentRepository {
 
     // get best content to add full text
     async filterBestContentWithoutFullText(
-        limit: number
+        limit: number,
+        skip: number
     ): Promise<ContentArrayResponse> {
         try {
             const links = await this.repo.find({
@@ -103,6 +104,7 @@ export class PostgresContentRepository {
                     deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
                 },
                 take: limit,
+                skip,
             });
             return success(links);
         } catch (err) {

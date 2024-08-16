@@ -83,7 +83,10 @@ const addFullTextToContent = async () => {
 
         while (totalProcessed < MAX_CONTENTS_TO_PROCESS) {
             const contentsResponse =
-                await contentRepo.filterBestContentWithoutFullText(BATCH_SIZE);
+                await contentRepo.filterBestContentWithoutFullText(
+                    BATCH_SIZE,
+                    totalProcessed
+                );
 
             if (!isSuccess(contentsResponse)) {
                 Logger.error(
@@ -107,8 +110,12 @@ const addFullTextToContent = async () => {
                 contents
             );
 
+            // debugger;
+
             // Batch save to database
-            await contentRepo.saveMany(processedContents);
+            const response = await contentRepo.saveMany(processedContents);
+
+            // debugger;
 
             totalProcessed += contents.length;
             const batchTime = (Date.now() - startTime) / 1000;
@@ -127,6 +134,8 @@ const addFullTextToContent = async () => {
         }
 
         Logger.info(`Finished processing ${totalProcessed} contents in total.`);
+
+        debugger;
     } catch (error) {
         Logger.error("Unexpected error:", error);
     } finally {
