@@ -23,7 +23,7 @@ export const run = async () => {
 
     const user = users.value[0];
 
-    const feedResponse = await FeedService.getFeed(user, 10);
+    const feedResponse = await FeedService.getFeed(user, 10, 0);
 
     const queue = await buildQueue(user, 10);
 
