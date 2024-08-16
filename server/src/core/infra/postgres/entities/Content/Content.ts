@@ -194,7 +194,7 @@ export class Content {
         name: "embedding",
         nullable: true,
         type: "vector" as any,
-        select: false,
+        // select: false,
     })
     embedding?: any | null;
 
