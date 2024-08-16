@@ -527,8 +527,10 @@ export const ContentRow = ({
 
 export const ContentRowImage = ({
   content: c,
+  size,
 }: {
   content: BaseContentFields;
+  size?: number;
 }) => {
   const gradient = getGradientById(c.id);
 
@@ -539,8 +541,8 @@ export const ContentRowImage = ({
           uri: c.thumbnailImageUrl,
         }}
         style={{
-          width: IMAGE_SIZE,
-          height: IMAGE_SIZE,
+          width: size || IMAGE_SIZE,
+          height: size || IMAGE_SIZE,
           borderRadius: 5,
         }}
       />
@@ -551,8 +553,8 @@ export const ContentRowImage = ({
     <LinearGradient
       colors={gradient}
       style={{
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
+        width: size || IMAGE_SIZE,
+        height: size || IMAGE_SIZE,
         borderRadius: 5,
         display: "flex",
         flexDirection: "row",

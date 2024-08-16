@@ -26,6 +26,7 @@ import {
   faCaretLeft,
   faCaretRight,
   faChevronLeft,
+  faChevronRight,
   faForward,
   faHeadset,
   faIslandTreePalm,
@@ -260,7 +261,7 @@ const AudioPlayer = () => {
             padding: 10,
           }}
         >
-          {content ? <ContentRowImage content={content} /> : null}
+          {content ? <ContentRowImage size={45} content={content} /> : null}
 
           <View style={{ flex: 1, marginLeft: 10 }}>
             <Text
@@ -269,7 +270,7 @@ const AudioPlayer = () => {
                 fontSize: 18,
                 fontFamily: "Raleway-Bold",
               }}
-              numberOfLines={1}
+              numberOfLines={2}
             >
               {content?.title}
             </Text>
@@ -628,20 +629,9 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
           alignItems: "center",
         }}
       >
-        <FastImage
-          style={{
-            width: 40,
-            marginRight: 10,
-            height: 40,
-            borderRadius: 10,
-          }}
-          resizeMode="cover"
-          source={{
-            uri: nextContent.thumbnailImageUrl || "",
-          }}
-        />
+        <ContentRowImage size={40} content={nextContent} />
 
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginLeft: 10 }}>
           <Text
             numberOfLines={1}
             style={{
@@ -677,10 +667,17 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
                 fontSize: 16,
               }}
             >
-              {Math.ceil(nextContent.lengthSeconds / 60)}min
+              {nextContent.lengthFormatted}
             </Text>
           </View>
         </View>
+
+        <FontAwesomeIcon
+          icon={faChevronRight}
+          color={theme.background}
+          size={18}
+          style={{ marginRight: 5 }}
+        />
       </View>
     </TouchableOpacity>
   );
