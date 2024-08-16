@@ -1,7 +1,7 @@
 import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
 import {
     _convertToAudio,
-    _embedContent,
+    _embedContentIntoChunks,
     _markContentProcessed,
     _transcribeContent,
     _updateAudioDuration,
@@ -17,7 +17,7 @@ const processContent = async (contentId: string) => {
     try {
         const chunks = await _transcribeContent(contentId);
 
-        await _embedContent(contentId, chunks);
+        await _embedContentIntoChunks(contentId, chunks);
 
         await _convertToAudio(contentId);
 
