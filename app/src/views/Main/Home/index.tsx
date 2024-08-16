@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   FlatList,
@@ -16,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { api, apolloClient } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
 import {
+  Content,
   ContentFeedFilter,
   GetQueueResponse,
   Mutation,
@@ -31,7 +33,7 @@ import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
 import { CurrentAudio } from "../../../components/CurrentAudio";
 import { useAudio } from "src/hooks/useAudio";
-import { setCurrentContent, setFeed, setQueue } from "src/redux/reducers/audio";
+import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faCar } from "@fortawesome/pro-solid-svg-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -39,6 +41,9 @@ import DatePicker from "react-native-date-picker";
 import moment from "moment";
 import { hasValue } from "src/core";
 import { AppContext } from "context";
+import { uniqBy } from "lodash";
+
+const LIMIT = 10;
 
 const Home = () => {
   const theme = useTheme();
@@ -50,32 +55,59 @@ const Home = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
 
+  const [page, setPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState(true);
+
   const [clear] = useMutation(api.queue.clear);
 
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
       filter: ContentFeedFilter.ForYou,
-      limit: 250,
+      limit: LIMIT,
+      page,
     }),
-    []
+    [page]
   );
 
-  const { data, refetch, error } = useQuery<Pick<Query, "getFeed">>(
-    api.content.feed,
-    {
-      variables,
-      fetchPolicy: "cache-and-network",
-    }
-  );
-
-  const { data: queueData, refetch: refetchQueue } = useQuery<
-    Pick<Query, "getQueue">
-  >(api.queue.list, {
+  const { data, refetch, fetchMore, error, loading } = useQuery<
+    Pick<Query, "getFeed">
+  >(api.content.feed, {
     variables,
     fetchPolicy: "cache-and-network",
+    onCompleted: (newData) => {
+      const newItems = newData.getFeed ?? [];
+      setHasMore(newItems.length === LIMIT); // Assume that if fewer items than the limit are returned, there's no more data
+    },
   });
 
-  const feed = (data?.getFeed ?? []) as BaseContentFields[];
+  const loadMore = () => {
+    if (loading || !hasMore) return;
+
+    const variables = { page: page + 1, limit: LIMIT };
+
+    console.log(variables);
+
+    setPage((prevPage) => prevPage + 1);
+
+    fetchMore({
+      variables: variables,
+      updateQuery: (prevResult, { fetchMoreResult }) => {
+        if (!fetchMoreResult) return prevResult;
+
+        const newItems = fetchMoreResult?.getFeed ?? [];
+
+        if (newItems.length < LIMIT) {
+          setHasMore(false);
+        }
+
+        const newFeed = [...prevResult.getFeed, ...newItems];
+
+        return {
+          getFeed: newFeed,
+        };
+      },
+    });
+  };
 
   const onShowMorePress = async () => {
     await showMore({
@@ -84,14 +116,8 @@ const Home = () => {
   };
 
   const content = useMemo((): BaseContentFields[] => {
-    if (filter === ContentFeedFilter.Queue) {
-      return (queueData?.getQueue?.queue ?? [])
-        .map((q) => q.content as BaseContentFields)
-        .filter(hasValue);
-    }
-
-    return (data?.getFeed ?? []) as BaseContentFields[];
-  }, [data, filter, queueData?.getQueue?.queue]);
+    return uniqBy(data?.getFeed ?? [], (i) => i.id) as BaseContentFields[];
+  }, [data]);
 
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {
@@ -117,27 +143,15 @@ const Home = () => {
   };
 
   const onRefresh = async () => {
-    await refetch();
+    setPage(0);
+    setHasMore(true);
+    refetch();
+    // restart the whole feed
+
     apolloClient.refetchQueries({
       include: [api.content.current, api.users.me],
     });
   };
-
-  const queue = queueData?.getQueue?.queue ?? [];
-
-  // FIXME: this is super hacky
-  useEffect(() => {
-    dispatch(
-      setQueue(
-        queue.map((q) => q.content as BaseContentFields).filter(hasValue)
-      )
-    );
-  }, [JSON.stringify(queue.map((q) => q.id))]);
-
-  // FIXME: this is super hacky
-  useEffect(() => {
-    dispatch(setFeed(feed));
-  }, [JSON.stringify(feed.map((f) => f.id))]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -234,35 +248,54 @@ const Home = () => {
             filter={filter}
           />
         )}
+        // ListFooterComponent={
+        //   // Show more
+        //   filter === ContentFeedFilter.ForYou ? (
+        //     <TouchableOpacity
+        //       style={{
+        //         padding: 5,
+        //         margin: 15,
+        //         borderRadius: 15,
+        //         backgroundColor: theme.secondaryBackground,
+        //         flexDirection: "row",
+        //         justifyContent: "center",
+        //         alignItems: "center",
+        //       }}
+        //       activeOpacity={0.8}
+        //       onPress={onShowMorePress}
+        //     >
+        //       <Text
+        //         style={{
+        //           color: colors.primary,
+        //           fontFamily: "Raleway-Bold",
+        //           fontSize: 16,
+        //           textAlign: "center",
+        //           padding: 10,
+        //         }}
+        //       >
+        //         Show more 👀
+        //       </Text>
+        //       {/* <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} /> */}
+        //     </TouchableOpacity>
+        //   ) : null
+        // }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5} // Adjust this value based on when you want to trigger loading more data
         ListFooterComponent={
-          // Show more
-          filter === ContentFeedFilter.ForYou ? (
-            <TouchableOpacity
+          loading ? (
+            <ActivityIndicator color={theme.activityIndicator} />
+          ) : !hasMore ? (
+            <Text
               style={{
-                padding: 5,
-                margin: 15,
-                borderRadius: 15,
-                backgroundColor: theme.secondaryBackground,
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
+                textAlign: "center",
+                padding: 10,
+                color: theme.text,
+                fontFamily: "Raleway-Regular",
+                fontSize: 16,
               }}
-              activeOpacity={0.8}
-              onPress={onShowMorePress}
             >
-              <Text
-                style={{
-                  color: colors.primary,
-                  fontFamily: "Raleway-Bold",
-                  fontSize: 16,
-                  textAlign: "center",
-                  padding: 10,
-                }}
-              >
-                Show more 👀
-              </Text>
-              {/* <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} /> */}
-            </TouchableOpacity>
+              No more data
+            </Text>
           ) : null
         }
       />

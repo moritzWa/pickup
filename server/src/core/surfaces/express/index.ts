@@ -28,22 +28,22 @@ const redisClient = new RedisClient(config.redis.cacheRedisUrl, {
     enableReadyCheck: false,
 });
 
-const limiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minutes
-    max: 400, // Limit each IP to 120 requests per `window` (here, per minute)
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    // Redis store configuration
-    store: new RedisStore({
-        // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
-        sendCommand: (...args: string[]) => redisClient.call(...args),
-    }),
-    handler: function (req, res /*next*/) {
-        return res.status(429).json({
-            error: "You sent too many requests. Please wait a while then try again",
-        });
-    },
-});
+// const limiter = rateLimit({
+//     windowMs: 60 * 1000, // 1 minutes
+//     max: 400, // Limit each IP to 120 requests per `window` (here, per minute)
+//     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+//     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+//     // Redis store configuration
+//     store: new RedisStore({
+//         // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
+//         sendCommand: (...args: string[]) => redisClient.call(...args),
+//     }),
+//     handler: function (req, res /*next*/) {
+//         return res.status(429).json({
+//             error: "You sent too many requests. Please wait a while then try again",
+//         });
+//     },
+// });
 
 const startInngest = async () => {
     const httpServer = http.createServer(app);
@@ -120,7 +120,7 @@ const startServer = async () => {
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
     app.use(cors());
-    app.use(limiter);
+    // app.use(limiter);
     app.use(
         helmet({
             contentSecurityPolicy:

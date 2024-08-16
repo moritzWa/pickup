@@ -12,18 +12,29 @@ import { keyBy, uniqBy } from "lodash";
 
 const getFeed = async (
     user: User,
-    limit: number
+    limit: number,
+    page: number
 ): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
+    const skip = page * limit;
+
     const feedResponse = await feedRepo.findForUser(user.id, {
         where: { isArchived: false },
         take: limit ?? 0,
+        skip: page * limit,
         order: {
             position: "desc",
+            createdAt: "desc",
         },
     });
 
     if (feedResponse.isFailure()) {
         return failure(feedResponse.error);
+    }
+
+    const feed = feedResponse.value;
+
+    if (!feed.length) {
+        return success([]);
     }
 
     // FIXME: hacky bc the typeorm joins are annoying
@@ -73,6 +84,9 @@ const getFeed = async (
 
     // idk why but I need this otherwise the frontend sometimes has dup ids?
     const uniqContent = uniqBy(content, (c) => c.id);
+
+    console.log(skip);
+    console.log(uniqContent.map((c) => c.title.slice(0, 3)));
 
     return success(uniqContent);
 };

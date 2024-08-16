@@ -1,4 +1,4 @@
-import { orderBy } from "lodash";
+import { orderBy, uniq } from "lodash";
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
@@ -14,10 +14,17 @@ import { LinkWithDistance } from "src/modules/curius/infra/linkRepo";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
+import {
+    contentRepo,
+    contentSessionRepo,
+    feedRepo,
+    interactionRepo,
+} from "../../infra";
 import { ContentWithDistance } from "../../infra/contentRepo";
 import { ContentService } from "../contentService";
 import moment = require("moment");
+import { In } from "typeorm";
+import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -35,32 +42,48 @@ export const buildQueue = async (
         return failure(feedResponse.error);
     }
 
-    const recentlyLikedContentResponse = await contentSessionRepo.find({
+    // v0 is just get content interacted with
+    const recentlyLikedContentResponse = await interactionRepo.find({
         where: {
             userId: user.id,
-            isBookmarked: true,
-            isLiked: true,
-            // TODO: has listened to a chunk of it...
+            type: In([
+                InteractionType.Bookmarked,
+                InteractionType.Finished,
+                InteractionType.ListenedToBeginning,
+                InteractionType.Queued,
+            ]),
         },
-        relations: { content: true },
         select: {
-            content: {
-                embedding: true,
-            },
+            id: true,
+            type: true,
+            contentId: true,
         },
         order: {
-            lastListenedAt: "desc",
+            createdAt: "desc",
         },
-        take: 10,
+        take: 100, // just get last 100
     });
 
     if (recentlyLikedContentResponse.isFailure()) {
         return failure(recentlyLikedContentResponse.error);
     }
 
-    const recentlyLikedContent = recentlyLikedContentResponse.value.map(
-        (c) => c.content
+    const recentlyLikedContentIds: string[] = uniq(
+        recentlyLikedContentResponse.value.map((c) => c.contentId)
     );
+
+    const contentResponse = await contentRepo.findByIds(
+        recentlyLikedContentIds,
+        {
+            select: { embedding: true },
+        }
+    );
+
+    if (contentResponse.isFailure()) {
+        return failure(contentResponse.error);
+    }
+
+    const recentlyLikedContent = contentResponse.value;
 
     const queries = [
         (description || "").slice(0, 4_000),

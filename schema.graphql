@@ -196,7 +196,7 @@ type Query {
   getContent(contentId: ID!): Content!
   getContentSession(contentId: ID!): ContentSession!
   getCurrentContentSession: ContentSession
-  getFeed(filter: ContentFeedFilter, limit: Int): [Content!]!
+  getFeed(filter: ContentFeedFilter, limit: Int, page: Int): [Content!]!
   getIntercomMobileToken(platform: String): String!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!

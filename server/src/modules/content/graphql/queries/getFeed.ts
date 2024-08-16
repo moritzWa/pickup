@@ -27,6 +27,7 @@ export const getFeed = queryField("getFeed", {
     type: nonNull(list(nonNull("Content"))),
     args: {
         limit: nullable(intArg()),
+        page: nullable(intArg()),
         filter: nullable("ContentFeedFilter"),
     },
     resolve: async (_parent, args, ctx: Context) => {
@@ -34,10 +35,14 @@ export const getFeed = queryField("getFeed", {
 
         // console.log(args);
 
-        const { limit } = args;
+        const { limit = 20, page = 0 } = args;
         const user = ctx.me!;
 
-        const feedResponse = await FeedService.getFeed(user, limit ?? 100);
+        const feedResponse = await FeedService.getFeed(
+            user,
+            limit ?? 20,
+            page ?? 0
+        );
 
         throwIfError(feedResponse);
 
