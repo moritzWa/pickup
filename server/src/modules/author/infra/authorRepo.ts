@@ -36,10 +36,17 @@ export class PostgresAuthorRepository {
 
     findForName = async (name: string): Promise<AuthorResponse> => {
         try {
-            const authors = await this.repo
-                .createQueryBuilder()
-                .where("name = :name", { name })
-                .getOne();
+            const authors = await this.repo.findOne({
+                where: {
+                    name,
+                },
+                select: {
+                    contents: false,
+                },
+                relations: {
+                    contents: false,
+                },
+            });
 
             if (!authors) {
                 return failure(new NotFoundError("Author not found."));
@@ -75,7 +82,7 @@ export class PostgresAuthorRepository {
         });
     }
 
-    async save(obj: Author): Promise<AuthorResponse> {
+    async save(obj: Omit<Author, "contents">): Promise<AuthorResponse> {
         try {
             return success(await this.repo.save(obj));
         } catch (err) {

@@ -18,6 +18,8 @@ import { Content } from "./Content";
 export enum InteractionType {
     Likes = "likes",
     Bookmarked = "bookmarked",
+    Queued = "queued",
+    StartedListening = "started_listening",
     ScrolledPast = "scrolled_past",
     Skipped = "skipped",
     LeftInProgress = "left_in_progress",

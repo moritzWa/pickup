@@ -10,8 +10,9 @@ import { loops } from "src/utils/loops";
 import { auth } from "firebase-admin";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, contentSessionRepo } from "../../infra";
+import { contentRepo, contentSessionRepo, interactionRepo } from "../../infra";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
+import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 
 export const startContent = mutationField("startContent", {
     type: nonNull("ContentSession"),
@@ -72,6 +73,15 @@ export const startContent = mutationField("startContent", {
 
         await pgUserRepo.update(user.id, {
             currentContentSessionId: session.id,
+        });
+
+        await interactionRepo.create({
+            id: uuidv4(),
+            contentId: content.id,
+            userId: user.id,
+            type: InteractionType.StartedListening,
+            createdAt: new Date(),
+            updatedAt: new Date(),
         });
 
         return session;

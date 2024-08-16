@@ -47,6 +47,7 @@ import {
   setSpeed,
 } from "src/redux/reducers/audio";
 import { singletonHook } from "react-singleton-hook";
+import { useInterval } from "./useInterval";
 
 export type UseAudioReturn = ReturnType<typeof useAudioHook>;
 
@@ -176,6 +177,8 @@ const useAudioHook = () => {
 
       await TrackPlayer.play();
 
+      console.log(`[playing ${track.title}]`);
+
       void startContent({
         variables: {
           contentId: content.id,
@@ -209,6 +212,8 @@ const useAudioHook = () => {
       // await sound.playAsync();
       await TrackPlayer.play();
       dispatch(setIsPlaying(true));
+
+      console.log(`[playing ${currentContent?.title}]`);
 
       if (session) {
         console.log(`[updating ${session.id} to ${currentMs}]`);
@@ -336,6 +341,21 @@ const useAudioHook = () => {
   const playPrev = async () => {
     await TrackPlayer.skipToPrevious();
   };
+
+  useInterval(() => {
+    if (!session) return;
+
+    console.log(`[updating session with current ms ${currentMs}]`);
+
+    void updateSession({
+      variables: {
+        contentSessionId: session.id,
+        lastListenedAt: new Date(),
+        currentMs,
+      },
+      refetchQueries: [api.content.getSession],
+    });
+  }, 5_000);
 
   // ehhh might need to adjust this more...
   // const syncQueue = async (queue: BaseQueueFields[]) => {

@@ -18,10 +18,12 @@ import { loops } from "src/utils/loops";
 import { auth } from "firebase-admin";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, contentSessionRepo } from "../../infra";
+import { contentRepo, contentSessionRepo, interactionRepo } from "../../infra";
 import BigNumber from "bignumber.js";
 import { last } from "lodash";
 import { dateArg } from "src/core/surfaces/graphql/base";
+import { ContentInteractionService } from "../../services/contentInteractionService";
+import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 
 export const updateContentSession = mutationField("updateContentSession", {
     type: nonNull("ContentSession"),
@@ -52,7 +54,7 @@ export const updateContentSession = mutationField("updateContentSession", {
         ).div(contentSession.durationMs ?? 0);
 
         const percentFinished = !percentFinishedRaw.isNaN()
-            ? percentFinishedRaw.multipliedBy(100).dp(0).toNumber()
+            ? percentFinishedRaw.multipliedBy(100).dp(0)
             : null;
 
         const updateSessionResponse = await contentSessionRepo.update(
@@ -61,7 +63,7 @@ export const updateContentSession = mutationField("updateContentSession", {
                 isBookmarked: args.isBookmarked ?? contentSession.isBookmarked,
                 isLiked: args.isLiked ?? contentSession.isLiked,
                 currentMs: args.currentMs ?? contentSession.currentMs,
-                percentFinished: percentFinished,
+                percentFinished: percentFinished?.toNumber() ?? null,
                 bookmarkedAt: args.isBookmarked
                     ? new Date()
                     : contentSession.bookmarkedAt,
@@ -73,6 +75,28 @@ export const updateContentSession = mutationField("updateContentSession", {
         throwIfError(updateSessionResponse);
 
         const session = updateSessionResponse.value;
+
+        if (session.currentMs && session.currentMs > 15_000) {
+            await interactionRepo.create({
+                id: uuidv4(),
+                contentId: session.id,
+                userId: user.id,
+                type: InteractionType.ListenedToBeginning,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+        }
+
+        if (percentFinished && percentFinished.gte(70)) {
+            await interactionRepo.create({
+                id: uuidv4(),
+                contentId: session.id,
+                userId: user.id,
+                type: InteractionType.Finished,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+        }
 
         return session;
     },

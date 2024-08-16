@@ -35,7 +35,7 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   ContentFeedFilter: "archived" | "for_you" | "new" | "popular" | "queue" | "unread"
-  InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "scrolled_past" | "skipped"
+  InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "queued" | "scrolled_past" | "skipped" | "started_listening"
   UserAuthProviderEnum: "firebase"
 }
 

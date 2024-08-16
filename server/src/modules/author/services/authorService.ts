@@ -2,6 +2,7 @@ import { Author } from "src/core/infra/postgres/entities";
 import { authorRepo } from "../infra";
 import { v4 as uuidv4 } from "uuid";
 import { DefaultErrors, failure, FailureOrSuccess } from "src/core/logic";
+import { select } from "radash";
 
 const findOrCreate = async (
     name: string,
@@ -13,11 +14,10 @@ const findOrCreate = async (
         return authorResponse;
     }
 
-    const author: Author = {
+    const author: Omit<Author, "contents"> = {
         id: uuidv4(),
         imageUrl: a.imageUrl || "",
         name,
-        contents: [],
     };
 
     const saveResponse = await authorRepo.save(author);

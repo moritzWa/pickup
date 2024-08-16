@@ -127,8 +127,10 @@ enum InteractionTypeEnum {
   LeftInProgress
   Likes
   ListenedToBeginning
+  Queued
   ScrolledPast
   Skipped
+  StartedListening
 }
 
 type Metadata {
