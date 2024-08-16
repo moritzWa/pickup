@@ -119,7 +119,7 @@ const Home = () => {
   const onRefresh = async () => {
     await refetch();
     apolloClient.refetchQueries({
-      include: [api.content.current, api.users.me, api.queue.list],
+      include: [api.content.current, api.users.me],
     });
   };
 

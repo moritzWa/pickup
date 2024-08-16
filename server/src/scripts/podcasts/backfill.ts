@@ -73,6 +73,10 @@ async function syncDatabases() {
                 continue;
             }
 
+            console.log(
+                `[updating ${row.reference_id} to ${localData.length_ms}]`
+            );
+
             // Update the production database with the local data
             await productionClient.query(
                 `UPDATE content SET length_ms = $1 WHERE id = $2`,

@@ -5,7 +5,7 @@ import {
 } from "src/core/surfaces/graphql/context";
 import { stripe } from "src/utils";
 import { throwIfError } from "src/core/surfaces/graphql/common";
-import { contentSessionRepo } from "../../infra";
+import { contentRepo, contentSessionRepo } from "../../infra";
 
 export const getCurrentContentSession = queryField("getCurrentContentSession", {
     type: nullable("ContentSession"),
@@ -19,14 +19,23 @@ export const getCurrentContentSession = queryField("getCurrentContentSession", {
         }
 
         const contentSession = await contentSessionRepo.findById(
-            user.currentContentSessionId,
-            {
-                relations: { content: true },
-            }
+            user.currentContentSessionId
         );
 
         throwIfError(contentSession);
 
-        return contentSession.value;
+        const contentResponse = await contentRepo.findById(
+            contentSession.value.contentId,
+            {
+                relations: { authors: true },
+            }
+        );
+
+        throwIfError(contentResponse);
+
+        return {
+            ...contentSession.value,
+            content: contentResponse.value,
+        };
     },
 });
