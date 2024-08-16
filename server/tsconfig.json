@@ -2,7 +2,7 @@
     "compilerOptions": {
         "incremental": true,
         "target": "es2020",
-        "module": "commonjs",
+        "module": "CommonJS",
         "moduleResolution": "node",
         "lib": ["es2020", "DOM", "esnext.asynciterable"],
         "sourceMap": true,
@@ -18,7 +18,7 @@
         "noImplicitThis": false,
         "strict": true,
         "typeRoots": ["node_modules/@types", "node_modules/@types/ioredis"],
-        "allowSyntheticDefaultImports": false,
+        "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "resolveJsonModule": true,

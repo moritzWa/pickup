@@ -41,6 +41,7 @@ import {
   setAudioUrl,
   setCurrentContent,
   setCurrentMs,
+  setDurationMs,
   setIsPlaying,
   setQueue,
   setSpeed,
@@ -137,6 +138,7 @@ const useAudioHook = () => {
       dispatch(setAudioUrl(url));
       dispatch(setCurrentContent(content));
       dispatch(setCurrentMs(0));
+      dispatch(setDurationMs(content.lengthMs ?? 0));
 
       // make it so it can play even if it is muted
       await Audio.setAudioModeAsync({

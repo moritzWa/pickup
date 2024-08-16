@@ -11,8 +11,8 @@ import { RSSFeedService } from "src/modules/content/services/rss/rssFeedService"
 import { ContentType } from "src/core/infra/postgres/entities/Content";
 import { v4 as uuidv4 } from "uuid";
 
-// cron to run at 3am UTC
-const CRON = "0 3 * * *";
+// cron to run at 12am PST
+const CRON = "0 7 * * *";
 const NAME = "Sync RSS Feed Cron";
 
 const syncRSSFeedCron = inngest.createFunction(

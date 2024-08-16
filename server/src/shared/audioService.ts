@@ -1,4 +1,4 @@
-import * as ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "fluent-ffmpeg";
 import {
     DefaultErrors,
     failure,

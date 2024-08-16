@@ -188,7 +188,6 @@ const convertCuriusToContent = async (
         followUpQuestions: [],
         title: link.title,
         websiteUrl: link.link,
-        contentAsMarkdown: null,
         chunks: [],
         createdAt: new Date(),
         updatedAt: new Date(),

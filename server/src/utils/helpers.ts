@@ -7,7 +7,7 @@ import {
     success,
 } from "src/core/logic";
 import { DefaultErrors, UnexpectedError } from "src/core/logic/errors";
-import * as Dinero from "dinero.js";
+import Dinero from "dinero.js";
 import { isNil } from "lodash/fp";
 import { isUndefined } from "lodash";
 import BigNumber from "bignumber.js";

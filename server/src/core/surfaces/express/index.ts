@@ -1,6 +1,6 @@
-import * as http from "http";
-import * as express from "express";
-import * as cors from "cors";
+import http from "http";
+import express from "express";
+import cors from "cors";
 
 import { startApolloServer } from "../graphql";
 import { Exception } from "src/core/logic";
