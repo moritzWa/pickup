@@ -8,39 +8,68 @@ import { firebase } from "../../utils/firebase";
 
 const BATCH_SIZE = 10;
 
+export function getFaviconURL(url: string): string {
+    const root = getRootOfURL(url);
+    return getFaviconUrlFromDuckDuckGo(root);
+}
+
+function getRootOfURL(url: string): string {
+    try {
+        return new URL(url).hostname;
+    } catch (e) {
+        return "";
+    }
+}
+
+function getFaviconUrlFromDuckDuckGo(baseDomain: string): string {
+    return `https://icons.duckduckgo.com/ip3/${baseDomain}.ico`;
+}
+
 const scrapeAndUploadThumbnail = async (content: Content) => {
     try {
         const options = { url: content.websiteUrl };
         const { result } = await ogs(options);
 
-        if (result.ogImage && result.ogImage.length > 0) {
-            const imageUrl = result.ogImage[0].url;
+        let imageUrl =
+            result.ogImage && result.ogImage.length > 0
+                ? result.ogImage[0].url
+                : null;
 
-            // log entire json output of ogs result
-            console.log(
-                `OGS result for content ${content.websiteUrl}:`,
-                JSON.stringify(result, null, 2)
-            );
-
-            // log imageUrl for link
+        if (!imageUrl) {
             Logger.info(
-                `Image URL for content ${content.websiteUrl}: ${imageUrl}`
+                `No og:image found for content: ${content.websiteUrl}, falling back to favicon`
             );
-            const uploadResult = await firebase.storage.upload(imageUrl);
+            imageUrl = getFaviconURL(content.websiteUrl);
+        }
 
-            if (isSuccess(uploadResult)) {
-                content.thumbnailImageUrl = uploadResult.value.originalUrl;
-                content.ogDescription = result.ogDescription ?? null;
-                Logger.info(
-                    `Thumbnail uploaded for content: ${content.websiteUrl}`
-                );
-            } else {
-                Logger.error(
-                    `Failed to upload thumbnail for content: ${content.websiteUrl}`
-                );
-            }
+        // log entire json output of ogs result
+        console.log(
+            `OGS result for content ${content.websiteUrl}:`,
+            JSON.stringify(result, null, 2)
+        );
+
+        // log imageUrl for link
+        Logger.info(`Image URL for content ${content.websiteUrl}: ${imageUrl}`);
+        let uploadResult = await firebase.storage.upload(imageUrl);
+
+        if (!isSuccess(uploadResult)) {
+            Logger.error(
+                `Failed to upload thumbnail for content: ${content.websiteUrl}, retrying with favicon`
+            );
+            imageUrl = getFaviconURL(content.websiteUrl);
+            uploadResult = await firebase.storage.upload(imageUrl);
+        }
+
+        if (isSuccess(uploadResult)) {
+            content.thumbnailImageUrl = uploadResult.value.originalUrl;
+            content.ogDescription = result.ogDescription ?? null;
+            Logger.info(
+                `Thumbnail uploaded for content: ${content.websiteUrl}`
+            );
         } else {
-            Logger.info(`No og:image found for content: ${content.websiteUrl}`);
+            Logger.error(
+                `Failed to upload thumbnail for content: ${content.websiteUrl}`
+            );
         }
     } catch (error) {
         Logger.error(
