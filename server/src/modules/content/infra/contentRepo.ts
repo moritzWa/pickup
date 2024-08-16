@@ -41,6 +41,8 @@ export class PostgresContentRepository {
         return dataSource.getRepository(this.model);
     }
 
+    // FINDERS
+
     async find(
         options: FindManyOptions<ContentModel>
     ): Promise<ContentArrayResponse> {
@@ -124,14 +126,20 @@ export class PostgresContentRepository {
         }
     }
 
-    async count(
-        options: FindManyOptions<ContentModel>
-    ): Promise<FailureOrSuccess<DefaultErrors, number>> {
-        return Helpers.trySuccessFail(async () => {
-            const query = Helpers.stripUndefined(options);
-            const res = await this.repo.count(query);
-            return success(res);
-        });
+    async filterContentWithoutThumbnail(): Promise<ContentArrayResponse> {
+        try {
+            const contents = await this.repo.find({
+                where: {
+                    thumbnailImageUrl: IsNull(),
+                },
+                order: {
+                    createdAt: "asc",
+                },
+            });
+            return success(contents);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
     }
 
     async findById(
@@ -176,30 +184,6 @@ export class PostgresContentRepository {
             }
             return success(user);
         });
-    }
-
-    async update(
-        userId: string,
-        updates: Partial<ContentModel>,
-        dbTxn?: EntityManager
-    ): Promise<ContentResponse> {
-        try {
-            dbTxn
-                ? await dbTxn.update(this.model, { id: userId }, updates)
-                : await this.repo.update(userId, updates);
-
-            const user = dbTxn
-                ? await dbTxn.findOneBy(this.model, { id: userId })
-                : await this.repo.findOneBy({ id: userId });
-
-            if (!user) {
-                return failure(new NotFoundError("Content does not exist!"));
-            }
-
-            return success(user);
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
     }
 
     async findSimilarContentFromChunks(
@@ -283,6 +267,56 @@ export class PostgresContentRepository {
         }
     }
 
+    // SAVES
+
+    async save(obj: ContentModel): Promise<ContentResponse> {
+        try {
+            return success(await this.repo.save(obj));
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async saveMany(
+        contents: ContentModel[]
+    ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> {
+        try {
+            return success(
+                await this.repo.save(contents, {
+                    chunk: 1,
+                })
+            );
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    // UPDATES
+
+    async update(
+        userId: string,
+        updates: Partial<ContentModel>,
+        dbTxn?: EntityManager
+    ): Promise<ContentResponse> {
+        try {
+            dbTxn
+                ? await dbTxn.update(this.model, { id: userId }, updates)
+                : await this.repo.update(userId, updates);
+
+            const user = dbTxn
+                ? await dbTxn.findOneBy(this.model, { id: userId })
+                : await this.repo.findOneBy({ id: userId });
+
+            if (!user) {
+                return failure(new NotFoundError("Content does not exist!"));
+            }
+
+            return success(user);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async bulkUpdate(
         userIds: string[],
         updates: Partial<ContentModel>
@@ -305,28 +339,6 @@ export class PostgresContentRepository {
 
             return success(updateResult.affected || 0);
         });
-    }
-
-    async save(obj: ContentModel): Promise<ContentResponse> {
-        try {
-            return success(await this.repo.save(obj));
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
-    }
-
-    async saveMany(
-        contents: ContentModel[]
-    ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> {
-        try {
-            return success(
-                await this.repo.save(contents, {
-                    chunk: 1,
-                })
-            );
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
     }
 
     async countContentsWithoutFullText(): Promise<
@@ -357,24 +369,7 @@ export class PostgresContentRepository {
         }
     }
 
-    // hard delete
-    async delete(userId: string): Promise<ContentResponse> {
-        try {
-            const user = await this.repo.findOne({
-                where: { id: userId },
-            });
-
-            if (!user) {
-                return failure(new NotFoundError("Content does not exist!"));
-            }
-
-            await this.repo.delete({ id: userId });
-
-            return success(user);
-        } catch (err) {
-            return failure(new UnexpectedError(err));
-        }
-    }
+    // CREATE & DELETE
 
     async create(
         params: Omit<ContentModel, "accounts">,
@@ -399,4 +394,23 @@ export class PostgresContentRepository {
             return success(res);
         });
     };
+
+    // hard delete
+    async delete(userId: string): Promise<ContentResponse> {
+        try {
+            const user = await this.repo.findOne({
+                where: { id: userId },
+            });
+
+            if (!user) {
+                return failure(new NotFoundError("Content does not exist!"));
+            }
+
+            await this.repo.delete({ id: userId });
+
+            return success(user);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
 }
