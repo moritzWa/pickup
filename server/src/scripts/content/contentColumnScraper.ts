@@ -64,8 +64,8 @@ console.error = (...args) => {
     originalConsoleError(...args);
 };
 
-const BATCH_SIZE = 500; // Increased batch size // move back to 60
-const CONCURRENCY_LIMIT = 10; // Number of contents to process concurrently // move back to 20
+const BATCH_SIZE = 1; // Increased batch size // move back to 60
+const CONCURRENCY_LIMIT = 1; // Number of contents to process concurrently // move back to 20
 const MAX_CONTENTS_TO_PROCESS = 687;
 
 const addFullTextToContent = async () => {

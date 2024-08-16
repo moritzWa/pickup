@@ -98,10 +98,19 @@ export class PostgresContentRepository {
             const links = await this.repo.find({
                 where: {
                     content: IsNull(),
+                    skippedErrorFetchingFullText: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+                    skippedNotProbablyReadable: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
                     skippedInaccessiblePDF: Raw(
                         (alias) => `${alias} IS NOT TRUE`
                     ),
                     deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+
+                    // get all articles that are not yet pod
+                    audioUrl: IsNull(),
                 },
                 take: limit,
                 skip,
