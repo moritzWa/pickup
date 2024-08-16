@@ -453,10 +453,11 @@ export const ContentRow = ({
 
                     <Text
                       style={{
-                        color: theme.text,
+                        color: theme.header,
                         fontSize: 14,
                         fontFamily: "Raleway-Medium",
                       }}
+                      numberOfLines={1}
                     >
                       {c.authorName}
                     </Text>

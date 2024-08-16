@@ -39,7 +39,6 @@ export const getFeed = queryField("getFeed", {
         const feedResponse = await feedRepo.findForUser(user.id, {
             where: { isArchived: false },
             take: limit ?? 0,
-            relations: { content: true },
             order: {
                 position: "desc",
             },
@@ -47,6 +46,20 @@ export const getFeed = queryField("getFeed", {
 
         throwIfError(feedResponse);
 
+        // FIXME: hacky bc the typeorm joins are annoying
+        const contentResponse = await contentRepo.find({
+            where: {
+                id: In(feedResponse.value.map((c) => c.contentId)),
+            },
+            select: {
+                embedding: false,
+            },
+            relations: { authors: true },
+        });
+
+        console.log(contentResponse.value);
+
+        throwIfError(contentResponse);
         // Note: just doing in memory, lil easier than fiddling with typeorm
 
         const contentIds = feedResponse.value.map((c) => c.contentId);
@@ -65,9 +78,11 @@ export const getFeed = queryField("getFeed", {
             (cs) => cs.contentId
         );
 
+        const contentByContentId = keyBy(contentResponse.value, (c) => c.id);
+
         const content = feedResponse.value.map((c) => {
             const session = sessionByContentId[c.id];
-            const content = c.content;
+            const content = contentByContentId[c.contentId];
 
             return {
                 ...content,
