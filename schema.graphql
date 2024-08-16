@@ -34,7 +34,7 @@ type Content {
   contentSession: ContentSession
   context: String!
   createdAt: Date!
-  followUpQuestions: [FollowUpQuestion!]!
+  followUpQuestions: [FollowUpQuestion!]
   id: String!
   lengthMs: Int
   lengthSeconds: Int!
