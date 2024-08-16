@@ -35,7 +35,11 @@ import { CurrentAudio } from "../../../components/CurrentAudio";
 import { useAudio } from "src/hooks/useAudio";
 import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faCar } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faCar,
+  faSatellite,
+  faSatelliteDish,
+} from "@fortawesome/pro-solid-svg-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
@@ -50,12 +54,11 @@ const Home = () => {
   // const filter = useSelector(getHomeFilter, shallowEqual);
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
 
-  const [showMore] = useMutation(api.content.showMore);
   const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
 
-  const [list, setList] = useState<Content[]>([]);
+  const [list, setList] = useState<BaseContentFields[]>([]);
   const [page, setPage] = useState<number>(0);
   const [hasMore, setHasMore] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -114,12 +117,6 @@ const Home = () => {
     }
   }, 300); // 300ms throttle to prevent rapid firing
 
-  const onShowMorePress = async () => {
-    await showMore({
-      refetchQueries: [api.queue.list, api.content.feed],
-    });
-  };
-
   const content = useMemo((): BaseContentFields[] => {
     return uniqBy(data?.getFeed ?? [], (i) => i.id) as BaseContentFields[];
   }, [data]);
@@ -145,6 +142,18 @@ const Home = () => {
     await clear({
       refetchQueries: [api.queue.list, api.content.feed],
     });
+  };
+
+  const onPressMore = async () => {
+    try {
+      setPage(0);
+      setHasMore(true);
+      await refetch({
+        variables: { page: 0, limit: LIMIT },
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const onRefresh = async () => {
@@ -176,7 +185,7 @@ const Home = () => {
           alignItems: "center",
         }}
       >
-        <Options />
+        <Options onPressMore={onPressMore} />
       </View>
 
       <FlatList
@@ -425,7 +434,7 @@ const HomeHeader = () => {
                   marginBottom: 0,
                 }}
               >
-                Commute save {commuteTime.formatted}.
+                Commute save {commuteTime?.formatted}.
               </Text>
             ) : (
               <>
@@ -532,7 +541,7 @@ export enum DiscoveryTab {
   Popular = "popular",
 }
 
-const Options = () => {
+const Options = ({ onPressMore }: { onPressMore: () => void }) => {
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
@@ -547,6 +556,9 @@ const Options = () => {
     api.content.startListening
   );
   const [setCommuteTime] = useMutation(api.users.setCommuteTime);
+  const [showMore, { loading: loadingShowMore }] = useMutation(
+    api.content.showMore
+  );
 
   const { data: queueData, refetch: refetchQueue } = useQuery<
     Pick<Query, "getQueue">
@@ -602,6 +614,14 @@ const Options = () => {
     } catch (err) {
       console.log(JSON.stringify(err, null, 2));
     }
+  };
+
+  const _onPressMore = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    await showMore({});
+
+    onPressMore();
   };
 
   const commuteTime = useMemo(() => {
@@ -675,38 +695,45 @@ const Options = () => {
           /> */}
         </View>
 
-        {/* {commuteTime ? (
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => setOpen(true)}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={_onPressMore}
+          disabled={loadingShowMore}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            borderRadius: 100,
+            marginRight: 10,
+            paddingVertical: 7,
+            padding: 10,
+            backgroundColor: theme.bgPrimary,
+          }}
+        >
+          <FontAwesomeIcon
+            style={{ marginRight: 5 }}
+            icon={faSatelliteDish}
+            size={16}
+            color={colors.primary}
+          />
+          <Text
             style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              borderRadius: 100,
-              marginRight: 10,
-              paddingVertical: 7,
-              padding: 10,
-              backgroundColor: theme.bgPrimary,
+              color: colors.primary,
+              fontFamily: "Raleway-Bold",
+              fontSize: 16,
             }}
           >
-            <FontAwesomeIcon
-              style={{ marginRight: 5 }}
-              icon={faCar}
-              size={16}
+            More
+          </Text>
+
+          {loadingShowMore ? (
+            <ActivityIndicator
+              style={{ marginLeft: 5 }}
+              size="small"
               color={colors.primary}
             />
-            <Text
-              style={{
-                color: colors.primary,
-                fontFamily: "Raleway-Bold",
-                fontSize: 16,
-              }}
-            >
-              {commuteTime.formatted}
-            </Text>
-          </TouchableOpacity>
-        ) : null} */}
+          ) : null}
+        </TouchableOpacity>
       </View>
     </>
   );
