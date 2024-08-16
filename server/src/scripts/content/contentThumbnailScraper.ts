@@ -15,21 +15,41 @@ const scrapeAndUploadThumbnail = async (content: Content) => {
 
         if (result.ogImage && result.ogImage.length > 0) {
             const imageUrl = result.ogImage[0].url;
+
+            // log entire json output of ogs result
+            console.log(
+                `OGS result for content ${content.websiteUrl}:`,
+                JSON.stringify(result, null, 2)
+            );
+
+            // log imageUrl for link
+            Logger.info(
+                `Image URL for content ${content.websiteUrl}: ${imageUrl}`
+            );
             const uploadResult = await firebase.storage.upload(imageUrl);
 
             if (isSuccess(uploadResult)) {
                 content.thumbnailImageUrl = uploadResult.value.originalUrl;
-                Logger.info(`Thumbnail uploaded for content: ${content.id}`);
+                content.ogDescription = result.ogDescription ?? null;
+                Logger.info(
+                    `Thumbnail uploaded for content: ${content.websiteUrl}`
+                );
             } else {
                 Logger.error(
-                    `Failed to upload thumbnail for content: ${content.id}`
+                    `Failed to upload thumbnail for content: ${content.websiteUrl}`
                 );
             }
         } else {
-            Logger.info(`No og:image found for content: ${content.id}`);
+            Logger.info(`No og:image found for content: ${content.websiteUrl}`);
         }
     } catch (error) {
-        Logger.error(`Error processing content ${content.id}:`, error);
+        Logger.error(
+            `Error processing content ${content.websiteUrl}: ${JSON.stringify(
+                error,
+                null,
+                2
+            )}`
+        );
     }
 
     return content;
