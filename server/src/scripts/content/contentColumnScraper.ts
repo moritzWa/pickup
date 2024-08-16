@@ -153,8 +153,6 @@ const addFullTextToContent = async () => {
         }
 
         Logger.info(`Finished processing ${totalProcessed} contents in total.`);
-
-        debugger;
     } catch (error) {
         Logger.error("Unexpected error:", error);
     } finally {
@@ -282,19 +280,26 @@ const processHTMLContent = async (content: Content) => {
         );
 
         const fetchPromise = fetch(content.websiteUrl);
-        const timeoutPromise = new Promise<never>((_, reject) =>
-            setTimeout(() => {
-                Logger.info(
-                    `Fetch timeout for content: ${content.websiteUrl} i.e. ${content.title}`
-                );
-                reject(new Error("Fetch timeout"));
-            }, FETCH_TIMEOUT)
+
+        let timetoutId: NodeJS.Timeout | null = null;
+        const timeoutPromise = new Promise<never>(
+            (_, reject) =>
+                (timetoutId = setTimeout(() => {
+                    Logger.info(
+                        `Fetch timeout for content: ${content.websiteUrl} i.e. ${content.title}`
+                    );
+                    reject(new Error("Fetch timeout"));
+                }, FETCH_TIMEOUT))
         );
 
         const response = (await Promise.race([
             fetchPromise,
             timeoutPromise,
         ])) as Response;
+
+        if (timetoutId) {
+            clearTimeout(timetoutId);
+        }
 
         if (!response.ok) {
             handleNonOkResponse(content, response);
