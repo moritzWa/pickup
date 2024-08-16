@@ -156,7 +156,7 @@ export const CurrentAudio = () => {
     }
 
     return false;
-  }, [activeContent, percentFinished]);
+  }, [activeContent]);
 
   if (shouldHide || !activeContent) {
     return null;

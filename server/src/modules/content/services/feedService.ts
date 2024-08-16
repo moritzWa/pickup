@@ -8,7 +8,7 @@ import {
     success,
 } from "src/core/logic";
 import { In } from "typeorm";
-import { keyBy } from "lodash";
+import { keyBy, uniqBy } from "lodash";
 
 const getFeed = async (
     user: User,
@@ -71,7 +71,10 @@ const getFeed = async (
         };
     });
 
-    return success(content);
+    // idk why but I need this otherwise the frontend sometimes has dup ids?
+    const uniqContent = uniqBy(content, (c) => c.id);
+
+    return success(uniqContent);
 };
 
 export const FeedService = {

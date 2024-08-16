@@ -32,7 +32,9 @@ const list = async (
         order: {
             queuedAt: "asc",
         },
-        relations: { content: true },
+        relations: {
+            content: true,
+        },
     });
 
     if (queueResponse.isFailure()) {

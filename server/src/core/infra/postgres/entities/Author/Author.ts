@@ -29,7 +29,7 @@ export class Author {
     imageUrl!: string | null;
 
     @ManyToMany(() => Content, (content) => content.authors, {
-        eager: true,
+        eager: false,
     })
     @JoinTable({
         name: "content_authors",
