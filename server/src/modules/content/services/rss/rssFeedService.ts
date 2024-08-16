@@ -1,14 +1,13 @@
-import * as Parser from "rss-parser";
+import Parser = require("rss-parser");
 import { Content } from "src/core/infra/postgres/entities";
+import { ContentType } from "src/core/infra/postgres/entities/Content";
 import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
     success,
 } from "src/core/logic";
-import { authorRepo } from "src/modules/author/infra";
 import { AuthorService } from "src/modules/author/services/authorService";
-import { ContentType } from "src/core/infra/postgres/entities/Content";
 import { v4 as uuidv4 } from "uuid";
 
 const parser = new Parser();
@@ -43,6 +42,7 @@ const scrapeRssFeed = async (
             id: uuidv4(),
             isProcessed: false,
             content: item.content || "",
+            contentAsMarkdown: item.content || "",
             context: item.content || "",
             insertionId,
             sourceImageUrl: feed.image?.url || "",

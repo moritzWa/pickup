@@ -196,6 +196,7 @@
         "nodemon": "^2.0.13",
         "numbro": "^2.4.0",
         "object-hash": "^3.0.0",
+        "open-graph-scraper": "^6.7.2",
         "openai": "^4.53.0",
         "path": "^0.12.7",
         "pdf-lib": "^1.17.1",

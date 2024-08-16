@@ -1,3 +1,4 @@
+import { orderBy } from "lodash";
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
@@ -5,7 +6,6 @@ import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
-    hasValue,
     success,
 } from "src/core/logic";
 import { authorRepo } from "src/modules/author/infra";
@@ -15,12 +15,9 @@ import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
-import moment = require("moment");
-import { openai } from "src/utils";
 import { ContentWithDistance } from "../../infra/contentRepo";
 import { ContentService } from "../contentService";
-import { orderBy } from "lodash";
-import { MoreThan } from "typeorm";
+import moment = require("moment");
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -176,6 +173,7 @@ const convertCuriusToContent = async (
         insertionId: null,
         audioUrl: audio.url,
         context: "",
+        contentAsMarkdown: link.fullText || "",
         content: link.fullText || "",
         isProcessed: false,
         thumbnailImageUrl: "",
