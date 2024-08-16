@@ -73,14 +73,12 @@ export const CurrentAudio = () => {
 
   const currentAudioUrl = useSelector(getCurrentAudioUrl);
 
-  const {
-    downloadAndPlayContent,
-    currentMs,
-    durationMs,
-    toggle,
-    percentFinished,
-    leftTimeFormatted,
-  } = useContext(AppContext).audio!;
+  const [getCurrentSession] = useLazyQuery<
+    Pick<Query, "getCurrentContentSession">
+  >(api.content.current);
+
+  const { startPlayingContent, toggle, percentFinished, leftTimeFormatted } =
+    useContext(AppContext).audio!;
 
   const isFocused = useIsFocused();
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
@@ -134,7 +132,7 @@ export const CurrentAudio = () => {
       if (currentAudioUrl !== audioUrl) {
         const content = activeContent as BaseContentFields;
 
-        await downloadAndPlayContent(content);
+        await startPlayingContent(content);
 
         return;
       }
@@ -157,6 +155,30 @@ export const CurrentAudio = () => {
 
     return false;
   }, [activeContent]);
+
+  const _getStartingContent = async () => {
+    const response = await getCurrentSession();
+
+    const data = response.data?.getCurrentContentSession ?? null;
+
+    console.log(data?.currentMs);
+
+    if (data) {
+      const content = data.content as BaseContentFields;
+
+      if (content) {
+        // load the content but don't play it to start
+        await startPlayingContent(content, {
+          startingTimeMs: data.currentMs ?? 0,
+          shouldNotAutoPlay: true,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    _getStartingContent();
+  }, []);
 
   if (shouldHide || !activeContent) {
     return null;

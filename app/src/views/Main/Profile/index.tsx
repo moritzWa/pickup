@@ -61,7 +61,7 @@ export const UserProfile = () => {
   // console.log("ME: " + me);
 
   const navigation = useNavigation<NavigationProps>();
-  const { downloadAndPlayContent, toggle } = useContext(AppContext).audio!;
+  const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
   const username = params?.username ?? me?.id;
   const insets = useSafeAreaInsets();
@@ -157,7 +157,7 @@ export const UserProfile = () => {
 
   const onPlayContent = async (content: BaseContentFields) => {
     // alert("play");
-    await downloadAndPlayContent(content);
+    await startPlayingContent(content);
     dispatch(setCurrentContent(content));
   };
 

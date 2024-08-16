@@ -48,6 +48,9 @@ import {
 } from "src/redux/reducers/audio";
 import { singletonHook } from "react-singleton-hook";
 import { useInterval } from "./useInterval";
+import { Alert } from "react-native";
+
+export type PlayOpts = { startingTimeMs?: number; shouldNotAutoPlay?: boolean };
 
 export type UseAudioReturn = ReturnType<typeof useAudioHook>;
 
@@ -116,8 +119,30 @@ const useAudioHook = () => {
     console.log("Cached files: ", result.length);
   };
 
-  const downloadAndPlayContent = async (
-    content: BaseContentFields
+  const _playTrack = async (track: AddTrack | null, opts: PlayOpts = {}) => {
+    console.log(`[playing ${track?.title || "existing track"}]`);
+
+    if (track) {
+      await TrackPlayer.add([track], 0);
+    }
+
+    if (!isNil(opts.startingTimeMs)) {
+      await TrackPlayer.seekTo(opts.startingTimeMs / 1_000);
+      dispatch(setCurrentMs(opts.startingTimeMs));
+    }
+
+    if (opts.shouldNotAutoPlay === true) {
+      return;
+    }
+
+    await TrackPlayer.play();
+
+    dispatch(setIsPlaying(true));
+  };
+
+  const startPlayingContent = async (
+    content: BaseContentFields,
+    opts?: PlayOpts
   ): Promise<FailureOrSuccess<DefaultErrors, null>> => {
     const url = content.audioUrl;
 
@@ -136,10 +161,15 @@ const useAudioHook = () => {
       //   sessionType: FileSystem.FileSystemSessionType.BACKGROUND,
       // });
 
+      const duration = content.lengthMs ?? 0;
+
+      console.log("DURATION: " + duration);
+      console.log("CURRENT: " + opts?.startingTimeMs ?? 0);
+
       dispatch(setAudioUrl(url));
       dispatch(setCurrentContent(content));
-      dispatch(setCurrentMs(0));
-      dispatch(setDurationMs(content.lengthMs ?? 0));
+      dispatch(setCurrentMs(opts?.startingTimeMs ?? 0));
+      dispatch(setDurationMs(duration));
 
       // make it so it can play even if it is muted
       await Audio.setAudioModeAsync({
@@ -171,13 +201,7 @@ const useAudioHook = () => {
 
       console.log(`[added ${track.title} to front of the queue]`);
 
-      await TrackPlayer.add([track], 0);
-
-      // await logQueue();
-
-      await TrackPlayer.play();
-
-      console.log(`[playing ${track.title}]`);
+      await _playTrack(track, opts);
 
       void startContent({
         variables: {
@@ -185,9 +209,6 @@ const useAudioHook = () => {
         },
         refetchQueries: [api.content.current],
       });
-
-      //   await sound.playAsync();
-      dispatch(setIsPlaying(true));
 
       return success(null);
     } catch (error) {
@@ -210,8 +231,7 @@ const useAudioHook = () => {
 
       // if paused -> play
       // await sound.playAsync();
-      await TrackPlayer.play();
-      dispatch(setIsPlaying(true));
+      await _playTrack(null);
 
       console.log(`[playing ${currentContent?.title}]`);
 
@@ -235,7 +255,7 @@ const useAudioHook = () => {
   const leftMs = (durationMs ?? 0) - (currentMs ?? 0);
 
   const leftTimeFormatted = useMemo(() => {
-    const totalSeconds = Math.floor(leftMs / 1000);
+    const totalSeconds = Math.ceil(leftMs / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
@@ -252,6 +272,10 @@ const useAudioHook = () => {
 
     // Ensure minutes are always displayed if there are hours
     timeString += `${hours > 0 ? String(minutes).padStart(2, "0") : minutes}:`;
+
+    if (seconds < 0) {
+      return 0;
+    }
 
     // Always pad seconds to 2 digits
     timeString += String(seconds).padStart(2, "0");
@@ -270,8 +294,6 @@ const useAudioHook = () => {
       ),
     [currentMs, durationMs]
   );
-
-  console.log(currentMs, durationMs);
 
   const skip = async (seconds: number) => {
     // track player to skip
@@ -307,12 +329,6 @@ const useAudioHook = () => {
   };
 
   const playNext = async () => {
-    // - [ ]  if it is in the queue, unqueue it
-    // - [ ]  if elements left in queue, start playing it
-    // - [ ]  if not, find the content right after it in the feed. or just pick the first content and play that.
-
-    // alert("next " + currentContent?.id);
-
     const nextContentVariables: QueryGetNextContentArgs = {
       afterContentId: currentContent?.id || "",
     };
@@ -324,8 +340,10 @@ const useAudioHook = () => {
       fetchPolicy: "network-only",
     });
 
+    console.log(nextItemResponse?.data);
+
     apolloClient.refetchQueries({
-      include: [api.queue.list, api.content.feed],
+      include: [api.queue.list],
     });
 
     const nextItem = nextItemResponse?.data?.getNextContent;
@@ -335,7 +353,9 @@ const useAudioHook = () => {
 
     dispatch(setCurrentContent(content));
 
-    await downloadAndPlayContent(content);
+    if (content) {
+      await startPlayingContent(content);
+    }
   };
 
   const playPrev = async () => {
@@ -357,45 +377,15 @@ const useAudioHook = () => {
     });
   }, 5_000);
 
-  // ehhh might need to adjust this more...
-  // const syncQueue = async (queue: BaseQueueFields[]) => {
-  //   console.log(`[syncing queue ${queue.length}]`);
-
-  //   const activeTrack = await TrackPlayer.getActiveTrack();
-  //   const currentContentId = activeTrack?.metadata?.contentId;
-
-  //   await TrackPlayer.removeUpcomingTracks();
-  //   await TrackPlayer.remove(0);
-
-  //   await logQueue();
-
-  //   for (const q of queue) {
-  //     const content = q.content!;
-
-  //     // don't add the track if it is already the active one
-  //     // if (cus
-
-  //     await TrackPlayer.add({
-  //       url: content.audioUrl || "",
-  //       title: content.title || "",
-  //       artist: content.authorName || "",
-  //       artwork: content.thumbnailImageUrl || "",
-  //       metadata: { contentId: content.id },
-  //     });
-  //   }
-
-  //   logQueue();
-  // };
-
   const logQueue = async () => {
     const queue = await TrackPlayer.getQueue();
-    console.log(queue.map((q) => q.title));
+    // console.log(queue.map((q) => q.title));
   };
 
   useTrackPlayerEvents([Event.PlaybackState], async (data) => {
     // console.log(data.state);
     if (data.state === "ended") {
-      // console.log("ENDED");
+      // alert("DONE");
 
       await playNext();
     }
@@ -416,7 +406,7 @@ const useAudioHook = () => {
   // sync the queue. add to the queue. etc... (track player)
 
   return {
-    downloadAndPlayContent,
+    startPlayingContent,
     toggle,
     percentFinished,
     leftTimeFormatted,
@@ -437,7 +427,7 @@ const useAudioHook = () => {
 export const useAudio = useAudioHook;
 // singletonHook(
 //   {
-//     downloadAndPlayContent: async (): Promise<
+//     startPlayingContent: async (): Promise<
 //       FailureOrSuccess<DefaultErrors, Audio.Sound>
 //     > => failure(new UnexpectedError("No sound object found")),
 //     toggle: async () => {},

@@ -51,7 +51,7 @@ const Home = () => {
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
 
   const [showMore] = useMutation(api.content.showMore);
-  const { downloadAndPlayContent, toggle } = useContext(AppContext).audio!;
+  const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
 
@@ -90,7 +90,7 @@ const Home = () => {
   const loadMoreData = throttle(() => {
     if (!loading && hasMore) {
       console.log(`[fetching page ${page + 1}]`);
-      console.log(`[total items: ${list.length}]`);
+      // console.log(`[total items: ${list.length}]`);
 
       fetchMore({
         variables: {
@@ -132,7 +132,7 @@ const Home = () => {
 
   const onPlayContent = async (content: BaseContentFields) => {
     // alert("play");
-    await downloadAndPlayContent(content);
+    await startPlayingContent(content);
   };
 
   const onTogglePlayOrPause = async (content: BaseContentFields) => {
