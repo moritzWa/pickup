@@ -50,7 +50,9 @@ export const Content = objectType({
                 if (hours > 0) {
                     return `${hours}h ${minutes % 60}m`;
                 } else if (minutes > 0) {
-                    return `${minutes}m`;
+                    return seconds > 0
+                        ? `${minutes}m ${seconds}s`
+                        : `${minutes}m`;
                 } else {
                     return `${seconds}s`;
                 }
