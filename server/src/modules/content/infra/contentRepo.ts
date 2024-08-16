@@ -142,6 +142,9 @@ export class PostgresContentRepository {
                         (alias) => `${alias} IS NOT TRUE`
                     ),
                     deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+
+                    // get all articles that are not yet pod
+                    audioUrl: IsNull(),
                 },
                 order: {
                     createdAt: "asc",

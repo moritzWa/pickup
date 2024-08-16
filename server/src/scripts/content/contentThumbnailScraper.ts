@@ -15,7 +15,12 @@ export function getFaviconURL(url: string): string {
 
 function getRootOfURL(url: string): string {
     try {
-        return new URL(url).hostname;
+        const parsedUrl = new URL(url);
+        // If the URL ends with .pdf, return the origin (root URL)
+        if (parsedUrl.pathname.endsWith(".pdf")) {
+            return parsedUrl.origin;
+        }
+        return parsedUrl.hostname;
     } catch (e) {
         return "";
     }
@@ -34,6 +39,11 @@ const scrapeAndUploadThumbnail = async (content: Content) => {
             result.ogImage && result.ogImage.length > 0
                 ? result.ogImage[0].url
                 : null;
+
+        if (imageUrl && !imageUrl.startsWith("http") && result.requestUrl) {
+            const baseUrl = new URL(result.requestUrl);
+            imageUrl = new URL(imageUrl, baseUrl).toString();
+        }
 
         if (!imageUrl) {
             Logger.info(
