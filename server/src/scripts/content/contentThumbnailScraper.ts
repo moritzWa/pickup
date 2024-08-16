@@ -13,6 +13,11 @@ export function getFaviconURL(url: string): string {
     return getFaviconUrlFromDuckDuckGo(root);
 }
 
+const truncateString = (str: string, maxLength: number): string => {
+    if (str.length <= maxLength) return str;
+    return str.slice(0, maxLength) + "...";
+};
+
 function getRootOfURL(url: string): string {
     try {
         const parsedUrl = new URL(url);
@@ -46,16 +51,16 @@ const scrapeAndUploadThumbnail = async (content: Content) => {
         }
 
         if (!imageUrl) {
-            Logger.info(
-                `No og:image found for content: ${content.websiteUrl}, falling back to favicon`
-            );
+            // Logger.info(
+            //     `No og:image found for content: ${content.websiteUrl}, falling back to favicon`
+            // );
             imageUrl = getFaviconURL(content.websiteUrl);
         }
 
         // log entire json output of ogs result
         console.log(
             `OGS result for content ${content.websiteUrl}:`,
-            JSON.stringify(result, null, 2)
+            truncateString(JSON.stringify(result), 500)
         );
 
         // log imageUrl for link
@@ -82,41 +87,59 @@ const scrapeAndUploadThumbnail = async (content: Content) => {
             );
             imageUrl = getFaviconURL(content.websiteUrl);
             uploadResult = await firebase.storage.upload(imageUrl);
+
+            if (!isSuccess(uploadResult)) {
+                Logger.error(
+                    `Failed to upload favicon for content: ${content.websiteUrl}`
+                );
+                content.couldntFetchThumbnail = true;
+                return content;
+            }
         }
 
         if (isSuccess(uploadResult)) {
             content.thumbnailImageUrl = uploadResult.value.originalUrl;
             content.ogDescription = result.ogDescription ?? null;
-            Logger.info(
-                `Thumbnail uploaded for content: ${content.websiteUrl}`
-            );
-        } else {
-            Logger.error(
-                `Failed to upload thumbnail for content: ${content.websiteUrl}`
-            );
+            content.couldntFetchThumbnail = false;
+            // Logger.info(
+            //     `Thumbnail uploaded for content: ${content.websiteUrl}`
+            // );
         }
     } catch (error) {
         Logger.error(
-            `Error processing content ${content.websiteUrl}: ${JSON.stringify(
-                error,
-                null,
-                2
+            `Error processing content ${content.websiteUrl}: ${truncateString(
+                JSON.stringify(error),
+                200
             )}`
         );
+        content.couldntFetchThumbnail = true;
     }
 
     return content;
 };
 
-const processBatch = async (contents: Content[]) => {
+const processBatch = async (
+    contents: Content[],
+    batchNumber: number,
+    totalBatches: number
+) => {
+    const startTime = Date.now();
+
     for (const content of contents) {
         await scrapeAndUploadThumbnail(content);
     }
 
     const saveResponse = await contentRepo.saveMany(contents);
     if (isSuccess(saveResponse)) {
+        const endTime = Date.now();
+        const duration = (endTime - startTime) / 1000; // Convert to seconds
         Logger.info(
             `Successfully updated ${contents.length} contents with thumbnails`
+        );
+        Logger.info(
+            `Processed batch ${batchNumber} of ${totalBatches} in ${duration.toFixed(
+                2
+            )} seconds`
         );
     } else {
         Logger.error("Failed to save updated contents:", saveResponse.error);
@@ -124,6 +147,7 @@ const processBatch = async (contents: Content[]) => {
 };
 
 const addThumbnailsToContent = async () => {
+    const overallStartTime = Date.now();
     try {
         await dataSource.initialize();
 
@@ -141,17 +165,21 @@ const addThumbnailsToContent = async () => {
         const allContents = contentsResponse.value;
         Logger.info(`Found ${allContents.length} contents without thumbnails`);
 
+        const totalBatches = Math.ceil(allContents.length / BATCH_SIZE);
+
         for (let i = 0; i < allContents.length; i += BATCH_SIZE) {
             const batch = allContents.slice(i, i + BATCH_SIZE);
-            Logger.info(
-                `Processing batch ${i / BATCH_SIZE + 1} of ${Math.ceil(
-                    allContents.length / BATCH_SIZE
-                )}`
-            );
-            await processBatch(batch);
+            const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
+            await processBatch(batch, batchNumber, totalBatches);
         }
 
-        Logger.info(`Finished processing all ${allContents.length} contents`);
+        const overallEndTime = Date.now();
+        const overallDuration = (overallEndTime - overallStartTime) / 1000; // Convert to seconds
+        Logger.info(
+            `Finished processing all ${
+                allContents.length
+            } contents in ${overallDuration.toFixed(2)} seconds`
+        );
     } catch (error) {
         Logger.error("Unexpected error:", error);
     } finally {

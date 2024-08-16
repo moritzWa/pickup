@@ -143,6 +143,10 @@ export class PostgresContentRepository {
                     ),
                     deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
 
+                    couldntFetchThumbnail: Raw(
+                        (alias) => `${alias} IS NOT TRUE`
+                    ),
+
                     // get all articles that are not yet pod
                     audioUrl: IsNull(),
                 },

@@ -194,6 +194,9 @@ export class Content {
     @Column({ nullable: true })
     deadLink?: boolean;
 
+    @Column({ nullable: true })
+    couldntFetchThumbnail?: boolean;
+
     // pdf
     @Column({ nullable: true })
     totalPagesIfPDF?: number;
