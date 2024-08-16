@@ -4,7 +4,7 @@ import { slugify } from "inngest";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { InngestEventName } from "../../types";
-import * as moment from "moment";
+import moment from "moment";
 import { parallel } from "radash";
 
 // cron to run at 3am UTC

@@ -55,7 +55,7 @@ const addThumbnailsToContent = async () => {
         await dataSource.initialize();
 
         const contentsResponse =
-            await contentRepo.filterConΓtentWithoutThumbnail();
+            await contentRepo.filterContentWithoutThumbnail();
 
         if (!isSuccess(contentsResponse)) {
             Logger.error(

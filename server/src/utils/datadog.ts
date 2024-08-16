@@ -24,7 +24,7 @@ export const logHistogram = ({
     metric: string;
     value: number;
     logIfOver?: number;
-    tags?: StatsD.Tags;
+    tags?: { [key in string]: string };
     slowMessage?: string;
     logToConsole?: boolean;
 }): void => {

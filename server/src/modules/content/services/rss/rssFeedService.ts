@@ -48,7 +48,6 @@ const scrapeRssFeed = async (
         const content: Content = {
             id: uuidv4(),
             isProcessed: false,
-            contentAsMarkdown: null,
             content: item.content || "",
             contentAsMarkdown: item.content || "",
             context: item.content || "",

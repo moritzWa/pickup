@@ -1,9 +1,9 @@
 import { MailData } from "@sendgrid/helpers/classes/mail";
-import * as mailer from "@sendgrid/mail";
+import mailer from "@sendgrid/mail";
 
 import { config } from "../config";
 
-import * as SG from "@sendgrid/client";
+import SG from "@sendgrid/client";
 import { uniqBy } from "lodash/fp";
 import {
     DefaultErrors,

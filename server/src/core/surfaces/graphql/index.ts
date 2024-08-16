@@ -8,7 +8,7 @@ import {
 } from "apollo-server-core";
 import { schema } from "./schema";
 import { createContext as context } from "./context";
-import * as graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.js";
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.js";
 import { config } from "src/config";
 import { hasValue } from "src/core/logic";
 
