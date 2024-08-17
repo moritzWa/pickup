@@ -15,6 +15,7 @@ import {
     ContentChunk,
     Content as ContentModel,
 } from "src/core/infra/postgres/entities";
+import { ContentType } from "src/core/infra/postgres/entities/Content";
 import { failure, FailureOrSuccess, success } from "src/core/logic";
 import { NotFoundError, UnexpectedError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
@@ -153,6 +154,21 @@ export class PostgresContentRepository {
                 order: {
                     createdAt: "asc",
                 },
+            });
+            return success(contents);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async filterContentThatNeedTTS(): Promise<ContentArrayResponse> {
+        try {
+            const contents = await this.repo.find({
+                where: {
+                    type: ContentType.ARTICLE,
+                    audioUrl: IsNull(),
+                },
+                take: 3,
             });
             return success(contents);
         } catch (err) {
