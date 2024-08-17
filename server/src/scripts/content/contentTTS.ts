@@ -1,6 +1,4 @@
 import { dataSource } from "src/core/infra/postgres";
-import { Content, ContentType } from "src/core/infra/postgres/entities/Content";
-import { success } from "src/core/logic";
 import { contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
 import { Logger } from "src/utils";
@@ -10,17 +8,7 @@ const contentTTS = async () => {
         await dataSource.initialize();
 
         // const contentResponse = await contentRepo.filterContentThatNeedTTS();
-        const contentResponse = success([
-            {
-                id: "mock-id",
-                websiteUrl:
-                    "https://www.thecrimson.com/article/2017/5/25/desai-commencement-ed/",
-                content:
-                    "This is a mock content for the Harvard Crimson article.",
-                type: ContentType.ARTICLE,
-                audioUrl: null,
-            } as Content,
-        ]);
+        const contentResponse = await contentRepo.getSingleTestContent();
 
         if (contentResponse.isFailure()) {
             Logger.error("Failed to fetch content:", contentResponse.error);
@@ -45,6 +33,8 @@ const contentTTS = async () => {
                 continue;
             }
 
+            Logger.info(`audio: ${audioResponse.value.url}`);
+
             const updateResponse = await contentRepo.update(content.id, {
                 audioUrl: audioResponse.value.url,
             });
@@ -56,7 +46,7 @@ const contentTTS = async () => {
                 );
             } else {
                 Logger.info(
-                    `Successfully processed content: ${content.websiteUrl}`
+                    `Successfully processed content for ${content.websiteUrl}. Audio URL: ${audioResponse.value.url}`
                 );
             }
         }

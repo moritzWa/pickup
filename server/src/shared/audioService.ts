@@ -1,5 +1,6 @@
 import ffmpeg from "fluent-ffmpeg";
 import { unlinkSync, writeFileSync } from "fs";
+import OpenAI from "openai";
 import {
     DefaultErrors,
     failure,
@@ -7,7 +8,7 @@ import {
     success,
     UnexpectedError,
 } from "src/core/logic";
-import { Firebase, openai } from "src/utils";
+import { Firebase } from "src/utils";
 import { PassThrough } from "stream";
 import _ = require("lodash");
 import internal = require("stream");
@@ -116,6 +117,8 @@ function chunkText(text: string): string[] {
 const toSpeech = async (
     _text: string
 ): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> => {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
     // TODO: bring this back but chunk-wise
     // const openPromptResponse = await openai.chat.completions.create([
     //     {
@@ -140,31 +143,39 @@ const toSpeech = async (
     //     return failure(new Error("Prompt was empty"));
     // }
     // const chunks = chunkText(prompt);
-    const chunks = chunkText(_text);
 
-    const responses: FailureOrSuccess<DefaultErrors, Buffer>[] = [];
+    const chunks = chunkText(_text);
+    const buffers: Buffer[] = [];
 
     for (const chunk of chunks) {
-        const response = await openai.audio.speak({
-            text: chunk,
-            voice: "onyx",
-            model: "tts-1",
-        });
+        try {
+            const response = await openai.audio.speech.create({
+                model: "tts-1",
+                voice: "onyx",
+                input: chunk,
+            });
 
-        if (response instanceof Buffer) {
-            responses.push(success(response));
-        } else {
-            return failure(new UnexpectedError("Failed to generate audio"));
+            const buffer = Buffer.from(await response.arrayBuffer());
+            buffers.push(buffer);
+        } catch (error: unknown) {
+            console.error("OpenAI API error:", error);
+            if (error instanceof Error) {
+                return failure(
+                    new UnexpectedError(`OpenAI API error: ${error.message}`)
+                );
+            } else {
+                return failure(
+                    new UnexpectedError(
+                        `OpenAI API error: Unknown error occurred`
+                    )
+                );
+            }
         }
     }
 
-    const failures = responses.filter((r) => r.isFailure());
-
-    if (failures.length > 0) {
-        return failure(failures[0].error);
+    if (buffers.length === 0) {
+        return failure(new UnexpectedError("No audio buffers were generated"));
     }
-
-    const buffers = responses.map((r) => r.value);
 
     const audioFileResponse = await stitchAndStreamAudioFiles(
         buffers,

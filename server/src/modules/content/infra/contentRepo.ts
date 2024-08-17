@@ -176,6 +176,21 @@ export class PostgresContentRepository {
         }
     }
 
+    async getSingleTestContent(): Promise<ContentArrayResponse> {
+        try {
+            const contents = await this.repo.find({
+                where: {
+                    id: "fc0aaa77-67af-4590-a828-057c6dfb7359",
+                    // websiteUrl:
+                    //     "https://putsomethingback.stevejobsarchive.com/",
+                },
+            });
+            return success(contents);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async findById(
         userId: string,
         opts?: FindOneOptions<ContentModel>
