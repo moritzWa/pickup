@@ -124,9 +124,9 @@ const AudioPlayer = () => {
   const theme = useTheme();
   const content = contentData?.getContent as BaseContentFields | null;
   const session = contentData?.getContent?.contentSession ?? null;
+  const lengthFormatted = content?.lengthFormatted ?? null;
 
   const insets = useSafeAreaInsets();
-  const estimatedLen = Math.ceil((durationMs || 0) / 60_000);
 
   useEffect(() => void refetchContent(), [isFocused, contentId]);
 
@@ -285,7 +285,7 @@ const AudioPlayer = () => {
             >
               {content?.authorName}
               {"  "}•{"  "}
-              {estimatedLen} mins
+              {lengthFormatted || ""}
             </Text>
           </View>
         </View>
