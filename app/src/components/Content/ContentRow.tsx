@@ -321,7 +321,9 @@ export const ContentRow = ({
           borderWidth: 1,
         }}
       >
-        <View
+        <TouchableOpacity
+          onPress={start}
+          activeOpacity={0.9}
           style={{
             padding: 15,
             backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,
@@ -330,6 +332,7 @@ export const ContentRow = ({
           <View>
             <View
               style={{
+                paddingRight: 50,
                 marginBottom: 10,
                 display: "flex",
                 flexDirection: "row",
@@ -339,9 +342,7 @@ export const ContentRow = ({
             >
               <ContentRowImage content={c} />
 
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={start}
+              <View
                 style={{
                   marginLeft: 10,
                   marginRight: 10,
@@ -363,39 +364,7 @@ export const ContentRow = ({
                 >
                   {c.title}
                 </Text>
-              </TouchableOpacity>
-
-              <Animated.View
-                style={{
-                  width: IMAGE_SIZE,
-                  height: IMAGE_SIZE,
-                  marginRight: 0,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 100,
-                  backgroundColor: colors.primary,
-                  alignSelf: "center",
-                  transform: [{ scale: animation }],
-                }}
-              >
-                <TouchableOpacity
-                  onPressIn={handlePressIn}
-                  onPressOut={handlePressOut}
-                  onPress={playOrPause}
-                  activeOpacity={1}
-                >
-                  <FontAwesomeIcon
-                    icon={isActive && isPlaying ? faPause : faPlay}
-                    color={colors.white}
-                    size={16}
-                    style={{
-                      position: "relative",
-                      right: isActive && isPlaying ? 0 : -1,
-                    }}
-                  />
-                </TouchableOpacity>
-              </Animated.View>
+              </View>
             </View>
 
             <View style={{}}>
@@ -524,7 +493,42 @@ export const ContentRow = ({
               </View>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
+
+        <Animated.View
+          style={{
+            width: IMAGE_SIZE,
+            height: IMAGE_SIZE,
+            marginRight: 0,
+            position: "absolute",
+            top: 15,
+            right: 15,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 100,
+            backgroundColor: colors.primary,
+            alignSelf: "center",
+            transform: [{ scale: animation }],
+          }}
+        >
+          <TouchableOpacity
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={playOrPause}
+            activeOpacity={1}
+          >
+            <FontAwesomeIcon
+              icon={isActive && isPlaying ? faPause : faPlay}
+              color={colors.white}
+              size={16}
+              style={{
+                position: "relative",
+                right: isActive && isPlaying ? 0 : -1,
+              }}
+            />
+          </TouchableOpacity>
+        </Animated.View>
       </Swipeable>
     </View>
   );
