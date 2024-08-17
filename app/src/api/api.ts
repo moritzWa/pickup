@@ -188,8 +188,8 @@ const StartListening = gql`
 
 const GetContentFeed = gql`
   ${BaseContentFields}
-  query GetFeed($limit: Int, $filter: ContentFeedFilter) {
-    getFeed(limit: $limit, filter: $filter) {
+  query GetFeed($limit: Int, $filter: ContentFeedFilter, $page: Int) {
+    getFeed(limit: $limit, filter: $filter, page: $page) {
       ...BaseContentFields
     }
   }

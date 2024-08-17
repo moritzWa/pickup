@@ -296,133 +296,106 @@ export const ContentRow = ({
   }, [filter]);
 
   return (
-    <Swipeable
-      renderRightActions={renderRightActions}
-      overshootRight={false}
-      ref={swipeableRef}
-      containerStyle={{
+    <View
+      style={{
+        shadowOffset: {
+          width: 0,
+          height: 0,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 5,
         marginBottom: 10,
-        marginHorizontal: 10,
-        borderRadius: 15,
-        backgroundColor: theme.medBackground,
-        borderColor: isActive ? theme.border : theme.border,
-        borderWidth: 1,
+        shadowColor: isActive ? "transparent" : colors.gray30,
       }}
     >
-      <View
-        style={{
-          shadowOffset: {
-            width: 0,
-            height: 0,
-          },
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          elevation: 5,
-          shadowColor: "#000",
-          padding: 15,
-          backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,
+      <Swipeable
+        renderRightActions={renderRightActions}
+        overshootRight={false}
+        ref={swipeableRef}
+        containerStyle={{
+          marginHorizontal: 10,
+          borderRadius: 15,
+          backgroundColor: theme.ternaryBackground,
+          borderColor: isActive ? theme.border : theme.border,
+          borderWidth: 1,
         }}
       >
-        <View>
-          <View
-            style={{
-              marginBottom: 10,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              flex: 1,
-            }}
-          >
-            <ContentRowImage content={c} />
-
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={start}
-              style={{
-                marginLeft: 10,
-                marginRight: 10,
-                flex: 1,
-                alignItems: "flex-start",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                numberOfLines={2}
-                style={{
-                  color: isActive ? colors.primary : theme.header,
-                  fontSize: 16,
-                  // underline it if active
-                  // textDecorationLine: isActive ? "underline" : "none",
-                  // marginRight: 20,
-                  fontFamily: "Raleway-SemiBold",
-                }}
-              >
-                {c.title}
-              </Text>
-            </TouchableOpacity>
-
-            <Animated.View
-              style={{
-                width: IMAGE_SIZE,
-                height: IMAGE_SIZE,
-                marginRight: 0,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 100,
-                backgroundColor: colors.primary,
-                alignSelf: "center",
-                transform: [{ scale: animation }],
-              }}
-            >
-              <TouchableOpacity
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                onPress={playOrPause}
-                activeOpacity={1}
-              >
-                <FontAwesomeIcon
-                  icon={isActive && isPlaying ? faPause : faPlay}
-                  color={colors.white}
-                  size={16}
-                  style={{
-                    position: "relative",
-                    right: isActive && isPlaying ? 0 : -1,
-                  }}
-                />
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-
-          <View style={{}}>
+        <TouchableOpacity
+          onPress={start}
+          activeOpacity={0.9}
+          style={{
+            padding: 15,
+            backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,
+          }}
+        >
+          <View>
             <View
               style={{
+                paddingRight: 50,
+                marginBottom: 10,
+                display: "flex",
                 flexDirection: "row",
-                alignItems: "flex-start",
+                alignItems: "center",
+                flex: 1,
               }}
             >
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    color: theme.text,
-                    fontSize: 14,
-                    // marginRight: 50,
-                    fontFamily: "Raleway-Medium",
-                  }}
-                  numberOfLines={2}
-                >
-                  {c.summary}
-                </Text>
+              <ContentRowImage content={c} />
 
-                <View
+              <View
+                style={{
+                  marginLeft: 10,
+                  marginRight: 10,
+                  flex: 1,
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  numberOfLines={2}
                   style={{
-                    marginTop: 10,
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
+                    color: isActive ? colors.primary : theme.header,
+                    fontSize: 16,
+                    // underline it if active
+                    // textDecorationLine: isActive ? "underline" : "none",
+                    // marginRight: 20,
+                    fontFamily: "Raleway-SemiBold",
                   }}
                 >
-                  {/* <Text
+                  {c.title}
+                </Text>
+              </View>
+            </View>
+
+            <View style={{}}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      color: theme.text,
+                      fontSize: 14,
+                      // marginRight: 50,
+                      fontFamily: "Raleway-Medium",
+                    }}
+                    numberOfLines={2}
+                  >
+                    {c.summary}
+                  </Text>
+
+                  <View
+                    style={{
+                      marginTop: 10,
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    {/* <Text
                   style={{
                     flex: 1,
                     color: theme.text,
@@ -433,95 +406,131 @@ export const ContentRow = ({
                   {c.authorName}
                 </Text> */}
 
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginRight: 30,
-                      flex: 1,
-                    }}
-                  >
-                    {/* <FontAwesomeIcon
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginRight: 30,
+                        flex: 1,
+                      }}
+                    >
+                      {/* <FontAwesomeIcon
                     icon={faHeadSide}
                     color={theme.text}
                     size={14}
                     style={{ marginRight: 5 }}
                   /> */}
 
-                    <Text
-                      style={{
-                        color: theme.header,
-                        fontSize: 14,
-                        fontFamily: "Raleway-Medium",
-                      }}
-                      numberOfLines={1}
-                    >
-                      {c.authorName}
-                    </Text>
-                  </View>
+                      <Text
+                        style={{
+                          color: theme.header,
+                          fontSize: 14,
+                          fontFamily: "Raleway-Medium",
+                        }}
+                        numberOfLines={1}
+                      >
+                        {c.authorName}
+                      </Text>
+                    </View>
 
-                  <View
-                    style={{
-                      display: "flex",
-                      marginLeft: 15,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faClock}
-                      color={theme.textSecondary}
-                      size={12}
-                      style={{ marginRight: 5 }}
-                    />
-
-                    <Text
-                      style={{
-                        color: theme.textSecondary,
-                        fontSize: 14,
-                        fontFamily: "Raleway-Medium",
-                      }}
-                    >
-                      {c.lengthFormatted}
-                    </Text>
-                  </View>
-
-                  {c.contentSession?.percentFinished ? (
                     <View
                       style={{
                         display: "flex",
                         marginLeft: 15,
                         flexDirection: "row",
                         alignItems: "center",
-                        // marginRight: 15,
                       }}
                     >
                       <FontAwesomeIcon
-                        icon={faCircleNotch}
-                        color={theme.text}
-                        size={14}
+                        icon={faClock}
+                        color={theme.textSecondary}
+                        size={12}
                         style={{ marginRight: 5 }}
                       />
 
                       <Text
                         style={{
-                          color: theme.text,
+                          color: theme.textSecondary,
                           fontSize: 14,
-                          fontFamily: "Raleway-SemiBold",
+                          fontFamily: "Raleway-Medium",
                         }}
                       >
-                        {c.contentSession?.percentFinished}%
+                        {c.lengthFormatted}
                       </Text>
                     </View>
-                  ) : null}
+
+                    {c.contentSession?.percentFinished ? (
+                      <View
+                        style={{
+                          display: "flex",
+                          marginLeft: 15,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          // marginRight: 15,
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={faCircleNotch}
+                          color={theme.text}
+                          size={14}
+                          style={{ marginRight: 5 }}
+                        />
+
+                        <Text
+                          style={{
+                            color: theme.text,
+                            fontSize: 14,
+                            fontFamily: "Raleway-SemiBold",
+                          }}
+                        >
+                          {c.contentSession?.percentFinished}%
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
                 </View>
               </View>
             </View>
           </View>
-        </View>
-      </View>
-    </Swipeable>
+        </TouchableOpacity>
+
+        <Animated.View
+          style={{
+            width: IMAGE_SIZE,
+            height: IMAGE_SIZE,
+            marginRight: 0,
+            position: "absolute",
+            top: 15,
+            right: 15,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 100,
+            backgroundColor: colors.primary,
+            alignSelf: "center",
+            transform: [{ scale: animation }],
+          }}
+        >
+          <TouchableOpacity
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={playOrPause}
+            activeOpacity={1}
+          >
+            <FontAwesomeIcon
+              icon={isActive && isPlaying ? faPause : faPlay}
+              color={colors.white}
+              size={16}
+              style={{
+                position: "relative",
+                right: isActive && isPlaying ? 0 : -1,
+              }}
+            />
+          </TouchableOpacity>
+        </Animated.View>
+      </Swipeable>
+    </View>
   );
 };
 

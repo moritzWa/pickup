@@ -13,6 +13,7 @@ import { inngest } from "src/jobs/inngest/clients";
 import { InngestEventName } from "src/jobs/inngest/types";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { LessThan, MoreThan, MoreThanOrEqual } from "typeorm";
+import { keyBy } from "lodash";
 
 const getSimilarContentFromQuery = async (
     user: User,
@@ -141,71 +142,57 @@ const next = async (
 ): Promise<
     FailureOrSuccess<DefaultErrors, Maybe<{ item: FeedItem; content: Content }>>
 > => {
-    const currentFeedItemResponse = await feedRepo.findOne({
+    const currentQueueResponse = await feedRepo.find({
         where: {
             userId: user.id,
-            contentId: content.id,
+            isQueued: true,
         },
+        order: {
+            queuedAt: "asc",
+        },
+        take: 2,
     });
 
-    // console.log("CURRENT FEED: " + currentFeedItemResponse.value);
-
-    if (currentFeedItemResponse.isFailure()) {
-        return failure(currentFeedItemResponse.error);
+    if (currentQueueResponse.isFailure()) {
+        return failure(currentQueueResponse.error);
     }
 
-    const currentFeedItem = currentFeedItemResponse.value;
+    const queue = currentQueueResponse.value;
+
+    if (!queue.length) {
+        return success(null);
+    }
+
+    const contentIds = queue.map((q) => q.contentId);
+
+    const contentResponse = await contentRepo.findByIds(contentIds, {
+        relations: { authors: true },
+    });
+
+    if (contentResponse.isFailure()) {
+        return failure(contentResponse.error);
+    }
+
+    const contentById = keyBy(contentResponse.value, (t) => t.id);
+    const topOfQueue = queue[0];
 
     // remove content from the ueue
-    await feedRepo.update(currentFeedItem.id, {
+    await feedRepo.update(topOfQueue.id, {
         isQueued: false,
         queuedAt: null,
     });
 
-    const [topOfQueueResponse, currentFeedResponse] = await Promise.all([
-        feedRepo.topOfQueue(user.id),
-        feedRepo.find({
-            where: {
-                userId: user.id,
-                isQueued: false,
-                // need or equal if the content has same position?
-                position: MoreThanOrEqual(currentFeedItem.position),
-            },
-            relations: { content: true },
-            order: {
-                position: "asc",
-                createdAt: "desc",
-            },
-            take: 10, // TODO: total hack bc the positioning isn't sequential atm
-        }),
-    ]);
+    const nextUp = queue[1];
 
-    if (topOfQueueResponse.isFailure()) {
-        return failure(topOfQueueResponse.error);
-    }
-
-    const topOfQueue = topOfQueueResponse.value;
-
-    // console.log(topOfQueue);
-
-    if (topOfQueue) {
-        return success({
-            item: topOfQueue,
-            content: topOfQueue.content,
-        });
-    }
-
-    const feed =
-        currentFeedResponse.value.find((v) => v.contentId !== content.id) ??
-        null;
-
-    if (!feed) {
+    if (!nextUp) {
         return success(null);
     }
 
+    const newContent = contentById[nextUp.contentId];
+
     return success({
-        item: feed,
-        content: feed?.content,
+        item: { ...nextUp, content: newContent },
+        content: newContent,
     });
 };
 

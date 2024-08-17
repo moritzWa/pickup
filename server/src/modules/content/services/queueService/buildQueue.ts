@@ -1,4 +1,4 @@
-import { orderBy } from "lodash";
+import { orderBy, uniq } from "lodash";
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
@@ -14,17 +14,23 @@ import { LinkWithDistance } from "src/modules/curius/infra/linkRepo";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
+import {
+    contentRepo,
+    contentSessionRepo,
+    feedRepo,
+    interactionRepo,
+} from "../../infra";
 import { ContentWithDistance } from "../../infra/contentRepo";
 import { ContentService } from "../contentService";
 import moment = require("moment");
+import { In } from "typeorm";
+import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 
 // needs to be idempotent
 export const buildQueue = async (
     user: User,
     limit: number
 ): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
-    const categories = user.interestCategories.join(" ");
     const description = user.interestDescription;
 
     const feedResponse = await feedRepo.findForUser(user.id, {
@@ -35,32 +41,48 @@ export const buildQueue = async (
         return failure(feedResponse.error);
     }
 
-    const recentlyLikedContentResponse = await contentSessionRepo.find({
+    // v0 is just get content interacted with
+    const recentlyLikedContentResponse = await interactionRepo.find({
         where: {
             userId: user.id,
-            isBookmarked: true,
-            isLiked: true,
-            // TODO: has listened to a chunk of it...
+            type: In([
+                InteractionType.Bookmarked,
+                InteractionType.Finished,
+                InteractionType.ListenedToBeginning,
+                InteractionType.Queued,
+            ]),
         },
-        relations: { content: true },
         select: {
-            content: {
-                embedding: true,
-            },
+            id: true,
+            type: true,
+            contentId: true,
         },
         order: {
-            lastListenedAt: "desc",
+            createdAt: "desc",
         },
-        take: 10,
+        take: 100, // just get last 100
     });
 
     if (recentlyLikedContentResponse.isFailure()) {
         return failure(recentlyLikedContentResponse.error);
     }
 
-    const recentlyLikedContent = recentlyLikedContentResponse.value.map(
-        (c) => c.content
+    const recentlyLikedContentIds: string[] = uniq(
+        recentlyLikedContentResponse.value.map((c) => c.contentId)
     );
+
+    const contentResponse = await contentRepo.findByIds(
+        recentlyLikedContentIds,
+        {
+            select: { embedding: true },
+        }
+    );
+
+    if (contentResponse.isFailure()) {
+        return failure(contentResponse.error);
+    }
+
+    const recentlyLikedContent = contentResponse.value;
 
     const queries = [
         (description || "").slice(0, 4_000),
@@ -69,10 +91,9 @@ export const buildQueue = async (
 
     const allContent: { content: ContentWithDistance[]; query: string }[] = [];
 
-    // FIXME: at some point maybe cache these bc they cost money to do
     for (const query of queries) {
         const similarContentResponse =
-            await ContentService.getSimilarContentFromQuery(user, query, 10);
+            await ContentService.getSimilarContentFromQuery(user, query, limit);
 
         if (similarContentResponse.isFailure()) {
             continue;
@@ -88,7 +109,7 @@ export const buildQueue = async (
         const similarContentResponse = await ContentService.getSimilarContent(
             user,
             content,
-            10
+            limit
         );
 
         if (similarContentResponse.isFailure()) {
@@ -102,13 +123,38 @@ export const buildQueue = async (
     }
 
     // relevant to not as relevant
-    const rankedContent = orderBy(
+    let rankedContent = orderBy(
         allContent.flatMap((c) => c.content),
         (c) => c.averageDistance,
         "asc"
     ).slice(0, limit);
 
     debugger;
+
+    // this is possible if no interests were filled out
+    // but we still want to be able to show the user something
+    if (!rankedContent.length) {
+        const topContentResponse = await contentRepo.find({
+            order: {
+                releasedAt: "desc",
+            },
+            take: limit,
+        });
+
+        if (topContentResponse.isFailure()) {
+            return failure(topContentResponse.error);
+        }
+
+        const randomContent = topContentResponse.value.map(
+            (c): ContentWithDistance => ({
+                ...c,
+                minDistance: 1,
+                averageDistance: 1,
+            })
+        );
+
+        rankedContent = randomContent;
+    }
 
     const queueResponse = await buildQueueFromContent(user, rankedContent);
 

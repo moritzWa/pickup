@@ -52,6 +52,8 @@ export const getNextContent = queryField("getNextContent", {
 
         throwIfError(nextQueueResponse);
 
+        console.log(nextQueueResponse.value);
+
         if (nextQueueResponse.value) {
             await pgUserRepo.update(user.id, {
                 currentFeedItemId: nextQueueResponse.value.item.id,

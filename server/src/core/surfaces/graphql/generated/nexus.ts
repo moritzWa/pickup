@@ -646,6 +646,7 @@ export interface NexusGenArgTypes {
     getFeed: { // args
       filter?: NexusGenEnums['ContentFeedFilter'] | null; // ContentFeedFilter
       limit?: number | null; // Int
+      page?: number | null; // Int
     }
     getIntercomMobileToken: { // args
       platform?: string | null; // String

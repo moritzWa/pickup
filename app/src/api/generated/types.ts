@@ -152,8 +152,10 @@ export enum InteractionTypeEnum {
   LeftInProgress = 'LeftInProgress',
   Likes = 'Likes',
   ListenedToBeginning = 'ListenedToBeginning',
+  Queued = 'Queued',
   ScrolledPast = 'ScrolledPast',
-  Skipped = 'Skipped'
+  Skipped = 'Skipped',
+  StartedListening = 'StartedListening'
 }
 
 export type Metadata = {
@@ -367,6 +369,7 @@ export type QueryGetContentSessionArgs = {
 export type QueryGetFeedArgs = {
   filter?: InputMaybe<ContentFeedFilter>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

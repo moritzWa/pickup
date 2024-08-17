@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   FlatList,
@@ -16,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { api, apolloClient } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
 import {
+  Content,
   ContentFeedFilter,
   GetQueueResponse,
   Mutation,
@@ -31,67 +33,93 @@ import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
 import { CurrentAudio } from "../../../components/CurrentAudio";
 import { useAudio } from "src/hooks/useAudio";
-import { setCurrentContent, setFeed, setQueue } from "src/redux/reducers/audio";
+import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faCar } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faCar,
+  faSatellite,
+  faSatelliteDish,
+} from "@fortawesome/pro-solid-svg-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
 import { hasValue } from "src/core";
 import { AppContext } from "context";
+import { throttle, uniqBy } from "lodash";
+
+const LIMIT = 10;
 
 const Home = () => {
   const theme = useTheme();
   // const filter = useSelector(getHomeFilter, shallowEqual);
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
 
-  const [showMore] = useMutation(api.content.showMore);
-  const { downloadAndPlayContent, toggle } = useContext(AppContext).audio!;
+  const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProps>();
+
+  const [list, setList] = useState<BaseContentFields[]>([]);
+  const [page, setPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [clear] = useMutation(api.queue.clear);
 
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
       filter: ContentFeedFilter.ForYou,
-      limit: 250,
+      limit: LIMIT,
+      page,
     }),
-    []
+    [page]
   );
 
-  const { data, refetch, error } = useQuery<Pick<Query, "getFeed">>(
-    api.content.feed,
-    {
-      variables,
-      fetchPolicy: "cache-and-network",
-    }
-  );
-
-  const { data: queueData, refetch: refetchQueue } = useQuery<
-    Pick<Query, "getQueue">
-  >(api.queue.list, {
+  const { data, refetch, fetchMore, error, loading } = useQuery<
+    Pick<Query, "getFeed">
+  >(api.content.feed, {
     variables,
     fetchPolicy: "cache-and-network",
+    onCompleted: (newData) => {
+      const newItems = newData.getFeed ?? [];
+      if (page === 0) {
+        setList(newItems);
+      } else {
+        setList((prevList) => uniqBy([...prevList, ...newItems], (i) => i.id));
+      }
+      setHasMore(newItems.length === LIMIT); // Assume that if fewer items than the limit are returned, there's no more data
+    },
   });
 
-  const feed = (data?.getFeed ?? []) as BaseContentFields[];
+  const loadMoreData = throttle(() => {
+    if (!loading && hasMore) {
+      console.log(`[fetching page ${page + 1}]`);
+      // console.log(`[total items: ${list.length}]`);
 
-  const onShowMorePress = async () => {
-    await showMore({
-      refetchQueries: [api.queue.list, api.content.feed],
-    });
-  };
+      fetchMore({
+        variables: {
+          page: page + 1,
+          limit: LIMIT,
+        },
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return previousResult;
+
+          const newItems = fetchMoreResult.getFeed ?? [];
+          setPage(page + 1);
+          setList((prev) => uniqBy([...prev, ...newItems], (i) => i.id));
+
+          if (newItems.length < LIMIT) {
+            setHasMore(false);
+          }
+
+          return fetchMoreResult;
+        },
+      });
+    }
+  }, 300); // 300ms throttle to prevent rapid firing
 
   const content = useMemo((): BaseContentFields[] => {
-    if (filter === ContentFeedFilter.Queue) {
-      return (queueData?.getQueue?.queue ?? [])
-        .map((q) => q.content as BaseContentFields)
-        .filter(hasValue);
-    }
-
-    return (data?.getFeed ?? []) as BaseContentFields[];
-  }, [data, filter, queueData?.getQueue?.queue]);
+    return uniqBy(data?.getFeed ?? [], (i) => i.id) as BaseContentFields[];
+  }, [data]);
 
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {
@@ -101,7 +129,7 @@ const Home = () => {
 
   const onPlayContent = async (content: BaseContentFields) => {
     // alert("play");
-    await downloadAndPlayContent(content);
+    await startPlayingContent(content);
   };
 
   const onTogglePlayOrPause = async (content: BaseContentFields) => {
@@ -116,28 +144,39 @@ const Home = () => {
     });
   };
 
-  const onRefresh = async () => {
-    await refetch();
-    apolloClient.refetchQueries({
-      include: [api.content.current, api.users.me],
-    });
+  const onPressMore = async () => {
+    try {
+      setPage(0);
+      setHasMore(true);
+      await refetch({
+        variables: { page: 0, limit: LIMIT },
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
-  const queue = queueData?.getQueue?.queue ?? [];
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      setPage(0);
+      setHasMore(true);
+      await refetch({
+        variables: { page: 0, limit: LIMIT },
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-  // FIXME: this is super hacky
-  useEffect(() => {
-    dispatch(
-      setQueue(
-        queue.map((q) => q.content as BaseContentFields).filter(hasValue)
-      )
+  const renderFooter = () => {
+    if (!loading) return null;
+    return (
+      <View style={{ padding: 10 }}>
+        <ActivityIndicator size="large" />
+      </View>
     );
-  }, [JSON.stringify(queue.map((q) => q.id))]);
-
-  // FIXME: this is super hacky
-  useEffect(() => {
-    dispatch(setFeed(feed));
-  }, [JSON.stringify(feed.map((f) => f.id))]);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -146,15 +185,15 @@ const Home = () => {
           alignItems: "center",
         }}
       >
-        <Options />
+        <Options onPressMore={onPressMore} />
       </View>
 
       <FlatList
-        data={content}
+        data={list}
         refreshControl={
           <RefreshControl
             tintColor={theme.activityIndicator}
-            refreshing={false}
+            refreshing={isRefreshing}
             onRefresh={onRefresh}
           />
         }
@@ -163,7 +202,7 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           // padding: 10,
-          // paddingTop: 15,
+          paddingTop: 15,
           paddingBottom: 150,
         }}
         ListHeaderComponent={
@@ -234,36 +273,55 @@ const Home = () => {
             filter={filter}
           />
         )}
+        // ListFooterComponent={
+        //   // Show more
+        //   filter === ContentFeedFilter.ForYou ? (
+        //     <TouchableOpacity
+        //       style={{
+        //         padding: 5,
+        //         margin: 15,
+        //         borderRadius: 15,
+        //         backgroundColor: theme.secondaryBackground,
+        //         flexDirection: "row",
+        //         justifyContent: "center",
+        //         alignItems: "center",
+        //       }}
+        //       activeOpacity={0.8}
+        //       onPress={onShowMorePress}
+        //     >
+        //       <Text
+        //         style={{
+        //           color: colors.primary,
+        //           fontFamily: "Raleway-Bold",
+        //           fontSize: 16,
+        //           textAlign: "center",
+        //           padding: 10,
+        //         }}
+        //       >
+        //         Show more 👀
+        //       </Text>
+        //       {/* <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} /> */}
+        //     </TouchableOpacity>
+        //   ) : null
+        // }
+        onEndReached={loadMoreData}
+        onEndReachedThreshold={0.5} // Adjust this value based on when you want to trigger loading more data
         ListFooterComponent={
-          // Show more
-          filter === ContentFeedFilter.ForYou ? (
-            <TouchableOpacity
+          hasMore ? (
+            renderFooter()
+          ) : (
+            <Text
               style={{
-                padding: 5,
-                margin: 15,
-                borderRadius: 15,
-                backgroundColor: theme.secondaryBackground,
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
+                textAlign: "center",
+                padding: 10,
+                color: theme.text,
+                fontFamily: "Raleway-Regular",
+                fontSize: 16,
               }}
-              activeOpacity={0.8}
-              onPress={onShowMorePress}
             >
-              <Text
-                style={{
-                  color: colors.primary,
-                  fontFamily: "Raleway-Bold",
-                  fontSize: 16,
-                  textAlign: "center",
-                  padding: 10,
-                }}
-              >
-                Show more 👀
-              </Text>
-              {/* <FontAwesomeIcon icon={faArrowRight} size={16} color={theme.text} /> */}
-            </TouchableOpacity>
-          ) : null
+              No more data
+            </Text>
+          )
         }
       />
 
@@ -376,7 +434,7 @@ const HomeHeader = () => {
                   marginBottom: 0,
                 }}
               >
-                Commute save {commuteTime.formatted}.
+                Commute save {commuteTime?.formatted}.
               </Text>
             ) : (
               <>
@@ -483,7 +541,7 @@ export enum DiscoveryTab {
   Popular = "popular",
 }
 
-const Options = () => {
+const Options = ({ onPressMore }: { onPressMore: () => void }) => {
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
@@ -498,6 +556,9 @@ const Options = () => {
     api.content.startListening
   );
   const [setCommuteTime] = useMutation(api.users.setCommuteTime);
+  const [showMore, { loading: loadingShowMore }] = useMutation(
+    api.content.showMore
+  );
 
   const { data: queueData, refetch: refetchQueue } = useQuery<
     Pick<Query, "getQueue">
@@ -553,6 +614,14 @@ const Options = () => {
     } catch (err) {
       console.log(JSON.stringify(err, null, 2));
     }
+  };
+
+  const _onPressMore = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    await showMore({});
+
+    onPressMore();
   };
 
   const commuteTime = useMemo(() => {
@@ -626,38 +695,45 @@ const Options = () => {
           /> */}
         </View>
 
-        {/* {commuteTime ? (
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => setOpen(true)}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={_onPressMore}
+          disabled={loadingShowMore}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            borderRadius: 100,
+            marginRight: 10,
+            paddingVertical: 7,
+            padding: 10,
+            backgroundColor: theme.bgPrimary,
+          }}
+        >
+          <FontAwesomeIcon
+            style={{ marginRight: 5 }}
+            icon={faSatelliteDish}
+            size={16}
+            color={colors.primary}
+          />
+          <Text
             style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              borderRadius: 100,
-              marginRight: 10,
-              paddingVertical: 7,
-              padding: 10,
-              backgroundColor: theme.bgPrimary,
+              color: colors.primary,
+              fontFamily: "Raleway-Bold",
+              fontSize: 16,
             }}
           >
-            <FontAwesomeIcon
-              style={{ marginRight: 5 }}
-              icon={faCar}
-              size={16}
+            More
+          </Text>
+
+          {loadingShowMore ? (
+            <ActivityIndicator
+              style={{ marginLeft: 5 }}
+              size="small"
               color={colors.primary}
             />
-            <Text
-              style={{
-                color: colors.primary,
-                fontFamily: "Raleway-Bold",
-                fontSize: 16,
-              }}
-            >
-              {commuteTime.formatted}
-            </Text>
-          </TouchableOpacity>
-        ) : null} */}
+          ) : null}
+        </TouchableOpacity>
       </View>
     </>
   );

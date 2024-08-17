@@ -211,12 +211,19 @@ export class PostgresContentRepository {
         }
     }
 
-    async findByIds(userIds: string[]): Promise<ContentArrayResponse> {
+    async findByIds(
+        userIds: string[],
+        opts?: FindManyOptions<ContentModel>
+    ): Promise<ContentArrayResponse> {
         return Helpers.trySuccessFail(async () => {
-            const users = await this.repo
-                .createQueryBuilder()
-                .where("id IN (:...userIds)", { userIds })
-                .getMany();
+            if (!userIds.length) {
+                return success([]);
+            }
+
+            const users = await this.repo.find({
+                ...opts,
+                where: { ...opts?.where, id: In(userIds) },
+            });
 
             return success(users);
         });
@@ -297,6 +304,7 @@ export class PostgresContentRepository {
                 )
                 .where({
                     id: Not(In(idsToExclude)),
+                    audioUrl: Not(IsNull()),
                 })
                 .setParameter("embedding", pgvector.toSql(vector))
                 .groupBy("content.id")

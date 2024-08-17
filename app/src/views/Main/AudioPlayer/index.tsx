@@ -90,7 +90,7 @@ const AudioPlayer = () => {
   const dispatch = useDispatch();
 
   const {
-    downloadAndPlayContent,
+    startPlayingContent,
     setPosition,
     setSpeed,
     speed,
@@ -124,9 +124,9 @@ const AudioPlayer = () => {
   const theme = useTheme();
   const content = contentData?.getContent as BaseContentFields | null;
   const session = contentData?.getContent?.contentSession ?? null;
+  const lengthFormatted = content?.lengthFormatted ?? null;
 
   const insets = useSafeAreaInsets();
-  const estimatedLen = Math.ceil((durationMs || 0) / 60_000);
 
   useEffect(() => void refetchContent(), [isFocused, contentId]);
 
@@ -160,7 +160,7 @@ const AudioPlayer = () => {
         artwork: content?.thumbnailImageUrl || "",
       };
 
-      const response = await downloadAndPlayContent(content);
+      const response = await startPlayingContent(content);
 
       console.log(response);
       return;
@@ -285,7 +285,7 @@ const AudioPlayer = () => {
             >
               {content?.authorName}
               {"  "}•{"  "}
-              {estimatedLen} mins
+              {lengthFormatted || ""}
             </Text>
           </View>
         </View>
@@ -554,7 +554,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
     return queue[currentIndex + 1] ?? null;
   }, [queue, currentContent]);
 
-  const { downloadAndPlayContent } = useContext(AppContext).audio!;
+  const { startPlayingContent } = useContext(AppContext).audio!;
 
   const [getNextContent] = useLazyQuery<Pick<Query, "getNextContent">>(
     api.content.next
@@ -589,7 +589,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
       // update the route params
       navigation.setParams({ contentId: nextContentId });
 
-      downloadAndPlayContent(nextContentQueued.content as BaseContentFields);
+      startPlayingContent(nextContentQueued.content as BaseContentFields);
     } catch (err) {
       console.log(err);
     }
@@ -690,7 +690,7 @@ const NextOrPrevButtons = ({
   content: BaseContentFields | null;
   skip: (seconds: number) => void;
 }) => {
-  const { downloadAndPlayContent } = useContext(AppContext).audio!;
+  const { startPlayingContent } = useContext(AppContext).audio!;
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProps>();
@@ -728,7 +728,7 @@ const NextOrPrevButtons = ({
       // update the route params
       navigation.setParams({ contentId: prevContentId });
 
-      downloadAndPlayContent(prevContentQueued.content as BaseContentFields);
+      startPlayingContent(prevContentQueued.content as BaseContentFields);
     } catch (err) {
       console.log(err);
     }
@@ -763,7 +763,7 @@ const NextOrPrevButtons = ({
       // update the route params
       navigation.setParams({ contentId: nextContentId });
 
-      downloadAndPlayContent(nextContentQueued.content as BaseContentFields);
+      startPlayingContent(nextContentQueued.content as BaseContentFields);
     } catch (err) {
       console.log(err);
     }

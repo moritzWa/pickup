@@ -53,7 +53,7 @@ const Activity = () => {
   const theme = useTheme();
 
   const dispatch = useDispatch();
-  const { downloadAndPlayContent, toggle } = useContext(AppContext).audio!;
+  const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const [clear] = useMutation(api.queue.clear);
 
   const {
@@ -75,7 +75,7 @@ const Activity = () => {
 
   const onPlayContent = async (content: BaseContentFields) => {
     // alert("play");
-    await downloadAndPlayContent(content);
+    await startPlayingContent(content);
   };
 
   const onTogglePlayOrPause = async (content: BaseContentFields) => {
@@ -99,8 +99,6 @@ const Activity = () => {
   const onRefresh = async () => {
     await refetchQueue();
   };
-
-  console.log(queueError);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -175,6 +173,8 @@ const Activity = () => {
           <View
             style={{
               flex: 1,
+              paddingVertical: 100,
+              paddingHorizontal: 30,
               justifyContent: "center",
               alignItems: "center",
             }}
@@ -182,11 +182,12 @@ const Activity = () => {
             <Text
               style={{
                 color: theme.text,
-                fontFamily: "Raleway-Bold",
-                fontSize: 16,
+                fontFamily: "Raleway-Medium",
+                fontSize: 18,
+                textAlign: "center",
               }}
             >
-              Your queue is empty
+              Go to the home tab and swipe to add content to the queue!
             </Text>
           </View>
         }

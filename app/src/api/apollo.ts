@@ -67,8 +67,6 @@ const authLink = setContext(async (_, { headers }) => {
   const deviceId = await _getDeviceId();
   const platform = Platform.OS;
 
-  // console.log(token);
-
   // return the headers to the context so httpLink can read them
   return {
     headers: {
