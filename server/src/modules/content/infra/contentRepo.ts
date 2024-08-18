@@ -180,9 +180,9 @@ export class PostgresContentRepository {
         try {
             const contents = await this.repo.find({
                 where: {
-                    id: "fc0aaa77-67af-4590-a828-057c6dfb7359",
-                    // websiteUrl:
-                    //     "https://putsomethingback.stevejobsarchive.com/",
+                    websiteUrl:
+                        "https://putsomethingback.stevejobsarchive.com/",
+                    // "https://www.thecrimson.com/article/2017/5/25/desai-commencement-ed/",
                 },
             });
             return success(contents);

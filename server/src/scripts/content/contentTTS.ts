@@ -3,6 +3,16 @@ import { contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
 import { Logger } from "src/utils";
 
+const slugify = (str: string) => {
+    str = str.replace(/^\s+|\s+$/g, ""); // trim leading/trailing white space
+    str = str.toLowerCase(); // convert string to lowercase
+    str = str
+        .replace(/[^a-z0-9 -]/g, "") // remove any non-alphanumeric characters
+        .replace(/\s+/g, "-") // replace spaces with hyphens
+        .replace(/-+/g, "-"); // remove consecutive hyphens
+    return str;
+};
+
 const contentTTS = async () => {
     try {
         await dataSource.initialize();
@@ -20,9 +30,12 @@ const contentTTS = async () => {
         Logger.info(`Found ${contents.length} contents that need TTS`);
 
         for (const content of contents) {
+            const contentTitleSlug = slugify(content.title);
+
             Logger.info(`Processing content: ${content.websiteUrl}`);
             const audioResponse = await AudioService.generate(
-                content.content || ""
+                content.content || "",
+                contentTitleSlug || ""
             );
 
             if (audioResponse.isFailure()) {
@@ -32,8 +45,6 @@ const contentTTS = async () => {
                 );
                 continue;
             }
-
-            Logger.info(`audio: ${audioResponse.value.url}`);
 
             const updateResponse = await contentRepo.update(content.id, {
                 audioUrl: audioResponse.value.url,

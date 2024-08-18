@@ -8,7 +8,7 @@ import {
     success,
     UnexpectedError,
 } from "src/core/logic";
-import { Firebase } from "src/utils";
+import { Firebase, Logger } from "src/utils";
 import { PassThrough } from "stream";
 import _ = require("lodash");
 import internal = require("stream");
@@ -95,14 +95,18 @@ function chunkText(text: string): string[] {
     const chunks: string[] = [];
     let currentChunk = "";
 
-    const words = text.split(" ");
+    // Split text into sentences
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
 
-    for (let word of words) {
-        if ((currentChunk + word).length > maxChunkSize) {
-            chunks.push(currentChunk.trim());
-            currentChunk = word + " ";
+    for (let sentence of sentences) {
+        sentence = sentence.trim();
+        if (currentChunk.length + sentence.length > maxChunkSize) {
+            if (currentChunk) {
+                chunks.push(currentChunk.trim());
+            }
+            currentChunk = sentence + " ";
         } else {
-            currentChunk += word + " ";
+            currentChunk += sentence + " ";
         }
     }
 
@@ -115,7 +119,8 @@ function chunkText(text: string): string[] {
 }
 
 const toSpeech = async (
-    _text: string
+    _text: string,
+    contentTitleSlug: string
 ): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> => {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -145,6 +150,10 @@ const toSpeech = async (
     // const chunks = chunkText(prompt);
 
     const chunks = chunkText(_text);
+
+    // log how many chunks were created
+    Logger.info(`chunks: ${chunks.length}`);
+
     const buffers: Buffer[] = [];
 
     for (const chunk of chunks) {
@@ -179,7 +188,7 @@ const toSpeech = async (
 
     const audioFileResponse = await stitchAndStreamAudioFiles(
         buffers,
-        "audio.mp3"
+        `${contentTitleSlug}.mp3`
     );
 
     if (audioFileResponse.isFailure()) {
@@ -195,5 +204,6 @@ const toSpeech = async (
 
 export const AudioService = {
     stitch: stitchAndStreamAudioFiles,
-    generate: toSpeech,
+    generate: (text: string, contentTitleSlug: string) =>
+        toSpeech(text, contentTitleSlug),
 };
