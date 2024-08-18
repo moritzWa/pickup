@@ -1,4 +1,8 @@
-import { Tags } from "hot-shots";
+import axios from "axios";
+import { NonRetriableError, slugify } from "inngest";
+import { parseBuffer } from "music-metadata";
+import * as pgvector from "pgvector/pg";
+import { Content, ContentChunk } from "src/core/infra/postgres/entities";
 import {
     DefaultErrors,
     failure,
@@ -6,22 +10,16 @@ import {
     success,
     UnexpectedError,
 } from "src/core/logic";
-import { Datadog, openai } from "src/utils";
-import { inngest } from "../clients";
-import { InngestEventName } from "../types";
-import { NonRetriableError, slugify } from "inngest";
 import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
-import { AudioService } from "src/shared/audioService";
-import axios from "axios";
 import {
     AudioDataChunk,
     TranscribeService,
 } from "src/modules/content/services/transcribeService";
-import { ContentService } from "src/modules/content/services/contentService";
-import { Content, ContentChunk } from "src/core/infra/postgres/entities";
+import { AudioService } from "src/shared/audioService";
+import { openai } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
-import { parseBuffer, parseFile } from "music-metadata";
-import * as pgvector from "pgvector/pg";
+import { inngest } from "../clients";
+import { InngestEventName } from "../types";
 
 const hash = require("object-hash");
 
@@ -241,7 +239,10 @@ export const _convertToAudio = async (contentId: string) => {
     }
 
     // FIXME: need to test this
-    const audioResponse = await AudioService.generate(content.content || "");
+    const audioResponse = await AudioService.generate(
+        content.content || "",
+        content.title || ""
+    );
 
     if (audioResponse.isFailure()) {
         throw audioResponse.error;

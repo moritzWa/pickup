@@ -2,6 +2,7 @@ import { orderBy, uniq } from "lodash";
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
+import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import {
     DefaultErrors,
     failure,
@@ -13,18 +14,12 @@ import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkWithDistance } from "src/modules/curius/infra/linkRepo";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
+import { In } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-import {
-    contentRepo,
-    contentSessionRepo,
-    feedRepo,
-    interactionRepo,
-} from "../../infra";
+import { contentRepo, feedRepo, interactionRepo } from "../../infra";
 import { ContentWithDistance } from "../../infra/contentRepo";
 import { ContentService } from "../contentService";
 import moment = require("moment");
-import { In } from "typeorm";
-import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -203,7 +198,10 @@ const convertCuriusToContent = async (
     // chunk the full text into less than 4000 characters long but make sure they are full words (no spaces)
 
     // try to get audio
-    const audioResponse = await AudioService.generate(link.fullText || "");
+    const audioResponse = await AudioService.generate(
+        link.fullText || "",
+        link.title
+    );
 
     if (audioResponse.isFailure()) {
         return failure(audioResponse.error);

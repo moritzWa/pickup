@@ -90,6 +90,16 @@ async function stitchAndStreamAudioFiles(
     });
 }
 
+const slugify = (str: string) => {
+    str = str.replace(/^\s+|\s+$/g, ""); // trim leading/trailing white space
+    str = str.toLowerCase(); // convert string to lowercase
+    str = str
+        .replace(/[^a-z0-9 -]/g, "") // remove any non-alphanumeric characters
+        .replace(/\s+/g, "-") // replace spaces with hyphens
+        .replace(/-+/g, "-"); // remove consecutive hyphens
+    return str;
+};
+
 function chunkText(text: string): string[] {
     const maxChunkSize = 4000;
     const chunks: string[] = [];
@@ -120,7 +130,7 @@ function chunkText(text: string): string[] {
 
 const toSpeech = async (
     _text: string,
-    contentTitleSlug: string
+    rawContentTitle: string
 ): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> => {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -186,6 +196,7 @@ const toSpeech = async (
         return failure(new UnexpectedError("No audio buffers were generated"));
     }
 
+    const contentTitleSlug = slugify(rawContentTitle);
     const audioFileResponse = await stitchAndStreamAudioFiles(
         buffers,
         `${contentTitleSlug}.mp3`
@@ -204,6 +215,6 @@ const toSpeech = async (
 
 export const AudioService = {
     stitch: stitchAndStreamAudioFiles,
-    generate: (text: string, contentTitleSlug: string) =>
-        toSpeech(text, contentTitleSlug),
+    generate: (text: string, rawContentTitle: string) =>
+        toSpeech(text, rawContentTitle),
 };
