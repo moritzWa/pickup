@@ -9,3 +9,4 @@ export * from "./addToQueue";
 export * from "./archiveContent";
 export * from "./clearQueue";
 export * from "./removeFromQueue";
+export * from "./createContentFromUrl";

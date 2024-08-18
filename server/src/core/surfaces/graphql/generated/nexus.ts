@@ -252,6 +252,7 @@ export interface NexusGenFieldTypes {
     bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     clearQueue: string; // String!
     createAuthor: NexusGenRootTypes['Author'] | null; // Author
+    createContentFromUrl: NexusGenRootTypes['Content']; // Content!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
     getAuthToken: string; // String!
@@ -458,6 +459,7 @@ export interface NexusGenFieldTypeNames {
     bookmarkContent: 'ContentSession'
     clearQueue: 'String'
     createAuthor: 'Author'
+    createContentFromUrl: 'Content'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
     getAuthToken: 'String'
@@ -569,6 +571,9 @@ export interface NexusGenArgTypes {
     createAuthor: { // args
       imageUrl?: string | null; // String
       name: string; // String!
+    }
+    createContentFromUrl: { // args
+      url: string; // String!
     }
     createUser: { // args
       email: string; // String!
