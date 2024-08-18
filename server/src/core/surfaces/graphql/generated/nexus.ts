@@ -165,6 +165,7 @@ export interface NexusGenFieldTypes {
     authorName: string | null; // String
     authors: NexusGenRootTypes['Author'][] | null; // [Author!]
     categories: string[]; // [String!]!
+    content: string | null; // String
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string | null; // String
     createdAt: NexusGenScalars['Date']; // Date!
@@ -371,6 +372,7 @@ export interface NexusGenFieldTypeNames {
     authorName: 'String'
     authors: 'Author'
     categories: 'String'
+    content: 'String'
     contentSession: 'ContentSession'
     context: 'String'
     createdAt: 'Date'

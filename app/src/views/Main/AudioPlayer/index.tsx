@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  ScrollView,
 } from "react-native";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import * as FileSystem from "expo-file-system";
@@ -22,12 +23,15 @@ import { Button, colors } from "src/components";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBackward,
+  faBackwardFast,
+  faBackwardStep,
   faBookmark,
   faCaretLeft,
   faCaretRight,
   faChevronLeft,
   faChevronRight,
   faForward,
+  faForwardStep,
   faHeadset,
   faIslandTreePalm,
   faList,
@@ -75,8 +79,9 @@ import {
   setCurrentContent,
 } from "src/redux/reducers/audio";
 import { ContentRowImage } from "src/components/Content/ContentRow";
+import { LinearGradient } from "expo-linear-gradient";
 
-const SIZE = 100;
+const SIZE = 75;
 
 const AudioPlayer = () => {
   const route = useRoute<RouteProp<RootStackParamList, "AudioPlayer">>();
@@ -162,7 +167,6 @@ const AudioPlayer = () => {
 
       const response = await startPlayingContent(content);
 
-      console.log(response);
       return;
     }
 
@@ -230,45 +234,55 @@ const AudioPlayer = () => {
   }, [content]);
 
   return (
-    <View
+    <LinearGradient
+      colors={[colors.gray10, colors.black]}
       style={{
         flex: 1,
-        paddingBottom: insets.bottom + 15,
+        // paddingBottom: insets.bottom + 15,
       }}
     >
-      <View
-        style={{
-          marginTop: 20,
-          zIndex: 100,
-        }}
-      >
-        <Close />
-      </View>
-
-      <View
-        style={{
-          marginHorizontal: 15,
-          marginRight: 60,
-          // backgroundColor: "blue",
-        }}
-      >
+      <ScrollView>
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "flex-start",
-            // backgroundColor: theme.secondaryBackground,
-            // borderRadius: 30,
-            padding: 10,
+            marginTop: 10,
+            zIndex: 100,
           }}
         >
-          {content ? <ContentRowImage size={45} content={content} /> : null}
+          <Close
+            iconColor={colors.white}
+            style={{
+              backgroundColor: colors.gray20,
+            }}
+          />
+        </View>
 
-          <View style={{ flex: 1, marginLeft: 10 }}>
+        <View
+          style={{
+            marginHorizontal: 15,
+            marginTop: 30,
+            alignItems: "center",
+            // backgroundColor: "blue",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              // backgroundColor: theme.secondaryBackground,
+              // borderRadius: 30,
+              padding: 10,
+            }}
+          >
+            {content ? <ContentRowImage size={175} content={content} /> : null}
+          </View>
+
+          <View style={{ marginTop: 15 }}>
             <Text
               style={{
-                color: theme.header,
+                color: colors.white,
                 fontSize: 18,
-                fontFamily: "Raleway-Bold",
+                textAlign: "center",
+                fontFamily: "Raleway-SemiBold",
               }}
               numberOfLines={2}
             >
@@ -277,266 +291,316 @@ const AudioPlayer = () => {
 
             <Text
               style={{
-                marginTop: 7,
-                color: theme.text,
+                marginTop: 15,
+                textAlign: "center",
+                color: colors.gray90,
+                fontSize: 16,
+                marginHorizontal: 75,
+                fontFamily: "Raleway-Medium",
+              }}
+              numberOfLines={1}
+            >
+              By {content?.authorName}
+            </Text>
+
+            <Text
+              style={{
+                marginTop: 15,
+                textAlign: "center",
+                color: colors.gray90,
                 fontSize: 16,
                 fontFamily: "Raleway-Medium",
               }}
+              ellipsizeMode="tail"
+              numberOfLines={2}
             >
-              {content?.authorName}
-              {"  "}•{"  "}
-              {lengthFormatted || ""}
+              {content?.summary}
             </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => {
+                if (!content) return;
+                navigation.navigate("ContentDetails", {
+                  content: content!,
+                });
+              }}
+              style={{
+                marginTop: 10,
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: colors.gray90,
+                  fontSize: 16,
+                  textDecorationLine: "underline",
+                  fontFamily: "Raleway-Medium",
+                }}
+              >
+                Read more
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
-      </View>
 
-      <View
-        style={{
-          flex: 1,
-          display: "flex",
-          paddingHorizontal: 25,
-          width: "100%",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          flexDirection: "row",
-        }}
-      >
-        <TouchableOpacity
-          activeOpacity={0.9}
+        <View
           style={{
-            padding: 25,
+            marginTop: 50,
+            marginBottom: 10,
+            display: "flex",
+            paddingHorizontal: 25,
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            flexDirection: "row",
           }}
-          onPress={() => skip(-15)}
         >
-          <Image
+          <TouchableOpacity
+            activeOpacity={0.9}
             style={{
-              width: SIZE / 3,
-              height: SIZE / 3,
+              padding: 25,
             }}
-            tintColor={theme.text}
-            resizeMode="contain"
-            source={require("src/assets/icons/backward-15.png")}
-          />
-        </TouchableOpacity>
-
-        <View style={{ flex: 1 }}>
-          {/* make a play button that is colors.pink and uses fontawesome */}
-          <Animated.View
-            style={{
-              width: SIZE,
-              height: SIZE,
-              borderRadius: 100,
-              backgroundColor:
-                theme.theme === "dark"
-                  ? colors.lightBlue10
-                  : colors.lightBlue90,
-              justifyContent: "center",
-              alignItems: "center",
-              alignSelf: "center",
-              transform: [{ scale: animation }],
-            }}
+            onPress={() => skip(-15)}
           >
-            <TouchableOpacity
+            <Image
               style={{
-                width: SIZE - 12,
-                height: SIZE - 12,
+                width: SIZE / 2,
+                height: SIZE / 2,
+              }}
+              tintColor={colors.white}
+              resizeMode="contain"
+              source={require("src/assets/icons/backward-15.png")}
+            />
+          </TouchableOpacity>
+
+          <View style={{ flex: 1 }}>
+            {/* make a play button that is colors.pink and uses fontawesome */}
+            <Animated.View
+              style={{
+                width: SIZE,
+                height: SIZE,
                 borderRadius: 100,
-                backgroundColor: colors.primary,
+                backgroundColor: colors.secondaryPrimary,
                 justifyContent: "center",
                 alignItems: "center",
+                alignSelf: "center",
+                transform: [{ scale: animation }],
               }}
-              activeOpacity={1}
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              onPress={playOrPause}
             >
-              <FontAwesomeIcon
+              <TouchableOpacity
                 style={{
-                  position: "relative",
-                  right: isPlaying ? 0 : -5,
+                  width: SIZE,
+                  height: SIZE,
+                  borderRadius: 100,
+                  backgroundColor: colors.white,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-                icon={isPlaying ? faPause : faPlay}
-                color={colors.white}
-                size={SIZE / 2}
-              />
-            </TouchableOpacity>
-          </Animated.View>
+                activeOpacity={1}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={playOrPause}
+              >
+                <FontAwesomeIcon
+                  style={{
+                    position: "relative",
+                    right: isPlaying ? 0 : -3,
+                  }}
+                  icon={isPlaying ? faPause : faPlay}
+                  color={colors.black}
+                  size={SIZE / 2}
+                />
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={{
+              padding: 25,
+            }}
+            onPress={() => skip(15)}
+          >
+            <Image
+              tintColor={colors.white}
+              style={{
+                width: SIZE / 2,
+                height: SIZE / 2,
+              }}
+              resizeMode="contain"
+              source={require("src/assets/icons/forward-15.png")}
+            />
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          style={{
-            padding: 25,
-          }}
-          onPress={() => skip(15)}
+        <View
+          style={[
+            styles.container,
+            {
+              marginBottom: 15,
+            },
+          ]}
         >
-          <Image
-            tintColor={theme.text}
+          <Slider
             style={{
-              width: SIZE / 3,
-              height: SIZE / 3,
+              width: width * 1.75,
+              alignSelf: "center",
+              height: 35,
+              transform: [{ scaleX: 0.5 }, { scaleY: 0.5 }],
             }}
-            resizeMode="contain"
-            source={require("src/assets/icons/forward-15.png")}
+            minimumValue={0}
+            maximumValue={durationMs ?? 0}
+            value={currentMs ?? 0}
+            onSlidingComplete={onSlidingComplete}
+            minimumTrackTintColor={colors.white}
+            maximumTrackTintColor={colors.gray50}
+            thumbTintColor={colors.white}
+            // change the size of the thumb
           />
-        </TouchableOpacity>
-      </View>
 
-      <View
-        style={[
-          styles.container,
-          {
-            marginBottom: 25,
-          },
-        ]}
-      >
-        <Slider
-          style={{
-            width: width * 1.75,
-            alignSelf: "center",
-            height: 35,
-            transform: [{ scaleX: 0.5 }, { scaleY: 0.5 }],
-          }}
-          minimumValue={0}
-          maximumValue={durationMs ?? 0}
-          value={currentMs ?? 0}
-          onSlidingComplete={onSlidingComplete}
-          minimumTrackTintColor={theme.text}
-          maximumTrackTintColor={theme.secondaryBackground2}
-          thumbTintColor={theme.text}
-          // change the size of the thumb
-        />
-
-        <View
-          style={{
-            width: "87%",
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginHorizontal: 15,
-          }}
-        >
-          <Text
+          <View
             style={{
-              color: theme.text,
-              fontSize: 14,
-              fontFamily: "Raleway-Medium",
+              width: "87%",
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginHorizontal: 15,
             }}
           >
-            {currentMs ? formatTime(currentMs) : "00:00"}
-          </Text>
+            <Text
+              style={{
+                color: colors.white,
+                fontSize: 16,
+                fontFamily: "Raleway-SemiBold",
+              }}
+            >
+              {currentMs ? formatTime(currentMs) : "00:00"}
+            </Text>
 
-          <Text
+            <Text
+              style={{
+                color: colors.white,
+                fontSize: 16,
+                fontFamily: "Raleway-SemiBold",
+              }}
+            >
+              {durationMs ? formatTime(durationMs) : "-"}
+            </Text>
+          </View>
+
+          <View
             style={{
-              color: theme.text,
-              fontSize: 14,
-              fontFamily: "Raleway-Medium",
+              marginTop: 25,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              width: "100%",
             }}
           >
-            {durationMs ? formatTime(durationMs) : "-"}
-          </Text>
-        </View>
+            <View>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                style={{
+                  padding: 10,
+                  alignSelf: "flex-start",
+                  marginLeft: 20,
+                  marginBottom: 10,
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 50,
+                  paddingRight: 15,
+                  backgroundColor: session?.isBookmarked
+                    ? colors.primary
+                    : "rgba(255, 255, 255, 0.1)",
+                }}
+                onPress={bookmarkContent}
+              >
+                <FontAwesomeIcon
+                  icon={faBookmark}
+                  color={colors.white}
+                  size={14}
+                />
 
-        <View
-          style={{
-            marginTop: 25,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <View>
+                <Text
+                  style={{
+                    color: session?.isBookmarked ? colors.white : colors.white,
+                    fontSize: 14,
+                    fontFamily: "Raleway-Medium",
+                    marginLeft: 5,
+                  }}
+                >
+                  Bookmark
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <TouchableOpacity
               activeOpacity={0.9}
               style={{
                 padding: 10,
                 alignSelf: "flex-start",
-                marginLeft: 20,
+                marginLeft: 10,
                 marginBottom: 10,
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 50,
-                backgroundColor: session?.isBookmarked
-                  ? colors.primary
-                  : theme.secondaryBackground,
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
               }}
-              onPress={bookmarkContent}
+              onPress={openQueue}
             >
-              <FontAwesomeIcon
-                icon={faBookmark}
-                color={session?.isBookmarked ? colors.white : theme.text}
-                size={14}
-              />
+              <FontAwesomeIcon icon={faList} color={colors.white} size={14} />
 
-              {/* <Text
+              <Text
                 style={{
-                  color: session?.isBookmarked ? colors.white : theme.text,
+                  color: session?.isBookmarked ? colors.white : colors.white,
                   fontSize: 14,
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Raleway-Medium",
                   marginLeft: 5,
                 }}
               >
-                Bookmark
-              </Text> */}
+                Queue
+              </Text>
+            </TouchableOpacity>
+
+            <View style={{ flex: 1 }} />
+
+            <TouchableOpacity
+              style={{
+                padding: 10,
+                width: 60,
+                alignSelf: "flex-end",
+                marginRight: 20,
+                marginBottom: 10,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 50,
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+              }}
+              onPress={setPlayerSpeed}
+            >
+              <Text
+                style={{
+                  color: colors.white,
+                  fontSize: 14,
+                  fontFamily: "Raleway-Bold",
+                }}
+              >
+                {speed}x
+              </Text>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            activeOpacity={0.9}
-            style={{
-              padding: 10,
-              alignSelf: "flex-start",
-              marginLeft: 10,
-              marginBottom: 10,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 50,
-              backgroundColor: theme.secondaryBackground,
-            }}
-            onPress={openQueue}
-          >
-            <FontAwesomeIcon icon={faList} color={theme.text} size={14} />
-          </TouchableOpacity>
-
-          <View style={{ flex: 1 }} />
-
-          <TouchableOpacity
-            style={{
-              padding: 10,
-              width: 60,
-              alignSelf: "flex-end",
-              marginRight: 20,
-              marginBottom: 10,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 50,
-              backgroundColor: theme.secondaryBackground,
-            }}
-            onPress={setPlayerSpeed}
-          >
-            <Text
-              style={{
-                color: theme.text,
-                fontSize: 14,
-                fontFamily: "Raleway-Bold",
-              }}
-            >
-              {speed}x
-            </Text>
-          </TouchableOpacity>
         </View>
-      </View>
 
-      <NextOrPrevButtons skip={skip} content={content ?? null} />
+        <NextOrPrevButtons skip={skip} content={content ?? null} />
 
-      <NextQueue content={content ?? null} />
-    </View>
+        <NextQueue content={content ?? null} />
+      </ScrollView>
+    </LinearGradient>
   );
 };
 
@@ -785,18 +849,18 @@ const NextOrPrevButtons = ({
         style={{
           flex: 1,
           marginRight: 5,
-          backgroundColor: theme.medBackground,
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
         }}
         onPress={_onClickPrev}
-        activityColor={theme.text}
+        activityColor={colors.white}
         labelStyle={{
-          color: theme.text,
+          color: colors.white,
         }}
         iconPosition="left"
         icon={
           <FontAwesomeIcon
-            icon={faBackward}
-            color={theme.text}
+            icon={faBackwardStep}
+            color={colors.white}
             size={18}
             style={{ position: "absolute", left: 15 }}
           />
@@ -808,18 +872,18 @@ const NextOrPrevButtons = ({
         style={{
           flex: 1,
           marginLeft: 5,
-          backgroundColor: theme.medBackground,
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
         }}
-        activityColor={theme.text}
+        activityColor={colors.white}
         onPress={_onClickNext}
         iconPosition="right"
         labelStyle={{
-          color: theme.text,
+          color: colors.white,
         }}
         icon={
           <FontAwesomeIcon
-            icon={faForward}
-            color={theme.text}
+            icon={faForwardStep}
+            color={colors.white}
             size={18}
             style={{ position: "absolute", right: 15 }}
           />

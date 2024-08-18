@@ -18,6 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 
 type ButtonProps = {
   onPress?: (event: GestureResponderEvent) => void;
+  iconColor?: string;
 } & TouchableOpacityProps;
 
 const Close = ({ onPress, ...other }: ButtonProps) => {
@@ -52,7 +53,11 @@ const Close = ({ onPress, ...other }: ButtonProps) => {
       activeOpacity={other.activeOpacity ?? 0.9}
       disabled={other.disabled}
     >
-      <FontAwesomeIcon color={theme.textSecondary} size={20} icon={faTimes} />
+      <FontAwesomeIcon
+        color={other?.iconColor ?? theme.textSecondary}
+        size={20}
+        icon={faTimes}
+      />
     </TouchableOpacity>
   );
 };

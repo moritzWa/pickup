@@ -41,6 +41,8 @@ import { LINKING } from "./linking";
 import { TabBar } from "./TabBar";
 import Queue from "src/views/Main/Queue";
 import Activity from "src/views/Main/Activity";
+import ContentDetails from "src/views/Main/ContentDetails";
+import { BaseContentFields } from "src/api/fragments";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -52,6 +54,7 @@ export type WebViewParams = {
 
 export type RootStackParamList = {
   Login: undefined; // params
+  ContentDetails: { content?: BaseContentFields };
   Signup: undefined; // params
   Welcome: undefined;
   CarMode?: { contentId: string; isCarMode: boolean };
@@ -357,6 +360,14 @@ export const MainNavigationStack = () => {
             <Stack.Screen
               name="Queue"
               component={Queue}
+              options={{
+                headerShown: false,
+              }}
+            />
+
+            <Stack.Screen
+              name="ContentDetails"
+              component={ContentDetails}
               options={{
                 headerShown: false,
               }}

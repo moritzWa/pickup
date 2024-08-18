@@ -19,6 +19,7 @@ export const Content = objectType({
         t.nullable.string("authorName", {
             resolve: (p) => (p.authors || [])[0]?.name,
         });
+        t.nullable.string("content");
         t.nullable.string("authorImageUrl", {
             resolve: (p) => (p.authors || [])[0]?.imageUrl,
         });

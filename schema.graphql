@@ -31,6 +31,7 @@ type Content {
   authorName: String
   authors: [Author!]
   categories: [String!]!
+  content: String
   contentSession: ContentSession
   context: String
   createdAt: Date!
