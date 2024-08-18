@@ -153,6 +153,7 @@ type Mutation {
   bookmarkContent(contentId: ID!): ContentSession!
   clearQueue: String!
   createAuthor(imageUrl: String, name: String!): Author
+  createContentFromUrl(url: String!): Content!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   getAuthToken: String!

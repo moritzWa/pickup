@@ -1,4 +1,6 @@
 import ffmpeg from "fluent-ffmpeg";
+import { unlinkSync, writeFileSync } from "fs";
+import OpenAI from "openai";
 import {
     DefaultErrors,
     failure,
@@ -6,8 +8,9 @@ import {
     success,
     UnexpectedError,
 } from "src/core/logic";
-import { Firebase, firebase, openai } from "src/utils";
+import { Firebase, Logger } from "src/utils";
 import { PassThrough } from "stream";
+import _ = require("lodash");
 import internal = require("stream");
 
 const bucket = Firebase.storage().bucket();
@@ -19,72 +22,101 @@ function bufferToStream(buffer: Buffer): internal.Readable {
     return readable;
 }
 
+type AudioUrlResult = FailureOrSuccess<DefaultErrors, { url: string }>;
+
 async function stitchAndStreamAudioFiles(
     buffers: Buffer[],
-    output: string
-): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> {
-    return new Promise<FailureOrSuccess<DefaultErrors, { url: string }>>(
-        (resolve) => {
-            const command = ffmpeg();
+    fileOutputName: string
+): Promise<AudioUrlResult> {
+    return new Promise<AudioUrlResult>((resolve) => {
+        const ffmpegCommand = ffmpeg();
 
-            // Add each file to the command
-            buffers.forEach((bf) => {
-                const source = bufferToStream(bf);
-                command.input(source);
+        console.log(`Processing ${buffers.length} audio buffers`);
+
+        // Create temp, local input buffer files
+        const tempInputFileBuffers = buffers.map((buffer, index) => {
+            const tempFilePath = `./temp_input_${index}.mp3`;
+            writeFileSync(tempFilePath, buffer);
+            return tempFilePath;
+        });
+
+        // add input buffers to ffmpeg command
+        tempInputFileBuffers.forEach((filePath, index) => {
+            console.log(`Adding file ${index + 1} to FFmpeg command`);
+            ffmpegCommand.input(filePath);
+        });
+
+        // Create a pass-through stream to pipe the output to Firebase
+        const passThroughStream = new PassThrough();
+
+        // Stream the merged audio directly to Firebase Storage
+        const fireBaseFileRef = bucket.file(fileOutputName);
+
+        const writeStream = fireBaseFileRef.createWriteStream({
+            contentType: "audio/mpeg",
+        });
+
+        // Pipe the ffmpeg output to the pass-through stream
+        ffmpegCommand
+            .on("error", (err) => {
+                console.error("FFmpeg error:", err);
+                resolve(failure(new UnexpectedError(err)));
+            })
+            .on("end", async () => {
+                console.log("Files have been merged and streamed successfully");
+                const [url] = await fireBaseFileRef.getSignedUrl({
+                    action: "read",
+                    expires: "03-01-2500",
+                });
+                // Clean up temporary files
+                tempInputFileBuffers.forEach((filePath) =>
+                    unlinkSync(filePath)
+                );
+                resolve(success({ url }));
+            })
+            .mergeToFile(passThroughStream, "./temp")
+            .format("mp3");
+
+        // Pipe the pass-through stream to the Firebase write stream
+        passThroughStream.pipe(writeStream);
+
+        ffmpegCommand
+            .on("start", (commandLine) => {
+                console.log("FFmpeg process started:", commandLine);
+            })
+            .on("progress", (progress) => {
+                console.log("FFmpeg progress:", progress);
             });
-
-            // Create a pass-through stream to pipe the output to Firebase
-            const passThroughStream = new PassThrough();
-
-            // Stream the merged audio directly to Firebase Storage
-            const file = bucket.file(output);
-
-            const writeStream = file.createWriteStream({
-                contentType: "audio/mpeg",
-            });
-
-            // Pipe the ffmpeg output to the pass-through stream
-            command
-                .on("error", (err) => {
-                    resolve(failure(new UnexpectedError(err)));
-                })
-                .on("end", async () => {
-                    console.log(
-                        "Files have been merged and streamed successfully"
-                    );
-
-                    const originalUrl = `https://firebasestorage.googleapis.com/v0/b/${
-                        bucket.name
-                    }/o/${encodeURIComponent(output)}?alt=media`;
-
-                    resolve(
-                        success({
-                            url: originalUrl,
-                        })
-                    );
-                })
-                .format("mp3") // Ensure the output format is mp3
-                .pipe(passThroughStream);
-
-            // Pipe the pass-through stream to the Firebase write stream
-            passThroughStream.pipe(writeStream);
-        }
-    );
+    });
 }
+
+const slugify = (str: string) => {
+    str = str.replace(/^\s+|\s+$/g, ""); // trim leading/trailing white space
+    str = str.toLowerCase(); // convert string to lowercase
+    str = str
+        .replace(/[^a-z0-9 -]/g, "") // remove any non-alphanumeric characters
+        .replace(/\s+/g, "-") // replace spaces with hyphens
+        .replace(/-+/g, "-"); // remove consecutive hyphens
+    return str;
+};
 
 function chunkText(text: string): string[] {
     const maxChunkSize = 4000;
     const chunks: string[] = [];
     let currentChunk = "";
 
-    const words = text.split(" ");
+    // Split text into sentences
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
 
-    for (let word of words) {
-        if ((currentChunk + word).length > maxChunkSize) {
-            chunks.push(currentChunk.trim());
-            currentChunk = word + " ";
+    for (let sentence of sentences) {
+        sentence = sentence.trim();
+        if (currentChunk.length + sentence.length > maxChunkSize) {
+            if (currentChunk) {
+                chunks.push(currentChunk.trim());
+            }
+            currentChunk = sentence + " ";
         } else {
-            currentChunk += word + " ";
+            currentChunk += sentence + " ";
         }
     }
 
@@ -97,58 +129,77 @@ function chunkText(text: string): string[] {
 }
 
 const toSpeech = async (
-    _text: string
+    _text: string,
+    rawContentTitle: string
 ): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> => {
-    const openPromptResponse = await openai.chat.completions.create([
-        {
-            role: "system",
-            content:
-                "Here is a batch of text. Clean it up and only return the cleaned up text. The text will be used to transform into audio content for a listener.",
-        },
-        {
-            role: "user",
-            content: `Text: ${_text}`,
-        },
-    ]);
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    if (openPromptResponse.isFailure()) {
-        return failure(openPromptResponse.error);
-    }
+    // TODO: bring this back but chunk-wise
+    // const openPromptResponse = await openai.chat.completions.create([
+    //     {
+    //         role: "system",
+    //         content:
+    //             "Here is a batch of text. Clean it up and only return the cleaned up text. The text will be used to transform into audio content for a listener.",
+    //     },
+    //     {
+    //         role: "user",
+    //         content: `Text: ${_text}`,
+    //     },
+    // ]);
 
-    const openPrompt = openPromptResponse.value;
-    const prompt = openPrompt.choices[0].message.content;
+    // if (openPromptResponse.isFailure()) {
+    //     return failure(openPromptResponse.error);
+    // }
 
-    if (!prompt) {
-        return failure(new Error("Prompt was empty"));
-    }
+    // const openPrompt = openPromptResponse.value;
+    // const prompt = openPrompt.choices[0].message.content;
 
-    const chunks = chunkText(prompt);
+    // if (!prompt) {
+    //     return failure(new Error("Prompt was empty"));
+    // }
+    // const chunks = chunkText(prompt);
 
-    const responses: FailureOrSuccess<DefaultErrors, Buffer>[] = [];
+    const chunks = chunkText(_text);
 
-    debugger;
+    // log how many chunks were created
+    Logger.info(`chunks: ${chunks.length}`);
+
+    const buffers: Buffer[] = [];
 
     for (const chunk of chunks) {
-        const response = await openai.audio.speak({
-            text: chunk,
-            voice: "onyx",
-            model: "tts-1",
-        });
+        try {
+            const response = await openai.audio.speech.create({
+                model: "tts-1",
+                voice: "onyx",
+                input: chunk,
+            });
 
-        responses.push(response);
+            const buffer = Buffer.from(await response.arrayBuffer());
+            buffers.push(buffer);
+        } catch (error: unknown) {
+            console.error("OpenAI API error:", error);
+            if (error instanceof Error) {
+                return failure(
+                    new UnexpectedError(`OpenAI API error: ${error.message}`)
+                );
+            } else {
+                return failure(
+                    new UnexpectedError(
+                        `OpenAI API error: Unknown error occurred`
+                    )
+                );
+            }
+        }
     }
 
-    const failures = responses.filter((r) => r.isFailure());
-
-    if (failures.length > 0) {
-        return failure(failures[0].error);
+    if (buffers.length === 0) {
+        return failure(new UnexpectedError("No audio buffers were generated"));
     }
 
-    const buffers = responses.map((r) => r.value);
-
+    const contentTitleSlug = slugify(rawContentTitle);
     const audioFileResponse = await stitchAndStreamAudioFiles(
         buffers,
-        "audio.mp3"
+        `${contentTitleSlug}.mp3`
     );
 
     if (audioFileResponse.isFailure()) {
@@ -164,5 +215,6 @@ const toSpeech = async (
 
 export const AudioService = {
     stitch: stitchAndStreamAudioFiles,
-    generate: toSpeech,
+    generate: (text: string, rawContentTitle: string) =>
+        toSpeech(text, rawContentTitle),
 };
