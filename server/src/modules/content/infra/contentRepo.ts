@@ -180,8 +180,8 @@ export class PostgresContentRepository {
         try {
             const contents = await this.repo.find({
                 where: {
-                    websiteUrl:
-                        "https://putsomethingback.stevejobsarchive.com/",
+                    websiteUrl: "http://paulgraham.com/goodtaste.html",
+                    // "https://putsomethingback.stevejobsarchive.com/",
                     // "https://www.thecrimson.com/article/2017/5/25/desai-commencement-ed/",
                 },
             });

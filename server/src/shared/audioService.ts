@@ -1,6 +1,7 @@
 import ffmpeg from "fluent-ffmpeg";
 import { unlinkSync, writeFileSync } from "fs";
 import OpenAI from "openai";
+import { performance } from "perf_hooks";
 import {
     DefaultErrors,
     failure,
@@ -100,8 +101,9 @@ const slugify = (str: string) => {
     return str;
 };
 
+const MAX_CHUNK_SIZE = 4000;
+
 function chunkText(text: string): string[] {
-    const maxChunkSize = 4000;
     const chunks: string[] = [];
     let currentChunk = "";
 
@@ -110,7 +112,7 @@ function chunkText(text: string): string[] {
 
     for (let sentence of sentences) {
         sentence = sentence.trim();
-        if (currentChunk.length + sentence.length > maxChunkSize) {
+        if (currentChunk.length + sentence.length > MAX_CHUNK_SIZE) {
             if (currentChunk) {
                 chunks.push(currentChunk.trim());
             }
@@ -132,6 +134,7 @@ const toSpeech = async (
     _text: string,
     rawContentTitle: string
 ): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> => {
+    const startTime = performance.now();
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     // TODO: bring this back but chunk-wise
@@ -166,8 +169,11 @@ const toSpeech = async (
 
     const buffers: Buffer[] = [];
 
-    for (const chunk of chunks) {
+    const ttsStartTime = performance.now();
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
         try {
+            const chunkStartTime = performance.now();
             const response = await openai.audio.speech.create({
                 model: "tts-1",
                 voice: "onyx",
@@ -176,6 +182,12 @@ const toSpeech = async (
 
             const buffer = Buffer.from(await response.arrayBuffer());
             buffers.push(buffer);
+            const chunkEndTime = performance.now();
+            Logger.info(
+                `Processed chunk ${i + 1}/${chunks.length} in ${Math.round(
+                    chunkEndTime - chunkStartTime
+                )}ms`
+            );
         } catch (error: unknown) {
             console.error("OpenAI API error:", error);
             if (error instanceof Error) {
@@ -191,15 +203,28 @@ const toSpeech = async (
             }
         }
     }
+    const ttsEndTime = performance.now();
+    Logger.info(
+        `TTS processing took ${Math.round(ttsEndTime - ttsStartTime)}ms for ${
+            chunks.length
+        } chunks.`
+    );
 
     if (buffers.length === 0) {
         return failure(new UnexpectedError("No audio buffers were generated"));
     }
 
     const contentTitleSlug = slugify(rawContentTitle);
+    const stitchingStartTime = performance.now();
     const audioFileResponse = await stitchAndStreamAudioFiles(
         buffers,
         `${contentTitleSlug}.mp3`
+    );
+    const stitchingEndTime = performance.now();
+    Logger.info(
+        `Audio stitching took ${Math.round(
+            stitchingEndTime - stitchingStartTime
+        )}ms`
     );
 
     if (audioFileResponse.isFailure()) {
@@ -207,6 +232,11 @@ const toSpeech = async (
     }
 
     const audioFile = audioFileResponse.value;
+
+    const endTime = performance.now();
+    Logger.info(
+        `Total toSpeech processing time: ${Math.round(endTime - startTime)}ms`
+    );
 
     return success({
         url: audioFile.url,

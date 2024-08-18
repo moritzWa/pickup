@@ -15,6 +15,8 @@ export const Content = objectType({
     definition(t) {
         t.nonNull.string("id");
         t.nullable.string("context"); // not used
+        t.nullable.string("content");
+        t.nullable.string("audioUrl");
         t.nullable.string("audioUrl");
         t.nullable.string("authorName", {
             resolve: (p) => (p.authors || [])[0]?.name,
