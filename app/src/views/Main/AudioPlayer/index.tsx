@@ -33,6 +33,7 @@ import {
   faForward,
   faForwardStep,
   faHeadset,
+  faHeart,
   faIslandTreePalm,
   faList,
   faPause,
@@ -100,12 +101,13 @@ const AudioPlayer = () => {
     setSpeed,
     speed,
     toggle,
-    currentMs,
+    currentMs: _currentMs,
     durationMs,
     isPlaying,
     audioUrl,
     skip,
   } = useContext(AppContext).audio!;
+  const currentContent = useSelector(getCurrentContent);
 
   const contentVariables = useMemo(
     (): QueryGetContentArgs => ({
@@ -130,6 +132,9 @@ const AudioPlayer = () => {
   const content = contentData?.getContent as BaseContentFields | null;
   const session = contentData?.getContent?.contentSession ?? null;
   const lengthFormatted = content?.lengthFormatted ?? null;
+
+  const isCurrent = content?.id === audioUrl;
+  const currentMs = isCurrent ? _currentMs : 0;
 
   const insets = useSafeAreaInsets();
 
@@ -460,7 +465,7 @@ const AudioPlayer = () => {
             }}
             minimumValue={0}
             maximumValue={durationMs ?? 0}
-            value={currentMs ?? 0}
+            value={isCurrent ? currentMs ?? 0 : 0}
             onSlidingComplete={onSlidingComplete}
             minimumTrackTintColor={colors.white}
             maximumTrackTintColor={colors.gray20}
@@ -520,20 +525,20 @@ const AudioPlayer = () => {
                   alignItems: "center",
                   justifyContent: "center",
                   borderRadius: 50,
-                  paddingRight: 15,
+                  // paddingRight: 15,
                   backgroundColor: session?.isBookmarked
-                    ? colors.primary
+                    ? colors.pink60
                     : "rgba(255, 255, 255, 0.1)",
                 }}
                 onPress={bookmarkContent}
               >
                 <FontAwesomeIcon
-                  icon={faBookmark}
+                  icon={faHeart}
                   color={colors.white}
-                  size={14}
+                  size={18}
                 />
 
-                <Text
+                {/* <Text
                   style={{
                     color: session?.isBookmarked ? colors.white : colors.white,
                     fontSize: 14,
@@ -541,8 +546,8 @@ const AudioPlayer = () => {
                     marginLeft: 5,
                   }}
                 >
-                  Bookmark
-                </Text>
+                  {session?.isBookmarked ? "Liked" : "Like"}
+                </Text> */}
               </TouchableOpacity>
             </View>
 
