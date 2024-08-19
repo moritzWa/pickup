@@ -369,7 +369,7 @@ export const ContentRow = ({
                     }}
                     numberOfLines={2}
                   >
-                    {c.summary}
+                    {c.summary || c.ogDescription}
                   </Text>
 
                   <View

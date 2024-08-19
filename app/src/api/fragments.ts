@@ -1,5 +1,4 @@
 import { gql } from "@apollo/client";
-import { Maybe } from "src/core";
 import { Content, ContentSession, FeedItem, User } from "./generated/types";
 
 export type BaseUserFields = Pick<
@@ -66,6 +65,7 @@ export type BaseContentFields = Pick<
   | "followUpQuestions"
   | "title"
   | "summary"
+  | "ogDescription"
   | "websiteUrl"
   | "lengthSeconds"
   | "categories"
@@ -103,6 +103,7 @@ export const BaseContentFields = gql`
     }
     title
     summary
+    ogDescription
     websiteUrl
     lengthSeconds
     lengthMs
