@@ -43,6 +43,7 @@ import {
   getIsPlaying,
   getQueueContentIdSet,
 } from "src/redux/reducers/audio";
+import { extractDomain } from "src/utils/author";
 
 const IMAGE_SIZE = 32;
 
@@ -415,7 +416,7 @@ export const ContentRow = ({
                         }}
                         numberOfLines={1}
                       >
-                        {c.authorName}
+                        {c.authorName || extractDomain(c.websiteUrl)}
                       </Text>
                     </View>
 
