@@ -3,7 +3,7 @@ import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
-import { feedRepo, interactionRepo } from "../../infra";
+import { feedRepo, interactionRepo, contentRepo } from "../../infra";
 import { ContentFromUrlService } from "../../services/contentFromUrlService";
 import { Content } from "../types/Content";
 
@@ -27,6 +27,18 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
         // throwIfNotAuthenticated(ctx); // accessible to all users for now
 
         const { url } = args;
+
+        // Check if content with the given URL already exists
+        const existingContentResponse = await contentRepo.findOne({
+            where: { websiteUrl: url },
+        });
+
+        if (
+            existingContentResponse.isSuccess() &&
+            existingContentResponse.value
+        ) {
+            return existingContentResponse.value;
+        }
 
         const contentResponse = await ContentFromUrlService.createFromUrl(url);
         if (contentResponse.isFailure()) {

@@ -74,9 +74,10 @@ export class PostgresContentRepository {
         options: FindOneOptions<ContentModel>
     ): Promise<ContentResponse> {
         return Helpers.trySuccessFail(async () => {
-            const user = await this.repo.findOne(options);
-            if (!user) return failure(new NotFoundError("Content not found."));
-            return success(user);
+            const content = await this.repo.findOne(options);
+            if (!content)
+                return failure(new NotFoundError("Content not found."));
+            return success(content);
         });
     }
 
@@ -203,53 +204,40 @@ export class PostgresContentRepository {
     }
 
     async findById(
-        userId: string,
+        contentId: string,
         opts?: FindOneOptions<ContentModel>
     ): Promise<ContentResponse> {
         try {
-            const user = await this.repo.findOne({
+            const content = await this.repo.findOne({
                 ...opts,
-                where: { ...opts?.where, id: userId },
+                where: { ...opts?.where, id: contentId },
             });
 
-            if (!user) {
+            if (!content) {
                 return failure(new NotFoundError("Content not found."));
             }
 
-            return success(user);
+            return success(content);
         } catch (err) {
             return failure(new UnexpectedError(err));
         }
     }
 
     async findByIds(
-        userIds: string[],
+        contentIds: string[],
         opts?: FindManyOptions<ContentModel>
     ): Promise<ContentArrayResponse> {
         return Helpers.trySuccessFail(async () => {
-            if (!userIds.length) {
+            if (!contentIds.length) {
                 return success([]);
             }
 
-            const users = await this.repo.find({
+            const contents = await this.repo.find({
                 ...opts,
-                where: { ...opts?.where, id: In(userIds) },
+                where: { ...opts?.where, id: In(contentIds) },
             });
 
-            return success(users);
-        });
-    }
-
-    async findByEmail(email: string): Promise<ContentResponse> {
-        return await Helpers.trySuccessFail(async () => {
-            const user = await this.repo
-                .createQueryBuilder()
-                .where("email = :email", { email })
-                .getOne();
-            if (!user) {
-                return failure(new NotFoundError("Content not found."));
-            }
-            return success(user);
+            return success(contents);
         });
     }
 

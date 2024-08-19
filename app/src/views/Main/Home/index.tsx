@@ -733,6 +733,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
             borderRadius: 100,
             paddingVertical: 7,
             padding: 10,
+            marginRight: 10,
             backgroundColor: theme.secondaryBackground,
           }}
         >
