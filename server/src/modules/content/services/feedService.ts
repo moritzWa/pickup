@@ -73,7 +73,7 @@ const getFeed = async (
     const contentByContentId = keyBy(contentResponse.value, (c) => c.id);
 
     const content = feedResponse.value.map((c) => {
-        const session = sessionByContentId[c.id];
+        const session = sessionByContentId[c.contentId];
         const content = contentByContentId[c.contentId];
 
         return {
@@ -85,8 +85,8 @@ const getFeed = async (
     // idk why but I need this otherwise the frontend sometimes has dup ids?
     const uniqContent = uniqBy(content, (c) => c.id);
 
-    console.log(skip);
-    console.log(uniqContent.map((c) => c.title.slice(0, 3)));
+    // console.log(skip);
+    // console.log(uniqContent.map((c) => c.title.slice(0, 3)));
 
     return success(uniqContent);
 };

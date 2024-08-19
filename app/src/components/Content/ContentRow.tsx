@@ -58,6 +58,8 @@ import { noop } from "lodash";
 import { Swipeable } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
 import Toast from "react-native-toast-message";
+import { Circle, Svg } from "react-native-svg";
+import { IS_IPAD } from "src/config";
 
 const IMAGE_SIZE = 32;
 
@@ -411,7 +413,7 @@ export const ContentRow = ({
                         display: "flex",
                         flexDirection: "row",
                         alignItems: "center",
-                        marginRight: 30,
+                        marginRight: 10,
                         flex: 1,
                       }}
                     >
@@ -470,18 +472,19 @@ export const ContentRow = ({
                           // marginRight: 15,
                         }}
                       >
-                        <FontAwesomeIcon
-                          icon={faCircleNotch}
-                          color={theme.text}
-                          size={14}
-                          style={{ marginRight: 5 }}
+                        <CircularProgress
+                          size={IS_IPAD ? 26 : 14}
+                          strokeWidth={IS_IPAD ? 5 : 3}
+                          bg={theme.secondaryBackground2}
+                          percentage={c.contentSession?.percentFinished || 0}
                         />
 
                         <Text
                           style={{
+                            marginLeft: 5,
                             color: theme.text,
                             fontSize: 14,
-                            fontFamily: "Raleway-SemiBold",
+                            fontFamily: "Raleway-Medium",
                           }}
                         >
                           {c.contentSession?.percentFinished}%
@@ -615,3 +618,48 @@ function getGradientById(id: string) {
   const index = stringToNumber(id) % gradients.length;
   return gradients[index];
 }
+
+const CircularProgress = ({
+  size,
+  strokeWidth,
+  percentage,
+  bg,
+}: {
+  size: number;
+  strokeWidth: number;
+  percentage: number;
+  bg: string;
+}) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <View>
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Background circle */}
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+          stroke={bg}
+        />
+        {/* Foreground circle */}
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+          stroke={colors.primary}
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          transform={`rotate(-90, ${size / 2}, ${size / 2})`}
+        />
+      </Svg>
+    </View>
+  );
+};

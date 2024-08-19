@@ -117,7 +117,6 @@ const AudioStreamingComponent = () => {
       //       "Content-Type": "multipart/form-data",
       //     },
       //   });
-      console.log("Backend response:", response.data);
     } catch (error) {
       console.error("Error sending audio to backend:", error);
     }

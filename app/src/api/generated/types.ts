@@ -51,6 +51,7 @@ export type Content = {
   authorName?: Maybe<Scalars['String']['output']>;
   authors?: Maybe<Array<Author>>;
   categories: Array<Scalars['String']['output']>;
+  content?: Maybe<Scalars['String']['output']>;
   contentSession?: Maybe<ContentSession>;
   context?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['Date']['output'];

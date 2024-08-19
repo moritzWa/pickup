@@ -161,8 +161,6 @@ export const CurrentAudio = () => {
 
     const data = response.data?.getCurrentContentSession ?? null;
 
-    console.log(data?.currentMs);
-
     if (data) {
       const content = data.content as BaseContentFields;
 

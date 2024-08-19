@@ -19,8 +19,6 @@ const API_URL = __DEV__
   ? "http://localhost:8888"
   : "https://api.talkpickup.com"; // ? "https://68c7a93084a8.ngrok.app" // "http://localhost:8888"
 
-console.log(API_URL);
-
 const ONE_SIGNAL_APP_ID = "42bfa89f-bfc6-472c-ab88-b73491ed37fe";
 
 // const DEV_URL = "https://3695-107-195-70-9.ngrok-free.app"; // "http://localhost:3000";

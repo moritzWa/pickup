@@ -73,6 +73,7 @@ export type BaseContentFields = Pick<
   | "sourceImageUrl"
   | "lengthMs"
   | "lengthFormatted"
+  | "content"
 > & {
   contentSession?: Pick<
     ContentSession,
@@ -91,6 +92,7 @@ export const BaseContentFields = gql`
   fragment BaseContentFields on Content {
     id
     audioUrl
+    content
     authorImageUrl
     authorName
     context

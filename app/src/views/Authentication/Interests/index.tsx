@@ -44,9 +44,6 @@ const Interests = () => {
 
   const categories = categoriesData?.getCategories || [];
 
-  console.log("=== categories ===");
-  console.log(JSON.stringify(categories, null, 2));
-
   useEffect(() => void refetch(), [isFocused]);
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
