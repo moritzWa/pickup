@@ -43,24 +43,41 @@ export const Content = objectType({
         });
         t.nullable.string("lengthFormatted", {
             resolve: (content) => {
-                const lengthMs = content.lengthMs;
+                if (content.lengthMs != null) {
+                    // Audio content
+                    const totalSeconds = Math.floor(content.lengthMs / 1000);
+                    const minutes = Math.floor(totalSeconds / 60);
+                    const hours = Math.floor(minutes / 60);
+                    const seconds = totalSeconds % 60;
 
-                if (lengthMs == null) return null;
+                    if (hours > 0) {
+                        return `${hours}h ${minutes % 60}m`;
+                    } else if (minutes > 0) {
+                        return seconds > 0
+                            ? `${minutes}m ${seconds}s`
+                            : `${minutes}m`;
+                    } else {
+                        return `${seconds}s`;
+                    }
+                } else if (content.length != null) {
+                    // Text content
+                    const wordsCount = Math.ceil(content.length / 5);
+                    const readingTimeMinutes = Math.ceil(wordsCount / 200);
 
-                const totalSeconds = Math.floor(lengthMs / 1000);
-                const minutes = Math.floor(totalSeconds / 60);
-                const hours = Math.floor(minutes / 60);
-                const seconds = totalSeconds % 60;
-
-                if (hours > 0) {
-                    return `${hours}h ${minutes % 60}m`;
-                } else if (minutes > 0) {
-                    return seconds > 0
-                        ? `${minutes}m ${seconds}s`
-                        : `${minutes}m`;
-                } else {
-                    return `${seconds}s`;
+                    if (readingTimeMinutes < 1) {
+                        return "< 1m";
+                    } else if (readingTimeMinutes < 60) {
+                        return `${readingTimeMinutes}m`;
+                    } else {
+                        const hours = Math.floor(readingTimeMinutes / 60);
+                        const minutes = readingTimeMinutes % 60;
+                        return minutes > 0
+                            ? `${hours}h ${minutes}m`
+                            : `${hours}h`;
+                    }
                 }
+
+                return null;
             },
         });
         t.nonNull.string("websiteUrl");
