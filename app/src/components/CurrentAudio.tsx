@@ -253,7 +253,7 @@ export const CurrentAudio = () => {
             style={{
               width: (percentFinished.toString() + "%") as DimensionValue,
               height: "100%",
-              opacity: 0.1,
+              opacity: theme.theme === "dark" ? 0.4 : 0.1,
             }}
           />
         </View>
