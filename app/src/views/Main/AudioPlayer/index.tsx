@@ -33,6 +33,7 @@ import {
   faForward,
   faForwardStep,
   faHeadset,
+  faHeart,
   faIslandTreePalm,
   faList,
   faPause,
@@ -520,20 +521,20 @@ const AudioPlayer = () => {
                   alignItems: "center",
                   justifyContent: "center",
                   borderRadius: 50,
-                  paddingRight: 15,
+                  // paddingRight: 15,
                   backgroundColor: session?.isBookmarked
-                    ? colors.primary
+                    ? colors.pink60
                     : "rgba(255, 255, 255, 0.1)",
                 }}
                 onPress={bookmarkContent}
               >
                 <FontAwesomeIcon
-                  icon={faBookmark}
+                  icon={faHeart}
                   color={colors.white}
-                  size={14}
+                  size={18}
                 />
 
-                <Text
+                {/* <Text
                   style={{
                     color: session?.isBookmarked ? colors.white : colors.white,
                     fontSize: 14,
@@ -541,8 +542,8 @@ const AudioPlayer = () => {
                     marginLeft: 5,
                   }}
                 >
-                  Bookmark
-                </Text>
+                  {session?.isBookmarked ? "Liked" : "Like"}
+                </Text> */}
               </TouchableOpacity>
             </View>
 

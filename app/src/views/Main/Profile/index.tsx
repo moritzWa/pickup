@@ -248,7 +248,7 @@ export const UserProfile = () => {
         isActive: profileFilter === ProfileTabFilter.All,
       },
       {
-        name: "Bookmarks",
+        name: "Liked", // FIXME: hack fix for now
         onClick: () => _onPressTab(ProfileTabFilter.Bookmarks),
         isActive: profileFilter === ProfileTabFilter.Bookmarks,
       },
