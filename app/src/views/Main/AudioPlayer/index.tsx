@@ -81,7 +81,7 @@ import {
 import { ContentRowImage } from "src/components/Content/ContentRow";
 import { LinearGradient } from "expo-linear-gradient";
 
-const SIZE = 75;
+const SIZE = 65;
 
 const AudioPlayer = () => {
   const route = useRoute<RouteProp<RootStackParamList, "AudioPlayer">>();
@@ -348,6 +348,8 @@ const AudioPlayer = () => {
           style={{
             marginTop: 50,
             marginBottom: 10,
+            maxWidth: 300,
+            alignSelf: "center",
             display: "flex",
             paddingHorizontal: 25,
             width: "100%",
