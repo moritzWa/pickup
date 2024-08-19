@@ -235,7 +235,7 @@ const AudioPlayer = () => {
 
   return (
     <LinearGradient
-      colors={[colors.gray10, colors.black]}
+      colors={[colors.gray20, colors.black]}
       style={{
         flex: 1,
         // paddingBottom: insets.bottom + 15,
