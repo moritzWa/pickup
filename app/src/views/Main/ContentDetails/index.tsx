@@ -17,6 +17,7 @@ const ContentDetails = () => {
     useRoute<RouteProp<RootStackParamList, "ContentDetails">>();
 
   const content = params.content ?? null;
+  const plainText = (content?.content || "").replace(/<\/?[^>]+(>|$)/g, "");
 
   return (
     <ScrollView
@@ -28,15 +29,14 @@ const ContentDetails = () => {
         <Close />
       </View>
 
-      <View style={{ marginTop: 15 }}>
+      <View style={{ marginTop: 45 }}>
         <Text
           style={{
             marginHorizontal: 15,
-            fontFamily: "Raleway-SemiBold",
-            fontSize: 20,
+            fontFamily: "Raleway-Bold",
+            fontSize: 22,
             marginTop: 5,
             marginBottom: 20,
-            marginRight: 50,
           }}
         >
           {content?.title}
@@ -45,13 +45,13 @@ const ContentDetails = () => {
           style={{
             marginHorizontal: 15,
             fontFamily: "Raleway-Regular",
-            fontSize: 16,
+            lineHeight: 24,
+            fontSize: 18,
             marginTop: 5,
             marginBottom: 20,
-            marginRight: 50,
           }}
         >
-          {content?.content}
+          {plainText}
         </Text>
       </View>
     </ScrollView>
