@@ -478,7 +478,7 @@ export const ContentRow = ({
                         <CircularProgress
                           size={IS_IPAD ? 26 : 14}
                           strokeWidth={IS_IPAD ? 5 : 3}
-                          bg={theme.secondaryBackground2}
+                          bg={theme.secondaryBackground}
                           percentage={c.contentSession?.percentFinished || 0}
                         />
 

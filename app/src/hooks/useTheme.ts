@@ -22,7 +22,7 @@ export const useTheme = () => {
 
   const data = useMemo(
     () => ({
-      bgPrimary: theme === "light" ? "#DFDCFB" : "#050129",
+      bgPrimary: theme === "light" ? "#DFDCFB" : "#1a115f",
       bgRed: theme === "light" ? colors.red100 : colors.red20,
       bgPrimaryLight: theme === "light" ? "#F4F2FF" : "#1A093D",
       background: theme === "light" ? colors.white : colors.black,

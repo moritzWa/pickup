@@ -65,9 +65,9 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
     <>
       <CurrentAudio />
 
-      <BlurView
-        intensity={75} // You can adjust the intensity of the blur
-        tint={theme === "light" ? "extraLight" : "dark"}
+      <View
+        // intensity={100} // You can adjust the intensity of the blur
+        // tint={theme === "light" ? "extraLight" : "dark"}
         style={{
           flexDirection: "column",
           width: "100%",
@@ -76,7 +76,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
           bottom: 0,
           left: 0,
           // borderTopWidth: 1,
-          // backgroundColor: background,
+          backgroundColor: background,
           // borderTopColor: medBackground,
         }}
       >
@@ -90,6 +90,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
             alignSelf: "center",
             flexDirection: "row",
             paddingBottom: 0,
+            backgroundColor: background,
           }}
         >
           {state.routes.map((route, index) => {
@@ -105,7 +106,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
             );
           })}
         </View>
-      </BlurView>
+      </View>
     </>
   );
 }

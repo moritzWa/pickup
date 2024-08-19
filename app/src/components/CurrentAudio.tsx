@@ -187,7 +187,7 @@ export const CurrentAudio = () => {
       style={{
         bottom: 90,
         width: "100%",
-        height: 10,
+        height: 75,
         paddingHorizontal: 0,
         paddingBottom: 0,
         backgroundColor: theme.background,

@@ -707,18 +707,19 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
             marginRight: 10,
             paddingVertical: 7,
             padding: 10,
-            backgroundColor: theme.bgPrimary,
+            backgroundColor:
+              theme.theme === "dark" ? colors.primary : theme.bgPrimary,
           }}
         >
           <FontAwesomeIcon
             style={{ marginRight: 5 }}
             icon={faSatelliteDish}
             size={16}
-            color={colors.primary}
+            color={theme.theme === "dark" ? colors.white : colors.primary}
           />
           <Text
             style={{
-              color: colors.primary,
+              color: theme.theme === "dark" ? colors.white : colors.primary,
               fontFamily: "Raleway-Bold",
               fontSize: 16,
             }}
