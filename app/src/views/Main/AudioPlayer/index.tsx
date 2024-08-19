@@ -1,86 +1,58 @@
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import {
-  View,
-  Text,
-  SafeAreaView,
-  TouchableOpacity,
-  Alert,
-  Animated,
-  StyleSheet,
-  Dimensions,
-  Image,
-  ScrollView,
-} from "react-native";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import * as FileSystem from "expo-file-system";
-import {
-  AVPlaybackStatus,
-  Audio,
-  InterruptionModeAndroid,
-  InterruptionModeIOS,
-} from "expo-av";
-import { useMe, useTheme } from "src/hooks";
-import { Button, colors } from "src/components";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faBackward,
-  faBackwardFast,
   faBackwardStep,
-  faBookmark,
-  faCaretLeft,
-  faCaretRight,
-  faChevronLeft,
   faChevronRight,
-  faForward,
   faForwardStep,
   faHeadset,
   faHeart,
-  faIslandTreePalm,
   faList,
   faPause,
   faPlay,
-  faRedo,
-  faReplyAll,
-  faTree,
 } from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import Slider from "@react-native-community/slider";
 import {
   RouteProp,
   useIsFocused,
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
-import { NavigationProps, RootStackParamList } from "src/navigation";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { AppContext } from "context";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import {
-  Mutation,
+  Animated,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Track } from "react-native-track-player";
+import { useDispatch, useSelector } from "react-redux";
+import { api } from "src/api";
+import { BaseContentFields } from "src/api/fragments";
+import {
   Query,
   QueryGetContentArgs,
   QueryGetNextContentArgs,
   QueryGetPrevContentArgs,
 } from "src/api/generated/types";
-import { api, apolloClient } from "src/api";
-import Back from "src/components/Back";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Voice from "@react-native-voice/voice";
-import * as Speech from "expo-speech";
-import { storage } from "src/utils/firebase";
-import { noop } from "lodash";
-import FastImage from "react-native-fast-image";
-import Slider from "@react-native-community/slider";
-import { useSpeech } from "./useSpeech";
+import { Button, colors } from "src/components";
 import Close from "src/components/Close";
-import { useAudio } from "src/hooks/useAudio";
-import { AppContext } from "context";
-import { Track } from "react-native-track-player";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { BaseContentFields } from "src/api/fragments";
-import { useDispatch, useSelector } from "react-redux";
+import { ContentRowImage } from "src/components/Content/ContentRow";
+import { useTheme } from "src/hooks";
+import { NavigationProps, RootStackParamList } from "src/navigation";
 import {
   getCurrentContent,
   getQueue,
   setCurrentContent,
 } from "src/redux/reducers/audio";
-import { ContentRowImage } from "src/components/Content/ContentRow";
-import { LinearGradient } from "expo-linear-gradient";
+import { extractDomain } from "src/utils/author";
 
 const SIZE = 65;
 
@@ -313,7 +285,10 @@ const AudioPlayer = () => {
               }}
               numberOfLines={1}
             >
-              By {content?.authorName}
+              By{" "}
+              {content?.authorName || content?.websiteUrl
+                ? extractDomain(content?.websiteUrl)
+                : null}
             </Text>
 
             <TouchableOpacity
@@ -339,7 +314,7 @@ const AudioPlayer = () => {
                 ellipsizeMode="head"
                 numberOfLines={2}
               >
-                {content?.summary}.{" "}
+                {content?.summary || content?.ogDescription}.{" "}
                 <Text
                   style={{
                     textAlign: "center",

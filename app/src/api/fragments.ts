@@ -59,6 +59,7 @@ export type BaseContentFields = Pick<
   Content,
   | "id"
   | "audioUrl"
+  | "websiteUrl"
   | "authorImageUrl"
   | "authorName"
   | "context"
@@ -92,6 +93,7 @@ export const BaseContentFields = gql`
   fragment BaseContentFields on Content {
     id
     audioUrl
+    websiteUrl
     content
     authorImageUrl
     authorName
