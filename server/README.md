@@ -73,13 +73,13 @@ npm run start:dev
 
 We use inngest for background jobs.
 
-To run inngest:
+Navigate to the server directory and run:
 
 ```console
 npm run inngest:dev
 ```
 
-Now run the inngest server:
+Now in a separate terminal run the inngest server:
 
 ```console
 npx inngest-cli@latest dev -u http://localhost:8001/inngest
