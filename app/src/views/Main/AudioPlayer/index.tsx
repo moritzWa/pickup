@@ -101,12 +101,13 @@ const AudioPlayer = () => {
     setSpeed,
     speed,
     toggle,
-    currentMs,
+    currentMs: _currentMs,
     durationMs,
     isPlaying,
     audioUrl,
     skip,
   } = useContext(AppContext).audio!;
+  const currentContent = useSelector(getCurrentContent);
 
   const contentVariables = useMemo(
     (): QueryGetContentArgs => ({
@@ -131,6 +132,9 @@ const AudioPlayer = () => {
   const content = contentData?.getContent as BaseContentFields | null;
   const session = contentData?.getContent?.contentSession ?? null;
   const lengthFormatted = content?.lengthFormatted ?? null;
+
+  const isCurrent = content?.id === audioUrl;
+  const currentMs = isCurrent ? _currentMs : 0;
 
   const insets = useSafeAreaInsets();
 
@@ -461,7 +465,7 @@ const AudioPlayer = () => {
             }}
             minimumValue={0}
             maximumValue={durationMs ?? 0}
-            value={currentMs ?? 0}
+            value={isCurrent ? currentMs ?? 0 : 0}
             onSlidingComplete={onSlidingComplete}
             minimumTrackTintColor={colors.white}
             maximumTrackTintColor={colors.gray20}
