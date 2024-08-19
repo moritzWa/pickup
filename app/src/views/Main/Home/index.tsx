@@ -1,7 +1,17 @@
 import { useMutation, useQuery } from "@apollo/client";
+import {
+  faCar,
+  faPlus,
+  faSatelliteDish,
+} from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
+import { AppContext } from "context";
 import * as Haptics from "expo-haptics";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import { throttle, uniqBy } from "lodash";
+import moment from "moment";
+import React, { useContext, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,13 +23,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DatePicker from "react-native-date-picker";
 import { useDispatch, useSelector } from "react-redux";
-import { api, apolloClient } from "src/api";
+import { api } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
 import {
-  Content,
   ContentFeedFilter,
-  GetQueueResponse,
   Mutation,
   MutationSetCommuteTimeArgs,
   Query,
@@ -28,24 +37,10 @@ import {
 import { colors } from "src/components";
 import { useMe, useTheme } from "src/hooks";
 import { NavigationProps } from "src/navigation";
+import { setCurrentContent } from "src/redux/reducers/audio";
 import { setHomeFilter } from "src/redux/reducers/globalState";
 import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
-import { CurrentAudio } from "../../../components/CurrentAudio";
-import { useAudio } from "src/hooks/useAudio";
-import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faCar,
-  faSatellite,
-  faSatelliteDish,
-} from "@fortawesome/pro-solid-svg-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import DatePicker from "react-native-date-picker";
-import moment from "moment";
-import { hasValue } from "src/core";
-import { AppContext } from "context";
-import { throttle, uniqBy } from "lodash";
 
 const LIMIT = 10;
 
@@ -74,9 +69,9 @@ const Home = () => {
     [page]
   );
 
-  const { data, refetch, fetchMore, error, loading } = useQuery<
-    Pick<Query, "getFeed">
-  >(api.content.feed, {
+  const { data, refetch, fetchMore, error, loading } = useQuery<{
+    getFeed: BaseContentFields[];
+  }>(api.content.feed, {
     variables,
     fetchPolicy: "cache-and-network",
     onCompleted: (newData) => {
@@ -559,6 +554,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
   const [showMore, { loading: loadingShowMore }] = useMutation(
     api.content.showMore
   );
+  const [createContentFromUrl] = useMutation(api.content.createFromUrl);
 
   const { data: queueData, refetch: refetchQueue } = useQuery<
     Pick<Query, "getQueue">
@@ -622,6 +618,38 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
     await showMore({});
 
     onPressMore();
+  };
+
+  const onAddContentFromUrl = () => {
+    Alert.prompt(
+      "Add Content",
+      "Enter the URL of the content you want to add:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Add",
+          onPress: async (url) => {
+            if (url) {
+              try {
+                const { data } = await createContentFromUrl({
+                  variables: { url },
+                  refetchQueries: [api.content.feed, api.queue.list],
+                });
+                if (data) {
+                  Alert.alert("Success", "Content added to queue");
+                }
+              } catch (error) {
+                Alert.alert("Error", "Failed to add content");
+              }
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
   };
 
   const commuteTime = useMemo(() => {
@@ -694,6 +722,39 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
             label="Archived"
           /> */}
         </View>
+
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={onAddContentFromUrl}
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            borderRadius: 100,
+            paddingVertical: 7,
+            padding: 10,
+            backgroundColor: theme.secondaryBackground,
+          }}
+        >
+          <FontAwesomeIcon
+            style={{ marginRight: 5 }}
+            icon={faPlus}
+            size={16}
+            color={
+              theme.theme === "dark" ? colors.white : colors.secondaryPrimary
+            }
+          />
+          <Text
+            style={{
+              color:
+                theme.theme === "dark" ? colors.white : colors.secondaryPrimary,
+              fontFamily: "Raleway-Bold",
+              fontSize: 16,
+            }}
+          >
+            Add
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={0.9}

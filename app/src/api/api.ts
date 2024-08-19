@@ -239,6 +239,15 @@ const Bookmark = gql`
   }
 `;
 
+const CreateContentFromUrl = gql`
+  ${BaseContentFields}
+  mutation CreateContentFromUrl($url: String!) {
+    createContentFromUrl(url: $url) {
+      ...BaseContentFields
+    }
+  }
+`;
+
 const AddToQueue = gql`
   ${BaseFeedItemFields}
   mutation AddToQueue($contentId: ID!) {
@@ -382,6 +391,7 @@ export const api = {
     bookmarks: GetBookmarks,
     archived: GetArchived,
     bookmark: Bookmark,
+    createFromUrl: CreateContentFromUrl,
     addToQueue: AddToQueue,
     removeFromQueue: RemoveFromQueue,
     archive: ArchiveContent,

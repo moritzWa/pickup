@@ -1,68 +1,48 @@
+import { useMutation } from "@apollo/client";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  FlatList,
-  RefreshControl,
+  faArchive,
+  faClock,
+  faPause,
+  faPlay,
+  faPodcast,
+} from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useRef } from "react";
+import {
   Alert,
   Animated,
   Image,
-  ViewProps,
   StyleProp,
+  Text,
+  TouchableOpacity,
+  View,
   ViewStyle,
 } from "react-native";
-import React, { useEffect, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { useTheme } from "src/hooks";
-import { useMutation, useQuery } from "@apollo/client";
+import FastImage from "react-native-fast-image";
+import { Swipeable } from "react-native-gesture-handler";
+import { Circle, Svg } from "react-native-svg";
+import Toast from "react-native-toast-message";
+import { useSelector } from "react-redux";
 import { api } from "src/api";
+import { BaseContentFields } from "src/api/fragments";
 import {
   ContentFeedFilter,
   Mutation,
   MutationAddToQueueArgs,
   MutationArchiveContentArgs,
   MutationRemoveFromQueueArgs,
-  Query,
 } from "src/api/generated/types";
-import { NavigationProps } from "src/navigation";
-import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faArchive,
-  faArrowRight,
-  faCircle,
-  faCircle0,
-  faCircleNotch,
-  faClock,
-  faHeadSide,
-  faHourglass,
-  faHourglass1,
-  faHourglass3,
-  faHourglassClock,
-  faPause,
-  faPerson,
-  faPlay,
-  faPodcast,
-  faTypewriter,
-  faVolumeMedium,
-} from "@fortawesome/pro-solid-svg-icons";
-import { Impressions } from "../../views/Main/Home/Github";
-import FastImage from "react-native-fast-image";
-import { useSelector } from "react-redux";
+import { IS_IPAD } from "src/config";
+import { useTheme } from "src/hooks";
+import { NavigationProps } from "src/navigation";
 import {
   getCurrentContent,
   getIsPlaying,
-  getQueue,
   getQueueContentIdSet,
 } from "src/redux/reducers/audio";
-import { noop } from "lodash";
-import { Swipeable } from "react-native-gesture-handler";
-import { LinearGradient } from "expo-linear-gradient";
-import Toast from "react-native-toast-message";
-import { Circle, Svg } from "react-native-svg";
-import { IS_IPAD } from "src/config";
 
 const IMAGE_SIZE = 32;
 
@@ -561,6 +541,7 @@ export const ContentRowImage = ({
           width: size || IMAGE_SIZE,
           height: size || IMAGE_SIZE,
           borderRadius: 5,
+          // @ts-ignore
           ...style,
         }}
       />
@@ -578,6 +559,7 @@ export const ContentRowImage = ({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        // @ts-ignore
         ...style,
       }}
       // start left -> right
