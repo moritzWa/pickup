@@ -1,21 +1,28 @@
-import { Readability } from "@mozilla/readability";
-import { JSDOM } from "jsdom";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 import { Content } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
 import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
-    isSuccess,
     success,
     UnexpectedError,
 } from "src/core/logic";
 import { AudioService } from "src/shared/audioService";
-import { firebase, Logger } from "src/utils";
+import { Logger } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo } from "../infra";
 import { OpenGraphService } from "./openGraphService";
+import { ScrapeContentTextService } from "./scrapeContentTextService";
+
+const truncateText = (text: string, maxLength: number = 100): string => {
+    if (text && text.length > maxLength) {
+        return (
+            text.slice(0, maxLength) +
+            `... (truncated ${text.length - maxLength} chars)`
+        );
+    }
+    return text || "";
+};
 
 export const ContentFromUrlService = {
     createFromUrl: async (
@@ -23,12 +30,27 @@ export const ContentFromUrlService = {
     ): Promise<FailureOrSuccess<DefaultErrors, Content>> => {
         try {
             // Fetch and parse content
-            const parsedContent = await fetchAndParseContent(url);
+            const parsedContent = await ScrapeContentTextService.processContent(
+                {
+                    websiteUrl: url,
+                    title: "",
+                    // Add other necessary fields with default values
+                } as Content
+            );
 
             Logger.info(
-                `Parsed content: ${JSON.stringify(
-                    parsedContent
-                )} now generating audio`
+                `Parsed content: ${JSON.stringify({
+                    ...parsedContent,
+                    content: truncateText(parsedContent.content || ""),
+                    contentAsMarkdown: truncateText(
+                        parsedContent.contentAsMarkdown || ""
+                    ),
+                })} now generating audio`
+            );
+
+            // Fetch OpenGraph data
+            const openGraphData = await OpenGraphService.fetchOpenGraphData(
+                url
             );
 
             // Generate audio
@@ -47,12 +69,12 @@ export const ContentFromUrlService = {
                 contentAsMarkdown: parsedContent.contentAsMarkdown || null,
                 insertionId: null,
                 isProcessed: false,
-                thumbnailImageUrl: parsedContent.thumbnailImageUrl || null,
+                thumbnailImageUrl: openGraphData.thumbnailImageUrl || null,
                 audioUrl: audioResponse.value.url,
                 lengthMs: null,
                 title: parsedContent.title || "",
                 summary: null,
-                ogDescription: parsedContent.ogDescription || null,
+                ogDescription: openGraphData.ogDescription || null,
                 websiteUrl: url,
                 categories: parsedContent.categories || [],
                 authors: [],
@@ -68,7 +90,7 @@ export const ContentFromUrlService = {
                 skippedInaccessiblePDF: false,
                 skippedErrorFetchingFullText: false,
                 deadLink: false,
-                couldntFetchThumbnail: parsedContent.couldntFetchThumbnail,
+                couldntFetchThumbnail: openGraphData.couldntFetchThumbnail,
                 sourceImageUrl: parsedContent.thumbnailImageUrl || null,
             };
 
@@ -84,36 +106,3 @@ export const ContentFromUrlService = {
         }
     },
 };
-
-async function fetchAndParseContent(url: string): Promise<Partial<Content>> {
-    const response = await fetch(url);
-    const html = await response.text();
-    const { window } = new JSDOM(html);
-    const reader = new Readability(window.document);
-    const article = reader.parse();
-
-    if (!article) {
-        throw new Error("Failed to parse article");
-    }
-
-    const openGraphData = await OpenGraphService.fetchOpenGraphData(url);
-
-    const content: Partial<Content> = {
-        type: ContentType.ARTICLE,
-        content: article.textContent,
-        contentAsMarkdown: NodeHtmlMarkdown.translate(article.content),
-        title: article.title,
-        websiteUrl: url,
-        thumbnailImageUrl: openGraphData.thumbnailImageUrl,
-        ogDescription: openGraphData.ogDescription,
-        categories: [],
-        followUpQuestions: [],
-        authors: [],
-        length: article.length,
-        excerpt: article.excerpt,
-        releasedAt: null,
-        couldntFetchThumbnail: openGraphData.couldntFetchThumbnail,
-    };
-
-    return content;
-}
