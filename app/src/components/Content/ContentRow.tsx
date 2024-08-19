@@ -8,6 +8,9 @@ import {
   Alert,
   Animated,
   Image,
+  ViewProps,
+  StyleProp,
+  ViewStyle,
 } from "react-native";
 import React, { useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -540,9 +543,11 @@ export const ContentRow = ({
 export const ContentRowImage = ({
   content: c,
   size,
+  style,
 }: {
   content: BaseContentFields;
   size?: number;
+  style?: StyleProp<ViewStyle>;
 }) => {
   const gradient = getGradientById(c.id);
 
@@ -556,6 +561,7 @@ export const ContentRowImage = ({
           width: size || IMAGE_SIZE,
           height: size || IMAGE_SIZE,
           borderRadius: 5,
+          ...style,
         }}
       />
     );
@@ -572,6 +578,7 @@ export const ContentRowImage = ({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        ...style,
       }}
       // start left -> right
       start={{ x: 0, y: 0 }}

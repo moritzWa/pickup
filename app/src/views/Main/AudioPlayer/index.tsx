@@ -244,14 +244,14 @@ const AudioPlayer = () => {
       <ScrollView>
         <View
           style={{
-            marginTop: 10,
+            marginTop: 15,
             zIndex: 100,
           }}
         >
           <Close
             iconColor={colors.white}
             style={{
-              backgroundColor: colors.gray20,
+              backgroundColor: colors.gray30,
             }}
           />
         </View>
@@ -259,7 +259,7 @@ const AudioPlayer = () => {
         <View
           style={{
             marginHorizontal: 15,
-            marginTop: 30,
+            marginTop: 10,
             alignItems: "center",
             // backgroundColor: "blue",
           }}
@@ -273,7 +273,15 @@ const AudioPlayer = () => {
               padding: 10,
             }}
           >
-            {content ? <ContentRowImage size={175} content={content} /> : null}
+            {content ? (
+              <ContentRowImage
+                style={{
+                  borderRadius: 10,
+                }}
+                size={175}
+                content={content}
+              />
+            ) : null}
           </View>
 
           <View style={{ marginTop: 15 }}>
@@ -293,7 +301,7 @@ const AudioPlayer = () => {
               style={{
                 marginTop: 15,
                 textAlign: "center",
-                color: colors.gray90,
+                color: colors.gray50,
                 fontSize: 16,
                 marginHorizontal: 75,
                 fontFamily: "Raleway-Medium",
@@ -301,20 +309,6 @@ const AudioPlayer = () => {
               numberOfLines={1}
             >
               By {content?.authorName}
-            </Text>
-
-            <Text
-              style={{
-                marginTop: 15,
-                textAlign: "center",
-                color: colors.gray90,
-                fontSize: 16,
-                fontFamily: "Raleway-Medium",
-              }}
-              ellipsizeMode="tail"
-              numberOfLines={2}
-            >
-              {content?.summary}
             </Text>
 
             <TouchableOpacity
@@ -326,19 +320,32 @@ const AudioPlayer = () => {
                 });
               }}
               style={{
-                marginTop: 10,
+                marginTop: 0,
               }}
             >
               <Text
                 style={{
+                  marginTop: 15,
                   textAlign: "center",
-                  color: colors.gray90,
+                  color: colors.white,
                   fontSize: 16,
-                  textDecorationLine: "underline",
                   fontFamily: "Raleway-Medium",
                 }}
+                ellipsizeMode="head"
+                numberOfLines={2}
               >
-                Read more
+                {content?.summary}.{" "}
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: colors.gray90,
+                    fontSize: 16,
+                    textDecorationLine: "underline",
+                    fontFamily: "Raleway-Medium",
+                  }}
+                >
+                  Read more.
+                </Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -346,7 +353,7 @@ const AudioPlayer = () => {
 
         <View
           style={{
-            marginTop: 50,
+            marginTop: 35,
             marginBottom: 10,
             maxWidth: 300,
             alignSelf: "center",
@@ -456,7 +463,7 @@ const AudioPlayer = () => {
             value={currentMs ?? 0}
             onSlidingComplete={onSlidingComplete}
             minimumTrackTintColor={colors.white}
-            maximumTrackTintColor={colors.gray50}
+            maximumTrackTintColor={colors.gray20}
             thumbTintColor={colors.white}
             // change the size of the thumb
           />
@@ -572,6 +579,7 @@ const AudioPlayer = () => {
             <View style={{ flex: 1 }} />
 
             <TouchableOpacity
+              activeOpacity={0.9}
               style={{
                 padding: 10,
                 width: 60,
