@@ -15,7 +15,7 @@ import { AudioService } from "src/shared/audioService";
 import { firebase, Logger } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo } from "../infra";
-import ogs = require("open-graph-scraper");
+import { OpenGraphService } from "./openGraphService";
 
 export const ContentFromUrlService = {
     createFromUrl: async (
@@ -68,7 +68,7 @@ export const ContentFromUrlService = {
                 skippedInaccessiblePDF: false,
                 skippedErrorFetchingFullText: false,
                 deadLink: false,
-                couldntFetchThumbnail: false,
+                couldntFetchThumbnail: parsedContent.couldntFetchThumbnail,
                 sourceImageUrl: parsedContent.thumbnailImageUrl || null,
             };
 
@@ -96,7 +96,7 @@ async function fetchAndParseContent(url: string): Promise<Partial<Content>> {
         throw new Error("Failed to parse article");
     }
 
-    const thumbnailImageUrl = await findThumbnailUrl(url);
+    const openGraphData = await OpenGraphService.fetchOpenGraphData(url);
 
     const content: Partial<Content> = {
         type: ContentType.ARTICLE,
@@ -104,85 +104,16 @@ async function fetchAndParseContent(url: string): Promise<Partial<Content>> {
         contentAsMarkdown: NodeHtmlMarkdown.translate(article.content),
         title: article.title,
         websiteUrl: url,
-        // ogDescription: article.excerpt, get this from findThumbnailUrl
-        thumbnailImageUrl: thumbnailImageUrl,
+        thumbnailImageUrl: openGraphData.thumbnailImageUrl,
+        ogDescription: openGraphData.ogDescription,
         categories: [],
         followUpQuestions: [],
         authors: [],
         length: article.length,
         excerpt: article.excerpt,
         releasedAt: null,
+        couldntFetchThumbnail: openGraphData.couldntFetchThumbnail,
     };
 
     return content;
-}
-
-// TODO: this is duplicate code from the contentFromUrlService.ts file
-async function findThumbnailUrl(url: string): Promise<string | null> {
-    try {
-        const options = { url };
-        const { result } = await ogs(options);
-
-        let imageUrl =
-            result.ogImage && result.ogImage.length > 0
-                ? result.ogImage[0].url
-                : null;
-
-        if (imageUrl && !imageUrl.startsWith("http") && result.requestUrl) {
-            const baseUrl = new URL(result.requestUrl);
-            imageUrl = new URL(imageUrl, baseUrl).toString();
-        }
-
-        if (!imageUrl) {
-            imageUrl = getFaviconURL(url);
-        }
-
-        // Upload image to Firebase Storage
-        let uploadResult = await firebase.storage.upload(imageUrl);
-
-        if (
-            !isSuccess(uploadResult) &&
-            imageUrl &&
-            !imageUrl.includes("www.")
-        ) {
-            const urlWithWww = new URL(imageUrl);
-            urlWithWww.hostname = `www.${urlWithWww.hostname}`;
-            imageUrl = urlWithWww.toString();
-            uploadResult = await firebase.storage.upload(imageUrl);
-        }
-
-        if (!isSuccess(uploadResult)) {
-            imageUrl = getFaviconURL(url);
-            uploadResult = await firebase.storage.upload(imageUrl);
-
-            if (!isSuccess(uploadResult)) {
-                return null;
-            }
-        }
-
-        return uploadResult.value.originalUrl;
-    } catch (error) {
-        Logger.error(`Error processing thumbnail for URL ${url}: ${error}`);
-        return null;
-    }
-}
-
-function getFaviconURL(url: string): string {
-    const root = getRootOfURL(url);
-    return getFaviconUrlFromDuckDuckGo(root);
-}
-
-function getRootOfURL(url: string): string {
-    try {
-        const parsedUrl = new URL(url);
-        return parsedUrl.pathname.endsWith(".pdf")
-            ? parsedUrl.origin
-            : parsedUrl.hostname;
-    } catch (e) {
-        return "";
-    }
-}
-
-function getFaviconUrlFromDuckDuckGo(baseDomain: string): string {
-    return `https://icons.duckduckgo.com/ip3/${baseDomain}.ico`;
 }

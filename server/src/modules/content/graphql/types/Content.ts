@@ -29,6 +29,8 @@ export const Content = objectType({
             resolve: (parent) => parent.authors || [],
         });
         t.nullable.string("thumbnailImageUrl");
+        t.nullable.string("ogDescription");
+        t.nullable.boolean("couldntFetchThumbnail");
         t.nullable.string("sourceImageUrl"); // not used
         t.nonNull.string("title");
         // categories list of string

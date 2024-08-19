@@ -191,6 +191,17 @@ export class PostgresContentRepository {
         }
     }
 
+    async findContentById(contentId: string): Promise<ContentResponse> {
+        return Helpers.trySuccessFail(async () => {
+            const content = await this.repo.findOne({
+                where: { id: contentId },
+            });
+            if (!content)
+                return failure(new NotFoundError("Content not found."));
+            return success(content);
+        });
+    }
+
     async findById(
         userId: string,
         opts?: FindOneOptions<ContentModel>

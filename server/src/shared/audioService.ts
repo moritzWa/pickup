@@ -83,10 +83,10 @@ async function stitchAndStreamAudioFiles(
 
         ffmpegCommand
             .on("start", (commandLine) => {
-                console.log("FFmpeg process started:", commandLine);
+                // console.log("FFmpeg process started:", commandLine);
             })
             .on("progress", (progress) => {
-                console.log("FFmpeg progress:", progress);
+                // console.log("FFmpeg progress:", progress);
             });
     });
 }

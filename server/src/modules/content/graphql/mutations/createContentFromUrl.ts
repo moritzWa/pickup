@@ -3,6 +3,17 @@ import { Context } from "src/core/surfaces/graphql/context";
 import { ContentFromUrlService } from "../../services/contentFromUrlService";
 import { Content } from "../types/Content";
 
+/*
+
+Example curl command:
+
+curl -X POST http://localhost:8888/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation { createContentFromUrl(url: \"https://blog.dennishackethal.com/posts/libertarian-faq \") { id title websiteUrl content audioUrl thumbnailImageUrl } }"            
+
+*/
+
 export const createContentFromUrl = mutationField("createContentFromUrl", {
     type: nonNull(Content),
     args: {
