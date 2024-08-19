@@ -180,8 +180,8 @@ export class PostgresContentRepository {
         try {
             const contents = await this.repo.find({
                 where: {
-                    websiteUrl:
-                        "https://putsomethingback.stevejobsarchive.com/",
+                    websiteUrl: "http://paulgraham.com/goodtaste.html",
+                    // "https://putsomethingback.stevejobsarchive.com/",
                     // "https://www.thecrimson.com/article/2017/5/25/desai-commencement-ed/",
                 },
             });
@@ -189,6 +189,17 @@ export class PostgresContentRepository {
         } catch (err) {
             return failure(new UnexpectedError(err));
         }
+    }
+
+    async findContentById(contentId: string): Promise<ContentResponse> {
+        return Helpers.trySuccessFail(async () => {
+            const content = await this.repo.findOne({
+                where: { id: contentId },
+            });
+            if (!content)
+                return failure(new NotFoundError("Content not found."));
+            return success(content);
+        });
     }
 
     async findById(

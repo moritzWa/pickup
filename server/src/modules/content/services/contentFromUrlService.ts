@@ -7,12 +7,15 @@ import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
+    isSuccess,
     success,
     UnexpectedError,
 } from "src/core/logic";
 import { AudioService } from "src/shared/audioService";
+import { firebase, Logger } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo } from "../infra";
+import { OpenGraphService } from "./openGraphService";
 
 export const ContentFromUrlService = {
     createFromUrl: async (
@@ -21,6 +24,12 @@ export const ContentFromUrlService = {
         try {
             // Fetch and parse content
             const parsedContent = await fetchAndParseContent(url);
+
+            Logger.info(
+                `Parsed content: ${JSON.stringify(
+                    parsedContent
+                )} now generating audio`
+            );
 
             // Generate audio
             const audioResponse = await AudioService.generate(
@@ -59,7 +68,7 @@ export const ContentFromUrlService = {
                 skippedInaccessiblePDF: false,
                 skippedErrorFetchingFullText: false,
                 deadLink: false,
-                couldntFetchThumbnail: false,
+                couldntFetchThumbnail: parsedContent.couldntFetchThumbnail,
                 sourceImageUrl: parsedContent.thumbnailImageUrl || null,
             };
 
@@ -87,35 +96,24 @@ async function fetchAndParseContent(url: string): Promise<Partial<Content>> {
         throw new Error("Failed to parse article");
     }
 
+    const openGraphData = await OpenGraphService.fetchOpenGraphData(url);
+
     const content: Partial<Content> = {
         type: ContentType.ARTICLE,
         content: article.textContent,
         contentAsMarkdown: NodeHtmlMarkdown.translate(article.content),
         title: article.title,
         websiteUrl: url,
-        // ogDescription: article.excerpt, get this from findThumbnailUrl
-        thumbnailImageUrl: findThumbnailUrl(window.document),
+        thumbnailImageUrl: openGraphData.thumbnailImageUrl,
+        ogDescription: openGraphData.ogDescription,
         categories: [],
         followUpQuestions: [],
         authors: [],
         length: article.length,
         excerpt: article.excerpt,
         releasedAt: null,
+        couldntFetchThumbnail: openGraphData.couldntFetchThumbnail,
     };
 
     return content;
-}
-
-function findThumbnailUrl(document: Document): string | null {
-    const ogImage = document.querySelector('meta[property="og:image"]');
-    if (ogImage && ogImage.getAttribute("content")) {
-        return ogImage.getAttribute("content");
-    }
-
-    const firstImage = document.querySelector("img");
-    if (firstImage && firstImage.getAttribute("src")) {
-        return firstImage.getAttribute("src");
-    }
-
-    return null;
 }

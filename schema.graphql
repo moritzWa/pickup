@@ -34,12 +34,14 @@ type Content {
   content: String
   contentSession: ContentSession
   context: String
+  couldntFetchThumbnail: Boolean
   createdAt: Date!
   followUpQuestions: [FollowUpQuestion!]
   id: String!
   lengthFormatted: String
   lengthMs: Int
   lengthSeconds: Int!
+  ogDescription: String
   sourceImageUrl: String
   summary: String
   thumbnailImageUrl: String
@@ -148,6 +150,7 @@ type Metadata {
 }
 
 type Mutation {
+  addOpenGraphDataToContent(contentId: String!): Content!
   addToQueue(contentId: ID!): FeedItem!
   archiveContent(contentId: ID!): FeedItem!
   bookmarkContent(contentId: ID!): ContentSession!

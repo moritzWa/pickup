@@ -1,119 +1,20 @@
-import ogs = require("open-graph-scraper");
 import { dataSource } from "src/core/infra/postgres";
 import { Content } from "src/core/infra/postgres/entities";
 import { isSuccess } from "src/core/logic";
+import { OpenGraphService } from "src/modules/content/services/openGraphService";
 import { Logger } from "src/utils/logger";
 import { contentRepo } from "../../modules/content/infra";
-import { firebase } from "../../utils/firebase";
 
 const BATCH_SIZE = 10;
 
-export function getFaviconURL(url: string): string {
-    const root = getRootOfURL(url);
-    return getFaviconUrlFromDuckDuckGo(root);
-}
-
-const truncateString = (str: string, maxLength: number): string => {
-    if (str.length <= maxLength) return str;
-    return str.slice(0, maxLength) + "...";
-};
-
-function getRootOfURL(url: string): string {
-    try {
-        const parsedUrl = new URL(url);
-        // If the URL ends with .pdf, return the origin (root URL)
-        if (parsedUrl.pathname.endsWith(".pdf")) {
-            return parsedUrl.origin;
-        }
-        return parsedUrl.hostname;
-    } catch (e) {
-        return "";
-    }
-}
-
-function getFaviconUrlFromDuckDuckGo(baseDomain: string): string {
-    return `https://icons.duckduckgo.com/ip3/${baseDomain}.ico`;
-}
-
 const scrapeAndUploadThumbnail = async (content: Content) => {
-    try {
-        const options = { url: content.websiteUrl };
-        const { result } = await ogs(options);
+    const openGraphData = await OpenGraphService.fetchOpenGraphData(
+        content.websiteUrl
+    );
 
-        let imageUrl =
-            result.ogImage && result.ogImage.length > 0
-                ? result.ogImage[0].url
-                : null;
-
-        if (imageUrl && !imageUrl.startsWith("http") && result.requestUrl) {
-            const baseUrl = new URL(result.requestUrl);
-            imageUrl = new URL(imageUrl, baseUrl).toString();
-        }
-
-        if (!imageUrl) {
-            // Logger.info(
-            //     `No og:image found for content: ${content.websiteUrl}, falling back to favicon`
-            // );
-            imageUrl = getFaviconURL(content.websiteUrl);
-        }
-
-        // log entire json output of ogs result
-        console.log(
-            `OGS result for content ${content.websiteUrl}:`,
-            truncateString(JSON.stringify(result), 500)
-        );
-
-        // log imageUrl for link
-        Logger.info(`Image URL for content ${content.websiteUrl}: ${imageUrl}`);
-        let uploadResult = await firebase.storage.upload(imageUrl);
-
-        if (
-            !isSuccess(uploadResult) &&
-            imageUrl &&
-            !imageUrl.includes("www.")
-        ) {
-            Logger.info(
-                `Retrying upload with www for content: ${content.websiteUrl}`
-            );
-            const urlWithWww = new URL(imageUrl);
-            urlWithWww.hostname = `www.${urlWithWww.hostname}`;
-            imageUrl = urlWithWww.toString();
-            uploadResult = await firebase.storage.upload(imageUrl);
-        }
-
-        if (!isSuccess(uploadResult)) {
-            Logger.error(
-                `Failed to upload thumbnail for content: ${content.websiteUrl}, retrying with favicon`
-            );
-            imageUrl = getFaviconURL(content.websiteUrl);
-            uploadResult = await firebase.storage.upload(imageUrl);
-
-            if (!isSuccess(uploadResult)) {
-                Logger.error(
-                    `Failed to upload favicon for content: ${content.websiteUrl}`
-                );
-                content.couldntFetchThumbnail = true;
-                return content;
-            }
-        }
-
-        if (isSuccess(uploadResult)) {
-            content.thumbnailImageUrl = uploadResult.value.originalUrl;
-            content.ogDescription = result.ogDescription ?? null;
-            content.couldntFetchThumbnail = false;
-            // Logger.info(
-            //     `Thumbnail uploaded for content: ${content.websiteUrl}`
-            // );
-        }
-    } catch (error) {
-        Logger.error(
-            `Error processing content ${content.websiteUrl}: ${truncateString(
-                JSON.stringify(error),
-                200
-            )}`
-        );
-        content.couldntFetchThumbnail = true;
-    }
+    content.thumbnailImageUrl = openGraphData.thumbnailImageUrl;
+    content.ogDescription = openGraphData.ogDescription;
+    content.couldntFetchThumbnail = openGraphData.couldntFetchThumbnail;
 
     return content;
 };

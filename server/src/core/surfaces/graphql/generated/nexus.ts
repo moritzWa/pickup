@@ -168,12 +168,14 @@ export interface NexusGenFieldTypes {
     content: string | null; // String
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string | null; // String
+    couldntFetchThumbnail: boolean | null; // Boolean
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][] | null; // [FollowUpQuestion!]
     id: string; // String!
     lengthFormatted: string | null; // String
     lengthMs: number | null; // Int
     lengthSeconds: number; // Int!
+    ogDescription: string | null; // String
     sourceImageUrl: string | null; // String
     summary: string | null; // String
     thumbnailImageUrl: string | null; // String
@@ -248,6 +250,7 @@ export interface NexusGenFieldTypes {
     siteName: string | null; // String
   }
   Mutation: { // field return type
+    addOpenGraphDataToContent: NexusGenRootTypes['Content']; // Content!
     addToQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
     archiveContent: NexusGenRootTypes['FeedItem']; // FeedItem!
     bookmarkContent: NexusGenRootTypes['ContentSession']; // ContentSession!
@@ -376,12 +379,14 @@ export interface NexusGenFieldTypeNames {
     content: 'String'
     contentSession: 'ContentSession'
     context: 'String'
+    couldntFetchThumbnail: 'Boolean'
     createdAt: 'Date'
     followUpQuestions: 'FollowUpQuestion'
     id: 'String'
     lengthFormatted: 'String'
     lengthMs: 'Int'
     lengthSeconds: 'Int'
+    ogDescription: 'String'
     sourceImageUrl: 'String'
     summary: 'String'
     thumbnailImageUrl: 'String'
@@ -456,6 +461,7 @@ export interface NexusGenFieldTypeNames {
     siteName: 'String'
   }
   Mutation: { // field return type name
+    addOpenGraphDataToContent: 'Content'
     addToQueue: 'FeedItem'
     archiveContent: 'FeedItem'
     bookmarkContent: 'ContentSession'
@@ -561,6 +567,9 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    addOpenGraphDataToContent: { // args
+      contentId: string; // String!
+    }
     addToQueue: { // args
       contentId: string; // ID!
     }
