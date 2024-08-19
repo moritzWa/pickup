@@ -1,5 +1,6 @@
 import ffmpeg from "fluent-ffmpeg";
 import { unlinkSync, writeFileSync } from "fs";
+import mp3Duration from "mp3-duration";
 import OpenAI from "openai";
 import { performance } from "perf_hooks";
 import {
@@ -11,6 +12,7 @@ import {
 } from "src/core/logic";
 import { Firebase, Logger } from "src/utils";
 import { PassThrough } from "stream";
+import { promisify } from "util";
 import _ = require("lodash");
 import internal = require("stream");
 
@@ -23,7 +25,12 @@ function bufferToStream(buffer: Buffer): internal.Readable {
     return readable;
 }
 
-type AudioUrlResult = FailureOrSuccess<DefaultErrors, { url: string }>;
+type AudioUrlResult = FailureOrSuccess<
+    DefaultErrors,
+    { url: string; lengthMs: number | null }
+>;
+
+const mp3DurationPromise = promisify(mp3Duration);
 
 async function stitchAndStreamAudioFiles(
     buffers: Buffer[],
@@ -50,6 +57,9 @@ async function stitchAndStreamAudioFiles(
         // Create a pass-through stream to pipe the output to Firebase
         const passThroughStream = new PassThrough();
 
+        // Create a separate stream for duration calculation
+        const durationStream = new PassThrough();
+
         // Stream the merged audio directly to Firebase Storage
         const fireBaseFileRef = bucket.file(fileOutputName);
 
@@ -57,7 +67,7 @@ async function stitchAndStreamAudioFiles(
             contentType: "audio/mpeg",
         });
 
-        // Pipe the ffmpeg output to the pass-through stream
+        // Pipe the ffmpeg output to both streams
         ffmpegCommand
             .on("error", (err) => {
                 console.error("FFmpeg error:", err);
@@ -69,17 +79,44 @@ async function stitchAndStreamAudioFiles(
                     action: "read",
                     expires: "03-01-2500",
                 });
+
                 // Clean up temporary files
                 tempInputFileBuffers.forEach((filePath) =>
                     unlinkSync(filePath)
                 );
-                resolve(success({ url }));
+                resolve(success({ url, lengthMs: null })); // We'll update this later
             })
             .mergeToFile(passThroughStream, "./temp")
             .format("mp3");
 
-        // Pipe the pass-through stream to the Firebase write stream
+        // Pipe the pass-through stream to both Firebase and duration calculation
         passThroughStream.pipe(writeStream);
+        passThroughStream.pipe(durationStream);
+
+        // Calculate duration
+        let chunks: Buffer[] = [];
+        durationStream.on("data", (chunk) => chunks.push(chunk));
+        durationStream.on("end", async () => {
+            const buffer = Buffer.concat(chunks);
+            try {
+                const durationInSeconds = await mp3DurationPromise(buffer);
+                const lengthMs = Math.round(durationInSeconds * 1000);
+                resolve(
+                    success({
+                        url: (
+                            await fireBaseFileRef.getSignedUrl({
+                                action: "read",
+                                expires: "03-01-2500",
+                            })
+                        )[0],
+                        lengthMs,
+                    })
+                );
+            } catch (error) {
+                console.error("Error calculating audio duration:", error);
+                // The original resolve will still be called, but without lengthMs
+            }
+        });
 
         ffmpegCommand
             .on("start", (commandLine) => {
@@ -133,7 +170,9 @@ function chunkText(text: string): string[] {
 const toSpeech = async (
     _text: string,
     rawContentTitle: string
-): Promise<FailureOrSuccess<DefaultErrors, { url: string }>> => {
+): Promise<
+    FailureOrSuccess<DefaultErrors, { url: string; lengthMs: number | null }>
+> => {
     const startTime = performance.now();
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -240,6 +279,7 @@ const toSpeech = async (
 
     return success({
         url: audioFile.url,
+        lengthMs: audioFile.lengthMs,
     });
 };
 

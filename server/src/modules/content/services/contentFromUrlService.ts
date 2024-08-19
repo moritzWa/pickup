@@ -71,7 +71,7 @@ export const ContentFromUrlService = {
                 isProcessed: false,
                 thumbnailImageUrl: openGraphData.thumbnailImageUrl || null,
                 audioUrl: audioResponse.value.url,
-                lengthMs: null,
+                lengthMs: audioResponse.value.lengthMs,
                 title: parsedContent.title || "",
                 summary: null,
                 ogDescription: openGraphData.ogDescription || null,

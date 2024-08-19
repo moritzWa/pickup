@@ -1,9 +1,13 @@
 import { mutationField, nonNull, stringArg } from "nexus";
+import {
+    Content as ContentEntity,
+    User,
+} from "src/core/infra/postgres/entities";
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
 import { v4 as uuidv4 } from "uuid";
-import { feedRepo, interactionRepo, contentRepo } from "../../infra";
+import { contentRepo, feedRepo, interactionRepo } from "../../infra";
 import { ContentFromUrlService } from "../../services/contentFromUrlService";
 import { Content } from "../types/Content";
 
@@ -37,7 +41,14 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
             existingContentResponse.isSuccess() &&
             existingContentResponse.value
         ) {
-            return existingContentResponse.value;
+            const existingContent = existingContentResponse.value;
+
+            // Add existing content to user's queue if user is authenticated
+            if (ctx.me) {
+                await addContentToUserQueue(ctx.me, existingContent);
+            }
+
+            return existingContent;
         }
 
         const contentResponse = await ContentFromUrlService.createFromUrl(url);
@@ -48,54 +59,53 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
         const content = contentResponse.value;
 
         if (ctx.me) {
-            const user = ctx.me;
-
-            await interactionRepo.create({
-                id: uuidv4(),
-                contentId: content.id,
-                userId: user.id,
-                type: InteractionType.Queued,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            });
-
-            const feedItemExistsResponse = await feedRepo.findOne({
-                where: {
-                    userId: user.id,
-                    contentId: content.id,
-                },
-            });
-
-            if (
-                feedItemExistsResponse.isFailure() ||
-                !feedItemExistsResponse.value
-            ) {
-                const feedItemResponse = await feedRepo.create({
-                    id: uuidv4(),
-                    position: 0,
-                    queuedAt: new Date(),
-                    isArchived: false,
-                    isQueued: true,
-                    userId: user.id,
-                    contentId: content.id,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                });
-
-                throwIfError(feedItemResponse);
-            } else {
-                // feeditem already exists, update it
-                const feedItem = feedItemExistsResponse.value;
-
-                const updateResponse = await feedRepo.update(feedItem.id, {
-                    isQueued: true,
-                    queuedAt: new Date(),
-                });
-
-                throwIfError(updateResponse);
-            }
+            await addContentToUserQueue(ctx.me, content);
         }
 
         return content;
     },
 });
+
+async function addContentToUserQueue(user: User, content: ContentEntity) {
+    await interactionRepo.create({
+        id: uuidv4(),
+        contentId: content.id,
+        userId: user.id,
+        type: InteractionType.Queued,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    });
+
+    const feedItemExistsResponse = await feedRepo.findOne({
+        where: {
+            userId: user.id,
+            contentId: content.id,
+        },
+    });
+
+    if (feedItemExistsResponse.isFailure() || !feedItemExistsResponse.value) {
+        const feedItemResponse = await feedRepo.create({
+            id: uuidv4(),
+            position: 0,
+            queuedAt: new Date(),
+            isArchived: false,
+            isQueued: true,
+            userId: user.id,
+            contentId: content.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+
+        throwIfError(feedItemResponse);
+    } else {
+        // feeditem already exists, update it
+        const feedItem = feedItemExistsResponse.value;
+
+        const updateResponse = await feedRepo.update(feedItem.id, {
+            isQueued: true,
+            queuedAt: new Date(),
+        });
+
+        throwIfError(updateResponse);
+    }
+}
