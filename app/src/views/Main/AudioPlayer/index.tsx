@@ -105,7 +105,7 @@ const AudioPlayer = () => {
   const session = contentData?.getContent?.contentSession ?? null;
   const lengthFormatted = content?.lengthFormatted ?? null;
 
-  const isCurrent = content?.id === audioUrl;
+  const isCurrent = content?.audioUrl === audioUrl;
   const currentMs = isCurrent ? _currentMs : 0;
 
   const insets = useSafeAreaInsets();

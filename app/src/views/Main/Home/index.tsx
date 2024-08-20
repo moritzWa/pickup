@@ -741,14 +741,11 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
             style={{ marginRight: 5 }}
             icon={faPlus}
             size={16}
-            color={
-              theme.theme === "dark" ? colors.white : colors.secondaryPrimary
-            }
+            color={theme.theme === "dark" ? colors.white : colors.primary}
           />
           <Text
             style={{
-              color:
-                theme.theme === "dark" ? colors.white : colors.secondaryPrimary,
+              color: theme.theme === "dark" ? colors.white : colors.primary,
               fontFamily: "Raleway-Bold",
               fontSize: 16,
             }}
