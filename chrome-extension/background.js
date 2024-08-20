@@ -1,0 +1,1 @@
+// required for manifest.json

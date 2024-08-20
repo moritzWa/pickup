@@ -5,9 +5,10 @@
   "description": "Save the current URL to your queue",
   "permissions": ["activeTab"],
   "action": {
-    "default_popup": "index.html"
+    "default_popup": "popup.html",
+    "default_icon": "couch_and_lamp.png"
   },
   "background": {
-    "service_worker": "static/js/background.js"
+    "service_worker": "background.js"
   }
 }
