@@ -364,6 +364,7 @@ const useAudioHook = () => {
 
   useInterval(() => {
     if (!session) return;
+    if (!isPlaying) return;
 
     console.log(`[updating session with current ms ${currentMs}]`);
 
