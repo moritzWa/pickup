@@ -36,6 +36,7 @@ const Queue = () => {
                 marginTop: 5,
                 marginBottom: 20,
                 marginRight: 50,
+                color: theme.header,
               }}
             >
               Your Queue

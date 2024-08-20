@@ -16,6 +16,7 @@ const ContentDetails = () => {
   const { params } =
     useRoute<RouteProp<RootStackParamList, "ContentDetails">>();
 
+  const theme = useTheme();
   const content = params.content ?? null;
   const plainText = (content?.content || "").replace(/<\/?[^>]+(>|$)/g, "");
 
@@ -37,6 +38,7 @@ const ContentDetails = () => {
             fontSize: 22,
             marginTop: 5,
             marginBottom: 20,
+            color: theme.header,
           }}
         >
           {content?.title}
@@ -49,6 +51,7 @@ const ContentDetails = () => {
             fontSize: 18,
             marginTop: 5,
             marginBottom: 20,
+            color: theme.text,
           }}
         >
           {plainText}
