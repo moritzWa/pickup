@@ -183,6 +183,9 @@ export class Content {
 
     // mozilla/readability
     @Column({ nullable: true })
+    lang?: string;
+
+    @Column({ nullable: true })
     skippedNotProbablyReadable?: boolean;
 
     @Column({ nullable: true })
@@ -203,6 +206,10 @@ export class Content {
 
     @Column({ nullable: true })
     fetchedPagesIfPDF?: number;
+
+    // open graph service
+    @Column({ nullable: true })
+    ogSiteName?: string;
 
     // TODO remove these?
 

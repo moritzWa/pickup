@@ -29,13 +29,16 @@ export const ContentFromUrlService = {
         url: string
     ): Promise<FailureOrSuccess<DefaultErrors, Content>> => {
         try {
+            const createAuthorIfBylineFound = true;
+
             // Fetch and parse content
             const parsedContent = await ScrapeContentTextService.processContent(
                 {
                     websiteUrl: url,
                     title: "",
                     // Add other necessary fields with default values
-                } as Content
+                } as Content,
+                createAuthorIfBylineFound
             );
 
             Logger.info(
@@ -53,13 +56,21 @@ export const ContentFromUrlService = {
                 url
             );
 
-            // Generate audio
-            const audioResponse = await AudioService.generate(
-                parsedContent.content || "",
-                parsedContent.title || ""
-            );
-            if (audioResponse.isFailure()) {
-                return failure(audioResponse.error);
+            let audioUrl: string | null = null;
+            let lengthMs: number | null = null;
+
+            const createAudioContent = false;
+            if (createAudioContent) {
+                // Generate audio
+                const audioResponse = await AudioService.generate(
+                    parsedContent.content || "",
+                    parsedContent.title || ""
+                );
+                if (audioResponse.isFailure()) {
+                    return failure(audioResponse.error);
+                }
+                audioUrl = audioResponse.value.url;
+                lengthMs = audioResponse.value.lengthMs;
             }
 
             const content: Content = {
@@ -70,14 +81,15 @@ export const ContentFromUrlService = {
                 insertionId: null,
                 isProcessed: false,
                 thumbnailImageUrl: openGraphData.thumbnailImageUrl || null,
-                audioUrl: audioResponse.value.url,
-                lengthMs: audioResponse.value.lengthMs,
+                audioUrl,
+                lengthMs,
                 title: parsedContent.title || "",
                 summary: null,
                 ogDescription: openGraphData.ogDescription || null,
                 websiteUrl: url,
                 categories: parsedContent.categories || [],
-                authors: [],
+                // we generate new authors in scrapeContentTextService if byline found
+                authors: parsedContent.authors || [],
                 followUpQuestions: [],
                 referenceId: null,
                 chunks: [],

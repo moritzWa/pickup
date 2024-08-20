@@ -1,10 +1,12 @@
 import ogs = require("open-graph-scraper");
+import { OgObjectInteral } from "open-graph-scraper/types/lib/types";
 import { isSuccess } from "src/core/logic";
 import { firebase, Logger } from "src/utils";
 
 export interface OpenGraphResult {
     thumbnailImageUrl: string | null;
     ogDescription: string | null;
+    ogSiteName: string | null;
     couldntFetchThumbnail: boolean;
 }
 
@@ -25,7 +27,7 @@ export const OpenGraphService = {
                 options = { url: getRootOfURL(url) };
             }
 
-            const { result } = await ogs(options);
+            const { result }: { result: OgObjectInteral } = await ogs(options);
 
             let imageUrl =
                 result.ogImage && result.ogImage.length > 0
@@ -81,6 +83,7 @@ export const OpenGraphService = {
                     return {
                         thumbnailImageUrl: null,
                         ogDescription: result.ogDescription ?? null,
+                        ogSiteName: result.ogSiteName ?? null,
                         couldntFetchThumbnail: true,
                     };
                 }
@@ -89,6 +92,7 @@ export const OpenGraphService = {
             return {
                 thumbnailImageUrl: uploadResult.value.originalUrl,
                 ogDescription: result.ogDescription ?? null,
+                ogSiteName: result.ogSiteName ?? null,
                 couldntFetchThumbnail: false,
             };
         } catch (error) {
@@ -101,6 +105,7 @@ export const OpenGraphService = {
             return {
                 thumbnailImageUrl: null,
                 ogDescription: null,
+                ogSiteName: null,
                 couldntFetchThumbnail: true,
             };
         }

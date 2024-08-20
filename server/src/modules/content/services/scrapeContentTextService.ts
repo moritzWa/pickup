@@ -2,7 +2,9 @@ import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import * as pdf from "pdf-parse";
+import { dataSource } from "src/core/infra/postgres";
 import { Content } from "src/core/infra/postgres/entities";
+import { Author } from "src/core/infra/postgres/entities/Author/Author";
 import { Logger } from "src/utils/logger";
 
 const originalConsoleError = console.error;
@@ -14,7 +16,11 @@ console.error = (...args) => {
         "Error: Could not load content:",
     ];
 
-    if (args[0] && errorMessages.some((msg) => args[0].includes(msg))) {
+    if (
+        args.length > 0 &&
+        typeof args[0] === "string" &&
+        errorMessages.some((msg) => args[0].includes(msg))
+    ) {
         return; // Suppress these specific errors
     }
     originalConsoleError(...args);
@@ -26,7 +32,24 @@ const sanitizeText = (text: string) => {
 
 const FETCH_TIMEOUT = 120000; // Increase to 2m
 
-const processContent = async (content: Content): Promise<Content> => {
+// Define an interface for the Readability result
+interface ReadabilityResult {
+    title: string;
+    content: string;
+    textContent: string;
+    length: number;
+    excerpt: string;
+    byline: string;
+    dir: string;
+    siteName: string;
+    lang: string;
+    publishedTime: string | null;
+}
+
+const processContent = async (
+    content: Content,
+    createAuthorIfBylineFound: boolean = false
+): Promise<Content> => {
     try {
         const isProbablyPDF = /\.pdf($|\?)/i.test(content.websiteUrl);
 
@@ -34,7 +57,7 @@ const processContent = async (content: Content): Promise<Content> => {
             await processPDFContent(content);
         } else {
             try {
-                await processHTMLContent(content);
+                await processHTMLContent(content, createAuthorIfBylineFound);
             } catch (error) {
                 // If HTML processing fails, try processing as PDF
                 if (error instanceof Error && error.message.includes("PDF")) {
@@ -50,7 +73,10 @@ const processContent = async (content: Content): Promise<Content> => {
     return content;
 };
 
-const processHTMLContent = async (content: Content) => {
+const processHTMLContent = async (
+    content: Content,
+    createAuthorIfBylineFound: boolean
+) => {
     try {
         Logger.info(
             `Fetching content: ${content.websiteUrl} i.e. ${content.title}`
@@ -101,7 +127,11 @@ const processHTMLContent = async (content: Content) => {
             return;
         }
 
-        updateContentWithParsedContent(content, result);
+        await updateContentWithParsedContent(
+            content,
+            result as ReadabilityResult,
+            createAuthorIfBylineFound
+        );
         content.skippedErrorFetchingFullText = false; // Explicitly set to false after successful parsing
         Logger.info(
             `Successfully processed content: ${content.id} (${content.title})`
@@ -180,7 +210,11 @@ const handleHTMLContentProcessingError = (content: Content, error: Error) => {
     markSkip(content, "skippedErrorFetchingFullText");
 };
 
-const updateContentWithParsedContent = (content: Content, result) => {
+const updateContentWithParsedContent = async (
+    content: Content,
+    result: ReadabilityResult,
+    createAuthorIfBylineFound: boolean
+) => {
     if (result.content) {
         content.skippedErrorFetchingFullText = false;
         content.skippedNotProbablyReadable = false;
@@ -188,16 +222,38 @@ const updateContentWithParsedContent = (content: Content, result) => {
         content.deadLink = false;
     }
 
-    Object.assign(content, {
+    if (createAuthorIfBylineFound && result.byline) {
+        const authorRepository = dataSource.getRepository(Author);
+        let author = await authorRepository.findOne({
+            where: { name: result.byline },
+        });
+
+        if (!author) {
+            author = new Author();
+            author.name = result.byline;
+            author = await authorRepository.save(author);
+        }
+
+        content.authors = [author];
+    }
+
+    // Use a type-safe way to update content properties
+    const contentUpdate: Partial<Content> = {
         length: result.length,
         excerpt: result.excerpt,
-        author: result.byline,
         lang: result.lang,
-        releasedAt: result.publishedTime,
+        releasedAt: result.publishedTime
+            ? new Date(result.publishedTime)
+            : null,
         title: result.title || content.title,
         content: result.textContent,
         contentAsMarkdown: NodeHtmlMarkdown.translate(result.content || ""),
-    });
+    };
+
+    // logg result.byline and other props as json
+    Logger.info(`result.byline: ${result.byline}`);
+
+    Object.assign(content, contentUpdate);
 };
 
 export const ScrapeContentTextService = {
