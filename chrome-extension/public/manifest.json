@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Pickup URL Saver",
+  "version": "1.0",
+  "description": "Save the current URL to your queue",
+  "permissions": ["activeTab"],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "static/js/background.js"
+  }
+}
