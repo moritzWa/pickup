@@ -127,10 +127,16 @@ const processHTMLContent = async (
             return;
         }
 
+        if (createAuthorIfBylineFound && result.byline) {
+            content.authors = await createOrFindAuthors(result.byline);
+            Logger.info(
+                `Created/found authors: ${JSON.stringify(content.authors)}`
+            );
+        }
+
         await updateContentWithParsedContent(
             content,
-            result as ReadabilityResult,
-            createAuthorIfBylineFound
+            result as ReadabilityResult
         );
         content.skippedErrorFetchingFullText = false; // Explicitly set to false after successful parsing
         Logger.info(
@@ -160,6 +166,36 @@ const processPDFContent = async (content: Content) => {
     content.content = sanitizeText(parsedPDF.text);
     content.totalPagesIfPDF = parsedPDF.numpages;
     content.fetchedPagesIfPDF = parsedPDF.numrender;
+};
+
+// HELPER FUNCTIONS
+
+const createOrFindAuthors = async (byline: string): Promise<Author[]> => {
+    if (!byline.trim()) {
+        return [];
+    }
+
+    const authorNames = byline
+        .split(/,|\sand\s/)
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
+
+    const authorRepository = dataSource.getRepository(Author);
+    const authors: Author[] = [];
+
+    for (const name of authorNames) {
+        let author = await authorRepository.findOne({ where: { name } });
+
+        if (!author) {
+            author = new Author();
+            author.name = name;
+            author = await authorRepository.save(author);
+        }
+
+        authors.push(author);
+    }
+
+    return authors;
 };
 
 type SkipType =
@@ -210,48 +246,15 @@ const handleHTMLContentProcessingError = (content: Content, error: Error) => {
     markSkip(content, "skippedErrorFetchingFullText");
 };
 
-const findOrCreateAuthors = async (byline: string): Promise<Author[]> => {
-    if (!byline.trim()) {
-        return [];
-    }
-
-    const authorNames = byline
-        .split(/,|\sand\s/)
-        .map((name) => name.trim())
-        .filter((name) => name.length > 0);
-
-    const authorRepository = dataSource.getRepository(Author);
-    const authors: Author[] = [];
-
-    for (const name of authorNames) {
-        let author = await authorRepository.findOne({ where: { name } });
-
-        if (!author) {
-            author = new Author();
-            author.name = name;
-            author = await authorRepository.save(author);
-        }
-
-        authors.push(author);
-    }
-
-    return authors;
-};
-
 const updateContentWithParsedContent = async (
     content: Content,
-    result: ReadabilityResult,
-    createAuthorIfBylineFound: boolean
+    result: ReadabilityResult
 ) => {
     if (result.content) {
         content.skippedErrorFetchingFullText = false;
         content.skippedNotProbablyReadable = false;
         content.skippedInaccessiblePDF = false;
         content.deadLink = false;
-    }
-
-    if (createAuthorIfBylineFound && result.byline) {
-        content.authors = await findOrCreateAuthors(result.byline);
     }
 
     // Use a type-safe way to update content properties
@@ -266,10 +269,6 @@ const updateContentWithParsedContent = async (
         content: result.textContent,
         contentAsMarkdown: NodeHtmlMarkdown.translate(result.content || ""),
     };
-
-    // Log result.byline and other props as json
-    Logger.info(`result.byline: ${result.byline}`);
-    Logger.info(`Created/found authors: ${JSON.stringify(content.authors)}`);
 
     Object.assign(content, contentUpdate);
 };

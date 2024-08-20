@@ -9,3 +9,4 @@ keys/**/*
 **/.DS_Store
 
 temp.log
+chrome-extension/build/

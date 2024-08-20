@@ -2,11 +2,7 @@
 // - https://www.npmjs.com/package/@postlight/parser // uses private github dependency only accessible via ssh token
 // - https://www.npmjs.com/package/@mozilla/readability <- current pick
 
-import { Readability } from "@mozilla/readability";
 import { EventEmitter } from "events";
-import { JSDOM } from "jsdom";
-import { NodeHtmlMarkdown } from "node-html-markdown";
-import * as pdf from "pdf-parse";
 import { dataSource } from "src/core/infra/postgres";
 import { Content } from "src/core/infra/postgres/entities";
 import { isSuccess } from "src/core/logic";
@@ -167,7 +163,12 @@ const processContentsConcurrently = async (
     contents: Content[]
 ): Promise<Content[]> => {
     const processChunk = async (chunk: Content[]) => {
-        return Promise.all(chunk.map(ScrapeContentTextService.processContent));
+        return Promise.all(
+            chunk.map((content) =>
+                // not creating authors assuming that this data already has them
+                ScrapeContentTextService.processContent(content, false)
+            )
+        );
     };
 
     const chunks: Content[][] = [];
