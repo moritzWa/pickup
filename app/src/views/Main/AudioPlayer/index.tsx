@@ -181,13 +181,16 @@ const AudioPlayer = () => {
         cancelButtonIndex: options.length - 1,
       },
       (selectedIndex?: number) => {
-        // if last, cancel
-        if (selectedIndex === options.length - 1) return;
+        if (
+          selectedIndex === undefined ||
+          selectedIndex === options.length - 1
+        ) {
+          return;
+        }
         const val = options[selectedIndex];
         const speed = parseFloat(val.replace("x", ""));
         console.log("SPEED: " + speed);
         setSpeed(speed);
-        return speed;
       }
     );
   };
