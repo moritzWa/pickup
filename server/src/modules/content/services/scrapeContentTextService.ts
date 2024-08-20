@@ -210,6 +210,34 @@ const handleHTMLContentProcessingError = (content: Content, error: Error) => {
     markSkip(content, "skippedErrorFetchingFullText");
 };
 
+const findOrCreateAuthors = async (byline: string): Promise<Author[]> => {
+    if (!byline.trim()) {
+        return [];
+    }
+
+    const authorNames = byline
+        .split(/,|\sand\s/)
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
+
+    const authorRepository = dataSource.getRepository(Author);
+    const authors: Author[] = [];
+
+    for (const name of authorNames) {
+        let author = await authorRepository.findOne({ where: { name } });
+
+        if (!author) {
+            author = new Author();
+            author.name = name;
+            author = await authorRepository.save(author);
+        }
+
+        authors.push(author);
+    }
+
+    return authors;
+};
+
 const updateContentWithParsedContent = async (
     content: Content,
     result: ReadabilityResult,
@@ -223,18 +251,7 @@ const updateContentWithParsedContent = async (
     }
 
     if (createAuthorIfBylineFound && result.byline) {
-        const authorRepository = dataSource.getRepository(Author);
-        let author = await authorRepository.findOne({
-            where: { name: result.byline },
-        });
-
-        if (!author) {
-            author = new Author();
-            author.name = result.byline;
-            author = await authorRepository.save(author);
-        }
-
-        content.authors = [author];
+        content.authors = await findOrCreateAuthors(result.byline);
     }
 
     // Use a type-safe way to update content properties
@@ -250,8 +267,9 @@ const updateContentWithParsedContent = async (
         contentAsMarkdown: NodeHtmlMarkdown.translate(result.content || ""),
     };
 
-    // logg result.byline and other props as json
+    // Log result.byline and other props as json
     Logger.info(`result.byline: ${result.byline}`);
+    Logger.info(`Created/found authors: ${JSON.stringify(content.authors)}`);
 
     Object.assign(content, contentUpdate);
 };
