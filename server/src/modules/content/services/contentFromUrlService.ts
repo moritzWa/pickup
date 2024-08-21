@@ -62,7 +62,10 @@ export const ContentFromUrlService = {
             let audioUrl: string | null = null;
             let lengthMs: number | null = null;
 
-            const createAudioContent = false;
+            console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+
+            const createAudioContent =
+                process.env.NODE_ENV === "production" ? true : false;
             if (createAudioContent) {
                 // Generate audio
                 const audioResponse = await AudioService.generate(

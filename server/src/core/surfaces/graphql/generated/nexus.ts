@@ -584,6 +584,7 @@ export interface NexusGenArgTypes {
       name: string; // String!
     }
     createContentFromUrl: { // args
+      authProviderId?: string | null; // String
       url: string; // String!
     }
     createUser: { // args

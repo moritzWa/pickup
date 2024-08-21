@@ -241,8 +241,8 @@ const Bookmark = gql`
 
 const CreateContentFromUrl = gql`
   ${BaseContentFields}
-  mutation CreateContentFromUrl($url: String!) {
-    createContentFromUrl(url: $url) {
+  mutation CreateContentFromUrl($url: String!, $authProviderId: String) {
+    createContentFromUrl(url: $url, authProviderId: $authProviderId) {
       ...BaseContentFields
     }
   }

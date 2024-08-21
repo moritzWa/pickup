@@ -31,13 +31,31 @@ function setupSaveLinkButton() {
         active: true,
         currentWindow: true,
       });
+
+      // Get the current user's UID from Firebase
+      const user = auth.currentUser;
+      const authProviderId = user ? user.uid : null;
+
       const response = await fetch("http://localhost:8888/graphql", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query: `mutation { createContentFromUrl(url: "${tab.url}") { id title websiteUrl content audioUrl thumbnailImageUrl } }`,
+          query: `mutation($url: String!, $authProviderId: String) {
+            createContentFromUrl(url: $url, authProviderId: $authProviderId) {
+              id
+              title
+              websiteUrl
+              content
+              audioUrl
+              thumbnailImageUrl
+            }
+          }`,
+          variables: {
+            url: tab.url,
+            authProviderId,
+          },
         }),
       });
 
