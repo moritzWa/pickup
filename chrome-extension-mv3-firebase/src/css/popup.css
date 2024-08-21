@@ -16,11 +16,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(#141e30, #1a115f);
-  /* background-color: #263238; */
+  background: white;
   font-family: "Lato", sans-serif;
   width: 200px;
-  height: 200px;
+  height: 100px;
 }
 
 h1 {
@@ -87,4 +86,12 @@ h1 {
   background-color: #fff;
   color: #333;
   border: 1px solid #333;
+}
+
+.loading {
+  display: none;
+}
+
+#main-content {
+  display: none;
 }

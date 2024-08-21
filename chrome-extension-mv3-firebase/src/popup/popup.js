@@ -22,7 +22,7 @@ function handleAuthStateChange(user) {
 }
 
 function checkForExistingToken() {
-  chrome.identity.getAuthToken({ interactive: false }, function(token) {
+  chrome.identity.getAuthToken({ interactive: false }, function (token) {
     if (token) {
       console.log("Existing token found, signing in...");
       const credential = GoogleAuthProvider.credential(null, token);
@@ -43,6 +43,8 @@ function checkForExistingToken() {
 
 function showLoginButton() {
   document.querySelector(".btn__google").style.display = "block";
+  document.getElementById("loading").classList.add("hidden");
+  document.getElementById("main-content").classList.remove("hidden");
 }
 
 function startGoogleSignIn() {
@@ -67,6 +69,8 @@ function startGoogleSignIn() {
   });
 }
 
-document.querySelector(".btn__google").addEventListener("click", startGoogleSignIn);
+document
+  .querySelector(".btn__google")
+  .addEventListener("click", startGoogleSignIn);
 
 onAuthStateChanged(auth, handleAuthStateChange);

@@ -16,7 +16,6 @@ function handleAuthStateChange(user) {
     console.log("current user:", user);
     setupSaveLinkButton();
     document.getElementById("saveLink").style.display = "block";
-    document.getElementById("sign_out").style.display = "block";
     saveCurrentLink();
   } else {
     console.log("No user");
@@ -25,7 +24,7 @@ function handleAuthStateChange(user) {
 }
 
 function checkForExistingToken() {
-  chrome.identity.getAuthToken({ interactive: false }, function(token) {
+  chrome.identity.getAuthToken({ interactive: false }, function (token) {
     if (token) {
       console.log("Existing token found, signing in...");
       const credential = GoogleAuthProvider.credential(null, token);
