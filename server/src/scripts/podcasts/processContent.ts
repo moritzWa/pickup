@@ -12,6 +12,7 @@ import { failure, success, UnexpectedError } from "src/core/logic";
 import { openai } from "src/utils";
 import * as pgvector from "pgvector/pg";
 import { chunk } from "lodash";
+import { ContentType } from "src/core/infra/postgres/entities/Content";
 
 const processContent = async (contentId: string) => {
     try {
@@ -74,7 +75,8 @@ const processContentV2 = async (contentId: string) => {
 const run = async () => {
     const contentResponse = await contentRepo.find({
         where: {
-            lengthMs: 0,
+            embedding: null,
+            type: ContentType.PODCAST,
         },
         select: { id: true, audioUrl: true },
         // take: 250,
@@ -102,7 +104,7 @@ const run = async () => {
 
         console.time("processContentChunk-" + i);
         const response = await Promise.all(
-            chunk.map(async (c) => _updateAudioDuration(c))
+            chunk.map(async (c) => processContentV2(c.id))
         );
         console.timeEnd("processContentChunk-" + i);
 

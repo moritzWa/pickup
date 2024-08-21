@@ -46,13 +46,11 @@ async function syncDatabases() {
         await productionClient.connect();
 
         // Fetch data from local
-        const localData = await localClient.query(
-            "SELECT * FROM content WHERE length_ms > 0 and audio_url is not null"
-        );
+        const localData = await localClient.query("SELECT * FROM content");
 
         // Fetch data from production
         const productionData = await productionClient.query(
-            "SELECT * FROM content WHERE (length_ms is null or length_ms = 0) and audio_url is not null"
+            "SELECT * FROM content WHERE type = 'podcast'"
         );
 
         debugger;
@@ -66,6 +64,8 @@ async function syncDatabases() {
 
         console.log(`syncing ${prodRows.length} rows with local`);
 
+        const promises: any[] = [];
+
         for (const row of prodRows) {
             const localData = rowByRefId[row.reference_id];
 
@@ -77,11 +77,15 @@ async function syncDatabases() {
                 `[updating ${row.reference_id} to ${localData.length_ms}]`
             );
 
-            // Update the production database with the local data
-            await productionClient.query(
-                `UPDATE content SET length_ms = $1 WHERE id = $2`,
-                [localData.length_ms, row.id]
-            );
+            if (localData.length_ms) {
+                // Update the production database with the local data
+                promises.push(
+                    productionClient.query(
+                        `UPDATE content SET length_ms = $1 WHERE id = $2`,
+                        [localData.length_ms, row.id]
+                    )
+                );
+            }
 
             count += 1;
 
@@ -92,6 +96,8 @@ async function syncDatabases() {
                 );
             }
         }
+
+        await Promise.all(promises);
 
         debugger;
     } catch (error) {
