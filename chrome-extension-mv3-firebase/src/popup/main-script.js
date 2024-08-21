@@ -17,20 +17,22 @@ function handleAuthStateChange(user) {
     setupSaveLinkButton();
     document.getElementById("saveLink").style.display = "block";
     document.getElementById("sign_out").style.display = "block";
+    saveCurrentLink();
   } else {
     console.log("No user");
-    checkForExistingToken();
+    window.location.replace("./popup.html");
   }
 }
 
 function checkForExistingToken() {
-  chrome.identity.getAuthToken({ interactive: false }, function (token) {
+  chrome.identity.getAuthToken({ interactive: false }, function(token) {
     if (token) {
       console.log("Existing token found, signing in...");
       const credential = GoogleAuthProvider.credential(null, token);
       signInWithCredential(auth, credential)
         .then((result) => {
           console.log("Sign-in successful:", result);
+          saveCurrentLink();
         })
         .catch((error) => {
           console.error("Sign-in error:", error);
@@ -42,21 +44,14 @@ function checkForExistingToken() {
   });
 }
 
-function setupSaveLinkButton() {
-  const saveLinkButton = document.getElementById("saveLink");
+function saveCurrentLink() {
   const messageDiv = document.getElementById("message");
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    const tab = tabs[0];
+    const user = auth.currentUser;
+    const authProviderId = user ? user.uid : null;
 
-  saveLinkButton.addEventListener("click", async () => {
     try {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-
-      // Get the current user's UID from Firebase
-      const user = auth.currentUser;
-      const authProviderId = user ? user.uid : null;
-
       const response = await fetch("http://localhost:8888/graphql", {
         method: "POST",
         headers: {
@@ -81,7 +76,7 @@ function setupSaveLinkButton() {
       });
 
       if (response.ok) {
-        messageDiv.textContent = "Link saved!";
+        messageDiv.textContent = "Link saved successfully!";
       } else {
         messageDiv.textContent = "Error saving link.";
       }
@@ -90,6 +85,11 @@ function setupSaveLinkButton() {
       messageDiv.textContent = "Error saving link.";
     }
   });
+}
+
+function setupSaveLinkButton() {
+  const saveLinkButton = document.getElementById("saveLink");
+  saveLinkButton.addEventListener("click", saveCurrentLink);
 }
 
 onAuthStateChanged(auth, handleAuthStateChange);

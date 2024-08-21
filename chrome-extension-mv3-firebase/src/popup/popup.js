@@ -1,5 +1,3 @@
-console.log("popup!");
-
 import {
   browserLocalPersistence,
   getAuth,
@@ -10,7 +8,6 @@ import {
 } from "firebase/auth";
 import { firebaseApp } from "./firebase_config";
 
-// Auth instance for the current firebaseApp
 const auth = getAuth(firebaseApp);
 setPersistence(auth, browserLocalPersistence);
 
@@ -25,13 +22,14 @@ function handleAuthStateChange(user) {
 }
 
 function checkForExistingToken() {
-  chrome.identity.getAuthToken({ interactive: false }, function (token) {
+  chrome.identity.getAuthToken({ interactive: false }, function(token) {
     if (token) {
       console.log("Existing token found, signing in...");
       const credential = GoogleAuthProvider.credential(null, token);
       signInWithCredential(auth, credential)
         .then((result) => {
           console.log("Sign-in successful:", result);
+          window.location.replace("./main.html");
         })
         .catch((error) => {
           console.error("Sign-in error:", error);
@@ -58,6 +56,7 @@ function startGoogleSignIn() {
       signInWithCredential(auth, credential)
         .then((result) => {
           console.log("Sign-in successful:", result);
+          window.location.replace("./main.html");
         })
         .catch((error) => {
           console.error("Sign-in error:", error);
@@ -68,8 +67,6 @@ function startGoogleSignIn() {
   });
 }
 
-document
-  .querySelector(".btn__google")
-  .addEventListener("click", startGoogleSignIn);
+document.querySelector(".btn__google").addEventListener("click", startGoogleSignIn);
 
 onAuthStateChanged(auth, handleAuthStateChange);
