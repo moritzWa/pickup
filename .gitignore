@@ -9,4 +9,9 @@ keys/**/*
 **/.DS_Store
 
 temp.log
+
+chrome-extension-mv3-firebase/dist/
+chrome-extension-mv3-firebase/dist.zip
+
 chrome-extension/build/
+chrome-extension/dist.zip
