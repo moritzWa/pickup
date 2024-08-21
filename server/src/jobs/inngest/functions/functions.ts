@@ -8,7 +8,7 @@ import { sendNotification } from "./sendNotification";
 export const inngestFunctions = [
     sendNotification,
     buildUserQueue,
-    processContent,
+    // processContent,
 ];
 
 export const cronInngestFunctions = [
