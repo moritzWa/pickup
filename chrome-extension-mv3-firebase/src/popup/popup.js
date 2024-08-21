@@ -14,20 +14,37 @@ import { firebaseApp } from "./firebase_config";
 const auth = getAuth(firebaseApp);
 setPersistence(auth, browserLocalPersistence);
 
-// ... imports and setup ...
-
 function handleAuthStateChange(user) {
   if (user) {
     console.log("User logged in:", user);
     window.location.replace("./main.html");
   } else {
     console.log("No user logged in");
-    // Show login button or form
+    checkForExistingToken();
   }
 }
 
-function initAuth() {
-  onAuthStateChanged(auth, handleAuthStateChange);
+function checkForExistingToken() {
+  chrome.identity.getAuthToken({ interactive: false }, function (token) {
+    if (token) {
+      console.log("Existing token found, signing in...");
+      const credential = GoogleAuthProvider.credential(null, token);
+      signInWithCredential(auth, credential)
+        .then((result) => {
+          console.log("Sign-in successful:", result);
+        })
+        .catch((error) => {
+          console.error("Sign-in error:", error);
+          showLoginButton();
+        });
+    } else {
+      showLoginButton();
+    }
+  });
+}
+
+function showLoginButton() {
+  document.querySelector(".btn__google").style.display = "block";
 }
 
 function startGoogleSignIn() {
@@ -55,4 +72,4 @@ document
   .querySelector(".btn__google")
   .addEventListener("click", startGoogleSignIn);
 
-initAuth();
+onAuthStateChanged(auth, handleAuthStateChange);
