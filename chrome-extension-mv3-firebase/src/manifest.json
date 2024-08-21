@@ -13,7 +13,7 @@
     },
     "default_title": "Getting Started Firebase + MV3!"
   },
-  "permissions": ["storage", "activeTab", "scripting", "identity"],
+  "permissions": ["storage", "activeTab", "scripting", "identity", "tabs"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
