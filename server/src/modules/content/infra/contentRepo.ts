@@ -446,7 +446,9 @@ export class PostgresContentRepository {
         contents: Omit<ContentModel, "accounts">[]
     ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> => {
         return Helpers.trySuccessFail(async () => {
-            const res = await this.repo.save(contents);
+            const res = await this.repo.save(contents, {
+                chunk: 1_000,
+            });
             return success(res);
         });
     };

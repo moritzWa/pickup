@@ -3,6 +3,7 @@ import {
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
+    Index,
     ManyToMany,
     OneToMany,
     PrimaryGeneratedColumn,
@@ -25,6 +26,10 @@ export enum ContentType {
 
 @Entity({
     name: "content",
+})
+@Index("content_website_unique_idx", ["websiteUrl"], {
+    // if type if article
+    where: "\"type\" = 'article'",
 })
 export class Content {
     @PrimaryGeneratedColumn("uuid")
@@ -115,7 +120,6 @@ export class Content {
         nullable: false,
         name: "website_url",
         type: "text",
-        unique: true,
     })
     websiteUrl!: string;
 

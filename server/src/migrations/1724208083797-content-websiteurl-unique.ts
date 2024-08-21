@@ -15,6 +15,7 @@ export class ContentWebsiteurlUnique1724208083797
                     SELECT id,
                            ROW_NUMBER() OVER (PARTITION BY website_url ORDER BY created_at DESC) as row_num
                     FROM content
+                    WHERE type = 'article'
                 ) t
                 WHERE t.row_num > 1
             );
@@ -29,6 +30,7 @@ export class ContentWebsiteurlUnique1724208083797
                     SELECT id,
                            ROW_NUMBER() OVER (PARTITION BY website_url ORDER BY created_at DESC) as row_num
                     FROM content
+                    WHERE type = 'article'
                 ) t
                 WHERE t.row_num > 1
             );
