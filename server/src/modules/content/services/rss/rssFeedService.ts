@@ -55,9 +55,7 @@ const scrapeRssFeed = async (
             ogDescription: item.summary || null,
             sourceImageUrl: feed.image?.url || "",
             audioUrl: item.enclosure?.url || "",
-            lengthMs: item.enclosure?.length
-                ? parseInt(item.enclosure.length.toString())
-                : 0,
+            lengthMs: 0,
             embedding: null, // done later
             categories,
             thumbnailImageUrl: item.itunes?.image || feed.image?.url || "",
