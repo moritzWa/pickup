@@ -6,7 +6,11 @@ export class WebsiteUniq1724213560850 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         // drop this index UQ_907928b9f7c8f1a98bb328c0d1c
         await queryRunner.query(
-            `DROP INDEX IF EXISTS "UQ_907928b9f7c8f1a98bb328c0d1c" ON "content"`
+            `ALTER TABLE "content" DROP CONSTRAINT IF EXISTS "UQ_907928b9f7c8f1a98bb328c0d1c"`
+        );
+
+        await queryRunner.query(
+            `DROP INDEX IF EXISTS "UQ_907928b9f7c8f1a98bb328c0d1c"`
         );
 
         await queryRunner.query(
