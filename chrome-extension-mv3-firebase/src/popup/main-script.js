@@ -8,10 +8,11 @@ console.log("popup main!");
 onAuthStateChanged(auth, (user) => {
   if (user != null) {
     console.log("logged in!");
-    console.log("current");
-    console.log(user);
+    console.log("current user:", user);
+    setupSaveLinkButton();
   } else {
     console.log("No user");
+    document.getElementById("saveLink").style.display = "none";
   }
 });
 
@@ -20,27 +21,34 @@ document.querySelector("#sign_out").addEventListener("click", () => {
   window.location.replace("./popup.html");
 });
 
-// Initialize button with user's preferred color
-let changeColor = document.getElementById("changeColor");
+function setupSaveLinkButton() {
+  const saveLinkButton = document.getElementById("saveLink");
+  const messageDiv = document.getElementById("message");
 
-chrome.storage.sync.get("color", ({ color }) => {
-  changeColor.style.backgroundColor = color;
-});
+  saveLinkButton.addEventListener("click", async () => {
+    try {
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      const response = await fetch("http://localhost:8888/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `mutation { createContentFromUrl(url: "${tab.url}") { id title websiteUrl content audioUrl thumbnailImageUrl } }`,
+        }),
+      });
 
-// When the button is clicked, inject setPageBackgroundColor into current page
-changeColor.addEventListener("click", async () => {
-  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    function: setPageBackgroundColor,
-  });
-});
-
-// The body of this function will be executed as a content script inside the
-// current page
-function setPageBackgroundColor() {
-  chrome.storage.sync.get("color", ({ color }) => {
-    document.body.style.backgroundColor = color;
+      if (response.ok) {
+        messageDiv.textContent = "Link saved!";
+      } else {
+        messageDiv.textContent = "Error saving link.";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      messageDiv.textContent = "Error saving link.";
+    }
   });
 }

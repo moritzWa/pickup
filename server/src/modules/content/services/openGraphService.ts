@@ -53,7 +53,9 @@ export const OpenGraphService = {
             );
 
             // log imageUrl for link
-            Logger.info(`Image URL for content ${url}: ${imageUrl}`);
+            Logger.info(
+                `Image URL for content. url: ${url}, imageUrl: ${imageUrl}`
+            );
 
             // Upload image to Firebase Storage
             let uploadResult = await firebase.storage.upload(imageUrl);

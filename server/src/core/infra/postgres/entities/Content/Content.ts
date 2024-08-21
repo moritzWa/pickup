@@ -115,6 +115,7 @@ export class Content {
         nullable: false,
         name: "website_url",
         type: "text",
+        unique: true,
     })
     websiteUrl!: string;
 

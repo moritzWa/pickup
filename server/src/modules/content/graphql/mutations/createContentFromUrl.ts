@@ -6,6 +6,7 @@ import {
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
+import { Logger } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, feedRepo, interactionRepo } from "../../infra";
 import { ContentFromUrlService } from "../../services/contentFromUrlService";
@@ -30,6 +31,8 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
     resolve: async (_parent, args, ctx: Context, _info) => {
         // throwIfNotAuthenticated(ctx); // accessible to all users for now
 
+        console.log("createContentFromUrl with args", args);
+
         const { url } = args;
 
         // Check if content with the given URL already exists
@@ -41,6 +44,10 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
             existingContentResponse.isSuccess() &&
             existingContentResponse.value
         ) {
+            Logger.info(
+                `Content already exists for url: ${url}, returning existing content`
+            );
+
             const existingContent = existingContentResponse.value;
 
             // Add existing content to user's queue if user is authenticated

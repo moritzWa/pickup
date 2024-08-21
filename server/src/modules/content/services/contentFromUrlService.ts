@@ -29,6 +29,7 @@ export const ContentFromUrlService = {
         url: string
     ): Promise<FailureOrSuccess<DefaultErrors, Content>> => {
         try {
+            // Only turn this of if scraping content from json like response where author is already extracted/created
             const createAuthorIfBylineFound = true;
 
             // Fetch and parse content
@@ -42,13 +43,15 @@ export const ContentFromUrlService = {
             );
 
             Logger.info(
-                `Parsed content: ${JSON.stringify({
-                    ...parsedContent,
-                    content: truncateText(parsedContent.content || ""),
-                    contentAsMarkdown: truncateText(
-                        parsedContent.contentAsMarkdown || ""
-                    ),
-                })} now generating audio`
+                `contentFromUrlService.createFromUrl Parsed content: ${JSON.stringify(
+                    {
+                        ...parsedContent,
+                        content: truncateText(parsedContent.content || ""),
+                        contentAsMarkdown: truncateText(
+                            parsedContent.contentAsMarkdown || ""
+                        ),
+                    }
+                )} now generating audio`
             );
 
             // Fetch OpenGraph data
@@ -106,7 +109,11 @@ export const ContentFromUrlService = {
                 sourceImageUrl: parsedContent.thumbnailImageUrl || null,
             };
 
-            // Save content
+            // Save or update content
+
+            Logger.info(
+                `contentFromUrlService.createFromUrl Saving content with url: ${url}`
+            );
             const savedContentResponse = await contentRepo.save(content);
             if (savedContentResponse.isFailure()) {
                 return failure(savedContentResponse.error);
