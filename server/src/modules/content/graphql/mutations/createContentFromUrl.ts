@@ -1,4 +1,4 @@
-import { mutationField, nonNull, stringArg } from "nexus";
+import { arg, mutationField, nonNull, stringArg } from "nexus";
 import {
     Content as ContentEntity,
     User,
@@ -6,6 +6,7 @@ import {
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
+import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { Logger } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, feedRepo, interactionRepo } from "../../infra";
@@ -27,13 +28,19 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
     type: nonNull(Content),
     args: {
         url: nonNull(stringArg()),
+        authProviderId: arg({ type: "String" }),
     },
     resolve: async (_parent, args, ctx: Context, _info) => {
-        // throwIfNotAuthenticated(ctx); // accessible to all users for now
+        const { url, authProviderId } = args;
+        Logger.info(
+            `createContentFromUrl called with url: ${url}, authProviderId: ${authProviderId}`
+        );
 
-        console.log("createContentFromUrl with args", args);
-
-        const { url } = args;
+        let content: ContentEntity;
+        let user = await getUserFromContextOrAuthProviderId(
+            ctx,
+            authProviderId
+        );
 
         // Check if content with the given URL already exists
         const existingContentResponse = await contentRepo.findOne({
@@ -47,31 +54,46 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
             Logger.info(
                 `Content already exists for url: ${url}, returning existing content`
             );
-
-            const existingContent = existingContentResponse.value;
-
-            // Add existing content to user's queue if user is authenticated
-            if (ctx.me) {
-                await addContentToUserQueue(ctx.me, existingContent);
+            content = existingContentResponse.value;
+        } else {
+            const contentResponse = await ContentFromUrlService.createFromUrl(
+                url
+            );
+            if (contentResponse.isFailure()) {
+                throw contentResponse.error;
             }
-
-            return existingContent;
+            content = contentResponse.value;
+            Logger.info(`New content created for url: ${url}`);
         }
 
-        const contentResponse = await ContentFromUrlService.createFromUrl(url);
-        if (contentResponse.isFailure()) {
-            throw contentResponse.error;
-        }
-
-        const content = contentResponse.value;
-
-        if (ctx.me) {
-            await addContentToUserQueue(ctx.me, content);
+        if (user) {
+            await addContentToUserQueue(user, content);
+            Logger.info(`Content added to queue for user: ${user.id}`);
+        } else {
+            Logger.info(`No user found to add content to queue`);
         }
 
         return content;
     },
 });
+
+async function getUserFromContextOrAuthProviderId(
+    ctx: Context,
+    authProviderId?: string | null
+): Promise<User | null> {
+    if (ctx.me) {
+        return ctx.me;
+    }
+    if (authProviderId) {
+        const userResponse = await pgUserRepo.findOne({
+            where: { authProviderId },
+        });
+        if (userResponse.isSuccess() && userResponse.value) {
+            return userResponse.value;
+        }
+    }
+    return null;
+}
 
 async function addContentToUserQueue(user: User, content: ContentEntity) {
     await interactionRepo.create({
@@ -104,15 +126,19 @@ async function addContentToUserQueue(user: User, content: ContentEntity) {
         });
 
         throwIfError(feedItemResponse);
+        Logger.info(
+            `New feed item created for user ${user.id} and content ${content.id}`
+        );
     } else {
-        // feeditem already exists, update it
         const feedItem = feedItemExistsResponse.value;
-
         const updateResponse = await feedRepo.update(feedItem.id, {
             isQueued: true,
             queuedAt: new Date(),
         });
 
         throwIfError(updateResponse);
+        Logger.info(
+            `Existing feed item updated for user ${user.id} and content ${content.id}`
+        );
     }
 }
