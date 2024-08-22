@@ -65,6 +65,7 @@ export const startContent = mutationField("startContent", {
             createdAt: new Date(),
             updatedAt: new Date(),
             percentFinished: null,
+            notes: null,
         });
 
         throwIfError(sessionResponse);

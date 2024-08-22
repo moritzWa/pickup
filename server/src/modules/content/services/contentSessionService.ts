@@ -33,6 +33,7 @@ const findOrCreate = async (
         lastListenedAt: new Date(),
         bookmarkedAt: null,
         updatedAt: new Date(),
+        notes: null,
         percentFinished: null,
     });
 
