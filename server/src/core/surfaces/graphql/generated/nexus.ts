@@ -67,8 +67,8 @@ export interface NexusGenObjects {
   }
   ContentSession: entities.ContentSession ;
   ContentUserFollowingProfile: { // root type
+    avatarImageUrl?: string | null; // String
     id: string; // ID!
-    imageUrl?: string | null; // String
     name?: string | null; // String
     username?: string | null; // String
   }
@@ -141,6 +141,13 @@ export interface NexusGenObjects {
     userIds: number[]; // [Int!]!
   }
   User: entities.User ;
+  UserSearchResult: { // root type
+    avatarImageUrl?: string | null; // String
+    id: string; // ID!
+    isFollowing?: boolean | null; // Boolean
+    name?: string | null; // String
+    username?: string | null; // String
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -214,8 +221,8 @@ export interface NexusGenFieldTypes {
     userId: string; // String!
   }
   ContentUserFollowingProfile: { // field return type
+    avatarImageUrl: string | null; // String
     id: string; // ID!
-    imageUrl: string | null; // String
     name: string | null; // String
     username: string | null; // String
   }
@@ -335,6 +342,7 @@ export interface NexusGenFieldTypes {
     getQueue: NexusGenRootTypes['GetQueueResponse']; // GetQueueResponse!
     me: NexusGenRootTypes['User'] | null; // User
     searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
+    searchUsers: NexusGenRootTypes['UserSearchResult'][]; // [UserSearchResult!]!
   }
   SearchResult: { // field return type
     averageDistance: number; // Float!
@@ -377,6 +385,13 @@ export interface NexusGenFieldTypes {
     role: string | null; // String
     timezone: string | null; // String
     updatedAt: NexusGenScalars['Date']; // Date!
+    username: string | null; // String
+  }
+  UserSearchResult: { // field return type
+    avatarImageUrl: string | null; // String
+    id: string; // ID!
+    isFollowing: boolean | null; // Boolean
+    name: string | null; // String
     username: string | null; // String
   }
 }
@@ -442,8 +457,8 @@ export interface NexusGenFieldTypeNames {
     userId: 'String'
   }
   ContentUserFollowingProfile: { // field return type name
+    avatarImageUrl: 'String'
     id: 'ID'
-    imageUrl: 'String'
     name: 'String'
     username: 'String'
   }
@@ -563,6 +578,7 @@ export interface NexusGenFieldTypeNames {
     getQueue: 'GetQueueResponse'
     me: 'User'
     searchSimilarLinks: 'SearchResult'
+    searchUsers: 'UserSearchResult'
   }
   SearchResult: { // field return type name
     averageDistance: 'Float'
@@ -605,6 +621,13 @@ export interface NexusGenFieldTypeNames {
     role: 'String'
     timezone: 'String'
     updatedAt: 'Date'
+    username: 'String'
+  }
+  UserSearchResult: { // field return type name
+    avatarImageUrl: 'String'
+    id: 'ID'
+    isFollowing: 'Boolean'
+    name: 'String'
     username: 'String'
   }
 }
@@ -746,6 +769,9 @@ export interface NexusGenArgTypes {
     }
     searchSimilarLinks: { // args
       limit: number | null; // Int
+      query: string; // String!
+    }
+    searchUsers: { // args
       query: string; // String!
     }
   }

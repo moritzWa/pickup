@@ -25,7 +25,7 @@ const ProfileIcon = ({
   size?: number;
   textStyle?: StyleProp<TextStyle>;
   style?: StyleProp<ViewStyle>;
-  onPress: () => void;
+  onPress?: () => void;
 }) => {
   const gradient = getGradientById(initials || "");
 
@@ -55,24 +55,27 @@ const ProfileIcon = ({
   return (
     <LinearGradient
       colors={gradient}
-      style={{
-        height: size,
-        width: size,
-        borderRadius: 100,
-        backgroundColor: colors.red50,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      style={[
+        {
+          height: size,
+          width: size,
+          borderRadius: 100,
+          backgroundColor: colors.red50,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        style,
+      ]}
     >
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[style]}>
+      <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[]}>
         <Text
           style={[
             {
-              fontSize: 20,
+              fontSize: 16,
               fontFamily: "Raleway-Bold",
-              color: colors.white,
+              color: colors.black,
             },
             textStyle,
           ]}

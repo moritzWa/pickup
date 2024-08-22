@@ -118,7 +118,7 @@ export const BaseContentFields = gql`
       id
       name
       username
-      imageUrl
+      avatarImageUrl
     }
     title
     summary

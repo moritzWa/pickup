@@ -42,7 +42,10 @@ export const ContactRow = React.memo(
           // borderBottomColor: theme.border,
         }}
       >
-        <ProfileIcon initials={initials} />
+        <ProfileIcon
+          initials={initials}
+          profileImageUrl={contact.hasThumbnail ? contact.thumbnailPath : null}
+        />
 
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text
@@ -68,7 +71,7 @@ export const ContactRow = React.memo(
 
         <TouchableOpacity
           style={{
-            backgroundColor: theme.header,
+            backgroundColor: theme.secondaryBackground,
             padding: 0,
             height: 40,
             paddingHorizontal: 15,
@@ -83,12 +86,12 @@ export const ContactRow = React.memo(
         >
           <Text
             style={{
-              color: theme.background,
+              color: theme.text,
               fontFamily: "Raleway-SemiBold",
-              fontSize: 14,
+              fontSize: 16,
             }}
           >
-            Add
+            Invite
           </Text>
         </TouchableOpacity>
       </View>

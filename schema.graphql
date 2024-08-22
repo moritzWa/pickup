@@ -82,8 +82,8 @@ type ContentSession {
 }
 
 type ContentUserFollowingProfile {
+  avatarImageUrl: String
   id: ID!
-  imageUrl: String
   name: String
   username: String
 }
@@ -230,6 +230,7 @@ type Query {
   getQueue: GetQueueResponse!
   me: User
   searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
+  searchUsers(query: String!): [UserSearchResult!]!
 }
 
 type SearchResult {
@@ -282,4 +283,12 @@ type User {
 
 enum UserAuthProviderEnum {
   Firebase
+}
+
+type UserSearchResult {
+  avatarImageUrl: String
+  id: ID!
+  isFollowing: Boolean
+  name: String
+  username: String
 }

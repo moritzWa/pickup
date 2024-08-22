@@ -15,7 +15,7 @@ export const ContentUserFollowingProfile = objectType({
     definition: (t) => {
         t.nonNull.id("id");
         t.nullable.string("name");
-        t.nullable.string("imageUrl");
+        t.nullable.string("avatarImageUrl");
         t.nullable.string("username");
     },
 });

@@ -56,6 +56,26 @@ export class PostgresUserRepository {
         });
     }
 
+    findBySimilarUsername = (username: string) => {
+        return Helpers.trySuccessFail(async () => {
+            const users = await this.repo
+                .createQueryBuilder()
+                .where("LOWER(username) LIKE LOWER(:username)", {
+                    username: `%${username}%`,
+                })
+                .orderBy(
+                    "CASE WHEN LOWER(username) = LOWER(:exactUsername) THEN 0 ELSE 1 END",
+                    "ASC"
+                )
+                .addOrderBy("LENGTH(username)", "ASC")
+                .addOrderBy("username", "ASC")
+                .setParameters({ exactUsername: username.toLowerCase() }) // Pass the exactUsername parameter
+                .getMany();
+
+            return success(users);
+        });
+    };
+
     async count(
         options: FindManyOptions<UserModel>
     ): Promise<FailureOrSuccess<DefaultErrors, number>> {

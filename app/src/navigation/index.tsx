@@ -363,6 +363,14 @@ export const MainNavigationStack = () => {
             component={Followers}
           />
 
+          <Stack.Screen
+            name="Friends"
+            options={{
+              headerShown: false,
+            }}
+            component={Friends}
+          />
+
           {/* MODALS */}
           <Stack.Group
             screenOptions={{
@@ -376,14 +384,6 @@ export const MainNavigationStack = () => {
                 headerShown: false,
               }}
               component={AudioPlayer}
-            />
-
-            <Stack.Screen
-              name="Friends"
-              options={{
-                headerShown: false,
-              }}
-              component={Friends}
             />
 
             <Stack.Screen

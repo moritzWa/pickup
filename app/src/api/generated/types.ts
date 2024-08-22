@@ -105,8 +105,8 @@ export type ContentSession = {
 
 export type ContentUserFollowingProfile = {
   __typename?: 'ContentUserFollowingProfile';
+  avatarImageUrl?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  imageUrl?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   username?: Maybe<Scalars['String']['output']>;
 };
@@ -381,6 +381,7 @@ export type Query = {
   getQueue: GetQueueResponse;
   me?: Maybe<User>;
   searchSimilarLinks: Array<SearchResult>;
+  searchUsers: Array<UserSearchResult>;
 };
 
 
@@ -467,6 +468,11 @@ export type QuerySearchSimilarLinksArgs = {
   query: Scalars['String']['input'];
 };
 
+
+export type QuerySearchUsersArgs = {
+  query: Scalars['String']['input'];
+};
+
 export type SearchResult = {
   __typename?: 'SearchResult';
   averageDistance: Scalars['Float']['output'];
@@ -517,3 +523,12 @@ export type User = {
 export enum UserAuthProviderEnum {
   Firebase = 'Firebase'
 }
+
+export type UserSearchResult = {
+  __typename?: 'UserSearchResult';
+  avatarImageUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isFollowing?: Maybe<Scalars['Boolean']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  username?: Maybe<Scalars['String']['output']>;
+};

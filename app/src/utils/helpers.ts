@@ -8,26 +8,26 @@ export function getGradientById(id: string) {
   }
 
   const gradients = [
-    ["#FF5F6D", "#FFC371"], // Gradient 1
-    ["#36D1DC", "#5B86E5"], // Gradient 2
-    ["#FFAFBD", "#ffc3a0"], // Gradient 3
-    ["#2193b0", "#6dd5ed"], // Gradient 4
-    ["#cc2b5e", "#753a88"], // Gradient 5
-    ["#ee9ca7", "#ffdde1"], // Gradient 6
-    ["#bdc3c7", "#2c3e50"], // Gradient 7
-    ["#e96443", "#904e95"], // Gradient 8
-    ["#de6262", "#ffb88c"], // Gradient 9
-    ["#f46b45", "#eea849"], // Gradient 10
-    ["#a8ff78", "#78ffd6"], // Gradient 11
-    ["#ff0844", "#ffb199"], // Gradient 12
-    ["#96e6a1", "#d4fc79"], // Gradient 13
-    ["#56ab2f", "#a8e063"], // Gradient 14
-    ["#108dc7", "#ef8e38"], // Gradient 15
-    ["#fc00ff", "#00dbde"], // Gradient 16
-    ["#74ebd5", "#ACB6E5"], // Gradient 17
-    ["#16A085", "#F4D03F"], // Gradient 18
-    ["#7F00FF", "#E100FF"], // Gradient 19
-    ["#ff7e5f", "#feb47b"], // Gradient 20
+    ["#FF3E50", "#FFC100"], // Gradient 1
+    ["#00E1FF", "#7F9FFF"], // Gradient 2
+    ["#FF80A0", "#FFB389"], // Gradient 3
+    ["#00AFFF", "#7DF9FF"], // Gradient 4
+    ["#E02D75", "#9144BB"], // Gradient 5
+    ["#FF80A7", "#FFDBE5"], // Gradient 6
+    ["#BDC3C7", "#34495E"], // Gradient 7
+    ["#FF5C5C", "#A14D9F"], // Gradient 8
+    ["#E86E6E", "#FFAD96"], // Gradient 9
+    ["#FF8345", "#FFB92E"], // Gradient 10
+    ["#90FF5E", "#5FFFCE"], // Gradient 11
+    ["#FF1E62", "#FFB29D"], // Gradient 12
+    ["#90FF91", "#E2FF8F"], // Gradient 13
+    ["#6BCC2A", "#BBFF91"], // Gradient 14
+    ["#00C8FF", "#FF8433"], // Gradient 15
+    ["#74E5FF", "#D9E6FF"], // Gradient 16
+    ["#17D585", "#FFDC00"], // Gradient 17
+    ["#9F00FF", "#E600FF"], // Gradient 18
+    ["#FF6B5F", "#FFAB79"], // Gradient 19
+    ["#FF7B3E", "#FFEB67"], // Gradient 20
   ];
 
   // Use the id to pick a gradient, using modulo to wrap around if id exceeds array length

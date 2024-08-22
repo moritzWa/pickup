@@ -631,6 +631,8 @@ const ContentFriends = ({
   const extraFriends = friends.length - friendsToShow.length;
   const navigation = useNavigation<NavigationProps>();
 
+  // console.log(friendsToShow);
+
   const onPressUser = (f: ContentUserFollowingProfile) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -665,7 +667,7 @@ const ContentFriends = ({
             fontSize: 14,
             fontFamily: "Raleway-ExtraBold",
           }}
-          profileImageUrl={f.imageUrl}
+          profileImageUrl={f.avatarImageUrl}
         />
       ))}
 

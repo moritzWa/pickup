@@ -25,22 +25,18 @@ import Header from "src/components/Header";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SearchBar } from "@rneui/base";
 import { SearchResults } from "./SearchResults";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SearchIcon = require("src/assets/icons/search.png");
 
 const Friends = () => {
   const fullTheme = useTheme();
   const { theme, header, text, background } = fullTheme;
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={{ flex: 1, backgroundColor: background }}>
-      <Header
-        containerStyle={{
-          paddingTop: 15,
-        }}
-        hasBackButton
-        title="Find Friends"
-      />
+      <Header hasBackButton title="Find Friends" />
 
       <SearchResults />
     </View>

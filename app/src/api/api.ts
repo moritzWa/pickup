@@ -123,6 +123,18 @@ const GetMe = gql`
   }
 `;
 
+const SearchUsers = gql`
+  query SearchUsers($query: String!) {
+    searchUsers(query: $query) {
+      id
+      username
+      name
+      avatarImageUrl
+      isFollowing
+    }
+  }
+`;
+
 const GetProfile = gql`
   query GetProfile($username: String) {
     getProfile(username: $username) {
@@ -411,6 +423,7 @@ export const api = {
     setCommuteTime: SetCommuteTime,
     verifyBiometric: VerifyBiometric,
     me: GetMe,
+    search: SearchUsers,
     getProfile: GetProfile,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,

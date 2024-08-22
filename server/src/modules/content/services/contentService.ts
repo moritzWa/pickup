@@ -297,7 +297,10 @@ const decorateContentWithFriends = async (
 
     const finalContent = content.map((c) => {
         const sessions = sessionByContent[c.id] ?? [];
-        const users = sessions.map((s) => userById[s.userId]).filter(hasValue);
+        const users = sessions
+            .map((s) => userById[s.userId])
+            .filter(hasValue)
+            .map((u) => ({ ...u, avatarImageUrl: u.imageUrl }));
 
         return {
             ...c,
