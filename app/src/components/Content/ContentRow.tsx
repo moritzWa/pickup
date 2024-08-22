@@ -47,6 +47,7 @@ import {
 } from "src/redux/reducers/audio";
 import { getGradientById } from "src/utils/helpers";
 import ProfileIcon from "../ProfileIcon";
+import { getDescription } from "./contentHelpers";
 
 const IMAGE_SIZE = 32;
 
@@ -283,17 +284,6 @@ export const ContentRow = ({
   useEffect(() => {
     swipeableRef.current?.close();
   }, [filter]);
-
-  const getDescription = (content: BaseContentFields) => {
-    if (content.summary) return content.summary;
-    if (content.ogDescription) return content.ogDescription;
-    if (content.content)
-      return (
-        content.content.slice(0, 300) +
-        (content.content.length > 300 ? "..." : "")
-      );
-    return "";
-  };
 
   return (
     <View

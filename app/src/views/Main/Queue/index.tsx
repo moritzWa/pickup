@@ -1,14 +1,14 @@
-import { View, Text, ScrollView, FlatList } from "react-native";
-import React from "react";
-import { useSelector } from "react-redux";
-import { getQueue } from "src/redux/reducers/audio";
-import { BaseContentFields } from "src/api/fragments";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faHeadset } from "@fortawesome/pro-solid-svg-icons";
-import { useTheme } from "src/hooks";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import React from "react";
+import { FlatList, Text, View } from "react-native";
 import FastImage from "react-native-fast-image";
-import Header from "src/components/Header";
+import { useSelector } from "react-redux";
+import { BaseContentFields } from "src/api/fragments";
 import Close from "src/components/Close";
+import { getDescription } from "src/components/Content/contentHelpers";
+import { useTheme } from "src/hooks";
+import { getQueue } from "src/redux/reducers/audio";
 
 const Queue = () => {
   const queue = useSelector(getQueue);
@@ -90,7 +90,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
         }}
         resizeMode="cover"
         source={{
-          uri: content.thumbnailImageUrl,
+          uri: content.thumbnailImageUrl ?? undefined,
         }}
       />
 
@@ -116,7 +116,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
           }}
           numberOfLines={2}
         >
-          {content.summary || content.ogDescription}
+          {getDescription(content)}
         </Text>
 
         <View
