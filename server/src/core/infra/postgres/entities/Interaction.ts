@@ -1,23 +1,22 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
-    Index,
-    ManyToOne,
-    JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn,
     DeleteDateColumn,
-    Unique,
+    Entity,
+    Index,
+    JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn,
     Relation,
+    UpdateDateColumn,
 } from "typeorm";
-import { User } from "./User";
-import { Maybe } from "src/core/logic";
 import { Content } from "./Content";
+import { User } from "./User";
 
 export enum InteractionType {
     Likes = "likes",
     Bookmarked = "bookmarked",
+    Unbookmarked = "unbookmarked",
     Queued = "queued",
     StartedListening = "started_listening",
     ScrolledPast = "scrolled_past",

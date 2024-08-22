@@ -5,17 +5,14 @@ export const PODCASTS = [
         name: "SaaS Interviews with CEOs, Startups, Founders",
     },
     {
-        // MFM
         url: "https://feeds.megaphone.fm/HS2300184645",
         name: "My First Million",
     },
     {
-        // How I built this
         url: "https://rss.art19.com/how-i-built-this",
         name: "How I Built This",
     },
     {
-        // Founders
         url: "https://feeds.simplecast.com/3hnxp7yk",
         name: "Founders",
     },
@@ -82,5 +79,9 @@ export const PODCASTS = [
     {
         url: "https://naval.libsyn.com/rss",
         name: "Naval",
+    },
+    {
+        url: "https://feeds.megaphone.fm/aoi",
+        name: "Art of Investing",
     },
 ];

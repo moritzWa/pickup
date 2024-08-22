@@ -1,23 +1,19 @@
-import { arg, idArg, mutationField, nonNull } from "nexus";
+import { arg, idArg, nonNull, queryField } from "nexus";
 import { User } from "src/core/infra/postgres/entities";
-import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { Logger } from "src/utils";
-import { v4 as uuidv4 } from "uuid";
-import { contentRepo, contentSessionRepo, interactionRepo } from "../../infra";
+import { contentRepo } from "../../infra";
 import { ContentSessionService } from "../../services/contentSessionService";
 
-export const bookmarkContent = mutationField("bookmarkContent", {
-    type: nonNull("ContentSession"),
+export const getIsBookmarked = queryField("getIsBookmarked", {
+    type: nonNull("Boolean"),
     args: {
         contentId: nonNull(idArg()),
         authProviderId: arg({ type: "String" }),
     },
-    resolve: async (_parent, args, ctx: Context, _info) => {
-        Logger.info("Starting bookmarkContent resolver");
-
+    resolve: async (_parent, args, ctx: Context) => {
         const { contentId, authProviderId } = args;
 
         let user = await getUserFromContextOrAuthProviderId(
@@ -33,43 +29,23 @@ export const bookmarkContent = mutationField("bookmarkContent", {
         throwIfError(contentResponse);
         const content = contentResponse.value;
 
+        // TODO: typically queries should not have mutations
         const sessionResponse = await ContentSessionService.findOrCreate(
             content,
             user
         );
         throwIfError(sessionResponse);
-        const session = sessionResponse.value;
 
-        const newBookmarkStatus = !session.isBookmarked;
-
-        const updatedSessionResponse = await contentSessionRepo.update(
-            session.id,
-            {
-                isBookmarked: newBookmarkStatus,
-                bookmarkedAt: newBookmarkStatus ? new Date() : null,
-            }
-        );
-        throwIfError(updatedSessionResponse);
-
-        // Create a new interaction for both bookmarking and unbookmarking
-        await interactionRepo.create({
-            id: uuidv4(),
-            contentId: content.id,
-            userId: user.id,
-            type: newBookmarkStatus
-                ? InteractionType.Bookmarked
-                : InteractionType.Unbookmarked,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
-
+        // log if is now bookmarked or unbookmarked
         Logger.info(
-            `Content ${content.id} ${
-                newBookmarkStatus ? "bookmarked" : "unbookmarked"
-            } by user ${user.id}`
+            `Content ${content.title} ${
+                sessionResponse.value?.isBookmarked
+                    ? "bookmarked"
+                    : "unbookmarked"
+            } by user ${user.email}`
         );
 
-        return updatedSessionResponse.value;
+        return sessionResponse.value?.isBookmarked ?? false;
     },
 });
 
