@@ -44,12 +44,12 @@ const processContent = inngest.createFunction(
 
         await step.run("embed-content", async () => _embedContent(contentId));
 
-        await step.run("save-audio-duration", async () =>
-            _saveAudioDuration(contentId)
-        );
-
         await step.run("generated-audio", async () =>
             _convertToAudio(contentId)
+        );
+
+        await step.run("save-audio-duration", async () =>
+            _saveAudioDuration(contentId)
         );
 
         await step.run("mark-content-processed", async () =>
