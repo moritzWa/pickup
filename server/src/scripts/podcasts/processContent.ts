@@ -62,7 +62,15 @@ const _embedContentV2 = async (contentId: string) => {
 
 const processContentV2 = async (contentId: string) => {
     try {
+        const contentResponse = await contentRepo.findById(contentId);
+
+        if (contentResponse.isFailure()) {
+            return failure(contentResponse.error);
+        }
+
         await _embedContentV2(contentId);
+
+        await _updateAudioDuration(contentResponse.value);
 
         await _markContentProcessed(contentId);
 
@@ -75,7 +83,7 @@ const processContentV2 = async (contentId: string) => {
 const run = async () => {
     const contentResponse = await contentRepo.find({
         where: {
-            embedding: null,
+            isProcessed: false,
             type: ContentType.PODCAST,
         },
         select: { id: true, audioUrl: true },
