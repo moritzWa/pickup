@@ -219,6 +219,7 @@ export interface NexusGenFieldTypes {
     durationMs: number | null; // Float
     id: string; // String!
     isBookmarked: boolean | null; // Boolean
+    notes: string | null; // String
     percentFinished: number | null; // Float
     timestampCursor: number | null; // Float
     updatedAt: NexusGenScalars['Date']; // Date!
@@ -461,6 +462,7 @@ export interface NexusGenFieldTypeNames {
     durationMs: 'Float'
     id: 'String'
     isBookmarked: 'Boolean'
+    notes: 'String'
     percentFinished: 'Float'
     timestampCursor: 'Float'
     updatedAt: 'Date'
@@ -715,6 +717,7 @@ export interface NexusGenArgTypes {
       isBookmarked?: boolean | null; // Boolean
       isLiked?: boolean | null; // Boolean
       lastListenedAt?: NexusGenScalars['Date'] | null; // Date
+      notes?: string | null; // String
     }
     updateUser: { // args
       avatarImageUrl?: string | null; // String

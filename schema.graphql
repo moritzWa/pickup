@@ -76,6 +76,7 @@ type ContentSession {
   durationMs: Float
   id: String!
   isBookmarked: Boolean
+  notes: String
   percentFinished: Float
   timestampCursor: Float
   updatedAt: Date!
@@ -192,7 +193,7 @@ type Mutation {
   startContent(contentId: ID!): ContentSession!
   startListening: ContentSession!
   unfollowProfile(username: String!): String!
-  updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean, lastListenedAt: Date): ContentSession!
+  updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean, lastListenedAt: Date, notes: String): ContentSession!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, description: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int, username: String): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
 }
