@@ -14,8 +14,7 @@ function handleAuthStateChange(user) {
   if (user) {
     console.log("logged in!");
     console.log("current user:", user);
-    setupSaveLinkButton();
-    document.getElementById("saveLink").style.display = "block";
+    document.getElementById("likeContent").style.display = "block";
     saveCurrentLink();
   } else {
     console.log("No user");
@@ -86,9 +85,45 @@ function saveCurrentLink() {
   });
 }
 
-function setupSaveLinkButton() {
-  const saveLinkButton = document.getElementById("saveLink");
-  saveLinkButton.addEventListener("click", saveCurrentLink);
+function likeContent() {
+  const messageDiv = document.getElementById("message");
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    const tab = tabs[0];
+    const user = auth.currentUser;
+    const authProviderId = user ? user.uid : null;
+
+    try {
+      const response = await fetch("http://localhost:8888/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `mutation($contentId: ID!, $authProviderId: String) {
+            bookmarkContent(contentId: $contentId, authProviderId: $authProviderId) {
+              id
+              isBookmarked
+            }
+          }`,
+          variables: {
+            contentId: tab.id, // Assuming tab.id is the content ID
+            authProviderId,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        messageDiv.textContent = "Content liked successfully!";
+      } else {
+        messageDiv.textContent = "Error liking content.";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      messageDiv.textContent = "Error liking content.";
+    }
+  });
 }
+
+document.getElementById("likeContent").addEventListener("click", likeContent);
 
 onAuthStateChanged(auth, handleAuthStateChange);
