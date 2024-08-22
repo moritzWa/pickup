@@ -43,6 +43,8 @@ import Queue from "src/views/Main/Queue";
 import Activity from "src/views/Main/Activity";
 import ContentDetails from "src/views/Main/ContentDetails";
 import { BaseContentFields } from "src/api/fragments";
+import Friends from "src/views/Main/Friends";
+import EditProfile from "src/views/Main/EditProfile";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -54,6 +56,7 @@ export type WebViewParams = {
 
 export type RootStackParamList = {
   Login: undefined; // params
+  Followers?: { username: string };
   ContentDetails: { content?: BaseContentFields };
   Signup: undefined; // params
   Welcome: undefined;
@@ -355,6 +358,22 @@ export const MainNavigationStack = () => {
                 headerShown: false,
               }}
               component={AudioPlayer}
+            />
+
+            <Stack.Screen
+              name="Friends"
+              options={{
+                headerShown: false,
+              }}
+              component={Friends}
+            />
+
+            <Stack.Screen
+              name="EditProfile"
+              options={{
+                headerShown: false,
+              }}
+              component={EditProfile}
             />
 
             <Stack.Screen

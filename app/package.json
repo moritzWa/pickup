@@ -37,6 +37,8 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.10.1",
     "@reduxjs/toolkit": "^2.2.6",
+    "@rneui/base": "^4.0.0-rc.8",
+    "@rneui/themed": "^4.0.0-rc.8",
     "@types/apollo-upload-client": "^18.0.0",
     "@types/lodash": "^4.17.7",
     "@types/moment": "^2.13.0",
@@ -57,6 +59,7 @@
     "expo-speech": "~12.0.2",
     "expo-status-bar": "~1.12.1",
     "firebase": "^10.12.4",
+    "fuse.js": "^7.0.0",
     "graphql": "^16.9.0",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
@@ -65,6 +68,7 @@
     "react-native": "0.74.3",
     "react-native-action-sheet": "^2.2.0",
     "react-native-airplay-button": "^1.1.0",
+    "react-native-contacts": "^7.0.8",
     "react-native-date-picker": "^5.0.4",
     "react-native-device-info": "^11.1.0",
     "react-native-fast-image": "^8.6.3",
@@ -91,7 +95,8 @@
     "react-singleton-hook": "^4.0.1",
     "redux-logger": "^3.0.6",
     "typescript": "~5.3.3",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

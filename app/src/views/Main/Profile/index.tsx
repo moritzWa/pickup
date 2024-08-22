@@ -43,6 +43,7 @@ import {
 import { colors } from "src/components";
 import { ContentRow } from "src/components/Content/ContentRow";
 import { CurrentAudio } from "src/components/CurrentAudio";
+import { FollowersInfo } from "src/components/FollowersInfo";
 import Header from "src/components/Header";
 import { TabBar } from "src/components/tabs";
 import { useMe } from "src/hooks";
@@ -450,7 +451,7 @@ const Profile = ({ username }: { username: string | null }) => {
   //   };
 
   const _editProfile = () => {
-    navigation.navigate("Settings");
+    navigation.navigate("EditProfile");
   };
 
   const _openSettings = () => {
@@ -541,7 +542,7 @@ const Profile = ({ username }: { username: string | null }) => {
           </View>
         </View>
 
-        {/* <FollowersInfo
+        <FollowersInfo
           containerStyle={{
             alignSelf: "flex-start",
             padding: 5,
@@ -550,7 +551,7 @@ const Profile = ({ username }: { username: string | null }) => {
             paddingTop: 0,
           }}
           username={username ?? null}
-        /> */}
+        />
       </View>
       {isME ? (
         <View
@@ -581,18 +582,19 @@ const Profile = ({ username }: { username: string | null }) => {
               borderColor: fullTheme.borderDark,
               backgroundColor: background,
             }}
-            onPress={_openSettings}
+            onPress={_editProfile}
           >
             <Image
-              source={require("src/assets/icons/settings-filled.png")}
+              source={require("src/assets/icons/pen-solid.png")}
               style={{
-                width: 18,
-                height: 18,
+                width: 15,
+                height: 15,
               }}
               tintColor={textPrimary}
             />
           </TouchableOpacity>
-          {/* <TouchableOpacity
+
+          <TouchableOpacity
             activeOpacity={0.8}
             style={{
               borderRadius: 100,
@@ -609,17 +611,17 @@ const Profile = ({ username }: { username: string | null }) => {
               borderColor: fullTheme.borderDark,
               backgroundColor: background,
             }}
-            onPress={_editProfile}
+            onPress={_openSettings}
           >
             <Image
-              source={require("src/assets/icons/pen-solid.png")}
+              source={require("src/assets/icons/settings-filled.png")}
               style={{
-                width: 15,
-                height: 15,
+                width: 18,
+                height: 18,
               }}
               tintColor={textPrimary}
             />
-          </TouchableOpacity> */}
+          </TouchableOpacity>
           {/* <TouchableOpacity
             activeOpacity={0.8}
             style={{

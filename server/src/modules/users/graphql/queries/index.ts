@@ -4,3 +4,5 @@ export * from "./getIntercomMobileToken";
 export * from "./checkCode";
 export * from "./getMobileUpdate";
 export * from "./getProfile";
+export * from "./checkValidUsername";
+export * from "./getFollows";

@@ -19,6 +19,7 @@ export const User = objectType({
     definition(t) {
         t.nonNull.string("id");
         t.nullable.string("phoneNumber");
+        t.nullable.string("username");
         t.nonNull.boolean("hasVerifiedPhoneNumber");
         t.nonNull.boolean("hasTwoFactorAuth");
         t.nullable.boolean("hasMobile");

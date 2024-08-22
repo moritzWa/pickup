@@ -22,6 +22,8 @@ export const updateUser = mutationField("updateUser", {
         biometricPublicKey: nullable(stringArg()),
         unreadCount: nullable(intArg()),
         avatarImageUrl: nullable(stringArg()),
+        username: nullable(stringArg()),
+        description: nullable(stringArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);
@@ -36,6 +38,8 @@ export const updateUser = mutationField("updateUser", {
                 args?.hasPushNotifications ?? user.hasPushNotificationsEnabled,
             unreadCount: args?.unreadCount ?? user.unreadCount,
             imageUrl: args?.avatarImageUrl ?? user.imageUrl,
+            username: args?.username ?? user.username,
+            description: args?.description ?? user.description,
         });
 
         throwIfError(newUserResponse);

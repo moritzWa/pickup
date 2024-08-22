@@ -8,7 +8,8 @@ import {
     success,
 } from "src/core/logic";
 import { In } from "typeorm";
-import { keyBy, uniqBy } from "lodash";
+import { groupBy, keyBy, uniqBy } from "lodash";
+import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
 
 const getFeed = async (
     user: User,
@@ -17,20 +18,43 @@ const getFeed = async (
 ): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
     const skip = page * limit;
 
-    const feedResponse = await feedRepo.findForUser(user.id, {
-        where: { isArchived: false },
-        take: limit ?? 0,
-        skip: page * limit,
-        order: {
-            position: "desc",
-            createdAt: "desc",
-        },
-    });
+    const relationshipResponse = await relationshipRepo.usersFollowing(user.id);
+
+    if (relationshipResponse.isFailure()) {
+        return failure(relationshipResponse.error);
+    }
+
+    const userIdsFollowing = relationshipResponse.value;
+
+    const [feedResponse, usersResponse] = await Promise.all([
+        feedRepo.findForUser(user.id, {
+            where: { isArchived: false },
+            take: limit ?? 0,
+            skip: page * limit,
+            order: {
+                position: "desc",
+                createdAt: "desc",
+            },
+        }),
+        pgUserRepo.findByIds(userIdsFollowing, {
+            select: {
+                id: true,
+                name: true,
+                username: true,
+                imageUrl: true,
+            },
+        }),
+    ]);
 
     if (feedResponse.isFailure()) {
         return failure(feedResponse.error);
     }
 
+    if (usersResponse.isFailure()) {
+        return failure(usersResponse.error);
+    }
+
+    const usersFollowing = usersResponse.value;
     const feed = feedResponse.value;
 
     if (!feed.length) {
@@ -85,10 +109,43 @@ const getFeed = async (
     // idk why but I need this otherwise the frontend sometimes has dup ids?
     const uniqContent = uniqBy(content, (c) => c.id);
 
+    const finalContentIds = uniqContent.map((c) => c.id);
+
+    const contentFromRelationships = await contentSessionRepo.find({
+        where: {
+            contentId: In(finalContentIds),
+            userId: In(userIdsFollowing),
+        },
+        select: {
+            id: true,
+            userId: true,
+            contentId: true,
+        },
+    });
+
+    if (contentFromRelationships.isFailure()) {
+        return failure(contentFromRelationships.error);
+    }
+
+    const sessions = contentFromRelationships.value;
+
+    const sessionByContent = groupBy(sessions, (s) => s.contentId);
+    const userById = keyBy(usersFollowing, (u) => u.id);
+
+    const finalContent = uniqContent.map((c) => {
+        const sessions = sessionByContent[c.id] ?? [];
+        const users = sessions.map((s) => userById[s.userId]).filter(hasValue);
+
+        return {
+            ...c,
+            friends: users,
+        };
+    });
+
     // console.log(skip);
     // console.log(uniqContent.map((c) => c.title.slice(0, 3)));
 
-    return success(uniqContent);
+    return success(finalContent);
 };
 
 export const FeedService = {
