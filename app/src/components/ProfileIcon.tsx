@@ -1,4 +1,10 @@
-import { View, Text, StyleProp } from "react-native";
+import {
+  View,
+  Text,
+  StyleProp,
+  ViewStyle,
+  TouchableOpacity,
+} from "react-native";
 import React from "react";
 import FastImage from "react-native-fast-image";
 import { colors } from ".";
@@ -9,38 +15,56 @@ const ProfileIcon = ({
   profileImageUrl,
   size = 40,
   textStyle,
+  style,
+  onPress,
 }: {
   initials?: string | null;
   profileImageUrl?: string | null;
   size?: number;
   textStyle?: StyleProp<TextStyle>;
+  style?: StyleProp<ViewStyle>;
+  onPress: () => void;
 }) => {
   if (profileImageUrl) {
     // return the fast image
     return (
-      <FastImage
-        source={{ uri: profileImageUrl }}
-        style={{
-          height: size,
-          width: size,
-          borderRadius: 100,
-        }}
-      />
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={onPress}
+        style={[style, { borderRadius: 100 }]}
+      >
+        <FastImage
+          source={{ uri: profileImageUrl }}
+          style={[
+            {
+              height: size,
+              width: size,
+              borderRadius: 100,
+            },
+            ,
+          ]}
+        />
+      </TouchableOpacity>
     );
   }
 
   return (
-    <View
-      style={{
-        height: size,
-        width: size,
-        borderRadius: 100,
-        backgroundColor: colors.red50,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      style={[
+        {
+          height: size,
+          width: size,
+          borderRadius: 100,
+          backgroundColor: colors.red50,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        style,
+      ]}
     >
       <Text
         style={[
@@ -54,7 +78,7 @@ const ProfileIcon = ({
       >
         {initials}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 

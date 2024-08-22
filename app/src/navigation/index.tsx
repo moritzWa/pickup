@@ -112,6 +112,7 @@ export type RootStackParamList = {
   Authentication: { screen?: string } | undefined;
   Interests?: undefined;
   FullName?: undefined;
+  Friends?: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
@@ -343,6 +344,14 @@ export const MainNavigationStack = () => {
               headerShown: false,
             }}
             component={LessonSession}
+          />
+
+          <Stack.Screen
+            name="UserProfile"
+            options={{
+              headerShown: false,
+            }}
+            component={UserProfile}
           />
 
           {/* MODALS */}

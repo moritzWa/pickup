@@ -81,15 +81,16 @@ const checkValidUsername = async (
     const usersWithNameResp = await pgUserRepo.findByUsername(username);
     if (usersWithNameResp.isFailure()) return failure(usersWithNameResp.error);
     const usersWithName = usersWithNameResp.value;
+
     // there is already a user with this username and it's not the current user
-    if (usersWithName.length > 0) {
+    if (usersWithName) {
         if (!user?.username) {
             return failure(
                 new Error(
                     "This username is already taken. Please enter another one."
                 )
             );
-        } else if (usersWithName.some((u) => u.id !== user.id)) {
+        } else if (usersWithName.id !== user.id) {
             return failure(
                 new Error(
                     "This username is already taken. Please enter another one."

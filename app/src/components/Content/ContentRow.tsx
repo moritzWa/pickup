@@ -29,6 +29,7 @@ import { api } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
 import {
   ContentFeedFilter,
+  ContentUserFollowingProfile,
   Mutation,
   MutationAddToQueueArgs,
   MutationArchiveContentArgs,
@@ -45,6 +46,8 @@ import {
 } from "src/redux/reducers/audio";
 import { extractDomain } from "src/utils/author";
 import ProfileIcon from "../ProfileIcon";
+import moment from "moment";
+import * as Haptics from "expo-haptics";
 
 const IMAGE_SIZE = 32;
 
@@ -420,17 +423,7 @@ export const ContentRow = ({
                         {c.authorName || extractDomain(c.websiteUrl)}
                       </Text> */}
 
-                      {(c.friends ?? []).map((f) => (
-                        <ProfileIcon
-                          size={22}
-                          initials={f.name?.charAt(0)}
-                          textStyle={{
-                            fontSize: 14,
-                            fontFamily: "Raleway-ExtraBold",
-                          }}
-                          profileImageUrl={f.imageUrl}
-                        />
-                      ))}
+                      <ContentFriends friends={c.friends ?? []} />
                     </View>
 
                     <View
@@ -441,13 +434,6 @@ export const ContentRow = ({
                         alignItems: "center",
                       }}
                     >
-                      <FontAwesomeIcon
-                        icon={faClock}
-                        color={theme.textSecondary}
-                        size={12}
-                        style={{ marginRight: 5 }}
-                      />
-
                       <Text
                         style={{
                           color: theme.textSecondary,
@@ -455,7 +441,11 @@ export const ContentRow = ({
                           fontFamily: "Raleway-Medium",
                         }}
                       >
-                        {c.lengthFormatted}
+                        {c.releasedAt
+                          ? moment(c.releasedAt).format("MMM Do") + " • "
+                          : ""}
+                        {c.lengthFormatted}{" "}
+                        {c.contentSession?.percentFinished ? " • " : ""}
                       </Text>
                     </View>
 
@@ -463,7 +453,7 @@ export const ContentRow = ({
                       <View
                         style={{
                           display: "flex",
-                          marginLeft: 15,
+                          marginLeft: 5,
                           flexDirection: "row",
                           alignItems: "center",
                           // marginRight: 15,
@@ -472,7 +462,7 @@ export const ContentRow = ({
                         <CircularProgress
                           size={IS_IPAD ? 26 : 14}
                           strokeWidth={IS_IPAD ? 5 : 3}
-                          bg={theme.secondaryBackground}
+                          bg={isActive ? theme.textSubtle : theme.textSubtle}
                           percentage={c.contentSession?.percentFinished || 0}
                         />
 
@@ -663,6 +653,70 @@ const CircularProgress = ({
           transform={`rotate(-90, ${size / 2}, ${size / 2})`}
         />
       </Svg>
+    </View>
+  );
+};
+
+const ContentFriends = ({
+  friends,
+}: {
+  friends: ContentUserFollowingProfile[];
+}) => {
+  const theme = useTheme();
+  const friendsToShow = (friends ?? []).slice(0, 3);
+  const extraFriends = friends.length - friendsToShow.length;
+  const navigation = useNavigation<NavigationProps>();
+
+  const onPressUser = (f: ContentUserFollowingProfile) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    navigation.navigate("UserProfile", {
+      username: f.username || "",
+    });
+  };
+
+  if (!friends.length) return null;
+
+  return (
+    <View
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
+      {(friendsToShow ?? []).map((f, i) => (
+        <ProfileIcon
+          onPress={() => onPressUser(f)}
+          size={22}
+          style={{
+            // negative left
+            left: i === 0 ? 0 : -7,
+            position: "relative",
+            borderColor: theme.border,
+            borderWidth: 1,
+          }}
+          initials={f.name?.charAt(0)}
+          textStyle={{
+            fontSize: 14,
+            fontFamily: "Raleway-ExtraBold",
+          }}
+          profileImageUrl={f.imageUrl}
+        />
+      ))}
+
+      {extraFriends > 0 ? (
+        <Text
+          style={{
+            fontSize: 14,
+            color: theme.text,
+            marginLeft: 5,
+            fontFamily: "Raleway-Medium",
+          }}
+        >
+          +{extraFriends} more
+        </Text>
+      ) : null}
     </View>
   );
 };

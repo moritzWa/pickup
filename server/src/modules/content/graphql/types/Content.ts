@@ -66,9 +66,7 @@ export const Content = objectType({
                     if (hours > 0) {
                         return `${hours}h ${minutes % 60}m`;
                     } else if (minutes > 0) {
-                        return seconds > 0
-                            ? `${minutes}m ${seconds}s`
-                            : `${minutes}m`;
+                        return `${minutes}m`;
                     } else {
                         return `${seconds}s`;
                     }
@@ -93,6 +91,7 @@ export const Content = objectType({
                 return null;
             },
         });
+        t.nullable.date("releasedAt");
         t.nonNull.string("websiteUrl");
         t.nullable.field("contentSession", {
             type: nullable("ContentSession"),

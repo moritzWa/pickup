@@ -102,6 +102,18 @@ const VerifyBiometric = gql`
   }
 `;
 
+const FollowProfile = gql`
+  mutation FollowProfile($username: String!) {
+    followProfile(username: $username)
+  }
+`;
+
+const UnfollowProfile = gql`
+  mutation UnfollowProfile($username: String!) {
+    unfollowProfile(username: $username)
+  }
+`;
+
 const GetMe = gql`
   ${BaseUserFields}
   query GetMe {
@@ -402,6 +414,8 @@ export const api = {
     getProfile: GetProfile,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,
+    unfollow: UnfollowProfile,
+    follow: FollowProfile,
   },
   queue: {
     list: GetQueue,

@@ -7,43 +7,53 @@ import * as crypto from "crypto";
 import { config } from "src/config";
 import { Maybe, success } from "src/core/logic";
 import { isNil } from "lodash";
-import { pgUserRepo } from "../../infra/postgres";
+import { pgUserRepo, relationshipRepo } from "../../infra/postgres";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { ApolloError } from "apollo-server-errors";
+import { ProfileService } from "../../services/profileService";
 
-// TODO: fill this in more later
 export const getProfile = queryField("getProfile", {
     type: nonNull("Profile"),
     args: {
-        userId: nullable(idArg()),
+        username: nullable(idArg()),
     },
     resolve: async (_parent, args, ctx: Context) => {
-        // console.log(ctx);
-
         throwIfNotAuthenticated(ctx);
 
-        const { userId } = args;
-        const _user = ctx.me!;
+        const me = ctx.me!;
 
-        if (!userId) {
+        const { username } = args;
+
+        if (!username) {
             throw new ApolloError("User ID is required");
         }
 
-        const userResponse = await pgUserRepo.findById(userId);
+        const userResponse = await pgUserRepo.findByUsername(username);
 
         throwIfError(userResponse);
 
         const user = userResponse.value;
+
+        const [profileResponse, isFollowingResponse] = await Promise.all([
+            ProfileService.getFollowersAndFollowing(user.id),
+            relationshipRepo.isFollowing(user.id, me.id),
+        ]);
+
+        throwIfError(profileResponse);
+        throwIfError(isFollowingResponse);
+
+        const isFollowing = isFollowingResponse.value;
+        const profile = profileResponse.value;
 
         return {
             id: user.id,
             username: user.username || "",
             name: user.name || "",
             description: user.description,
-            numFollowers: 0,
-            numFollowing: 0,
+            numFollowers: profile.numFollowers,
+            numFollowing: profile.numFollowing,
             avatarImageUrl: user.imageUrl,
-            isFollowing: false,
+            isFollowing: isFollowing,
         };
     },
 });

@@ -6,3 +6,5 @@ export * from "./getAuthToken";
 export * from "./deleteMe";
 export * from "./setCommuteTime";
 export * from "./setInterests";
+export * from "./followProfile";
+export * from "./unfollowProfile";

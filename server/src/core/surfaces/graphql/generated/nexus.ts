@@ -187,6 +187,7 @@ export interface NexusGenFieldTypes {
     lengthMs: number | null; // Int
     lengthSeconds: number; // Int!
     ogDescription: string | null; // String
+    releasedAt: NexusGenScalars['Date'] | null; // Date
     sourceImageUrl: string | null; // String
     summary: string | null; // String
     thumbnailImageUrl: string | null; // String
@@ -280,6 +281,7 @@ export interface NexusGenFieldTypes {
     createContentFromUrl: NexusGenRootTypes['Content']; // Content!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
+    followProfile: string; // String!
     getAuthToken: string; // String!
     recordInteraction: NexusGenRootTypes['Interaction']; // Interaction!
     removeFromQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
@@ -290,6 +292,7 @@ export interface NexusGenFieldTypes {
     showMore: string; // String!
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startListening: NexusGenRootTypes['ContentSession']; // ContentSession!
+    unfollowProfile: string; // String!
     updateContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
@@ -412,6 +415,7 @@ export interface NexusGenFieldTypeNames {
     lengthMs: 'Int'
     lengthSeconds: 'Int'
     ogDescription: 'String'
+    releasedAt: 'Date'
     sourceImageUrl: 'String'
     summary: 'String'
     thumbnailImageUrl: 'String'
@@ -505,6 +509,7 @@ export interface NexusGenFieldTypeNames {
     createContentFromUrl: 'Content'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
+    followProfile: 'String'
     getAuthToken: 'String'
     recordInteraction: 'Interaction'
     removeFromQueue: 'FeedItem'
@@ -515,6 +520,7 @@ export interface NexusGenFieldTypeNames {
     showMore: 'String'
     startContent: 'ContentSession'
     startListening: 'ContentSession'
+    unfollowProfile: 'String'
     updateContentSession: 'ContentSession'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
@@ -632,6 +638,9 @@ export interface NexusGenArgTypes {
       referralCode?: string | null; // String
       username?: string | null; // String
     }
+    followProfile: { // args
+      username: string; // String!
+    }
     recordInteraction: { // args
       contentId: string; // ID!
       eventType: NexusGenEnums['InteractionTypeEnum']; // InteractionTypeEnum!
@@ -656,6 +665,9 @@ export interface NexusGenArgTypes {
     }
     startContent: { // args
       contentId: string; // ID!
+    }
+    unfollowProfile: { // args
+      username: string; // String!
     }
     updateContentSession: { // args
       contentSessionId: string; // ID!
@@ -727,7 +739,7 @@ export interface NexusGenArgTypes {
       currentMs?: number | null; // Int
     }
     getProfile: { // args
-      userId?: string | null; // ID
+      username?: string | null; // ID
     }
     searchSimilarLinks: { // args
       limit: number | null; // Int

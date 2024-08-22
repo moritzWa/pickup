@@ -83,6 +83,7 @@ export type BaseContentFields = Pick<
   | "lengthMs"
   | "lengthFormatted"
   | "content"
+  | "releasedAt"
 > & {
   contentSession?: Pick<
     ContentSession,
@@ -107,6 +108,7 @@ export const BaseContentFields = gql`
     authorImageUrl
     authorName
     context
+    releasedAt
     followUpQuestions {
       id
       question

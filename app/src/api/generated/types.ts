@@ -63,6 +63,7 @@ export type Content = {
   lengthMs?: Maybe<Scalars['Int']['output']>;
   lengthSeconds: Scalars['Int']['output'];
   ogDescription?: Maybe<Scalars['String']['output']>;
+  releasedAt?: Maybe<Scalars['Date']['output']>;
   sourceImageUrl?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
   thumbnailImageUrl?: Maybe<Scalars['String']['output']>;
@@ -201,6 +202,7 @@ export type Mutation = {
   createContentFromUrl: Content;
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
+  followProfile: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
   recordInteraction: Interaction;
   removeFromQueue: FeedItem;
@@ -211,6 +213,7 @@ export type Mutation = {
   showMore: Scalars['String']['output'];
   startContent: ContentSession;
   startListening: ContentSession;
+  unfollowProfile: Scalars['String']['output'];
   updateContentSession: ContentSession;
   updateUser: User;
   verifyPhoneNumber: User;
@@ -258,6 +261,11 @@ export type MutationCreateUserArgs = {
 };
 
 
+export type MutationFollowProfileArgs = {
+  username: Scalars['String']['input'];
+};
+
+
 export type MutationRecordInteractionArgs = {
   contentId: Scalars['ID']['input'];
   eventType: InteractionTypeEnum;
@@ -294,6 +302,11 @@ export type MutationSetInterestsArgs = {
 
 export type MutationStartContentArgs = {
   contentId: Scalars['ID']['input'];
+};
+
+
+export type MutationUnfollowProfileArgs = {
+  username: Scalars['String']['input'];
 };
 
 

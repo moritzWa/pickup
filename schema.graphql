@@ -43,6 +43,7 @@ type Content {
   lengthMs: Int
   lengthSeconds: Int!
   ogDescription: String
+  releasedAt: Date
   sourceImageUrl: String
   summary: String
   thumbnailImageUrl: String
@@ -172,6 +173,7 @@ type Mutation {
   createContentFromUrl(authProviderId: String, url: String!): Content!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
+  followProfile(username: String!): String!
   getAuthToken: String!
   recordInteraction(contentId: ID!, eventType: InteractionTypeEnum!): Interaction!
   removeFromQueue(contentId: ID!): FeedItem!
@@ -182,6 +184,7 @@ type Mutation {
   showMore: String!
   startContent(contentId: ID!): ContentSession!
   startListening: ContentSession!
+  unfollowProfile(username: String!): String!
   updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean, lastListenedAt: Date): ContentSession!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, description: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int, username: String): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
@@ -223,7 +226,7 @@ type Query {
   getNextContent(afterContentId: ID!, currentMs: Int): FeedItem
   getPaymentMethods: [PaymentMethod!]!
   getPrevContent(beforeContentId: ID!, currentMs: Int): FeedItem
-  getProfile(userId: ID): Profile!
+  getProfile(username: ID): Profile!
   getQueue: GetQueueResponse!
   me: User
   searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!

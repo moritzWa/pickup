@@ -40,7 +40,7 @@ import {
   Profile as ProfileT,
   Query,
 } from "src/api/generated/types";
-import { colors } from "src/components";
+import { Button, colors } from "src/components";
 import { ContentRow } from "src/components/Content/ContentRow";
 import { CurrentAudio } from "src/components/CurrentAudio";
 import { FollowersInfo } from "src/components/FollowersInfo";
@@ -59,14 +59,12 @@ import { v4 as uuidv4 } from "uuid";
 export const UserProfile = () => {
   const { me, refetchMe } = useMe("network-only");
 
-  // console.log("ME: " + me);
-
   const navigation = useNavigation<NavigationProps>();
   const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
   const username = params?.username ?? me?.id;
   const insets = useSafeAreaInsets();
-  const isME = username === me?.id;
+  const isME = username === me?.username;
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -375,6 +373,7 @@ const Profile = ({ username }: { username: string | null }) => {
     textPrimary,
     activityIndicator,
     text,
+    header,
     theme,
     textSecondary,
   } = fullTheme;
@@ -399,56 +398,56 @@ const Profile = ({ username }: { username: string | null }) => {
 
   const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
-  //   const [followProfile, { loading: loadingFollow }] = useMutation<
-  //     Pick<Mutation, "followProfile">
-  //   >(api.profiles.follow);
+  const [followProfile, { loading: loadingFollow }] = useMutation<
+    Pick<Mutation, "followProfile">
+  >(api.users.follow);
 
-  //   const [unfollowProfile, { loading: loadingUnfollow }] = useMutation<
-  //     Pick<Mutation, "unfollowProfile">
-  //   >(api.profiles.unfollow);
+  const [unfollowProfile, { loading: loadingUnfollow }] = useMutation<
+    Pick<Mutation, "unfollowProfile">
+  >(api.users.unfollow);
 
-  //   const followUser = async () => {
-  //     try {
-  //       await followProfile({
-  //         variables: {
-  //           username,
-  //         },
-  //         refetchQueries: [api.profiles.getProfile],
-  //       });
+  const followUser = async () => {
+    try {
+      await followProfile({
+        variables: {
+          username,
+        },
+        refetchQueries: [api.users.getProfile],
+      });
 
-  //       // Alert.alert("Success", `Successfully followed ${profile?.name}.`);
-  //     } catch (e) {
-  //       console.error(e);
+      // Alert.alert("Success", `Successfully followed ${profile?.name}.`);
+    } catch (e) {
+      console.error(e);
 
-  //       Alert.alert(
-  //         "Error",
-  //         (e as any)?.message || "An error occurred. Please try again."
-  //       );
-  //     }
-  //   };
+      Alert.alert(
+        "Error",
+        (e as any)?.message || "An error occurred. Please try again."
+      );
+    }
+  };
 
-  //   const unfollowUser = async () => {
-  //     try {
-  //       await unfollowProfile({
-  //         variables: {
-  //           username,
-  //         },
-  //         refetchQueries: [api.profiles.getProfile],
-  //       });
+  const unfollowUser = async () => {
+    try {
+      await unfollowProfile({
+        variables: {
+          username,
+        },
+        refetchQueries: [api.users.getProfile],
+      });
 
-  //       // Alert.alert(
-  //       //   "Success",
-  //       //   `Successfully un-followed ${profile?.name.trim() || "user"}.`
-  //       // );
-  //     } catch (e) {
-  //       console.error(e);
+      // Alert.alert(
+      //   "Success",
+      //   `Successfully un-followed ${profile?.name.trim() || "user"}.`
+      // );
+    } catch (e) {
+      console.error(e);
 
-  //       Alert.alert(
-  //         "Error",
-  //         (e as any)?.message || "An error occurred. Please try again."
-  //       );
-  //     }
-  //   };
+      Alert.alert(
+        "Error",
+        (e as any)?.message || "An error occurred. Please try again."
+      );
+    }
+  };
 
   const _editProfile = () => {
     navigation.navigate("EditProfile");
@@ -661,7 +660,7 @@ const Profile = ({ username }: { username: string | null }) => {
             flexDirection: "row",
           }}
         >
-          {/* <Button
+          <Button
             style={{
               borderRadius: 100,
               height: 35,
@@ -683,7 +682,7 @@ const Profile = ({ username }: { username: string | null }) => {
             onPress={profile?.isFollowing ? unfollowUser : followUser}
             loading={loadingFollow || loadingUnfollow}
             label={profile?.isFollowing ? "Unfollow" : "Follow"}
-          /> */}
+          />
         </View>
       )}
     </View>

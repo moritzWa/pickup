@@ -45,12 +45,12 @@ export class PostgresUserRepository {
     }
 
     // YOU MUST CHECK BY LOWERCASE IF YOU SEARCH BY USERNAME!
-    async findByUsername(username: string): Promise<UserArrayResponse> {
+    async findByUsername(username: string): Promise<UserResponse> {
         return Helpers.trySuccessFail(async () => {
             const users = await this.repo
                 .createQueryBuilder()
                 .where("LOWER(username) = LOWER(:username)", { username })
-                .getMany();
+                .getOne();
 
             return success(users);
         });
