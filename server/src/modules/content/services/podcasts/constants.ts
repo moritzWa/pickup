@@ -80,8 +80,63 @@ export const PODCASTS = [
         url: "https://naval.libsyn.com/rss",
         name: "Naval",
     },
+    // =====New=====
     {
-        url: "https://feeds.megaphone.fm/aoi",
+        url: "https://anchor.fm/s/e231a4ec/podcast/rss",
+        name: "The Peel",
+    },
+    {
+        // https://feeds.buzzsprout.com/2342471.rss IDK
+        url: "https://feeds.buzzsprout.com/2342471.rss",
+        name: "Stoic Coffee Break",
+    },
+    {
+        name: "Crucible Moments",
+        url: "https://feeds.megaphone.fm/VMP5587961509",
+    },
+    {
         name: "Art of Investing",
+        url: "https://feeds.megaphone.fm/aoi",
+    },
+    {
+        name: "Generally Intelligent",
+        url: "https://anchor.fm/s/42cab330/podcast/rss",
+    },
+    {
+        // IDK
+        url: "https://feeds.captivate.fm/gradient-dissent/",
+        name: "Gradient Dissent",
+    },
+    {
+        name: "Infinite Loops",
+        url: "https://infiniteloops.libsyn.com/rss",
+    },
+    {
+        name: "This Week in Startups",
+        url: "https://anchor.fm/s/7c624c84/podcast/rss",
+    },
+    {
+        name: "Village Global",
+        url: "https://www.spreaker.com/show/2737820/episodes/feed",
+    },
+    {
+        name: "Y Combinator Startup",
+        url: "https://anchor.fm/s/8c1524bc/podcast/rss",
+    },
+    {
+        name: "Increments",
+        url: "https://feeds.fireside.fm/increments/rss",
+    },
+    {
+        name: "Lex Fridman",
+        url: "https://lexfridman.com/feed/podcast",
+    },
+    {
+        name: "Machine LEarning Street Talk",
+        url: "https://anchor.fm/s/1e4a0eac/podcast/rss",
+    },
+    {
+        name: "NfX",
+        url: "https://feeds.podcastai.com/Vrs8cvjnVNikq1eUBoiysC.xml",
     },
 ];

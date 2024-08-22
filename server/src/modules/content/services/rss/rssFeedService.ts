@@ -16,6 +16,7 @@ import { keyBy } from "lodash";
 import { fork } from "radash";
 import { inngest } from "src/jobs/inngest/clients";
 import { InngestEventName } from "src/jobs/inngest/types";
+import { config } from "src/config";
 
 const parser = new Parser();
 
@@ -157,11 +158,13 @@ const upsertRssFeed = async (
 
         console.log(`[inserted ${contentToAdd.length} content]`);
 
-        for (const addedContent of contentToAdd) {
-            await inngest.send({
-                name: InngestEventName.ProcessContent,
-                data: { contentId: addedContent.id },
-            });
+        if (config.env === "production") {
+            for (const addedContent of contentToAdd) {
+                await inngest.send({
+                    name: InngestEventName.ProcessContent,
+                    data: { contentId: addedContent.id },
+                });
+            }
         }
 
         return success({

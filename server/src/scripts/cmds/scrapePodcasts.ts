@@ -12,9 +12,11 @@ import { PODCASTS } from "src/modules/content/services/podcasts/constants";
 const scrapePodcasts = async () => {
     console.log(`[scraping ${PODCASTS.length} podcasts]`);
 
+    const newPodcasts = PODCASTS.slice(20);
+
     debugger;
 
-    for (const podcast of PODCASTS) {
+    for (const podcast of newPodcasts) {
         const contentResponse = await RSSFeedService.scrapeRssFeed(
             podcast.url,
             podcast.name,

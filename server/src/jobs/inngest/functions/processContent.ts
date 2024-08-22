@@ -285,6 +285,7 @@ export const _updateAudioDuration = async (
             lengthMs: durationMS,
         });
     } catch (err) {
+        debugger;
         return failure(new UnexpectedError(err));
     }
 };
