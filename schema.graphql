@@ -167,7 +167,7 @@ type Mutation {
   addOpenGraphDataToContent(contentId: String!): Content!
   addToQueue(contentId: ID!): FeedItem!
   archiveContent(contentId: ID!): FeedItem!
-  bookmarkContent(contentId: ID!): ContentSession!
+  bookmarkContent(authProviderId: String, contentId: ID!): ContentSession!
   clearQueue: String!
   createAuthor(imageUrl: String, name: String!): Author
   createContentFromUrl(authProviderId: String, url: String!): Content!

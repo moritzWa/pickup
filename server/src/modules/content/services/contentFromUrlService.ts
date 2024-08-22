@@ -7,10 +7,10 @@ import {
     success,
     UnexpectedError,
 } from "src/core/logic";
-import { AudioService } from "src/shared/audioService";
 import { Logger } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo } from "../infra";
+import { AudioGenerationQueue } from "./audioGenerationQueue";
 import { OpenGraphService } from "./openGraphService";
 import { ScrapeContentTextService } from "./scrapeContentTextService";
 
@@ -59,26 +59,6 @@ export const ContentFromUrlService = {
                 url
             );
 
-            let audioUrl: string | null = null;
-            let lengthMs: number | null = null;
-
-            console.log("process.env.NODE_ENV", process.env.NODE_ENV);
-
-            const createAudioContent =
-                process.env.NODE_ENV === "production" ? true : false;
-            if (createAudioContent) {
-                // Generate audio
-                const audioResponse = await AudioService.generate(
-                    parsedContent.content || "",
-                    parsedContent.title || ""
-                );
-                if (audioResponse.isFailure()) {
-                    return failure(audioResponse.error);
-                }
-                audioUrl = audioResponse.value.url;
-                lengthMs = audioResponse.value.lengthMs;
-            }
-
             const content: Content = {
                 id: uuidv4(),
                 type: ContentType.ARTICLE,
@@ -87,14 +67,13 @@ export const ContentFromUrlService = {
                 insertionId: null,
                 isProcessed: false,
                 thumbnailImageUrl: openGraphData.thumbnailImageUrl || null,
-                audioUrl,
-                lengthMs,
+                audioUrl: null, // Initially null
+                lengthMs: null, // Initially null
                 title: parsedContent.title || "",
                 summary: null,
                 ogDescription: openGraphData.ogDescription || null,
                 websiteUrl: url,
                 categories: parsedContent.categories || [],
-                // we generate new authors in scrapeContentTextService if byline found
                 authors: parsedContent.authors || [],
                 followUpQuestions: [],
                 referenceId: null,
@@ -112,14 +91,25 @@ export const ContentFromUrlService = {
                 sourceImageUrl: parsedContent.thumbnailImageUrl || null,
             };
 
-            // Save or update content
-
-            Logger.info(
-                `contentFromUrlService.createFromUrl Saving content with url: ${url}`
-            );
+            // Save content to the database
             const savedContentResponse = await contentRepo.save(content);
             if (savedContentResponse.isFailure()) {
                 return failure(savedContentResponse.error);
+            }
+
+            const createAudioContent =
+                process.env.NODE_ENV === "production" ? true : false;
+            if (createAudioContent) {
+                // Enqueue audio generation task
+                await AudioGenerationQueue.add("generateAudio", {
+                    contentId: content.id,
+                    text: parsedContent.content || "",
+                    title: parsedContent.title || "",
+                });
+            } else {
+                Logger.info(
+                    `Audio generation disabled in contentFromUrlService.ts because process.env.NODE_ENV is not production: ${content.title}`
+                );
             }
 
             return success(savedContentResponse.value);

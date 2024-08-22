@@ -2,6 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
 
 module.exports = {
   // Note:
@@ -44,6 +45,9 @@ module.exports = {
         { from: "./src/icons/*" },
         { from: "./src/css/*" },
       ],
+    }),
+    new Dotenv({
+      path: `./.env.${process.env.NODE_ENV}`, // Load the appropriate .env file
     }),
   ],
   output: {
