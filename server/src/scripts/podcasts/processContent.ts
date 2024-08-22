@@ -43,9 +43,12 @@ const _embedContentV2 = async (contentId: string) => {
         console.log(`[no summary for ${content.title}]`);
         return Promise.resolve();
     }
-    const embeddingResponse = await openai.embeddings.create(
-        `Title: ${content.title}. Summary: ${content.summary || ""}`
-    );
+
+    const query = `Title: ${content.title}. Summary: ${content.summary || ""}`;
+    // only use the first 4k tokens for embedding
+    const truncatedQuery = query.slice(0, 4000); // Truncate to approximately 4000 characters (roughly 4k tokens)
+
+    const embeddingResponse = await openai.embeddings.create(truncatedQuery);
 
     if (embeddingResponse.isFailure()) {
         throw embeddingResponse.error;
@@ -68,9 +71,10 @@ const processContentV2 = async (contentId: string) => {
             return failure(contentResponse.error);
         }
 
-        await _embedContentV2(contentId);
-
-        await _updateAudioDuration(contentResponse.value);
+        await Promise.all([
+            _embedContentV2(contentId),
+            _updateAudioDuration(contentResponse.value),
+        ]);
 
         await _markContentProcessed(contentId);
 
@@ -95,7 +99,7 @@ const run = async () => {
     console.time("processContent");
 
     // chunks of 10
-    const results = chunk(content, 50);
+    const results = chunk(content, 1);
 
     console.time("processContent");
 

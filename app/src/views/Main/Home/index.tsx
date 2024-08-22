@@ -925,8 +925,8 @@ const FriendsScroller = () => {
         <ProfileIcon
           style={{
             marginRight: 5,
-            borderWidth: 2,
-            borderColor: theme.border,
+            // borderWidth: 2,
+            // borderColor: theme.border,
           }}
           size={50}
           onPress={() => onPressUsername(f.profile.username || "")}

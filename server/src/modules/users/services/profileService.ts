@@ -120,6 +120,7 @@ const followUser = async (
     const createResp = await relationshipRepo.create({
         fromUserId: fromUser.id,
         toUserId: toUser.id,
+        lastCheckedAt: null,
     });
 
     if (createResp.isFailure()) {
