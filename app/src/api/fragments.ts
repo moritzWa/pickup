@@ -1,5 +1,11 @@
 import { gql } from "@apollo/client";
-import { Content, ContentSession, FeedItem, User } from "./generated/types";
+import {
+  Content,
+  ContentSession,
+  ContentUserFollowingProfile,
+  FeedItem,
+  User,
+} from "./generated/types";
 
 export type BaseUserFields = Pick<
   User,
@@ -26,6 +32,7 @@ export type BaseUserFields = Pick<
   | "authProviderId"
   | "timezone"
   | "commuteTime"
+  | "username"
 >;
 
 export const BaseUserFields = gql`
@@ -52,6 +59,7 @@ export const BaseUserFields = gql`
     authProviderId
     timezone
     commuteTime
+    username
   }
 `;
 
@@ -87,6 +95,7 @@ export type BaseContentFields = Pick<
     | "createdAt"
     | "updatedAt"
   >;
+  friends?: ContentUserFollowingProfile[];
 };
 
 export const BaseContentFields = gql`
@@ -102,6 +111,12 @@ export const BaseContentFields = gql`
       id
       question
       answer
+    }
+    friends {
+      id
+      name
+      username
+      imageUrl
     }
     title
     summary

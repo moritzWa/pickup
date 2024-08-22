@@ -1,0 +1,474 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  TouchableHighlight,
+  View,
+  Text,
+  ScrollView,
+  FlatList,
+  ActivityIndicator,
+  SectionList,
+  SectionListData,
+  Linking,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Share,
+  Platform,
+} from "react-native";
+import { IS_IPAD, constants } from "src/config";
+import { useTheme } from "src/hooks/useTheme";
+import * as Haptics from "expo-haptics";
+import { api, apolloClient } from "src/api";
+import { Maybe, Query } from "src/api/generated/types";
+import { RefreshControl } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
+import { NavigationProps } from "src/navigation";
+import { NetworkStatus, useLazyQuery } from "@apollo/client";
+import { debounce, noop } from "lodash";
+import { SearchBar } from "@rneui/base";
+import { PERMISSIONS, check, request } from "react-native-permissions";
+import { colors } from "src/components";
+import Contacts from "react-native-contacts";
+import Fuse from "fuse.js";
+import { ContactRow } from "./ContactRow";
+import { useMe } from "src/hooks";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faSearch, faTimes } from "@fortawesome/pro-solid-svg-icons";
+
+export const SearchResults = () => {
+  const fullTheme = useTheme();
+  const { text, header } = fullTheme;
+  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<NavigationProps>();
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const { me } = useMe();
+  const [isHidden, setIsHidden] = useState(false);
+
+  const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
+
+  const [search, setSearch] = useState(
+    "" //  "WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk" // "94sFWT94hg6qK9VtYwGz8VxbyEMaXf9H2U3HTTbofimy"
+  );
+  const [loadingDebounceResults, setLoadingDebounceResults] = useState(false);
+
+  // const [
+  //   getDiscoveryResults,
+  //   {
+  //     data: resultsData,
+  //     networkStatus: resultsNetworkStatus,
+  //     loading: resultsLoading,
+  //     error: errorGetResults,
+  //   },
+  // ] = useLazyQuery<{
+  //   getDiscoveryResults: GetDiscoveryResultsResponse;
+  // }>(api.discovery.getDiscoveryResults, {
+  //   notifyOnNetworkStatusChange: true,
+  //   fetchPolicy: "cache-first",
+  // });
+
+  const _getContactsPermission = async () => {
+    const CONTACT_PERMISSION = Platform.select({
+      ios: PERMISSIONS.IOS.CONTACTS,
+      android: PERMISSIONS.ANDROID.READ_CONTACTS,
+      default: PERMISSIONS.IOS.CONTACTS,
+    });
+
+    // check if have contacts permission on iOS
+    const status = await check(CONTACT_PERMISSION);
+
+    if (status === "granted") {
+      setHasPermission(true);
+    } else {
+      setHasPermission(false);
+    }
+  };
+
+  useEffect(() => void _getContactsPermission(), []);
+
+  const _syncContacts = async () => {
+    const contacts = await Contacts.getAll();
+
+    setContacts(contacts);
+  };
+
+  useEffect(() => {
+    if (hasPermission) {
+      _syncContacts();
+    }
+  }, [hasPermission]);
+
+  const _requestPermission = async () => {
+    const CONTACT_PERMISSION = Platform.select({
+      ios: PERMISSIONS.IOS.CONTACTS,
+      android: PERMISSIONS.ANDROID.READ_CONTACTS,
+      default: PERMISSIONS.IOS.CONTACTS,
+    });
+
+    const status = await check(CONTACT_PERMISSION);
+
+    // if blocked open up settings, otherwise request
+    if (status === "blocked") {
+      Linking.openSettings();
+    } else {
+      const status = await request(CONTACT_PERMISSION);
+      setHasPermission(status === "granted");
+    }
+  };
+
+  const _onDeny = () => {
+    setIsHidden(true);
+  };
+
+  const discoveryResults = useMemo(() => {
+    return [] ?? null;
+  }, []);
+
+  // const { results, users } = discoveryResults ?? { results: null, users: null };
+
+  const debouncedGetDiscoveryResults = useCallback(
+    debounce((search: string) => {
+      // getDiscoveryResults({
+      //   variables: {
+      //     query: search,
+      //   },
+      // });
+      setLoadingDebounceResults(false);
+      // trackEvent("discovery_search", { query: search });
+    }, 500), // 200 was way too low
+    []
+  );
+
+  useEffect(() => {
+    setLoadingDebounceResults(true);
+
+    debouncedGetDiscoveryResults(search);
+  }, [search, debouncedGetDiscoveryResults]);
+
+  const loading = loadingDebounceResults;
+
+  const _onRefresh = useCallback(() => {
+    setRefreshing(true);
+    apolloClient.refetchQueries({
+      // include: [api.discovery.getDiscoveryResults],
+    });
+    // set timeout
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2_000);
+  }, []);
+
+  // const onSelectUser = (user: DiscoveryUserResult) => {
+  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+  //   navigation.navigate("UserProfile", {
+  //     username: user.username,
+  //   });
+  // };
+
+  const onSelectContact = (contact: Contacts.Contact) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    const phoneNumber = contact.phoneNumbers?.[0]?.number;
+    const message = "TODO:";
+
+    if (phoneNumber) {
+      // open up to send to this contact on imessage
+      const url = `sms:${phoneNumber}?body=${message}`;
+
+      Linking.openURL(url);
+
+      return;
+    }
+
+    // open up to send to this contact
+    Share.share({
+      message: message,
+      // url: constants.appStoreUrl,
+    });
+  };
+
+  // indexed contacts by some keys
+  const contactSearch = useMemo(() => {
+    return new Fuse(contacts, {
+      threshold: 0.1,
+      isCaseSensitive: false,
+      keys: ["displayName", "givenName", "familyName"],
+    });
+  }, [contacts.length]);
+
+  const relevantContacts = useMemo((): Contacts.Contact[] => {
+    if (!search) return contacts;
+    return contactSearch.search(search).map((i) => i.item);
+  }, [contactSearch, search, contacts.length]);
+
+  console.log(contacts.length, relevantContacts.length, search);
+
+  const contactSection: SectionListData<Contacts.Contact> = {
+    key: "contacts",
+    data: relevantContacts ?? [],
+    keyExtractor: (item) => item.recordID,
+    renderItem: ({ item }) => (
+      <ContactRow onSelectContact={onSelectContact} contact={item} />
+    ),
+  };
+
+  const hasResults = !!contacts && contacts.length > 0;
+
+  return (
+    <>
+      <SearchBar
+        onChangeText={setSearch}
+        autoCapitalize="none"
+        showCancel={false}
+        cancelButtonProps={{ style: { display: "none" } }}
+        autoComplete="off"
+        autoCorrect={false}
+        value={search}
+        containerStyle={{
+          backgroundColor: "transparent",
+          paddingHorizontal: 5,
+        }}
+        searchIcon={
+          <FontAwesomeIcon icon={faSearch} color={fullTheme.text} size={16} />
+        }
+        inputContainerStyle={{
+          backgroundColor: fullTheme.medBackground,
+          height: 45,
+          paddingHorizontal: 5,
+          paddingRight: 0,
+          borderRadius: 10,
+        }}
+        clearIcon={
+          <FontAwesomeIcon icon={faTimes} color={fullTheme.text} size={16} />
+        }
+        inputStyle={{
+          color: header,
+          fontSize: 16,
+          fontFamily: "Raleway-Regular",
+        }}
+        platform="ios"
+        placeholder="Search"
+      />
+
+      {!hasPermission && !isHidden ? (
+        <ContactsPrompt onAllow={_requestPermission} onDeny={_onDeny} />
+      ) : null}
+
+      <SectionList
+        sections={[contactSection] as any[]}
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="interactive"
+        windowSize={10}
+        maxToRenderPerBatch={10}
+        // make it render efficiently
+        initialNumToRender={10}
+        style={{
+          flex: 1,
+        }}
+        contentContainerStyle={{
+          paddingBottom: 100,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={_onRefresh}
+            tintColor={fullTheme.activityIndicator}
+          />
+        }
+        ListEmptyComponent={
+          loading && !hasResults ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 50,
+              }}
+            >
+              <ActivityIndicator
+                size="large"
+                color={fullTheme.activityIndicator}
+              />
+            </View>
+          ) : null
+        }
+        ListHeaderComponent={
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: 10,
+              paddingHorizontal: 15,
+              paddingBottom: 10,
+            }}
+          >
+            <Text
+              style={{
+                flex: 1,
+                fontFamily: "Raleway-Medium",
+                fontSize: IS_IPAD ? 30 : 22,
+                color: header,
+              }}
+            >
+              {hasResults ? "Results" : ""}
+            </Text>
+
+            {loading && hasResults && (
+              <ActivityIndicator
+                size={IS_IPAD ? 30 : 24}
+                style={{
+                  marginLeft: 10,
+                }}
+                color={fullTheme.activityIndicator}
+              />
+            )}
+          </View>
+        }
+      />
+    </>
+  );
+};
+
+const ContactsPrompt = ({
+  onAllow,
+  onDeny,
+}: {
+  onAllow: () => void;
+  onDeny: () => void;
+}) => {
+  const { theme } = useTheme();
+
+  return (
+    <View style={[styles.container, {}]}>
+      <View
+        style={[
+          styles.dialogBox,
+          {
+            width: 275,
+            backgroundColor: theme === "dark" ? colors.gray80 : colors.gray95,
+            borderColor: colors.gray70,
+            borderWidth: 1,
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.title,
+            {
+              fontFamily: "Raleway-SemiBold",
+            },
+          ]}
+        >
+          View Contacts
+        </Text>
+
+        <Text
+          style={[
+            styles.message,
+            {
+              fontFamily: "Raleway-Regular",
+              paddingBottom: 20,
+            },
+          ]}
+        >
+          We'll never text your contacts.
+        </Text>
+
+        <View
+          style={{
+            backgroundColor: colors.gray70,
+            height: 1,
+            width: "100%",
+          }}
+        />
+
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              padding: 13,
+              alignItems: "center",
+              borderRightColor: colors.gray70,
+              borderRightWidth: 1,
+            }}
+            onPress={onDeny}
+            activeOpacity={0.75}
+          >
+            <Text
+              style={{
+                color: "#007bff",
+                fontSize: 16,
+                fontFamily: "Raleway-Regular",
+              }}
+            >
+              No Thanks
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.75}
+            style={{
+              flex: 1,
+              padding: 13,
+              alignItems: "center",
+            }}
+            onPress={onAllow}
+          >
+            <Text
+              style={{
+                color: "#007bff",
+                fontSize: 16,
+                fontFamily: "Raleway-SemiBold",
+              }}
+            >
+              Yes, Enable
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dialogBox: {
+    width: "80%",
+    backgroundColor: colors.gray80,
+    borderRadius: 15,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 18,
+    paddingTop: 25,
+    fontWeight: "bold",
+  },
+  message: {
+    fontSize: 14,
+    padding: 10,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    borderTopColor: colors.gray60,
+    borderTopWidth: 1,
+  },
+  button: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 5,
+    margin: 5,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+});

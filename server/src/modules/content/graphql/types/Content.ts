@@ -1,4 +1,4 @@
-import { nonNull, nullable, objectType } from "nexus";
+import { list, nonNull, nullable, objectType } from "nexus";
 import { Author } from "src/modules/author/graphql";
 
 export const FollowUpQuestion = objectType({
@@ -7,6 +7,16 @@ export const FollowUpQuestion = objectType({
         t.nonNull.string("id");
         t.nonNull.string("question");
         t.nonNull.string("answer");
+    },
+});
+
+export const ContentUserFollowingProfile = objectType({
+    name: "ContentUserFollowingProfile",
+    definition: (t) => {
+        t.nonNull.id("id");
+        t.nullable.string("name");
+        t.nullable.string("imageUrl");
+        t.nullable.string("username");
     },
 });
 
@@ -28,6 +38,9 @@ export const Content = objectType({
         t.list.field("authors", {
             type: nonNull(Author),
             resolve: (parent) => parent.authors || [],
+        });
+        t.field("friends", {
+            type: nullable(list(nonNull("ContentUserFollowingProfile"))),
         });
         t.nullable.string("thumbnailImageUrl");
         t.nullable.string("ogDescription");

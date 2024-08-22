@@ -44,6 +44,7 @@ import {
   getQueueContentIdSet,
 } from "src/redux/reducers/audio";
 import { extractDomain } from "src/utils/author";
+import ProfileIcon from "../ProfileIcon";
 
 const IMAGE_SIZE = 32;
 
@@ -408,7 +409,7 @@ export const ContentRow = ({
                     style={{ marginRight: 5 }}
                   /> */}
 
-                      <Text
+                      {/* <Text
                         style={{
                           color: theme.header,
                           fontSize: 14,
@@ -417,7 +418,19 @@ export const ContentRow = ({
                         numberOfLines={1}
                       >
                         {c.authorName || extractDomain(c.websiteUrl)}
-                      </Text>
+                      </Text> */}
+
+                      {(c.friends ?? []).map((f) => (
+                        <ProfileIcon
+                          size={22}
+                          initials={f.name?.charAt(0)}
+                          textStyle={{
+                            fontSize: 14,
+                            fontFamily: "Raleway-ExtraBold",
+                          }}
+                          profileImageUrl={f.imageUrl}
+                        />
+                      ))}
                     </View>
 
                     <View

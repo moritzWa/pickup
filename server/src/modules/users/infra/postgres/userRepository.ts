@@ -3,6 +3,7 @@ import {
     FindManyOptions,
     FindOneOptions,
     getRepository,
+    In,
     Repository,
 } from "typeorm";
 
@@ -82,12 +83,18 @@ export class PostgresUserRepository {
         }
     }
 
-    async findByIds(userIds: string[]): Promise<UserArrayResponse> {
+    async findByIds(
+        userIds: string[],
+        opts?: FindManyOptions<UserModel>
+    ): Promise<UserArrayResponse> {
         return Helpers.trySuccessFail(async () => {
-            const users = await this.repo
-                .createQueryBuilder()
-                .where("id IN (:...userIds)", { userIds })
-                .getMany();
+            const users = await this.repo.find({
+                ...opts,
+                where: {
+                    ...opts?.where,
+                    id: In(userIds),
+                },
+            });
 
             return success(users);
         });

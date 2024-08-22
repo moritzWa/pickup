@@ -36,6 +36,12 @@ const CreateUser = gql`
   }
 `;
 
+const CheckValidUsername = gql`
+  query CheckValidUsername($username: String!) {
+    checkValidUsername(username: $username)
+  }
+`;
+
 const UpdateUser = gql`
   ${BaseUserFields}
   mutation UpdateUser(
@@ -45,6 +51,8 @@ const UpdateUser = gql`
     $hasPushNotifications: Boolean
     $biometricPublicKey: String
     $avatarImageUrl: String
+    $description: String
+    $username: String
   ) {
     updateUser(
       name: $name
@@ -53,6 +61,8 @@ const UpdateUser = gql`
       hasPushNotifications: $hasPushNotifications
       biometricPublicKey: $biometricPublicKey
       avatarImageUrl: $avatarImageUrl
+      description: $description
+      username: $username
     ) {
       ...BaseUserFields
     }
@@ -360,8 +370,27 @@ const GetContentSession = gql`
   }
 `;
 
+const GetFollows = gql`
+  query GetFollows($username: String!) {
+    getFollows(username: $username) {
+      followers {
+        username
+        name
+        avatarImageUrl
+      }
+      following {
+        username
+        name
+        avatarImageUrl
+      }
+    }
+  }
+`;
+
 export const api = {
   users: {
+    getFollows: GetFollows,
+    checkValidUsername: CheckValidUsername,
     deleteMe: DeleteMe,
     create: CreateUser,
     getIntercomHash: GetIntercomMobileToken,

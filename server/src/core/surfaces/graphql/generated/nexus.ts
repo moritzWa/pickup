@@ -66,6 +66,12 @@ export interface NexusGenObjects {
     transcription: string; // String!
   }
   ContentSession: entities.ContentSession ;
+  ContentUserFollowingProfile: { // root type
+    id: string; // ID!
+    imageUrl?: string | null; // String
+    name?: string | null; // String
+    username?: string | null; // String
+  }
   CreateUserResponse: { // root type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
@@ -75,6 +81,10 @@ export interface NexusGenObjects {
     answer: string; // String!
     id: string; // String!
     question: string; // String!
+  }
+  FollowersResponse: { // root type
+    followers: NexusGenRootTypes['Profile'][]; // [Profile!]!
+    following: NexusGenRootTypes['Profile'][]; // [Profile!]!
   }
   GetMobileUpdateResponse: { // root type
     latestVersion?: string | null; // String
@@ -171,6 +181,7 @@ export interface NexusGenFieldTypes {
     couldntFetchThumbnail: boolean | null; // Boolean
     createdAt: NexusGenScalars['Date']; // Date!
     followUpQuestions: NexusGenRootTypes['FollowUpQuestion'][] | null; // [FollowUpQuestion!]
+    friends: NexusGenRootTypes['ContentUserFollowingProfile'][] | null; // [ContentUserFollowingProfile!]
     id: string; // String!
     lengthFormatted: string | null; // String
     lengthMs: number | null; // Int
@@ -201,6 +212,12 @@ export interface NexusGenFieldTypes {
     updatedAt: NexusGenScalars['Date']; // Date!
     userId: string; // String!
   }
+  ContentUserFollowingProfile: { // field return type
+    id: string; // ID!
+    imageUrl: string | null; // String
+    name: string | null; // String
+    username: string | null; // String
+  }
   CreateUserResponse: { // field return type
     token: string; // String!
     user: NexusGenRootTypes['User']; // User!
@@ -220,6 +237,10 @@ export interface NexusGenFieldTypes {
     answer: string; // String!
     id: string; // String!
     question: string; // String!
+  }
+  FollowersResponse: { // field return type
+    followers: NexusGenRootTypes['Profile'][]; // [Profile!]!
+    following: NexusGenRootTypes['Profile'][]; // [Profile!]!
   }
   GetMobileUpdateResponse: { // field return type
     latestVersion: string | null; // String
@@ -290,6 +311,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     checkCode: boolean; // Boolean!
+    checkValidUsername: string; // String!
     getActivity: NexusGenRootTypes['Content'][]; // [Content!]!
     getArchived: NexusGenRootTypes['Content'][]; // [Content!]!
     getAuthor: NexusGenRootTypes['Author']; // Author!
@@ -299,6 +321,7 @@ export interface NexusGenFieldTypes {
     getContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     getCurrentContentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     getFeed: NexusGenRootTypes['Content'][]; // [Content!]!
+    getFollows: NexusGenRootTypes['FollowersResponse']; // FollowersResponse!
     getIntercomMobileToken: string; // String!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
@@ -351,6 +374,7 @@ export interface NexusGenFieldTypes {
     role: string | null; // String
     timezone: string | null; // String
     updatedAt: NexusGenScalars['Date']; // Date!
+    username: string | null; // String
   }
 }
 
@@ -382,6 +406,7 @@ export interface NexusGenFieldTypeNames {
     couldntFetchThumbnail: 'Boolean'
     createdAt: 'Date'
     followUpQuestions: 'FollowUpQuestion'
+    friends: 'ContentUserFollowingProfile'
     id: 'String'
     lengthFormatted: 'String'
     lengthMs: 'Int'
@@ -412,6 +437,12 @@ export interface NexusGenFieldTypeNames {
     updatedAt: 'Date'
     userId: 'String'
   }
+  ContentUserFollowingProfile: { // field return type name
+    id: 'ID'
+    imageUrl: 'String'
+    name: 'String'
+    username: 'String'
+  }
   CreateUserResponse: { // field return type name
     token: 'String'
     user: 'User'
@@ -431,6 +462,10 @@ export interface NexusGenFieldTypeNames {
     answer: 'String'
     id: 'String'
     question: 'String'
+  }
+  FollowersResponse: { // field return type name
+    followers: 'Profile'
+    following: 'Profile'
   }
   GetMobileUpdateResponse: { // field return type name
     latestVersion: 'String'
@@ -501,6 +536,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     checkCode: 'Boolean'
+    checkValidUsername: 'String'
     getActivity: 'Content'
     getArchived: 'Content'
     getAuthor: 'Author'
@@ -510,6 +546,7 @@ export interface NexusGenFieldTypeNames {
     getContentSession: 'ContentSession'
     getCurrentContentSession: 'ContentSession'
     getFeed: 'Content'
+    getFollows: 'FollowersResponse'
     getIntercomMobileToken: 'String'
     getLikes: 'ContentSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
@@ -562,6 +599,7 @@ export interface NexusGenFieldTypeNames {
     role: 'String'
     timezone: 'String'
     updatedAt: 'Date'
+    username: 'String'
   }
 }
 
@@ -629,11 +667,13 @@ export interface NexusGenArgTypes {
     updateUser: { // args
       avatarImageUrl?: string | null; // String
       biometricPublicKey?: string | null; // String
+      description?: string | null; // String
       hasMobile?: boolean | null; // Boolean
       hasPushNotifications?: boolean | null; // Boolean
       hasTwoFactorAuth?: boolean | null; // Boolean
       name?: string | null; // String
       unreadCount?: number | null; // Int
+      username?: string | null; // String
     }
     verifyPhoneNumber: { // args
       otpCode: string; // String!
@@ -643,6 +683,9 @@ export interface NexusGenArgTypes {
   Query: {
     checkCode: { // args
       referralCode: string; // String!
+    }
+    checkValidUsername: { // args
+      username: string; // String!
     }
     getActivity: { // args
       filter?: NexusGenEnums['ActivityFilter'] | null; // ActivityFilter
@@ -664,6 +707,9 @@ export interface NexusGenArgTypes {
       filter?: NexusGenEnums['ContentFeedFilter'] | null; // ContentFeedFilter
       limit?: number | null; // Int
       page?: number | null; // Int
+    }
+    getFollows: { // args
+      username: string; // String!
     }
     getIntercomMobileToken: { // args
       platform?: string | null; // String

@@ -37,6 +37,7 @@ type Content {
   couldntFetchThumbnail: Boolean
   createdAt: Date!
   followUpQuestions: [FollowUpQuestion!]
+  friends: [ContentUserFollowingProfile!]
   id: String!
   lengthFormatted: String
   lengthMs: Int
@@ -79,6 +80,13 @@ type ContentSession {
   userId: String!
 }
 
+type ContentUserFollowingProfile {
+  id: ID!
+  imageUrl: String
+  name: String
+  username: String
+}
+
 type CreateUserResponse {
   token: String!
   user: User!
@@ -103,6 +111,11 @@ type FollowUpQuestion {
   answer: String!
   id: String!
   question: String!
+}
+
+type FollowersResponse {
+  followers: [Profile!]!
+  following: [Profile!]!
 }
 
 type GetMobileUpdateResponse {
@@ -170,7 +183,7 @@ type Mutation {
   startContent(contentId: ID!): ContentSession!
   startListening: ContentSession!
   updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean, lastListenedAt: Date): ContentSession!
-  updateUser(avatarImageUrl: String, biometricPublicKey: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int): User!
+  updateUser(avatarImageUrl: String, biometricPublicKey: String, description: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int, username: String): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
 }
 
@@ -193,6 +206,7 @@ type Profile {
 
 type Query {
   checkCode(referralCode: String!): Boolean!
+  checkValidUsername(username: String!): String!
   getActivity(filter: ActivityFilter): [Content!]!
   getArchived: [Content!]!
   getAuthor(authorId: ID!): Author!
@@ -202,6 +216,7 @@ type Query {
   getContentSession(contentId: ID!): ContentSession!
   getCurrentContentSession: ContentSession
   getFeed(filter: ContentFeedFilter, limit: Int, page: Int): [Content!]!
+  getFollows(username: String!): FollowersResponse!
   getIntercomMobileToken(platform: String): String!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
@@ -259,6 +274,7 @@ type User {
   role: String
   timezone: String
   updatedAt: Date!
+  username: String
 }
 
 enum UserAuthProviderEnum {

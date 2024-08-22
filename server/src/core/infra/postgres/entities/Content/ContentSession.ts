@@ -19,6 +19,7 @@ import { Content } from "./Content";
 })
 @Index("user_bookmarked_at_idx", { synchronize: false })
 @Index("user_last_listened_at_idx", { synchronize: false })
+@Index("session_content_user_id_idx", ["userId", "contentId"])
 export class ContentSession {
     @PrimaryGeneratedColumn("uuid")
     id!: string;

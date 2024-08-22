@@ -40,7 +40,6 @@ export const FollowersInfo = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("Followers", {
       username: username || "",
-      defaultMode: mode,
     });
   };
 
@@ -70,16 +69,16 @@ export const FollowersInfo = ({
             fontSize: 16,
             color: theme.textPrimary,
             marginRight: 5,
-            fontFamily: "Mona-Sans-Bold",
+            fontFamily: "Raleway-Bold",
           }}
         >
           {profile?.numFollowers || 0}
         </Text>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: 14,
             color: theme.textSecondary,
-            fontFamily: "Mona-Sans-Regular",
+            fontFamily: "Raleway-Regular",
           }}
         >
           followers
@@ -100,16 +99,16 @@ export const FollowersInfo = ({
             fontSize: 16,
             color: theme.textPrimary,
             marginRight: 5,
-            fontFamily: "Mona-Sans-Bold",
+            fontFamily: "Raleway-Bold",
           }}
         >
           {profile?.numFollowing || 0}
         </Text>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: 14,
             color: theme.textSecondary,
-            fontFamily: "Mona-Sans-Regular",
+            fontFamily: "Raleway-Regular",
           }}
         >
           following

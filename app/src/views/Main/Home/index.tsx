@@ -3,6 +3,8 @@ import {
   faCar,
   faPlus,
   faSatelliteDish,
+  faUserPlus,
+  faUsers,
 } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
@@ -490,7 +492,7 @@ const SingleFilter = ({
         style={{
           color: isActive ? theme.header : theme.text,
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 24,
+          fontSize: 16,
         }}
       >
         {label}
@@ -620,6 +622,12 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
     onPressMore();
   };
 
+  const onOpenFriends = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    navigation.navigate("Friends");
+  };
+
   const onAddContentFromUrl = () => {
     Alert.prompt(
       "Add Content",
@@ -686,15 +694,56 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
+          width: "100%",
         }}
       >
         <View
           style={{
-            flex: 1,
-            // paddingHorizontal: 5,
+            flex: 2,
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
+          }}
+        >
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={onOpenFriends}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              borderRadius: 100,
+              paddingVertical: 7,
+              padding: 10,
+              marginRight: 5,
+              backgroundColor: theme.medBackground,
+            }}
+          >
+            <FontAwesomeIcon
+              style={{ marginRight: 5 }}
+              icon={faUserPlus}
+              size={16}
+              color={theme.text}
+            />
+            <Text
+              style={{
+                color: theme.text,
+                fontFamily: "Raleway-Medium",
+                fontSize: 16,
+              }}
+            >
+              Friends
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View
+          style={{
+            flex: 2,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <SingleFilter
@@ -723,77 +772,85 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
           /> */}
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={onAddContentFromUrl}
+        <View
           style={{
+            flex: 2,
             display: "flex",
             flexDirection: "row",
-            alignItems: "center",
-            borderRadius: 100,
-            paddingVertical: 7,
-            padding: 10,
-            marginRight: 10,
-            backgroundColor: theme.secondaryBackground,
+            justifyContent: "flex-end",
           }}
         >
-          <FontAwesomeIcon
-            style={{ marginRight: 5 }}
-            icon={faPlus}
-            size={16}
-            color={theme.theme === "dark" ? colors.white : colors.primary}
-          />
-          <Text
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={onAddContentFromUrl}
             style={{
-              color: theme.theme === "dark" ? colors.white : colors.primary,
-              fontFamily: "Raleway-Bold",
-              fontSize: 16,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              borderRadius: 100,
+              paddingVertical: 7,
+              padding: 10,
+              marginRight: 5,
+              backgroundColor: theme.secondaryBackground,
             }}
           >
-            Add
-          </Text>
-        </TouchableOpacity>
+            <FontAwesomeIcon
+              style={{ marginRight: 5 }}
+              icon={faPlus}
+              size={16}
+              color={theme.text}
+            />
+            <Text
+              style={{
+                color: theme.text,
+                fontFamily: "Raleway-Medium",
+                fontSize: 16,
+              }}
+            >
+              Add
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={_onPressMore}
-          disabled={loadingShowMore}
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            borderRadius: 100,
-            marginRight: 10,
-            paddingVertical: 7,
-            padding: 10,
-            backgroundColor:
-              theme.theme === "dark" ? colors.primary : theme.bgPrimary,
-          }}
-        >
-          <FontAwesomeIcon
+          {/* <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={_onPressMore}
+            disabled={loadingShowMore}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              borderRadius: 100,
+              paddingVertical: 7,
+              padding: 10,
+              backgroundColor:
+                theme.theme === "dark" ? colors.primary : theme.bgPrimary,
+            }}
+          >
+            <FontAwesomeIcon
             style={{ marginRight: 5 }}
             icon={faSatelliteDish}
             size={16}
             color={theme.theme === "dark" ? colors.white : colors.primary}
-          />
-          <Text
-            style={{
-              color: theme.theme === "dark" ? colors.white : colors.primary,
-              fontFamily: "Raleway-Bold",
-              fontSize: 16,
-            }}
-          >
-            More
-          </Text>
+          /> 
+            <Text
+              style={{
+                color: theme.theme === "dark" ? colors.white : colors.primary,
+                fontFamily: "Raleway-Bold",
+                fontSize: 16,
+              }}
+            >
+              More
+            </Text>
 
-          {loadingShowMore ? (
-            <ActivityIndicator
-              style={{ marginLeft: 5 }}
-              size="small"
-              color={colors.primary}
-            />
-          ) : null}
-        </TouchableOpacity>
+            {loadingShowMore ? (
+              <ActivityIndicator
+                style={{ marginLeft: 5 }}
+                size="small"
+                color={colors.primary}
+              />
+            ) : null}
+          </TouchableOpacity> */}
+        </View>
       </View>
     </>
   );
