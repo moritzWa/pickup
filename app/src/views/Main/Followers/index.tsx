@@ -64,8 +64,8 @@ export const Followers = () => {
           <View
             style={{
               padding: 0,
-              flex: 20,
-              paddingHorizontal: 80,
+              flex: 6,
+              paddingHorizontal: 0,
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
@@ -177,6 +177,10 @@ const Following = ({
         <UserRow user={item} onSelectUser={onSelectUser} />
       )}
       initialNumToRender={8}
+      contentContainerStyle={{
+        paddingTop: 10,
+        paddingBottom: 100,
+      }}
       // make it efficiently render
       removeClippedSubviews
       maxToRenderPerBatch={8}

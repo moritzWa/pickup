@@ -236,20 +236,29 @@ export const SearchResults = () => {
           paddingHorizontal: 5,
         }}
         searchIcon={
-          <FontAwesomeIcon icon={faSearch} color={fullTheme.text} size={16} />
+          <FontAwesomeIcon
+            icon={faSearch}
+            color={fullTheme.textSubtle}
+            size={16}
+          />
         }
         inputContainerStyle={{
           backgroundColor: fullTheme.medBackground,
           height: 45,
-          paddingHorizontal: 5,
+          paddingHorizontal: 10,
           paddingRight: 0,
-          borderRadius: 10,
+          borderRadius: 100,
         }}
         clearIcon={
-          <FontAwesomeIcon icon={faTimes} color={fullTheme.text} size={16} />
+          <View />
+          // <FontAwesomeIcon
+          //   icon={faTimes}
+          //   color={fullTheme.textSubtle}
+          //   size={16}
+          // />
         }
         inputStyle={{
-          color: header,
+          color: text,
           fontSize: 16,
           fontFamily: "Raleway-Regular",
         }}

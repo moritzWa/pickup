@@ -493,7 +493,7 @@ const SingleFilter = ({
         style={{
           color: isActive ? theme.header : theme.text,
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 16,
+          fontSize: 18,
         }}
       >
         {label}
@@ -691,7 +691,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
       <View
         style={{
           paddingHorizontal: 10,
-          paddingBottom: 5,
+          paddingBottom: 10,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -714,8 +714,8 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              paddingVertical: 7,
-              padding: 10,
+              paddingVertical: 10,
+              padding: 15,
               marginRight: 5,
               backgroundColor: theme.medBackground,
             }}
@@ -723,7 +723,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
             <FontAwesomeIcon
               style={{ marginRight: 5 }}
               icon={faUserPlus}
-              size={16}
+              size={20}
               color={theme.text}
             />
             <Text
@@ -789,19 +789,18 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              paddingVertical: 7,
               padding: 10,
               marginRight: 5,
               backgroundColor: theme.secondaryBackground,
             }}
           >
             <FontAwesomeIcon
-              style={{ marginRight: 5 }}
+              // style={{ marginRight: 5 }}
               icon={faPlus}
-              size={16}
+              size={20}
               color={theme.text}
             />
-            <Text
+            {/* <Text
               style={{
                 color: theme.text,
                 fontFamily: "Raleway-Medium",
@@ -809,7 +808,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               }}
             >
               Add
-            </Text>
+            </Text> */}
           </TouchableOpacity>
 
           {/* <TouchableOpacity

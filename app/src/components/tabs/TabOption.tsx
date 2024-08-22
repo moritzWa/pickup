@@ -47,8 +47,11 @@ export const TabOption = ({
       activeOpacity={0.8}
       onPress={onPress}
       style={{
-        paddingHorizontal: 5,
-        marginRight: 15,
+        paddingVertical: 7,
+        paddingHorizontal: 15,
+        borderRadius: 100,
+        backgroundColor: isActive ? theme.medBackground : "transparent",
+        marginRight: 5,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -56,7 +59,7 @@ export const TabOption = ({
     >
       <Text
         style={{
-          fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
+          fontFamily: "Raleway-SemiBold",
           fontSize: 16,
           color: isActive ? theme.textPrimary : theme.textSecondary,
         }}

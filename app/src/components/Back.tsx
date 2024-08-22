@@ -46,6 +46,7 @@ const Back = ({
           paddingVertical: 3,
           paddingHorizontal: 0,
           borderRadius: 10,
+          zIndex: 1000,
         },
         other.style,
       ]}

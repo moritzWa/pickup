@@ -52,7 +52,7 @@ export const ContactRow = React.memo(
             style={{
               fontFamily: "Raleway-SemiBold",
               fontSize: 16,
-              marginBottom: 5,
+              marginBottom: 2,
               color: theme.textPrimary,
             }}
           >
@@ -61,7 +61,7 @@ export const ContactRow = React.memo(
           <Text
             style={{
               fontFamily: "Raleway-Regular",
-              fontSize: 16,
+              fontSize: 14,
               color: theme.textSecondary,
             }}
           >
