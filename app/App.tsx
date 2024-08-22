@@ -1,70 +1,48 @@
-import "react-native-get-random-values";
-import React, { createContext, useMemo, useRef } from "react";
-import { StatusBar } from "expo-status-bar";
+import { ApolloProvider, useQuery } from "@apollo/client";
 import {
-  Appearance,
-  StyleSheet,
-  Text,
-  View,
-  LogBox,
-  Alert,
-} from "react-native";
-import { MainNavigationStack } from "./src/navigation";
-import SplashScreen from "react-native-splash-screen";
-import * as Font from "expo-font";
-import { useCallback, useEffect, useState } from "react";
-import {
-  useFonts,
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-  Poppins_900Black,
-} from "@expo-google-fonts/poppins";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import {
-  ApolloProvider,
-  useLazyQuery,
-  useMutation,
-  useQuery,
-} from "@apollo/client";
-import { api, apolloClient } from "./src/api";
-import { Provider, useSelector } from "react-redux";
-import { store } from "./src/redux";
-import {
-  getUserAuthStatus,
-  setUserAuthStateChanged,
-} from "src/redux/reducers/user";
-import { LogLevel, OneSignal } from "react-native-onesignal";
-import { IS_ANDROID, constants } from "src/config";
-import { useOneSignal } from "src/hooks/useOneSignal";
-import { PortalProvider } from "@gorhom/portal";
-import { useTheme } from "src/hooks/useTheme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setTheme } from "src/redux/reducers/globalState";
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_900Black,
+} from "@expo-google-fonts/inter";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { useMe } from "src/hooks";
-import Toast, {
-  ToastConfig,
-  BaseToast,
-  ErrorToast,
-} from "react-native-toast-message";
+import { PortalProvider } from "@gorhom/portal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppContext } from "context";
+import { Audio } from "expo-av";
+import * as Font from "expo-font";
+import React, { useEffect, useRef } from "react";
+import { LogBox, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "react-native-get-random-values";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
+import { OneSignal } from "react-native-onesignal";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { colors } from "src/components";
-import { auth } from "src/utils/firebase";
-import changeNavigationBarColor from "react-native-navigation-bar-color";
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
-import { getCurrentAudioUrl } from "src/redux/reducers/audio";
-import { useAudio, UseAudioReturn } from "src/hooks/useAudio";
+import SplashScreen from "react-native-splash-screen";
+import Toast, { ToastConfig } from "react-native-toast-message";
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
 } from "react-native-track-player";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { AppContext } from "context";
+import { Provider, useSelector } from "react-redux";
+import { IS_ANDROID } from "src/config";
+import { useMe } from "src/hooks";
+import { useAudio } from "src/hooks/useAudio";
+import { useTheme } from "src/hooks/useTheme";
+import { setTheme } from "src/redux/reducers/globalState";
+import {
+  getUserAuthStatus,
+  setUserAuthStateChanged,
+} from "src/redux/reducers/user";
+import { auth } from "src/utils/firebase";
+import { api, apolloClient } from "./src/api";
+import { MainNavigationStack } from "./src/navigation";
+import { store } from "./src/redux";
 
 LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 LogBox.ignoreAllLogs(); //Ignore all log notifications
@@ -141,11 +119,11 @@ function App() {
     async function prepare() {
       try {
         await Font.loadAsync({
-          "Poppins-Regular": Poppins_400Regular,
-          "Poppins-Medium": Poppins_500Medium,
-          "Poppins-Semibold": Poppins_600SemiBold,
-          "Poppins-Bold": Poppins_700Bold,
-          "Poppins-Black": Poppins_900Black,
+          "Inter-Regular": Inter_400Regular,
+          "Inter-Medium": Inter_500Medium,
+          "Inter-SemiBold": Inter_600SemiBold,
+          "Inter-Bold": Inter_700Bold,
+          "Inter-Black": Inter_900Black,
         });
       } catch (e) {
         console.warn(e);
@@ -235,7 +213,7 @@ function App() {
           style={{
             color: background,
             fontSize: 16,
-            fontFamily: "Raleway-Semibold",
+            fontFamily: "Inter-Semibold",
           }}
         >
           {props.text1}

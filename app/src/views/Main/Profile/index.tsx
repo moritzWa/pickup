@@ -50,13 +50,11 @@ import {
 } from "src/api/generated/types";
 import { Button, colors } from "src/components";
 import { ContentRow } from "src/components/Content/ContentRow";
-import { CurrentAudio } from "src/components/CurrentAudio";
 import { FollowersInfo } from "src/components/FollowersInfo";
 import Header from "src/components/Header";
 import { TabBar } from "src/components/tabs";
 import { hasValue } from "src/core";
 import { useMe } from "src/hooks";
-import { useAudio } from "src/hooks/useAudio";
 import { useTheme } from "src/hooks/useTheme";
 import { NavigationProps, RootStackParamList } from "src/navigation";
 import { setCurrentContent } from "src/redux/reducers/audio";
@@ -495,7 +493,7 @@ const Profile = ({ username }: { username: string | null }) => {
             {!!profile?.name ? (
               <Text
                 style={{
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                   fontSize: 20,
                   color: textPrimary,
                   textAlign: "center",
@@ -522,7 +520,7 @@ const Profile = ({ username }: { username: string | null }) => {
             >
               <Text
                 style={{
-                  fontFamily: "Raleway-Regular",
+                  fontFamily: "Inter-Regular",
                   fontSize: 14,
                   marginTop: 5,
                   textAlign: "center",
@@ -542,7 +540,7 @@ const Profile = ({ username }: { username: string | null }) => {
             {!!profile?.description ? (
               <Text
                 style={{
-                  fontFamily: "Raleway-Regular",
+                  fontFamily: "Inter-Regular",
                   fontSize: 16,
                   textAlign: "left",
                   marginTop: 20,
@@ -968,7 +966,7 @@ const ProfilePicture = () => {
             style={{
               fontSize: 28,
               color: fullTheme.background,
-              fontFamily: "Raleway-Bold",
+              fontFamily: "Inter-Bold",
             }}
           >
             {initials}

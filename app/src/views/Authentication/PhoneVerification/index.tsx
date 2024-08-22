@@ -1,10 +1,7 @@
-import React from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { auth } from "src/utils/firebase";
-import { Button, Input, colors } from "src/components";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { Maybe } from "src/core";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { FirebaseError } from "firebase/app";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,14 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { Button, Input, colors } from "src/components";
+import { auth } from "src/utils/firebase";
 // import the types for react native firebase
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { RootStackParamList } from "src/navigation";
+import * as Haptics from "expo-haptics";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Haptics from "expo-haptics";
 import { useTheme } from "src/hooks/useTheme";
+import { RootStackParamList } from "src/navigation";
 
 export function PhoneVerification() {
   const { params } =
@@ -331,7 +329,7 @@ export function PhoneVerification() {
               <Text
                 style={{
                   fontSize: 14,
-                  fontFamily: "Raleway-Semibold",
+                  fontFamily: "Inter-Semibold",
                   color: colors.primary,
                 }}
               >

@@ -1,12 +1,5 @@
 import { useMutation, useQuery } from "@apollo/client";
-import {
-  faCar,
-  faPlus,
-  faPlusCircle,
-  faSatelliteDish,
-  faUserPlus,
-  faUsers,
-} from "@fortawesome/pro-solid-svg-icons";
+import { faCar, faPlus, faUserPlus } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
 import { AppContext } from "context";
@@ -38,14 +31,14 @@ import {
   QueryGetFeedArgs,
 } from "src/api/generated/types";
 import { colors } from "src/components";
+import ProfileIcon from "src/components/ProfileIcon";
 import { useMe, useTheme } from "src/hooks";
+import { ProfileService } from "src/modules/profileService";
 import { NavigationProps } from "src/navigation";
 import { setCurrentContent } from "src/redux/reducers/audio";
 import { setHomeFilter } from "src/redux/reducers/globalState";
 import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
-import ProfileIcon from "src/components/ProfileIcon";
-import { ProfileService } from "src/modules/profileService";
 
 const LIMIT = 10;
 
@@ -239,7 +232,7 @@ const Home = () => {
                     style={{
                       flex: 1,
                       color: theme.header,
-                      fontFamily: "Raleway-Bold",
+                      fontFamily: "Inter-Bold",
                       fontSize: 24,
                       textAlign: "left",
                     }}
@@ -252,7 +245,7 @@ const Home = () => {
                       flex: 1,
                       paddingVertical: 25,
                       color: theme.header,
-                      fontFamily: "Raleway-Bold",
+                      fontFamily: "Inter-Bold",
                       fontSize: 24,
                       textAlign: "left",
                     }}
@@ -265,7 +258,7 @@ const Home = () => {
                     <Text
                       style={{
                         color: theme.text,
-                        fontFamily: "Raleway-Bold",
+                        fontFamily: "Inter-Bold",
                         fontSize: 16,
                         textAlign: "center",
                         padding: 10,
@@ -309,7 +302,7 @@ const Home = () => {
         //       <Text
         //         style={{
         //           color: colors.primary,
-        //           fontFamily: "Raleway-Bold",
+        //           fontFamily: "Inter-Bold",
         //           fontSize: 16,
         //           textAlign: "center",
         //           padding: 10,
@@ -332,7 +325,7 @@ const Home = () => {
                 textAlign: "center",
                 padding: 10,
                 color: theme.text,
-                fontFamily: "Raleway-Regular",
+                fontFamily: "Inter-Regular",
                 fontSize: 16,
               }}
             >
@@ -446,7 +439,7 @@ const HomeHeader = () => {
               <Text
                 style={{
                   color: colors.white,
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                   fontSize: 16,
                   marginBottom: 0,
                 }}
@@ -458,7 +451,7 @@ const HomeHeader = () => {
                 <Text
                   style={{
                     color: colors.white,
-                    fontFamily: "Raleway-Bold",
+                    fontFamily: "Inter-Bold",
                     fontSize: 16,
                     marginBottom: 0,
                   }}
@@ -468,7 +461,7 @@ const HomeHeader = () => {
                 <Text
                   style={{
                     color: colors.white,
-                    fontFamily: "Raleway-Regular",
+                    fontFamily: "Inter-Regular",
                     fontSize: 14,
                     marginTop: 5,
                   }}
@@ -753,7 +746,7 @@ const Options = ({
             {/* <Text
               style={{
                 color: theme.text,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
                 fontSize: 16,
               }}
             >
@@ -836,7 +829,7 @@ const Options = ({
             {/* <Text
               style={{
                 color: theme.text,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
                 fontSize: 16,
               }}
             >
@@ -868,7 +861,7 @@ const Options = ({
             <Text
               style={{
                 color: theme.theme === "dark" ? colors.white : colors.primary,
-                fontFamily: "Raleway-Bold",
+                fontFamily: "Inter-Bold",
                 fontSize: 16,
               }}
             >

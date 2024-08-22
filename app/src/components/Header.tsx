@@ -1,16 +1,9 @@
-import {
-  View,
-  Text,
-  ViewProps,
-  ViewStyle,
-  TouchableOpacityProps,
-} from "react-native";
 import React from "react";
+import { Text, TouchableOpacityProps, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from ".";
-import Back from "./Back";
-import { useTheme } from "src/hooks/useTheme";
 import { IS_ANDROID, IS_IPAD } from "src/config";
+import { useTheme } from "src/hooks/useTheme";
+import Back from "./Back";
 
 type HeaderProps = {
   title?: string | any;
@@ -72,7 +65,7 @@ const Header = ({
           style={{
             flex: 3,
             textAlign: "center",
-            fontFamily: "Raleway-Semibold",
+            fontFamily: "Inter-Semibold",
             fontSize: IS_IPAD ? 24 : 16,
             color: header,
           }}

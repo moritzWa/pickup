@@ -1,62 +1,43 @@
+import { useLazyQuery, useMutation } from "@apollo/client";
 import {
-  View,
+  faHeadphonesAlt,
+  faPause,
+  faPlay,
+} from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { AppContext } from "context";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Alert,
+  Animated,
+  Dimensions,
+  DimensionValue,
+  Easing,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  SafeAreaView,
-  FlatList,
-  RefreshControl,
-  Alert,
-  Image,
-  Animated,
-  DimensionValue,
-  StyleSheet,
-  Dimensions,
-  Easing,
+  View,
 } from "react-native";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useTheme } from "src/hooks";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { useSelector } from "react-redux";
 import { api } from "src/api";
+import { BaseContentFields } from "src/api/fragments";
 import {
   Mutation,
   MutationUpdateContentSessionArgs,
   Query,
 } from "src/api/generated/types";
-import { NavigationProps } from "src/navigation";
-import { BaseContentFields } from "src/api/fragments";
 import { colors } from "src/components";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faArrowRight,
-  faCar,
-  faCarBolt,
-  faHeadphones,
-  faHeadphonesAlt,
-  faPause,
-  faPlay,
-} from "@fortawesome/pro-solid-svg-icons";
-import { Impressions } from "../views/Main/Home/Github";
-import { ContentRow, ContentRowImage } from "./Content/ContentRow";
-import { LinearGradient } from "expo-linear-gradient";
-import Header from "src/components/Header";
-import FastImage from "react-native-fast-image";
-import { BlurView } from "expo-blur";
-import { AppContext } from "context";
-import { useDispatch, useSelector } from "react-redux";
+import { useTheme } from "src/hooks";
+import { NavigationProps } from "src/navigation";
 import {
   getCurrentAudioUrl,
   getCurrentContent,
-  getCurrentMs,
-  getDurationMs,
   getIsPlaying,
-  setAudioUrl,
-  setIsPlaying,
 } from "src/redux/reducers/audio";
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
-import { useAudio } from "src/hooks/useAudio";
-import BigNumber from "bignumber.js";
-import { Track } from "react-native-track-player";
+import { ContentRowImage } from "./Content/ContentRow";
 
 export const CurrentAudio = () => {
   const theme = useTheme();
@@ -299,7 +280,7 @@ export const CurrentAudio = () => {
               <Text
                 style={{
                   color: theme.text,
-                  fontFamily: "Raleway-Medium",
+                  fontFamily: "Inter-Medium",
                   textAlign: "center",
                   fontSize: 14,
                 }}
@@ -438,6 +419,6 @@ const styles = StyleSheet.create({
     fontSize: 16, // Adjust the font size as needed
     fontWeight: "bold",
     width: screenWidth * 1.5,
-    fontFamily: "Raleway-Bold",
+    fontFamily: "Inter-Bold",
   },
 });

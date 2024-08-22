@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Image,
   ImageStyle,
   StyleProp,
   TextStyle,
@@ -9,10 +8,10 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { Text } from "./Text";
-import { useTheme } from "src/hooks/useTheme";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faChevronRight } from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useTheme } from "src/hooks/useTheme";
+import { Text } from "./Text";
 
 type Props = {
   name?: string;
@@ -99,7 +98,7 @@ const Section = ({
                 {
                   fontSize: 14,
                   textAlign: "left",
-                  fontFamily: "Raleway-Regular",
+                  fontFamily: "Inter-Regular",
                   color: header,
                 },
                 nameStyle,
@@ -121,7 +120,7 @@ const Section = ({
                 {
                   textAlign: "right",
                   fontSize: 14,
-                  fontFamily: "Raleway-Regular",
+                  fontFamily: "Inter-Regular",
                   marginHorizontal: 15,
                   marginRight: 0,
                   flex: 1,

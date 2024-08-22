@@ -5,11 +5,10 @@ import {
   TouchableOpacity,
   View,
   ViewProps,
-  ViewStyle,
 } from "react-native";
 import { Maybe } from "src/core";
-import * as colors from "./colors";
 import { useTheme } from "src/hooks/useTheme";
+import * as colors from "./colors";
 
 export type StatusTagType =
   | "info"
@@ -122,7 +121,7 @@ export default function StatusTag({
                 marginRight: rightIcon ? 5 : 0,
                 fontSize: 12,
                 textAlign: "center",
-                fontFamily: "Raleway-Semibold",
+                fontFamily: "Inter-Semibold",
                 color,
               },
               labelStyle,

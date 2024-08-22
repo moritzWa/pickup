@@ -1,29 +1,19 @@
-import React from "react";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { api } from "src/api";
-import { useTheme } from "src/hooks/useTheme";
-import { NavigationProps, RootStackParamList } from "src/navigation";
-import Header from "src/components/Header";
-import Close from "src/components/Close";
-import * as Haptics from "expo-haptics";
-import { Profile, Query } from "src/api/generated/types";
-import { ProfileService } from "src/modules/profileService";
-import ProfileIcon from "src/components/ProfileIcon";
-import { noop } from "lodash";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useQuery } from "@apollo/client";
 import { faChevronRight } from "@fortawesome/pro-solid-svg-icons";
-import Back from "src/components/Back";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
+import { noop } from "lodash";
+import React, { useMemo, useState } from "react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { api } from "src/api";
+import { Profile, Query } from "src/api/generated/types";
+import Header from "src/components/Header";
+import ProfileIcon from "src/components/ProfileIcon";
+import { useTheme } from "src/hooks/useTheme";
+import { ProfileService } from "src/modules/profileService";
+import { NavigationProps, RootStackParamList } from "src/navigation";
 
 export const Followers = () => {
   const { params } = useRoute<RouteProp<RootStackParamList, "Followers">>();
@@ -87,7 +77,7 @@ export const Followers = () => {
             >
               <Text
                 style={{
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                   fontSize: 14,
                   color: textPrimary,
                 }}
@@ -112,7 +102,7 @@ export const Followers = () => {
             >
               <Text
                 style={{
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                   fontSize: 14,
                   color: textPrimary,
                 }}
@@ -235,7 +225,7 @@ const UserRow = React.memo(
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text
             style={{
-              fontFamily: "Raleway-SemiBold",
+              fontFamily: "Inter-Semibold",
               fontSize: 16,
               color: theme.textPrimary,
             }}
@@ -244,7 +234,7 @@ const UserRow = React.memo(
           </Text>
           <Text
             style={{
-              fontFamily: "Raleway-Regular",
+              fontFamily: "Inter-Regular",
               fontSize: 14,
               marginTop: 5,
               color: theme.textSecondary,

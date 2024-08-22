@@ -1,52 +1,24 @@
+import { useMutation, useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import { AppContext } from "context";
+import React, { useContext, useEffect, useMemo } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
   FlatList,
   RefreshControl,
-  Alert,
-  Image,
-  Animated,
+  SafeAreaView,
+  Text,
+  View,
 } from "react-native";
-import React, { useContext, useEffect, useMemo, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { useTheme } from "src/hooks";
-import { useMutation, useQuery } from "@apollo/client";
+import { useDispatch } from "react-redux";
 import { api } from "src/api";
-import {
-  ActivityFilter,
-  Query,
-  QueryGetActivityArgs,
-} from "src/api/generated/types";
-import { NavigationProps } from "src/navigation";
 import { BaseContentFields } from "src/api/fragments";
+import { Query } from "src/api/generated/types";
 import { colors } from "src/components";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faArrowRight,
-  faCar,
-  faCarBolt,
-  faHeadphones,
-  faHeadphonesAlt,
-  faPlay,
-  faPlus,
-} from "@fortawesome/pro-solid-svg-icons";
-import { ContentRow } from "../../../components/Content/ContentRow";
-import { LinearGradient } from "expo-linear-gradient";
-import Header from "src/components/Header";
-import FastImage from "react-native-fast-image";
-import { BlurView } from "expo-blur";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getActivityFilter,
-  setActivityFilter,
-} from "src/redux/reducers/globalState";
-import * as Haptics from "expo-haptics";
-import { CurrentAudio } from "src/components/CurrentAudio";
 import { hasValue } from "src/core";
-import { AppContext } from "context";
+import { useTheme } from "src/hooks";
+import { NavigationProps } from "src/navigation";
 import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
+import { ContentRow } from "../../../components/Content/ContentRow";
 
 const Activity = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -122,7 +94,7 @@ const Activity = () => {
         <Text
           style={{
             color: theme.header,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
             fontSize: 24,
           }}
         >
@@ -190,7 +162,7 @@ const Activity = () => {
             <Text
               style={{
                 color: theme.text,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
                 fontSize: 18,
                 textAlign: "center",
               }}

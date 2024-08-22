@@ -1,13 +1,13 @@
 import React from "react";
 import {
-  TextInput,
-  View,
   StyleSheet,
   Text,
+  TextInput,
   TextInputProps,
+  View,
 } from "react-native";
-import * as colors from "./colors";
 import { useTheme } from "src/hooks/useTheme";
+import * as colors from "./colors";
 
 type InputProps = {
   placeholder?: string;
@@ -51,7 +51,7 @@ const Input = ({
           style={{
             fontSize: 14,
             marginBottom: 5,
-            fontFamily: "Raleway-Medium",
+            fontFamily: "Inter-Medium",
             color: textPrimary,
           }}
         >
@@ -66,7 +66,7 @@ const Input = ({
           style={{
             fontSize: 12,
             marginBottom: 5,
-            fontFamily: "Raleway-Regular",
+            fontFamily: "Inter-Regular",
             color: textSecondary,
           }}
         >
@@ -103,7 +103,7 @@ const Input = ({
             fontSize: 12,
             marginTop: 5,
             color: colors.red50,
-            fontFamily: "Raleway-Regular",
+            fontFamily: "Inter-Regular",
           }}
         >
           {errorMessage}

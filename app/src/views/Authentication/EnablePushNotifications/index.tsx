@@ -1,40 +1,24 @@
-import {
-  CommonActions,
-  RouteProp,
-  useIsFocused,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
+import { useMutation } from "@apollo/client";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useRef } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  Image,
   Animated,
   Dimensions,
-  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { OneSignal } from "react-native-onesignal";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { api } from "src/api";
+import { colors } from "src/components";
+import Close from "src/components/Close";
+import Header from "src/components/Header";
 import { useTheme } from "src/hooks/useTheme";
 import { NavigationProps, RootStackParamList } from "src/navigation";
-import * as Haptics from "expo-haptics";
-import { colors } from "src/components";
-import { OneSignal } from "react-native-onesignal";
-import Header from "src/components/Header";
-import Close from "src/components/Close";
-import { useMutation } from "@apollo/client";
-import { api } from "src/api";
 
 const EnablePushNotifications = () => {
   const { height } = Dimensions.get("window");
@@ -176,7 +160,7 @@ const EnablePushNotifications = () => {
               style={{
                 color: header,
                 fontSize: 26,
-                fontFamily: "Raleway-Bold",
+                fontFamily: "Inter-Bold",
               }}
             >
               Enable Notifications
@@ -187,7 +171,7 @@ const EnablePushNotifications = () => {
                 marginTop: 20,
                 color: text,
                 fontSize: 18,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
               }}
             >
               {subtitle ||
@@ -230,7 +214,7 @@ const PushNotificationPrompt = ({
           style={[
             styles.title,
             {
-              fontFamily: "Raleway-SemiBold",
+              fontFamily: "Inter-Semibold",
             },
           ]}
         >
@@ -241,7 +225,7 @@ const PushNotificationPrompt = ({
           style={[
             styles.message,
             {
-              fontFamily: "Raleway-Regular",
+              fontFamily: "Inter-Regular",
               paddingBottom: 20,
             },
           ]}
@@ -278,7 +262,7 @@ const PushNotificationPrompt = ({
               style={{
                 color: text,
                 fontSize: 16,
-                fontFamily: "Raleway-SemiBold",
+                fontFamily: "Inter-Semibold",
               }}
             >
               No Thanks
@@ -297,7 +281,7 @@ const PushNotificationPrompt = ({
               style={{
                 color: "#007bff",
                 fontSize: 16,
-                fontFamily: "Raleway-SemiBold",
+                fontFamily: "Inter-Semibold",
               }}
             >
               Yes, Enable

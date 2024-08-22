@@ -1,16 +1,15 @@
-import React from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import { colors } from ".";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import {
   GoogleSignin,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
-import { IS_IPAD, constants } from "src/config";
 import * as Haptics from "expo-haptics";
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import React from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import FastImage from "react-native-fast-image";
-import { auth } from "src/utils/firebase";
+import { IS_IPAD, constants } from "src/config";
 import { useTheme } from "src/hooks";
+import { auth } from "src/utils/firebase";
 
 const GoogleImage = require("src/assets/social/google-2.png");
 
@@ -100,7 +99,7 @@ export const GoogleButton = ({ label, onSuccess, onError }: GoogleProps) => {
           <Text
             style={{
               color: theme.text,
-              fontFamily: "Raleway-Bold",
+              fontFamily: "Inter-Bold",
               textAlign: "center",
               fontSize: IS_IPAD ? 24 : 16,
             }}

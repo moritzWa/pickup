@@ -133,7 +133,7 @@ const Interests = () => {
         <Text
           style={{
             fontSize: 28,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
             textAlign: "left",
             width: "100%",
             marginTop: 25,
@@ -178,7 +178,7 @@ const Interests = () => {
               <Text
                 style={{
                   fontSize: 14,
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                   color: text,
                   marginBottom: 10,
                   textTransform: "uppercase",
@@ -279,7 +279,7 @@ const CategoryButton = ({
       {category.emoji && (
         <Text
           style={{
-            fontFamily: "Raleway-Medium",
+            fontFamily: "Inter-Medium",
             fontSize: 12,
             marginRight: 5,
             color: fullTheme.text,

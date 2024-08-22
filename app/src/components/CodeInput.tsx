@@ -1,12 +1,12 @@
+import React, { useEffect, useRef, useState } from "react";
 import {
   InteractionManager,
   Pressable,
+  StyleSheet,
+  Text,
   TextInput,
   View,
-  Text,
-  StyleSheet,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "src/hooks/useTheme";
 import { colors } from ".";
 
@@ -80,7 +80,7 @@ const CodeInput = ({
           style={{
             fontSize: 22,
             color: theme.header,
-            fontFamily: "Raleway-Expanded-SemiBold",
+            fontFamily: "Inter-Expanded-SemiBold",
           }}
         >
           {digit}
@@ -126,7 +126,7 @@ const CodeInput = ({
           textAlign: "left",
           width: "100%",
           marginBottom: 10,
-          fontFamily: "Raleway-Semibold",
+          fontFamily: "Inter-Semibold",
           color: theme.text,
         }}
       >

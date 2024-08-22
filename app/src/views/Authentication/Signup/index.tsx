@@ -1,33 +1,25 @@
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import React, { useRef } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Input, colors } from "src/components";
-import Button from "src/components/Button";
-import Back from "src/components/Back";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ApolloError, useLazyQuery, useMutation } from "@apollo/client";
+import { AppleRequestResponse } from "@invertase/react-native-apple-authentication";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { useNavigation } from "@react-navigation/core";
+import * as Haptics from "expo-haptics";
+import React from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api, apolloClient } from "src/api";
 import {
   Mutation,
   MutationCreateUserArgs,
   Query,
 } from "src/api/generated/types";
-import * as Haptics from "expo-haptics";
-import { useNavigation } from "@react-navigation/core";
-import { NavigationProps } from "src/navigation";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { GoogleButton } from "src/components/GoogleButton";
+import { Input } from "src/components";
 import { AppleButton } from "src/components/AppleButton";
+import Back from "src/components/Back";
+import Button from "src/components/Button";
+import { GoogleButton } from "src/components/GoogleButton";
 import { useTheme } from "src/hooks/useTheme";
-import { AppleRequestResponse } from "@invertase/react-native-apple-authentication";
+import { NavigationProps } from "src/navigation";
 
 const Signup = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -231,7 +223,7 @@ const Signup = () => {
         <Text
           style={{
             fontSize: 28,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
             textAlign: "left",
             width: "100%",
             marginTop: 25,
@@ -279,7 +271,7 @@ const Signup = () => {
                   fontSize: 14,
                   flex: 1,
                   color: text,
-                  fontFamily: "Raleway-Regular",
+                  fontFamily: "Inter-Regular",
                 }}
               >
                 Password
@@ -292,7 +284,7 @@ const Signup = () => {
                 <Text
                   style={{
                     fontSize: 14,
-                    fontFamily: "Raleway-Regular",
+                    fontFamily: "Inter-Regular",
                     color: text,
                   }}
                 >

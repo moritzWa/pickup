@@ -349,7 +349,7 @@ export const ContentRow = ({
                     // underline it if active
                     // textDecorationLine: isActive ? "underline" : "none",
                     // marginRight: 20,
-                    fontFamily: "Raleway-SemiBold",
+                    fontFamily: "Inter-Semibold",
                   }}
                 >
                   {c.title}
@@ -370,7 +370,7 @@ export const ContentRow = ({
                       color: theme.text,
                       fontSize: 14,
                       // marginRight: 50,
-                      fontFamily: "Raleway-Medium",
+                      fontFamily: "Inter-Medium",
                     }}
                     numberOfLines={2}
                   >
@@ -390,7 +390,7 @@ export const ContentRow = ({
                     flex: 1,
                     color: theme.text,
                     fontSize: 14,
-                    fontFamily: "Raleway-Medium",
+                    fontFamily: "Inter-Medium",
                   }}
                 >
                   {c.authorName}
@@ -416,7 +416,7 @@ export const ContentRow = ({
                         style={{
                           color: theme.header,
                           fontSize: 14,
-                          fontFamily: "Raleway-Medium",
+                          fontFamily: "Inter-Medium",
                         }}
                         numberOfLines={1}
                       >
@@ -438,7 +438,7 @@ export const ContentRow = ({
                         style={{
                           color: theme.textSecondary,
                           fontSize: 14,
-                          fontFamily: "Raleway-Medium",
+                          fontFamily: "Inter-Medium",
                         }}
                       >
                         {c.releasedAt
@@ -471,7 +471,7 @@ export const ContentRow = ({
                             marginLeft: 5,
                             color: theme.text,
                             fontSize: 14,
-                            fontFamily: "Raleway-Medium",
+                            fontFamily: "Inter-Medium",
                           }}
                         >
                           {c.contentSession?.percentFinished}%
@@ -664,7 +664,7 @@ const ContentFriends = ({
           initials={f.name?.charAt(0)}
           textStyle={{
             fontSize: 14,
-            fontFamily: "Raleway-ExtraBold",
+            fontFamily: "Inter-ExtraBold",
           }}
           profileImageUrl={f.avatarImageUrl}
         />
@@ -676,7 +676,7 @@ const ContentFriends = ({
             fontSize: 14,
             color: theme.text,
             marginLeft: 5,
-            fontFamily: "Raleway-Medium",
+            fontFamily: "Inter-Medium",
           }}
         >
           +{extraFriends} more

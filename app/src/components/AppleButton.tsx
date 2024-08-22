@@ -1,3 +1,9 @@
+import {
+  AppleRequestResponse,
+  appleAuth,
+} from "@invertase/react-native-apple-authentication";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import * as Haptics from "expo-haptics";
 import React from "react";
 import {
   ActivityIndicator,
@@ -6,21 +12,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { colors } from ".";
-import {
-  GoogleSignin,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
-import { constants } from "src/config";
-import * as Haptics from "expo-haptics";
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import FastImage from "react-native-fast-image";
-import { auth } from "src/utils/firebase";
-import {
-  AppleRequestResponse,
-  appleAuth,
-} from "@invertase/react-native-apple-authentication";
 import { useTheme } from "src/hooks";
+import { auth } from "src/utils/firebase";
 
 const AppleImage = require("src/assets/social/white-apple.png");
 
@@ -132,7 +125,7 @@ export const AppleButton = ({
           <Text
             style={{
               color: theme.background,
-              fontFamily: "Raleway-Bold",
+              fontFamily: "Inter-Bold",
               textAlign: "center",
               fontSize: 16,
             }}

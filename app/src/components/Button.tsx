@@ -1,17 +1,15 @@
+import React from "react";
 import {
-  View,
-  TouchableOpacity,
+  ActivityIndicator,
   GestureResponderEvent,
   StyleProp,
-  ViewStyle,
-  TouchableOpacityProps,
-  TextProps,
-  ActivityIndicator,
   Text,
+  TextProps,
   TextStyle,
+  TouchableOpacity,
+  TouchableOpacityProps,
+  ViewStyle,
 } from "react-native";
-import React from "react";
-import * as colors from "./colors";
 import { IS_IPAD } from "src/config";
 import { useTheme } from "src/hooks/useTheme";
 
@@ -102,7 +100,7 @@ const Button = ({
                 {
                   color: theme.background,
                   textAlign: "center",
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                   width: "100%",
                   fontSize: IS_IPAD ? 24 : 16,
                 },

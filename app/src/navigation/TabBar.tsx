@@ -1,21 +1,17 @@
-import React, { useMemo } from "react";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Text, TouchableOpacity, View, Image, Alert } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
-import { useTheme } from "src/hooks/useTheme";
-import { IS_IPAD } from "src/config";
-import { Maybe } from "src/core";
-import { Descriptor, Route } from "@react-navigation/native";
 import { useQuery } from "@apollo/client";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { BlurView } from "expo-blur";
+import { isNil } from "lodash";
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "src/api";
-import { useMe } from "src/hooks";
-import { colors } from "src/components";
-import { hasIn, isNil } from "lodash";
-import { CurrentAudio } from "src/components/CurrentAudio";
-import { useSelector } from "react-redux";
-import { getCurrentContent } from "src/redux/reducers/audio";
 import { Query } from "src/api/generated/types";
+import { colors } from "src/components";
+import { CurrentAudio } from "src/components/CurrentAudio";
+import { Maybe } from "src/core";
+import { useMe } from "src/hooks";
+import { useTheme } from "src/hooks/useTheme";
 
 const HomeIcon = require("src/assets/icons/home.png");
 const HomeIconFilled = require("src/assets/icons/home-filled.png");
@@ -238,7 +234,7 @@ const SingleTab = ({
           style={{
             textAlign: "center",
             fontSize: 12,
-            fontFamily: "Raleway-Semibold",
+            fontFamily: "Inter-Semibold",
             color: isFocused
               ? theme === "light"
                 ? colors.positive

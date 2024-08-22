@@ -1,19 +1,12 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  TouchableOpacityProps,
-  Alert,
-} from "react-native";
-import React from "react";
-import { useNavigation } from "@react-navigation/native";
-import { NavigationProps } from "../navigation";
-import { colors } from ".";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faChevronLeft } from "@fortawesome/pro-solid-svg-icons";
-import { useTheme } from "src/hooks/useTheme";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import { Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
 import { IS_IPAD } from "src/config";
+import { useTheme } from "src/hooks/useTheme";
+import { colors } from ".";
+import { NavigationProps } from "../navigation";
 
 const Back = ({
   hideBack,
@@ -60,7 +53,7 @@ const Back = ({
       {hideBack ? null : (
         <Text
           style={{
-            fontFamily: "Raleway-Regular",
+            fontFamily: "Inter-Regular",
             marginLeft: 5,
             fontSize: IS_IPAD ? 20 : 16,
             color: color,

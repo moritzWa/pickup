@@ -256,7 +256,7 @@ const Profile = () => {
               style={{
                 flex: 1,
                 textAlign: "center",
-                fontFamily: "Raleway-Semibold",
+                fontFamily: "Inter-Semibold",
                 color: colors.white,
                 fontSize: 16,
                 padding: 15,
@@ -374,7 +374,7 @@ const Profile = () => {
             onPress={_logout}
             icon={<FontAwesomeIcon icon={faSignOut} color={colors.red50} />}
             name="Logout"
-            nameStyle={{ color: colors.red50, fontFamily: "Raleway-Regular" }}
+            nameStyle={{ color: colors.red50, fontFamily: "Inter-Regular" }}
             showRightIcon={false}
           />
           <View style={{ height: 1, backgroundColor: secondaryBackground }} />
@@ -385,7 +385,7 @@ const Profile = () => {
                   fontSize: 12,
                   paddingVertical: 10,
                   paddingHorizontal: 30,
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                   backgroundColor: secondaryBackground,
                   color: header,
                 }}
@@ -508,7 +508,7 @@ const _ProfilePicture = ({
       <Text
         style={{
           fontSize: 28,
-          fontFamily: "Raleway-Semibold",
+          fontFamily: "Inter-Semibold",
           color: colors.white,
         }}
       >

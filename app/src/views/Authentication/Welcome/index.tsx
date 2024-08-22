@@ -1,15 +1,13 @@
-import { View, Image, Animated } from "react-native";
-import React, { useEffect, useRef } from "react";
-import Button from "src/components/Button";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
-import { NavigationProps, RootStackParamList } from "src/navigation";
-import { colors } from "src/components";
+import React from "react";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Button from "src/components/Button";
 import { Text } from "src/components/Text";
-import FastImage from "react-native-fast-image";
 import { IS_IPAD } from "src/config";
 import { useTheme } from "src/hooks";
+import { NavigationProps } from "src/navigation";
 
 const Welcome = () => {
   const insets = useSafeAreaInsets();
@@ -89,7 +87,7 @@ const Welcome = () => {
             style={{
               fontSize: IS_IPAD ? 48 : 32,
               textAlign: "center",
-              fontFamily: "Raleway-Bold",
+              fontFamily: "Inter-Bold",
               color: theme.header,
             }}
           >
@@ -101,7 +99,7 @@ const Welcome = () => {
               fontSize: 20,
               marginTop: 15,
               textAlign: "center",
-              fontFamily: "Raleway-Medium",
+              fontFamily: "Inter-Medium",
               color: theme.text,
             }}
           >
@@ -128,7 +126,7 @@ const Welcome = () => {
             }}
             textProps={{
               style: {
-                // fontFamily: "Raleway-Semibold",
+                // fontFamily: "Inter-Semibold",
               },
             }}
             onPress={signUp}
@@ -143,7 +141,7 @@ const Welcome = () => {
             textProps={{
               style: {
                 color: theme.text,
-                // fontFamily: "Raleway-Semibold",
+                // fontFamily: "Inter-Semibold",
               },
             }}
             onPress={signIn}

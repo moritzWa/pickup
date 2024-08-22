@@ -1,43 +1,28 @@
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
-import React from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Input, colors } from "../../../components";
-import Button from "src/components/Button";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { FirebaseError } from "firebase/app";
+import { ApolloError, useLazyQuery, useMutation } from "@apollo/client";
+import { AppleRequestResponse } from "@invertase/react-native-apple-authentication";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { statusCodes } from "@react-native-google-signin/google-signin";
 import { useNavigation } from "@react-navigation/native";
-import { NavigationProps, PhoneVerificationParams } from "../../../navigation";
-import auth from "@react-native-firebase/auth";
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import * as Haptics from "expo-haptics";
-import {
-  GoogleSignin,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
-import { IS_IPAD, constants } from "src/config";
 import { MultiFactorError } from "firebase/auth";
-import { isNil, noop } from "lodash";
-import FastImage from "react-native-fast-image";
-import { GoogleButton } from "src/components/GoogleButton";
+import React from "react";
+import { Alert, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { api } from "src/api";
 import {
   Mutation,
   MutationCreateUserArgs,
   Query,
 } from "src/api/generated/types";
-import { ApolloError, useLazyQuery, useMutation } from "@apollo/client";
-import { api } from "src/api";
-import Back from "src/components/Back";
 import { AppleButton } from "src/components/AppleButton";
+import Back from "src/components/Back";
+import Button from "src/components/Button";
+import { GoogleButton } from "src/components/GoogleButton";
+import { IS_IPAD } from "src/config";
 import { useTheme } from "src/hooks/useTheme";
-import { AppleRequestResponse } from "@invertase/react-native-apple-authentication";
+import { Input } from "../../../components";
+import { NavigationProps, PhoneVerificationParams } from "../../../navigation";
 
 const Login = () => {
   const insets = useSafeAreaInsets();
@@ -274,7 +259,7 @@ const Login = () => {
             marginTop: 25,
             marginBottom: 25,
             color: header,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
           }}
         >
           Welcome back 👋
