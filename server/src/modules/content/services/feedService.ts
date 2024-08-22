@@ -7,16 +7,76 @@ import {
     hasValue,
     success,
 } from "src/core/logic";
-import { In } from "typeorm";
+import { In, MoreThan } from "typeorm";
 import { groupBy, keyBy, uniqBy } from "lodash";
 import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
 import { ContentService } from "./contentService";
+import { ContentFeedFilterEnum } from "src/core/infra/postgres/entities/FeedItem";
 
-const getFeed = async (
+const getFriendFeedForUser = async (
     user: User,
     limit: number,
     page: number
 ): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
+    console.log("getting feed for friends");
+
+    const relationshipResponse = await relationshipRepo.usersFollowing(user.id);
+
+    if (relationshipResponse.isFailure()) {
+        return failure(relationshipResponse.error);
+    }
+
+    const userIdsFollowing = relationshipResponse.value;
+
+    const recentContentFromFriendsResponse = await contentSessionRepo.find({
+        where: {
+            userId: In(userIdsFollowing),
+            // percentFinished: MoreThan(10)
+        },
+        order: {
+            lastListenedAt: "desc",
+        },
+        select: {
+            id: true,
+            userId: true,
+            contentId: true,
+        },
+        take: limit,
+        skip: page * limit,
+    });
+
+    if (recentContentFromFriendsResponse.isFailure()) {
+        return failure(recentContentFromFriendsResponse.error);
+    }
+
+    const contentResponse = await contentRepo.findByIds(
+        recentContentFromFriendsResponse.value.map((i) => i.contentId)
+    );
+
+    if (contentResponse.isFailure()) {
+        return failure(contentResponse.error);
+    }
+
+    const content = contentResponse.value;
+
+    const finalContent = await ContentService.decorateContentWithFriends(
+        user,
+        content
+    );
+
+    return finalContent;
+};
+
+const getFeed = async (
+    user: User,
+    limit: number,
+    page: number,
+    filter?: ContentFeedFilterEnum | null
+): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
+    if (filter === ContentFeedFilterEnum.Friends) {
+        return getFriendFeedForUser(user, limit, page);
+    }
+
     const [feedResponse] = await Promise.all([
         feedRepo.findForUser(user.id, {
             where: { isArchived: false },
@@ -84,12 +144,9 @@ const getFeed = async (
         };
     });
 
-    // idk why but I need this otherwise the frontend sometimes has dup ids?
-    const uniqContent = uniqBy(content, (c) => c.id);
-
     const finalContent = await ContentService.decorateContentWithFriends(
         user,
-        uniqContent
+        content
     );
 
     return finalContent;

@@ -34,7 +34,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
-  ContentFeedFilter: "archived" | "for_you" | "new" | "popular" | "queue" | "unread"
+  ContentFeedFilter: "archived" | "for_you" | "friends" | "new" | "popular" | "queue" | "unread"
   InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "queued" | "scrolled_past" | "skipped" | "started_listening" | "unbookmarked"
   UserAuthProviderEnum: "firebase"
 }
@@ -85,6 +85,10 @@ export interface NexusGenObjects {
   FollowersResponse: { // root type
     followers: NexusGenRootTypes['Profile'][]; // [Profile!]!
     following: NexusGenRootTypes['Profile'][]; // [Profile!]!
+  }
+  FriendProfile: { // root type
+    profile: NexusGenRootTypes['Profile']; // Profile!
+    unreadCount: number; // Int!
   }
   GetMobileUpdateResponse: { // root type
     latestVersion?: string | null; // String
@@ -250,6 +254,10 @@ export interface NexusGenFieldTypes {
     followers: NexusGenRootTypes['Profile'][]; // [Profile!]!
     following: NexusGenRootTypes['Profile'][]; // [Profile!]!
   }
+  FriendProfile: { // field return type
+    profile: NexusGenRootTypes['Profile']; // Profile!
+    unreadCount: number; // Int!
+  }
   GetMobileUpdateResponse: { // field return type
     latestVersion: string | null; // String
     shouldUpdate: boolean; // Boolean!
@@ -332,6 +340,7 @@ export interface NexusGenFieldTypes {
     getCurrentContentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     getFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getFollows: NexusGenRootTypes['FollowersResponse']; // FollowersResponse!
+    getFriends: NexusGenRootTypes['FriendProfile'][]; // [FriendProfile!]!
     getIntercomMobileToken: string; // String!
     getIsBookmarked: boolean; // Boolean!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
@@ -487,6 +496,10 @@ export interface NexusGenFieldTypeNames {
     followers: 'Profile'
     following: 'Profile'
   }
+  FriendProfile: { // field return type name
+    profile: 'Profile'
+    unreadCount: 'Int'
+  }
   GetMobileUpdateResponse: { // field return type name
     latestVersion: 'String'
     shouldUpdate: 'Boolean'
@@ -569,6 +582,7 @@ export interface NexusGenFieldTypeNames {
     getCurrentContentSession: 'ContentSession'
     getFeed: 'Content'
     getFollows: 'FollowersResponse'
+    getFriends: 'FriendProfile'
     getIntercomMobileToken: 'String'
     getIsBookmarked: 'Boolean'
     getLikes: 'ContentSession'

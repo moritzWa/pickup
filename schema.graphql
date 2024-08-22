@@ -53,12 +53,13 @@ type Content {
 }
 
 enum ContentFeedFilter {
-  archived
-  for_you
-  new
-  popular
-  queue
-  unread
+  Archived
+  ForYou
+  Friends
+  New
+  Popular
+  Queue
+  Unread
 }
 
 type ContentRespondResponse {
@@ -117,6 +118,11 @@ type FollowUpQuestion {
 type FollowersResponse {
   followers: [Profile!]!
   following: [Profile!]!
+}
+
+type FriendProfile {
+  profile: Profile!
+  unreadCount: Int!
 }
 
 type GetMobileUpdateResponse {
@@ -221,6 +227,7 @@ type Query {
   getCurrentContentSession: ContentSession
   getFeed(filter: ContentFeedFilter, limit: Int, page: Int): [Content!]!
   getFollows(username: String!): FollowersResponse!
+  getFriends: [FriendProfile!]!
   getIntercomMobileToken(platform: String): String!
   getIsBookmarked(authProviderId: String, contentId: ID!): Boolean!
   getLikes(limit: Int, page: Int): [ContentSession!]!

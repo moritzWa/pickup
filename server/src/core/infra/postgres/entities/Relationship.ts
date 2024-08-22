@@ -35,6 +35,15 @@ export class Relationship {
     @JoinColumn({ name: "from_user_id" })
     fromUser!: User;
 
+    // date of the last time the to user clicked into their profile
+    @Column({
+        nullable: true,
+        name: "last_checked_at",
+        type: "timestamp",
+        default: null,
+    })
+    lastCheckedAt!: Date | null;
+
     // to user id
     @Column({
         nullable: false,

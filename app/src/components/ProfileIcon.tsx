@@ -33,7 +33,7 @@ const ProfileIcon = ({
     // return the fast image
     return (
       <TouchableOpacity
-        activeOpacity={0.9}
+        activeOpacity={1}
         onPress={onPress}
         style={[style, { borderRadius: 100 }]}
       >
@@ -69,7 +69,7 @@ const ProfileIcon = ({
         style,
       ]}
     >
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[]}>
+      <TouchableOpacity activeOpacity={1} onPress={onPress} style={[]}>
         <Text
           style={[
             {

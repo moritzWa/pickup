@@ -28,7 +28,7 @@ import {
 } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { useDispatch, useSelector } from "react-redux";
-import { api } from "src/api";
+import { api, apolloClient } from "src/api";
 import { BaseContentFields } from "src/api/fragments";
 import {
   ContentFeedFilter,
@@ -44,6 +44,8 @@ import { setCurrentContent } from "src/redux/reducers/audio";
 import { setHomeFilter } from "src/redux/reducers/globalState";
 import { ReduxState } from "src/redux/types";
 import { ContentRow } from "../../../components/Content/ContentRow";
+import ProfileIcon from "src/components/ProfileIcon";
+import { ProfileService } from "src/modules/profileService";
 
 const LIMIT = 10;
 
@@ -65,11 +67,11 @@ const Home = () => {
 
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
-      filter: ContentFeedFilter.ForYou,
+      filter: filter ?? ContentFeedFilter.ForYou,
       limit: LIMIT,
       page,
     }),
-    [page]
+    [page, filter]
   );
 
   const { data, refetch, fetchMore, error, loading } = useQuery<{
@@ -87,6 +89,8 @@ const Home = () => {
       setHasMore(newItems.length === LIMIT); // Assume that if fewer items than the limit are returned, there's no more data
     },
   });
+
+  // console.log(JSON.stringify(error, null, 2));
 
   const loadMoreData = throttle(() => {
     if (!loading && hasMore) {
@@ -142,12 +146,24 @@ const Home = () => {
     });
   };
 
+  const onPressTab = async () => {
+    try {
+      setPage(0);
+      setHasMore(true);
+      await refetch({
+        // variables: { page: 0, limit: LIMIT, filter },
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const onPressMore = async () => {
     try {
       setPage(0);
       setHasMore(true);
       await refetch({
-        variables: { page: 0, limit: LIMIT },
+        // variables: { page: 0, limit: LIMIT, filter },
       });
     } finally {
       setIsRefreshing(false);
@@ -160,8 +176,9 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        variables: { page: 0, limit: LIMIT },
+        // variables: { page: 0, limit: LIMIT },
       });
+      apolloClient.refetchQueries({ include: [api.users.friends] });
     } finally {
       setIsRefreshing(false);
     }
@@ -183,7 +200,7 @@ const Home = () => {
           alignItems: "center",
         }}
       >
-        <Options onPressMore={onPressMore} />
+        <Options onPressMore={onPressMore} onPressTab={onPressTab} />
       </View>
 
       <FlatList
@@ -200,7 +217,7 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           // padding: 10,
-          paddingTop: 15,
+          paddingTop: filter === ContentFeedFilter.Friends ? 5 : 25,
           paddingBottom: 150,
         }}
         ListHeaderComponent={
@@ -260,6 +277,8 @@ const Home = () => {
                 ) : null}
               </View>
             ) : null}
+
+            {filter === ContentFeedFilter.Friends ? <FriendsScroller /> : null}
           </>
         }
         renderItem={({ item: c }) => (
@@ -493,7 +512,7 @@ const SingleFilter = ({
         style={{
           color: isActive ? theme.header : theme.text,
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 18,
+          fontSize: 16,
         }}
       >
         {label}
@@ -539,7 +558,13 @@ export enum DiscoveryTab {
   Popular = "popular",
 }
 
-const Options = ({ onPressMore }: { onPressMore: () => void }) => {
+const Options = ({
+  onPressMore,
+  onPressTab,
+}: {
+  onPressMore: () => void;
+  onPressTab: () => void;
+}) => {
   const filter = useSelector((state: ReduxState) => state.global.homeFilter);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
@@ -570,6 +595,8 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     dispatch(setHomeFilter(feed));
+
+    onPressTab();
   };
 
   const onStartListening = async () => {
@@ -671,8 +698,6 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
     return null;
   }, [me]);
 
-  const queueCount = queueData?.getQueue?.total ?? 0;
-
   return (
     <>
       {commuteTime ? (
@@ -691,7 +716,6 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
       <View
         style={{
           paddingHorizontal: 10,
-          paddingBottom: 5,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -714,19 +738,19 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              paddingVertical: 7,
-              padding: 12,
+              // paddingVertical: 7,
+              padding: 7,
               marginRight: 5,
               backgroundColor: theme.medBackground,
             }}
           >
             <FontAwesomeIcon
-              style={{ marginRight: 5 }}
+              style={{ position: "relative", right: -2 }}
               icon={faUserPlus}
-              size={16}
+              size={18}
               color={theme.text}
             />
-            <Text
+            {/* <Text
               style={{
                 color: theme.text,
                 fontFamily: "Raleway-Medium",
@@ -734,7 +758,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               }}
             >
               Friends
-            </Text>
+            </Text> */}
           </TouchableOpacity>
         </View>
 
@@ -748,9 +772,19 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
           }}
         >
           <SingleFilter
-            onPress={() => onPress(ContentFeedFilter.ForYou)}
+            onPress={() => {
+              onPress(ContentFeedFilter.ForYou);
+            }}
             isActive={filter === ContentFeedFilter.ForYou}
-            label="Your Feed"
+            label="For you"
+          />
+
+          <SingleFilter
+            onPress={() => {
+              onPress(ContentFeedFilter.Friends);
+            }}
+            isActive={filter === ContentFeedFilter.Friends}
+            label="Friends"
           />
 
           {/* <SingleFilter
@@ -855,4 +889,56 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
   );
 };
 
+const FriendsScroller = () => {
+  const theme = useTheme();
+  const navigation = useNavigation<NavigationProps>();
+
+  const { data, error } = useQuery<Pick<Query, "getFriends">>(
+    api.users.friends
+  );
+
+  const onPressUsername = (username: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    navigation.navigate("UserProfile", {
+      username,
+    });
+  };
+
+  const friends = data?.getFriends ?? [];
+
+  return (
+    <FlatList
+      horizontal
+      style={{
+        paddingLeft: 10,
+        paddingVertical: 10,
+        // backgroundColor: "red",
+        borderTopWidth: 1,
+        borderColor: theme.border,
+        borderBottomWidth: 1,
+        marginBottom: 15,
+        backgroundColor: theme.ternaryBackground,
+      }}
+      data={friends}
+      renderItem={({ item: f }) => (
+        <ProfileIcon
+          style={{
+            marginRight: 5,
+            borderWidth: 2,
+            borderColor: theme.border,
+          }}
+          size={50}
+          onPress={() => onPressUsername(f.profile.username || "")}
+          profileImageUrl={f.profile.avatarImageUrl}
+          textStyle={{ fontSize: 18 }}
+          initials={ProfileService.getInitials(
+            f.profile.name,
+            f.profile.username
+          )}
+        />
+      )}
+    />
+  );
+};
 export default Home;

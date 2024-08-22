@@ -229,6 +229,20 @@ const GetContentFeed = gql`
   }
 `;
 
+const GetFriends = gql`
+  query GetFriends {
+    getFriends {
+      profile {
+        id
+        username
+        name
+        avatarImageUrl
+      }
+      unreadCount
+    }
+  }
+`;
+
 const GetActivity = gql`
   ${BaseContentFields}
   query GetActivity($filter: ActivityFilter, $username: String) {
@@ -420,6 +434,7 @@ const GetIsBookmarked = gql`
 
 export const api = {
   users: {
+    friends: GetFriends,
     getFollows: GetFollows,
     checkValidUsername: CheckValidUsername,
     deleteMe: DeleteMe,

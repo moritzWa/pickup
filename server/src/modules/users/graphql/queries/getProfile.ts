@@ -34,16 +34,24 @@ export const getProfile = queryField("getProfile", {
 
         const user = userResponse.value;
 
-        const [profileResponse, isFollowingResponse] = await Promise.all([
-            ProfileService.getFollowersAndFollowing(user.id),
-            relationshipRepo.isFollowing(user.id, me.id),
-        ]);
+        const [profileResponse, isFollowingResponse, relationshipResponse] =
+            await Promise.all([
+                ProfileService.getFollowersAndFollowing(user.id),
+                relationshipRepo.isFollowing(user.id, me.id),
+                relationshipRepo.findRelationship(me.id, user.id),
+            ]);
 
         throwIfError(profileResponse);
         throwIfError(isFollowingResponse);
 
         const isFollowing = isFollowingResponse.value;
         const profile = profileResponse.value;
+
+        if (relationshipResponse.isSuccess() && relationshipResponse.value) {
+            await relationshipRepo.update(relationshipResponse.value.id, {
+                lastCheckedAt: new Date(),
+            });
+        }
 
         return {
             id: user.id,

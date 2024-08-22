@@ -17,11 +17,26 @@ import { contentRepo, contentSessionRepo, feedRepo } from "../../infra";
 import { In } from "typeorm";
 import { keyBy } from "lodash";
 import { FeedService } from "../../services/feedService";
+import { NexusGenEnums } from "src/core/surfaces/graphql/generated/nexus";
+import { ContentFeedFilterEnum } from "src/core/infra/postgres/entities/FeedItem";
 
 export const ContentFeedFilter = enumType({
     name: "ContentFeedFilter",
-    members: ["popular", "for_you", "new", "unread", "queue", "archived"],
+    members: ContentFeedFilterEnum,
 });
+
+const FILTER_MAPPING: Record<
+    NexusGenEnums["ContentFeedFilter"],
+    ContentFeedFilterEnum
+> = {
+    archived: ContentFeedFilterEnum.Archived,
+    for_you: ContentFeedFilterEnum.ForYou,
+    friends: ContentFeedFilterEnum.Friends,
+    new: ContentFeedFilterEnum.New,
+    popular: ContentFeedFilterEnum.Popular,
+    queue: ContentFeedFilterEnum.Queue,
+    unread: ContentFeedFilterEnum.Unread,
+};
 
 export const getFeed = queryField("getFeed", {
     type: nonNull(list(nonNull("Content"))),
@@ -33,6 +48,8 @@ export const getFeed = queryField("getFeed", {
     resolve: async (_parent, args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);
 
+        console.log(args.filter);
+
         // console.log(args);
 
         const { limit = 20, page = 0 } = args;
@@ -41,7 +58,8 @@ export const getFeed = queryField("getFeed", {
         const feedResponse = await FeedService.getFeed(
             user,
             limit ?? 20,
-            page ?? 0
+            page ?? 0,
+            args.filter ? FILTER_MAPPING[args.filter] : null
         );
 
         throwIfError(feedResponse);
