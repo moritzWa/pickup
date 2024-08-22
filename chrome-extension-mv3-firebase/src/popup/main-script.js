@@ -1,7 +1,7 @@
 import {
   getAuth,
-  onAuthStateChanged,
   GoogleAuthProvider,
+  onAuthStateChanged,
   signInWithCredential,
 } from "firebase/auth";
 import { firebaseApp } from "./firebase_config";
@@ -42,6 +42,9 @@ function checkForExistingToken() {
   });
 }
 
+const apiUrl = process.env.API_URL;
+console.log(`API URL: ${apiUrl}`);
+
 function saveCurrentLink() {
   const messageDiv = document.getElementById("message");
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
@@ -49,8 +52,10 @@ function saveCurrentLink() {
     const user = auth.currentUser;
     const authProviderId = user ? user.uid : null;
 
+    console.log("saving link using api url:", apiUrl);
+
     try {
-      const response = await fetch("http://localhost:8888/graphql", {
+      const response = await fetch(`${apiUrl}/graphql`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +98,7 @@ function likeContent() {
     const authProviderId = user ? user.uid : null;
 
     try {
-      const response = await fetch("http://localhost:8888/graphql", {
+      const response = await fetch(`${apiUrl}/graphql`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
