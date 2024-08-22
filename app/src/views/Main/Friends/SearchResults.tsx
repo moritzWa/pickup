@@ -158,7 +158,7 @@ export const SearchResults = () => {
 
     const phoneNumber = contact.phoneNumbers?.[0]?.number;
     const message =
-      "Try out Pickup to see what podcasts listen to 🎙️\n\nhttps://testflight.apple.com/join/ets4bkPy";
+      "Try out Pickup to see what podcasts I listen to 🎙️\n\nhttps://testflight.apple.com/join/ets4bkPy";
 
     if (phoneNumber) {
       // open up to send to this contact on imessage

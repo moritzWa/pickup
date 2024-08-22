@@ -691,7 +691,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
       <View
         style={{
           paddingHorizontal: 10,
-          paddingBottom: 10,
+          paddingBottom: 5,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -714,8 +714,8 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              paddingVertical: 10,
-              padding: 15,
+              paddingVertical: 7,
+              padding: 12,
               marginRight: 5,
               backgroundColor: theme.medBackground,
             }}
@@ -723,7 +723,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
             <FontAwesomeIcon
               style={{ marginRight: 5 }}
               icon={faUserPlus}
-              size={20}
+              size={16}
               color={theme.text}
             />
             <Text
@@ -789,15 +789,14 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              padding: 10,
-              marginRight: 5,
+              padding: 7,
               backgroundColor: theme.secondaryBackground,
             }}
           >
             <FontAwesomeIcon
               // style={{ marginRight: 5 }}
               icon={faPlus}
-              size={20}
+              size={18}
               color={theme.text}
             />
             {/* <Text
