@@ -16,7 +16,6 @@ function handleAuthStateChange(user) {
     console.log("current user:", user);
     document.getElementById("likeContent").style.display = "block";
     saveCurrentLink();
-    checkBookmarkStatus();
   } else {
     console.log("No user");
     window.location.replace("./popup.html");
@@ -89,6 +88,10 @@ async function saveCurrentLink() {
           console.log("Content ID saved:", contentId);
         });
         messageDiv.textContent = "Link saved successfully!";
+
+        // TODO: just get this from the same API call?
+        // calling this here instead of in handleAuthStateChange to reduce redundant API calls
+        await checkBookmarkStatus();
       } else {
         messageDiv.textContent = "Error saving link.";
       }
@@ -97,7 +100,6 @@ async function saveCurrentLink() {
       messageDiv.textContent = "Error saving link.";
     }
   });
-  await checkBookmarkStatus();
 }
 
 async function checkBookmarkStatus() {
@@ -105,14 +107,9 @@ async function checkBookmarkStatus() {
   const likeButton = document.getElementById("likeContent");
   const hintText = document.getElementById("hint");
 
-  chrome.storage.local.get(["currentContentId"], async (result) => {
-    const contentId = result.currentContentId;
-    if (!contentId) {
-      messageDiv.textContent =
-        "No content ID found. Please save the link first.";
-      return;
-    }
-
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    const tab = tabs[0];
+    const url = tab.url;
     const user = auth.currentUser;
     const authProviderId = user ? user.uid : null;
 
@@ -123,11 +120,11 @@ async function checkBookmarkStatus() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query: `query($contentId: ID!, $authProviderId: String) {
-            getIsBookmarked(contentId: $contentId, authProviderId: $authProviderId)
+          query: `query($url: String!, $authProviderId: String) {
+            getIsBookmarked(url: $url, authProviderId: $authProviderId)
           }`,
           variables: {
-            contentId: contentId,
+            url,
             authProviderId,
           },
         }),
@@ -136,6 +133,8 @@ async function checkBookmarkStatus() {
       if (response.ok) {
         const result = await response.json();
         const isBookmarked = result.data.getIsBookmarked;
+
+        console.log("isBookmarked", isBookmarked);
 
         if (isBookmarked) {
           likeButton.textContent = "Unlike Content";

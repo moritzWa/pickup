@@ -1,4 +1,4 @@
-import { arg, idArg, nonNull, queryField } from "nexus";
+import { arg, nonNull, queryField, stringArg } from "nexus";
 import { User } from "src/core/infra/postgres/entities";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
@@ -10,11 +10,19 @@ import { ContentSessionService } from "../../services/contentSessionService";
 export const getIsBookmarked = queryField("getIsBookmarked", {
     type: nonNull("Boolean"),
     args: {
-        contentId: nonNull(idArg()),
+        url: nonNull(stringArg()),
         authProviderId: arg({ type: "String" }),
     },
     resolve: async (_parent, args, ctx: Context) => {
-        const { contentId, authProviderId } = args;
+        const { url, authProviderId } = args;
+
+        Logger.info(
+            `getIsBookmarked: Checking if URL ${url} is bookmarked, authProviderId: ${authProviderId}`
+        );
+
+        if (!url) {
+            throw new Error("URL is required");
+        }
 
         let user = await getUserFromContextOrAuthProviderId(
             ctx,
@@ -25,18 +33,22 @@ export const getIsBookmarked = queryField("getIsBookmarked", {
             throw new Error("User not authenticated");
         }
 
-        const contentResponse = await contentRepo.findById(contentId);
+        const contentResponse = await contentRepo.findOne({
+            where: { websiteUrl: url },
+        });
         throwIfError(contentResponse);
         const content = contentResponse.value;
 
-        // TODO: typically queries should not have mutations
+        if (!content) {
+            return false; // URL not saved, so it's not bookmarked
+        }
+
         const sessionResponse = await ContentSessionService.findOrCreate(
             content,
             user
         );
         throwIfError(sessionResponse);
 
-        // log if is now bookmarked or unbookmarked
         Logger.info(
             `Content ${content.title} ${
                 sessionResponse.value?.isBookmarked
@@ -60,7 +72,12 @@ async function getUserFromContextOrAuthProviderId(
         const userResponse = await pgUserRepo.findOne({
             where: { authProviderId },
         });
+
         if (userResponse.isSuccess() && userResponse.value) {
+            Logger.info(
+                `getUserFromContextOrAuthProviderId: Found user ${userResponse.value?.email} with authProviderId ${authProviderId}`
+            );
+
             return userResponse.value;
         }
     }

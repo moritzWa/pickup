@@ -756,7 +756,7 @@ export interface NexusGenArgTypes {
     }
     getIsBookmarked: { // args
       authProviderId?: string | null; // String
-      contentId: string; // ID!
+      url: string; // String!
     }
     getLikes: { // args
       limit?: number | null; // Int

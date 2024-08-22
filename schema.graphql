@@ -222,7 +222,7 @@ type Query {
   getFeed(filter: ContentFeedFilter, limit: Int, page: Int): [Content!]!
   getFollows(username: String!): FollowersResponse!
   getIntercomMobileToken(platform: String): String!
-  getIsBookmarked(authProviderId: String, contentId: ID!): Boolean!
+  getIsBookmarked(authProviderId: String, url: String!): Boolean!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
   getNextContent(afterContentId: ID!, currentMs: Int): FeedItem
