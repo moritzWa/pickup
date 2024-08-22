@@ -41,7 +41,6 @@ module.exports = {
       patterns: [
         { from: "./src/manifest.json" },
         { from: "./src/background/background.js" },
-        { from: "./src/content/content.js" },
         { from: "./src/icons/*" },
         { from: "./src/css/*" },
       ],

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "version": "0.1",
-  "name": "Pickup: Share and listen to links and get AI recommendations",
-  "description": "Pickup is a social ai bookmarking platform to share the best content with friends.",
+  "name": "Pickup",
+  "description": "Share and listen to links and get AI recommendations.",
   "action": {
     "default_popup": "./popup.html",
     "default_icon": {
@@ -13,14 +13,8 @@
     },
     "default_title": "Pickup Chrome Extension"
   },
-  "permissions": ["storage", "activeTab", "scripting", "identity", "tabs"],
-  "host_permissions": ["http://localhost:8888/*"],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
-    }
-  ],
+  "permissions": ["storage", "identity", "tabs"],
+  "host_permissions": ["https://api.talkpickup.com/*"],
   "background": {
     "service_worker": "background.js"
   },
