@@ -124,8 +124,8 @@ const GetMe = gql`
 `;
 
 const GetProfile = gql`
-  query GetProfile($userId: ID!) {
-    getProfile(userId: $userId) {
+  query GetProfile($username: String) {
+    getProfile(username: $username) {
       id
       username
       name
@@ -219,8 +219,8 @@ const GetContentFeed = gql`
 
 const GetActivity = gql`
   ${BaseContentFields}
-  query GetActivity($filter: ActivityFilter) {
-    getActivity(filter: $filter) {
+  query GetActivity($filter: ActivityFilter, $username: String) {
+    getActivity(filter: $filter, username: $username) {
       ...BaseContentFields
     }
   }
@@ -237,8 +237,8 @@ const GetContent = gql`
 
 const GetBookmarks = gql`
   ${BaseContentFields}
-  query GetBookmarks($limit: Int, $page: Int) {
-    getBookmarks(limit: $limit, page: $page) {
+  query GetBookmarks($limit: Int, $page: Int, $username: String) {
+    getBookmarks(limit: $limit, page: $page, username: $username) {
       ...BaseContentFields
     }
   }

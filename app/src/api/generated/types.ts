@@ -236,6 +236,7 @@ export type MutationArchiveContentArgs = {
 
 
 export type MutationBookmarkContentArgs = {
+  authProviderId?: InputMaybe<Scalars['String']['input']>;
   contentId: Scalars['ID']['input'];
 };
 
@@ -395,6 +396,7 @@ export type QueryCheckValidUsernameArgs = {
 
 export type QueryGetActivityArgs = {
   filter?: InputMaybe<ActivityFilter>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -406,6 +408,7 @@ export type QueryGetAuthorArgs = {
 export type QueryGetBookmarksArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -455,7 +458,7 @@ export type QueryGetPrevContentArgs = {
 
 
 export type QueryGetProfileArgs = {
-  userId?: InputMaybe<Scalars['ID']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 

@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import {
   faCar,
   faPlus,
+  faPlusCircle,
   faSatelliteDish,
   faUserPlus,
   faUsers,

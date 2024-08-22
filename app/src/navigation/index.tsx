@@ -40,11 +40,12 @@ import Signup from "../views/Authentication/Signup";
 import { LINKING } from "./linking";
 import { TabBar } from "./TabBar";
 import Queue from "src/views/Main/Queue";
-import Activity from "src/views/Main/Activity";
+import QueueTab from "src/views/Main/QueueTab";
 import ContentDetails from "src/views/Main/ContentDetails";
 import { BaseContentFields } from "src/api/fragments";
 import Friends from "src/views/Main/Friends";
 import EditProfile from "src/views/Main/EditProfile";
+import { Followers } from "src/views/Main/Followers";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -56,7 +57,7 @@ export type WebViewParams = {
 
 export type RootStackParamList = {
   Login: undefined; // params
-  Followers?: { username: string };
+  Followers?: { username: string; defaultMode: "followers" | "following" };
   ContentDetails: { content?: BaseContentFields };
   Signup: undefined; // params
   Welcome: undefined;
@@ -203,7 +204,7 @@ const MainTabNavigation = () => {
         options={{
           headerShown: false,
         }}
-        component={Activity}
+        component={QueueTab}
       />
 
       <Tabs.Screen
@@ -354,6 +355,14 @@ export const MainNavigationStack = () => {
             component={UserProfile}
           />
 
+          <Stack.Screen
+            name="Followers"
+            options={{
+              headerShown: false,
+            }}
+            component={Followers}
+          />
+
           {/* MODALS */}
           <Stack.Group
             screenOptions={{
@@ -401,6 +410,15 @@ export const MainNavigationStack = () => {
               }}
             />
           </Stack.Group>
+
+          {/* <Stack.Group
+            screenOptions={{
+              presentation: "fullScreenModal",
+              animation: "default",
+            }}
+          >
+           
+          </Stack.Group> */}
         </Stack.Navigator>
       </NavigationContainer>
     </View>

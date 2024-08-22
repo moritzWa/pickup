@@ -9,6 +9,8 @@ import React from "react";
 import FastImage from "react-native-fast-image";
 import { colors } from ".";
 import { TextStyle } from "react-native";
+import { getGradientById } from "src/utils/helpers";
+import { LinearGradient } from "expo-linear-gradient";
 
 const ProfileIcon = ({
   initials,
@@ -25,6 +27,8 @@ const ProfileIcon = ({
   style?: StyleProp<ViewStyle>;
   onPress: () => void;
 }) => {
+  const gradient = getGradientById(initials || "");
+
   if (profileImageUrl) {
     // return the fast image
     return (
@@ -49,36 +53,34 @@ const ProfileIcon = ({
   }
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={onPress}
-      style={[
-        {
-          height: size,
-          width: size,
-          borderRadius: 100,
-          backgroundColor: colors.red50,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        style,
-      ]}
+    <LinearGradient
+      colors={gradient}
+      style={{
+        height: size,
+        width: size,
+        borderRadius: 100,
+        backgroundColor: colors.red50,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <Text
-        style={[
-          {
-            fontSize: 20,
-            fontFamily: "Raleway-Bold",
-            color: colors.white,
-          },
-          textStyle,
-        ]}
-      >
-        {initials}
-      </Text>
-    </TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[style]}>
+        <Text
+          style={[
+            {
+              fontSize: 20,
+              fontFamily: "Raleway-Bold",
+              color: colors.white,
+            },
+            textStyle,
+          ]}
+        >
+          {initials}
+        </Text>
+      </TouchableOpacity>
+    </LinearGradient>
   );
 };
 

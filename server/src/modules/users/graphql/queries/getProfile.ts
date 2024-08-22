@@ -1,4 +1,4 @@
-import { idArg, nonNull, nullable, queryField } from "nexus";
+import { idArg, nonNull, nullable, queryField, stringArg } from "nexus";
 import {
     Context,
     throwIfNotAuthenticated,
@@ -15,7 +15,7 @@ import { ProfileService } from "../../services/profileService";
 export const getProfile = queryField("getProfile", {
     type: nonNull("Profile"),
     args: {
-        username: nullable(idArg()),
+        username: nullable(stringArg()),
     },
     resolve: async (_parent, args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);

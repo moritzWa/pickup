@@ -14,7 +14,7 @@ export const TabBar = ({ tabs }: Props) => {
   return (
     <View
       style={{
-        paddingTop: 25,
+        paddingTop: 15,
         paddingHorizontal: 15,
         display: "flex",
         flexDirection: "row",

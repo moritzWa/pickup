@@ -702,6 +702,7 @@ export interface NexusGenArgTypes {
     }
     getActivity: { // args
       filter?: NexusGenEnums['ActivityFilter'] | null; // ActivityFilter
+      username?: string | null; // String
     }
     getAuthor: { // args
       authorId: string; // ID!
@@ -709,6 +710,7 @@ export interface NexusGenArgTypes {
     getBookmarks: { // args
       limit?: number | null; // Int
       page?: number | null; // Int
+      username?: string | null; // String
     }
     getContent: { // args
       contentId: string; // ID!
@@ -740,7 +742,7 @@ export interface NexusGenArgTypes {
       currentMs?: number | null; // Int
     }
     getProfile: { // args
-      username?: string | null; // ID
+      username?: string | null; // String
     }
     searchSimilarLinks: { // args
       limit: number | null; // Int
