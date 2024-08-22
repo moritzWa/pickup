@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import {
   faCar,
   faPlus,
+  faPlusCircle,
   faSatelliteDish,
   faUserPlus,
   faUsers,
@@ -492,7 +493,7 @@ const SingleFilter = ({
         style={{
           color: isActive ? theme.header : theme.text,
           fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
-          fontSize: 16,
+          fontSize: 18,
         }}
       >
         {label}
@@ -714,7 +715,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               alignItems: "center",
               borderRadius: 100,
               paddingVertical: 7,
-              padding: 10,
+              padding: 12,
               marginRight: 5,
               backgroundColor: theme.medBackground,
             }}
@@ -788,19 +789,17 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              paddingVertical: 7,
-              padding: 10,
-              marginRight: 5,
+              padding: 7,
               backgroundColor: theme.secondaryBackground,
             }}
           >
             <FontAwesomeIcon
-              style={{ marginRight: 5 }}
+              // style={{ marginRight: 5 }}
               icon={faPlus}
-              size={16}
+              size={18}
               color={theme.text}
             />
-            <Text
+            {/* <Text
               style={{
                 color: theme.text,
                 fontFamily: "Raleway-Medium",
@@ -808,7 +807,7 @@ const Options = ({ onPressMore }: { onPressMore: () => void }) => {
               }}
             >
               Add
-            </Text>
+            </Text> */}
           </TouchableOpacity>
 
           {/* <TouchableOpacity

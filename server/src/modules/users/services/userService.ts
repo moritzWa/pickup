@@ -102,7 +102,6 @@ const logToSlack = async (user: User, clientId: Maybe<string>) => {
                 `Name: ${user.name || "none"}`,
                 `Email: ${user.email}`,
                 `ID: ${user.id}`,
-                `Link: https://movement.market/email/${user.email || ""}`,
             ]
                 .filter(hasValue)
                 .join("\n") +

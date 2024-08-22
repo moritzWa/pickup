@@ -81,15 +81,16 @@ const checkValidUsername = async (
     const usersWithNameResp = await pgUserRepo.findByUsername(username);
     if (usersWithNameResp.isFailure()) return failure(usersWithNameResp.error);
     const usersWithName = usersWithNameResp.value;
+
     // there is already a user with this username and it's not the current user
-    if (usersWithName.length > 0) {
+    if (usersWithName) {
         if (!user?.username) {
             return failure(
                 new Error(
                     "This username is already taken. Please enter another one."
                 )
             );
-        } else if (usersWithName.some((u) => u.id !== user.id)) {
+        } else if (usersWithName.id !== user.id) {
             return failure(
                 new Error(
                     "This username is already taken. Please enter another one."
@@ -109,8 +110,7 @@ const getFollowersAndFollowingFromUsername = (username: string) =>
 
 const followUser = async (
     toUser: User,
-    fromUser: User,
-    notifyOnBuy?: boolean
+    fromUser: User
 ): Promise<FailureOrSuccess<DefaultErrors, null>> => {
     if (toUser.id === fromUser.id) {
         return failure(new Error("You cannot follow yourself."));
@@ -129,23 +129,10 @@ const followUser = async (
     // send notification
     await NotificationService.sendNotification(toUser, {
         title: `${fromUser.name || ""} (@${fromUser.username || ""})`,
-        subtitle: `followed you on Movement`,
+        subtitle: `followed you on Pickup`,
         iconImageUrl: null,
         followerUserId: fromUser.id,
     });
-    // const notificationResp = await NotificationService.create({
-    //     title: `${fromUser.name} (@${fromUser.username}) followed you`,
-    //     subtitle: "",
-    //     iconImageUrl: null,
-    //     userId: toUser.id, // to the person who got followed
-    // });
-    // if (notificationResp.isFailure()) {
-    //     // log to slack but don't return failure
-    //     await Slack.send({
-    //         message: `Error sending notification for followUser: ${notificationResp.error.message}`,
-    //         channel: SlackChannel.TradingNever,
-    //     });
-    // }
 
     return success(null);
 };

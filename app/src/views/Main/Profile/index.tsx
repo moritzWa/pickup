@@ -10,7 +10,13 @@ import {
 } from "@react-navigation/native";
 import { AppContext } from "context";
 import * as Haptics from "expo-haptics";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -39,13 +45,16 @@ import {
   MutationUpdateUserArgs,
   Profile as ProfileT,
   Query,
+  QueryGetActivityArgs,
+  QueryGetProfileArgs,
 } from "src/api/generated/types";
-import { colors } from "src/components";
+import { Button, colors } from "src/components";
 import { ContentRow } from "src/components/Content/ContentRow";
 import { CurrentAudio } from "src/components/CurrentAudio";
 import { FollowersInfo } from "src/components/FollowersInfo";
 import Header from "src/components/Header";
 import { TabBar } from "src/components/tabs";
+import { hasValue } from "src/core";
 import { useMe } from "src/hooks";
 import { useAudio } from "src/hooks/useAudio";
 import { useTheme } from "src/hooks/useTheme";
@@ -56,17 +65,22 @@ import { ProfileTabFilter, ReduxState } from "src/redux/types";
 import { storage } from "src/utils/firebase";
 import { v4 as uuidv4 } from "uuid";
 
+const ProfileContext = createContext<{
+  profile: ProfileT | null;
+}>({
+  profile: null,
+});
+
 export const UserProfile = () => {
   const { me, refetchMe } = useMe("network-only");
-
-  // console.log("ME: " + me);
 
   const navigation = useNavigation<NavigationProps>();
   const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
-  const username = params?.username ?? me?.id;
+
+  const username = params?.username ?? me?.username;
   const insets = useSafeAreaInsets();
-  const isME = username === me?.id;
+  const isME = username === me?.username;
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -79,10 +93,10 @@ export const UserProfile = () => {
   } = useTheme();
 
   const variables = useMemo(
-    () => ({
-      userId: me?.id,
+    (): QueryGetProfileArgs => ({
+      username: username,
     }),
-    [me?.id]
+    [username]
   );
 
   const {
@@ -90,10 +104,8 @@ export const UserProfile = () => {
     loading: loadingProfile,
     refetch,
     error: profileError,
-  } = useQuery<{
-    getProfile: ProfileT;
-  }>(api.users.getProfile, {
-    skip: !variables.userId,
+  } = useQuery<Pick<Query, "getProfile">>(api.users.getProfile, {
+    skip: !variables.username,
     fetchPolicy: "cache-and-network",
     variables: variables,
   });
@@ -107,15 +119,30 @@ export const UserProfile = () => {
 
   useEffect(() => void refetchMe(), []);
 
+  const activityVariables = useMemo(
+    (): QueryGetActivityArgs => ({
+      username: username,
+    }),
+    [username]
+  );
+
   const {
     data,
     error,
     refetch: refetchActivity,
-  } = useQuery<Pick<Query, "getActivity">>(api.content.activity);
+  } = useQuery<Pick<Query, "getActivity">>(api.content.activity, {
+    variables: activityVariables,
+    skip: !activityVariables.username,
+    fetchPolicy: "cache-and-network",
+  });
 
   const { data: bookmarksData, refetch: refetchBookmarks } = useQuery<
     Pick<Query, "getBookmarks">
-  >(api.content.bookmarks);
+  >(api.content.bookmarks, {
+    variables: activityVariables,
+    skip: !activityVariables.username,
+    fetchPolicy: "cache-and-network",
+  });
 
   const { data: archivedData, refetch: refetchArchived } = useQuery<
     Pick<Query, "getArchived">
@@ -244,7 +271,7 @@ export const UserProfile = () => {
   const tabs = useMemo(() => {
     return [
       {
-        name: "Activity",
+        name: "Recent",
         onClick: () => _onPressTab(ProfileTabFilter.All),
         isActive: profileFilter === ProfileTabFilter.All,
       },
@@ -253,13 +280,15 @@ export const UserProfile = () => {
         onClick: () => _onPressTab(ProfileTabFilter.Bookmarks),
         isActive: profileFilter === ProfileTabFilter.Bookmarks,
       },
-      {
-        name: "Archived",
-        onClick: () => _onPressTab(ProfileTabFilter.Archived),
-        isActive: profileFilter === ProfileTabFilter.Archived,
-      },
-    ];
-  }, [profileFilter]);
+      isME
+        ? {
+            name: "Archived",
+            onClick: () => _onPressTab(ProfileTabFilter.Archived),
+            isActive: profileFilter === ProfileTabFilter.Archived,
+          }
+        : null,
+    ].filter(hasValue);
+  }, [profileFilter, isME]);
 
   const sections = useMemo(
     () => [
@@ -336,37 +365,39 @@ export const UserProfile = () => {
   // console.log(me);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingTop: isME ? insets.top : 0,
-        backgroundColor: background,
-      }}
-    >
-      {!isME ? <Header hasBackButton /> : null}
+    <ProfileContext.Provider value={{ profile: profile ?? null }}>
+      <View
+        style={{
+          flex: 1,
+          paddingTop: isME ? insets.top : 0,
+          backgroundColor: background,
+        }}
+      >
+        {!isME ? <Header hasBackButton /> : null}
 
-      {/* <ProfileImage name={profile?.name} /> */}
+        {/* <ProfileImage name={profile?.name} /> */}
 
-      <SectionList
-        contentContainerStyle={{ paddingBottom: 200 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={_onRefresh}
-            tintColor={activityIndicator}
-          />
-        }
-        sections={sections}
-      />
+        <SectionList
+          contentContainerStyle={{ paddingBottom: 200 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={_onRefresh}
+              tintColor={activityIndicator}
+            />
+          }
+          sections={sections}
+        />
 
-      {/* <CurrentAudio content={content} /> */}
-    </View>
+        {/* <CurrentAudio content={content} /> */}
+      </View>
+    </ProfileContext.Provider>
   );
 };
 
 const Profile = ({ username }: { username: string | null }) => {
   const { me } = useMe("network-only");
-  const isME = username === me?.id;
+  const isME = username === me?.username;
 
   const navigation = useNavigation<NavigationProps>();
   const fullTheme = useTheme();
@@ -375,80 +406,63 @@ const Profile = ({ username }: { username: string | null }) => {
     textPrimary,
     activityIndicator,
     text,
+    header,
     theme,
     textSecondary,
   } = fullTheme;
 
-  const variables = useMemo(
-    () => ({
-      userId: me?.id,
-    }),
-    [me?.id]
-  );
+  const { profile } = useContext(ProfileContext);
 
-  const {
-    data: getProfileData,
-    loading: loadingProfile,
-    error: profileError,
-  } = useQuery<{
-    getProfile: ProfileT;
-  }>(api.users.getProfile, {
-    skip: !variables.userId,
-    variables: variables,
-  });
+  const [followProfile, { loading: loadingFollow }] = useMutation<
+    Pick<Mutation, "followProfile">
+  >(api.users.follow);
 
-  const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
+  const [unfollowProfile, { loading: loadingUnfollow }] = useMutation<
+    Pick<Mutation, "unfollowProfile">
+  >(api.users.unfollow);
 
-  //   const [followProfile, { loading: loadingFollow }] = useMutation<
-  //     Pick<Mutation, "followProfile">
-  //   >(api.profiles.follow);
+  const followUser = async () => {
+    try {
+      await followProfile({
+        variables: {
+          username,
+        },
+        refetchQueries: [api.users.getProfile],
+      });
 
-  //   const [unfollowProfile, { loading: loadingUnfollow }] = useMutation<
-  //     Pick<Mutation, "unfollowProfile">
-  //   >(api.profiles.unfollow);
+      // Alert.alert("Success", `Successfully followed ${profile?.name}.`);
+    } catch (e) {
+      console.error(e);
 
-  //   const followUser = async () => {
-  //     try {
-  //       await followProfile({
-  //         variables: {
-  //           username,
-  //         },
-  //         refetchQueries: [api.profiles.getProfile],
-  //       });
+      Alert.alert(
+        "Error",
+        (e as any)?.message || "An error occurred. Please try again."
+      );
+    }
+  };
 
-  //       // Alert.alert("Success", `Successfully followed ${profile?.name}.`);
-  //     } catch (e) {
-  //       console.error(e);
+  const unfollowUser = async () => {
+    try {
+      await unfollowProfile({
+        variables: {
+          username,
+        },
+        refetchQueries: [api.users.getProfile],
+      });
 
-  //       Alert.alert(
-  //         "Error",
-  //         (e as any)?.message || "An error occurred. Please try again."
-  //       );
-  //     }
-  //   };
+      // Alert.alert(
+      //   "Success",
+      //   `Successfully un-followed ${profile?.name.trim() || "user"}.`
+      // );
+    } catch (e) {
+      console.error(e);
 
-  //   const unfollowUser = async () => {
-  //     try {
-  //       await unfollowProfile({
-  //         variables: {
-  //           username,
-  //         },
-  //         refetchQueries: [api.profiles.getProfile],
-  //       });
-
-  //       // Alert.alert(
-  //       //   "Success",
-  //       //   `Successfully un-followed ${profile?.name.trim() || "user"}.`
-  //       // );
-  //     } catch (e) {
-  //       console.error(e);
-
-  //       Alert.alert(
-  //         "Error",
-  //         (e as any)?.message || "An error occurred. Please try again."
-  //       );
-  //     }
-  //   };
+      Alert.alert(
+        "Error",
+        (e as any)?.message || "An error occurred. Please try again."
+      );
+    }
+  };
 
   const _editProfile = () => {
     navigation.navigate("EditProfile");
@@ -475,7 +489,7 @@ const Profile = ({ username }: { username: string | null }) => {
             paddingHorizontal: 15,
           }}
         >
-          <ProfilePicture profile={profile ?? null} />
+          <ProfilePicture />
 
           <View style={{ marginTop: 20, alignItems: "flex-start" }}>
             {!!profile?.name ? (
@@ -547,7 +561,7 @@ const Profile = ({ username }: { username: string | null }) => {
             alignSelf: "flex-start",
             padding: 5,
             marginTop: 20,
-            paddingBottom: 15,
+            paddingBottom: 0,
             paddingTop: 0,
           }}
           username={username ?? null}
@@ -661,7 +675,7 @@ const Profile = ({ username }: { username: string | null }) => {
             flexDirection: "row",
           }}
         >
-          {/* <Button
+          <Button
             style={{
               borderRadius: 100,
               height: 35,
@@ -683,24 +697,25 @@ const Profile = ({ username }: { username: string | null }) => {
             onPress={profile?.isFollowing ? unfollowUser : followUser}
             loading={loadingFollow || loadingUnfollow}
             label={profile?.isFollowing ? "Unfollow" : "Follow"}
-          /> */}
+          />
         </View>
       )}
     </View>
   );
 };
 
-const ProfilePicture = ({ profile }: { profile?: ProfileT | null }) => {
+const ProfilePicture = () => {
   const fullTheme = useTheme();
 
   const { me } = useMe();
+  const { profile } = useContext(ProfileContext);
   const [profileUrl, setProfileUrl] = useState<string | null>(null);
   const [updateUser] = useMutation<Mutation, MutationUpdateUserArgs>(
     api.users.update
   );
   const [isLoading, setLoading] = useState(false);
 
-  const isME = me && me.id === profile?.id;
+  const isME = me?.id === profile?.id;
 
   const initials = useMemo(() => {
     if (!profile) {
@@ -908,8 +923,8 @@ const ProfilePicture = ({ profile }: { profile?: ProfileT | null }) => {
   };
 
   useEffect(
-    () => setProfileUrl(me?.avatarImageUrl || ""),
-    [me?.avatarImageUrl]
+    () => setProfileUrl(profile?.avatarImageUrl || ""),
+    [profile?.avatarImageUrl]
   );
 
   //   if (__DEV__ && error) {

@@ -9,7 +9,7 @@ const parsePrivateKey = (key?: string) => (key || "").replace(/\\n/g, "\n");
 export const VALID_FREE_SUBSCRIPTION = new Date("2024-03-01T00:00:00.000Z");
 
 export const config = {
-    domain: "https://movement.market/",
+    domain: "https://talkpickup.com",
     port: process.env.PORT || "5000",
     env: process.env.NODE_ENV || "local",
     workers: process.env.WORKERS || 2,
@@ -155,8 +155,8 @@ export const config = {
             process.env.TWILIO_MESSAGING_SERVICE_ACCOUNT || "",
     },
     sendgrid: {
-        fromEmail: process.env.SENDGRID_FROM_EMAIL || "team@awaken.tax",
-        fromName: process.env.SENDGRID_FROM_NAME || "Movement",
+        fromEmail: process.env.SENDGRID_FROM_EMAIL || "team@talkpickup.com",
+        fromName: process.env.SENDGRID_FROM_NAME || "Pickup",
         secret: process.env.SENDGRID_API_KEY || "",
     },
     segment: {
@@ -263,26 +263,6 @@ export const config = {
     concurrency: {
         maxConcurrency: process.env.AWAKEN_MAX_CONCURRENCY || "2",
         maxWaitTime: process.env.AWAKEN_MAX_WAIT_TIME || "5000",
-    },
-    awakenFeePayer: {
-        privateKey:
-            process.env.MOVEMENT_FEE_PAYER_PRIVATE_KEY ||
-            process.env.AWAKEN_FEE_PAYER_PRIVATE_KEY ||
-            "",
-    },
-    movement: {
-        onrampPrivateKey: process.env.MOVEMENT_ONRAMP_PRIVATE_KEY || "",
-        fundAccountPrivateKey:
-            process.env.MOVEMENT_FUND_ACCOUNT_PRIVATE_KEY || "",
-        airdropPrivateKey: process.env.MOVEMENT_AIRDROP_PRIVATE_KEY || "",
-        jupiterReferralAccountPubKey:
-            process.env.MOVEMENT_JUPITER_REFERRAL_ACCOUNT_PUB_KEY ||
-            process.env.AWAKEN_JUPITER_REFERRAL_ACCOUNT_PUB_KEY ||
-            "CXnD2XHTWbozvD9bT9HG17Wr8EvV2pfECaWszVExyYFm",
-        feeAccountPubKey:
-            process.env.MOVEMENT_FEE_ACCOUNT_PUB_KEY ||
-            process.env.AWAKEN_FEE_ACCOUNT_PUB_KEY ||
-            "muLap14LG1yP6qTerDVooZqf4zbwVZaWVK1KMCzheEd",
     },
 };
 

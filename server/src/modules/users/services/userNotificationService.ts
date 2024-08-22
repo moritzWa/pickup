@@ -23,21 +23,21 @@ const sendWelcomeEmail = async (user: User) => {
 
         const data: EmailJobData = {
             channel: NotificationChannel.Email,
-            subject: `Movement: thanks for signing up 📈`,
-            fromEmail: "team@movement.market",
-            fromName: "Movement",
+            subject: `Pickup: thanks for signing up 📈`,
+            fromEmail: "team@pickup.market",
+            fromName: "Pickup",
             html: `
                 <div>
                     Hello${firstName ? " " + firstName : ""},
                     <br /><br />
-                    Thank you for signing up for the new Movement app!
+                    Thank you for signing up for the new Pickup app!
                     <br /><br />
                     If we can do anything to make your experience using the app better, respond to this email and we'll be right on it 🫡.
                     <br />
                     <br />
                     Best,
                     <br />
-                    Movement Team
+                    Pickup Team
                 </div>
             `,
             toEmails: [{ email: user.email, name: user.name || "" }],
@@ -61,20 +61,20 @@ const sendFeedbackToTraderEmail = async (user: User) => {
 
         const data: EmailJobData = {
             channel: NotificationChannel.Email,
-            subject: `Movement: we'd love to hear about your experience 🙏`,
-            fromEmail: "team@movement.market",
-            fromName: "Movement",
+            subject: `Pickup: we'd love to hear about your experience 🙏`,
+            fromEmail: "team@pickup.market",
+            fromName: "Pickup",
             html: `
                 <div>
                     Hello${firstName ? " " + firstName : ""},
                     <br /><br />
-                    Thank you for trying out and trading on the new Movement trading app!
+                    Thank you for trying out and trading on the new Pickup trading app!
                     <br /><br />
                     Quick question: what was your favorite and least favorite part of the app so far? 
                     <br /><br />
                     Best,
                     <br />
-                    Movement Team
+                    Pickup Team
                     <br />
                     <br />
                     P.S. If you want to earn a $20 Amazon gift card for a 30-minute Zoom call, respond to this email letting us know!
@@ -101,20 +101,20 @@ const sendFeedbackToNonTraderEmail = async (user: User) => {
 
         const data: EmailJobData = {
             channel: NotificationChannel.Email,
-            subject: `Movement: we'd love to hear about your experience 🙏`,
-            fromEmail: "team@movement.market",
-            fromName: "Movement",
+            subject: `Pickup: we'd love to hear about your experience 🙏`,
+            fromEmail: "team@pickup.market",
+            fromName: "Pickup",
             html: `
                 <div>
                     Hello${firstName ? " " + firstName : ""},
                     <br /><br />
-                    Thank you for downloading the new Movement trading app!
+                    Thank you for downloading Pickup!
                     <br /><br />
-                    I wanted to reach out to see if you need any help getting started? What would make Movement a no-brainer place for trading your crypto?
+                    I wanted to reach out to see if you need any help getting started? What would make Pickup a no-brainer place for you to listen to podcasts?
                     <br /><br />
                     Best,
                     <br />
-                    Movement Team
+                    Pickup Team
                     <br />
                     <br />
                     P.S. If you want to earn a $20 Amazon gift card for a 30-minute Zoom call, respond to this email letting us know!

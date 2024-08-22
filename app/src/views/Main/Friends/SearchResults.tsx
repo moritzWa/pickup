@@ -19,7 +19,7 @@ import { IS_IPAD, constants } from "src/config";
 import { useTheme } from "src/hooks/useTheme";
 import * as Haptics from "expo-haptics";
 import { api, apolloClient } from "src/api";
-import { Maybe, Query } from "src/api/generated/types";
+import { Maybe, Query, UserSearchResult } from "src/api/generated/types";
 import { RefreshControl } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { NavigationProps } from "src/navigation";
@@ -34,6 +34,7 @@ import { ContactRow } from "./ContactRow";
 import { useMe } from "src/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faSearch, faTimes } from "@fortawesome/pro-solid-svg-icons";
+import { UserRow } from "./UserRow";
 
 export const SearchResults = () => {
   const fullTheme = useTheme();
@@ -46,25 +47,13 @@ export const SearchResults = () => {
 
   const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
 
-  const [search, setSearch] = useState(
-    "" //  "WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk" // "94sFWT94hg6qK9VtYwGz8VxbyEMaXf9H2U3HTTbofimy"
-  );
-  const [loadingDebounceResults, setLoadingDebounceResults] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // const [
-  //   getDiscoveryResults,
-  //   {
-  //     data: resultsData,
-  //     networkStatus: resultsNetworkStatus,
-  //     loading: resultsLoading,
-  //     error: errorGetResults,
-  //   },
-  // ] = useLazyQuery<{
-  //   getDiscoveryResults: GetDiscoveryResultsResponse;
-  // }>(api.discovery.getDiscoveryResults, {
-  //   notifyOnNetworkStatusChange: true,
-  //   fetchPolicy: "cache-first",
-  // });
+  const [searchUsers, { data: resultsData, loading: loadingSearchResults }] =
+    useLazyQuery<Pick<Query, "searchUsers">>(api.users.search, {
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "cache-first",
+    });
 
   const _getContactsPermission = async () => {
     const CONTACT_PERMISSION = Platform.select({
@@ -125,51 +114,51 @@ export const SearchResults = () => {
 
   // const { results, users } = discoveryResults ?? { results: null, users: null };
 
-  const debouncedGetDiscoveryResults = useCallback(
+  const debouncedSearchResults = useCallback(
     debounce((search: string) => {
-      // getDiscoveryResults({
-      //   variables: {
-      //     query: search,
-      //   },
-      // });
-      setLoadingDebounceResults(false);
-      // trackEvent("discovery_search", { query: search });
-    }, 500), // 200 was way too low
+      if (!search.trim()) return;
+
+      searchUsers({
+        variables: {
+          query: search.trim(),
+        },
+      });
+    }, 250),
     []
   );
 
   useEffect(() => {
-    setLoadingDebounceResults(true);
+    debouncedSearchResults(search);
+  }, [search, debouncedSearchResults]);
 
-    debouncedGetDiscoveryResults(search);
-  }, [search, debouncedGetDiscoveryResults]);
+  const loading = loadingSearchResults;
 
-  const loading = loadingDebounceResults;
-
-  const _onRefresh = useCallback(() => {
+  const _onRefresh = useCallback(async () => {
     setRefreshing(true);
-    apolloClient.refetchQueries({
-      // include: [api.discovery.getDiscoveryResults],
-    });
-    // set timeout
-    setTimeout(() => {
+
+    try {
+      await apolloClient.refetchQueries({
+        include: [api.users.search],
+      });
+    } finally {
       setRefreshing(false);
-    }, 2_000);
+    }
   }, []);
 
-  // const onSelectUser = (user: DiscoveryUserResult) => {
-  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const onSelectUser = (user: UserSearchResult) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-  //   navigation.navigate("UserProfile", {
-  //     username: user.username,
-  //   });
-  // };
+    navigation.navigate("UserProfile", {
+      username: user.username || "",
+    });
+  };
 
-  const onSelectContact = (contact: Contacts.Contact) => {
+  const onSelectContact = useCallback((contact: Contacts.Contact) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const phoneNumber = contact.phoneNumbers?.[0]?.number;
-    const message = "TODO:";
+    const message =
+      "Try out Pickup to see what podcasts I listen to 🎙️\n\nhttps://testflight.apple.com/join/ets4bkPy";
 
     if (phoneNumber) {
       // open up to send to this contact on imessage
@@ -183,9 +172,8 @@ export const SearchResults = () => {
     // open up to send to this contact
     Share.share({
       message: message,
-      // url: constants.appStoreUrl,
     });
-  };
+  }, []);
 
   // indexed contacts by some keys
   const contactSearch = useMemo(() => {
@@ -201,18 +189,37 @@ export const SearchResults = () => {
     return contactSearch.search(search).map((i) => i.item);
   }, [contactSearch, search, contacts.length]);
 
-  console.log(contacts.length, relevantContacts.length, search);
+  const relevantUsers = useMemo((): UserSearchResult[] => {
+    return resultsData?.searchUsers ?? [];
+  }, [resultsData]);
 
-  const contactSection: SectionListData<Contacts.Contact> = {
-    key: "contacts",
-    data: relevantContacts ?? [],
-    keyExtractor: (item) => item.recordID,
-    renderItem: ({ item }) => (
-      <ContactRow onSelectContact={onSelectContact} contact={item} />
-    ),
-  };
+  const userSection: SectionListData<UserSearchResult> = useMemo(
+    () => ({
+      key: "user",
+      data: relevantUsers ?? [],
+      keyExtractor: (item) => item.id,
+      renderItem: ({ item }) => (
+        <UserRow onSelectUser={onSelectUser} user={item} />
+      ),
+    }),
+    [relevantUsers]
+  );
 
-  const hasResults = !!contacts && contacts.length > 0;
+  const contactSection: SectionListData<Contacts.Contact> = useMemo(
+    () => ({
+      key: "contacts",
+      data: relevantContacts ?? [],
+      keyExtractor: (item) => item.recordID,
+      renderItem: ({ item }) => (
+        <ContactRow onSelectContact={onSelectContact} contact={item} />
+      ),
+    }),
+    [relevantContacts, onSelectContact]
+  );
+
+  const hasResults =
+    (!!contacts && contacts.length > 0) ||
+    (!!relevantUsers && relevantUsers.length > 0);
 
   return (
     <>
@@ -229,20 +236,29 @@ export const SearchResults = () => {
           paddingHorizontal: 5,
         }}
         searchIcon={
-          <FontAwesomeIcon icon={faSearch} color={fullTheme.text} size={16} />
+          <FontAwesomeIcon
+            icon={faSearch}
+            color={fullTheme.textSubtle}
+            size={16}
+          />
         }
         inputContainerStyle={{
           backgroundColor: fullTheme.medBackground,
           height: 45,
-          paddingHorizontal: 5,
+          paddingHorizontal: 10,
           paddingRight: 0,
-          borderRadius: 10,
+          borderRadius: 100,
         }}
         clearIcon={
-          <FontAwesomeIcon icon={faTimes} color={fullTheme.text} size={16} />
+          <View />
+          // <FontAwesomeIcon
+          //   icon={faTimes}
+          //   color={fullTheme.textSubtle}
+          //   size={16}
+          // />
         }
         inputStyle={{
-          color: header,
+          color: text,
           fontSize: 16,
           fontFamily: "Raleway-Regular",
         }}
@@ -255,7 +271,7 @@ export const SearchResults = () => {
       ) : null}
 
       <SectionList
-        sections={[contactSection] as any[]}
+        sections={[userSection, contactSection] as any[]}
         keyboardShouldPersistTaps="always"
         keyboardDismissMode="interactive"
         windowSize={10}

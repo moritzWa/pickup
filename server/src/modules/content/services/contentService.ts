@@ -1,9 +1,10 @@
 import { openai } from "src/utils";
-import { contentRepo, feedRepo } from "../infra";
+import { contentRepo, contentSessionRepo, feedRepo } from "../infra";
 import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
+    hasValue,
     Maybe,
     success,
     UnexpectedError,
@@ -12,8 +13,9 @@ import { SimilarContentWithDistanceResponse } from "../infra/contentRepo";
 import { inngest } from "src/jobs/inngest/clients";
 import { InngestEventName } from "src/jobs/inngest/types";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
-import { LessThan, MoreThan, MoreThanOrEqual } from "typeorm";
-import { keyBy } from "lodash";
+import { In, LessThan, MoreThan, MoreThanOrEqual } from "typeorm";
+import { groupBy, keyBy, uniqBy } from "lodash";
+import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
 
 const getSimilarContentFromQuery = async (
     user: User,
@@ -237,6 +239,81 @@ const prev = async (
     return success(prevItem);
 };
 
+const decorateContentWithFriends = async (
+    user: User,
+    content: Content[]
+): Promise<
+    FailureOrSuccess<
+        DefaultErrors,
+        (Content & {
+            friends: Partial<User>[];
+        })[]
+    >
+> => {
+    const relationshipResponse = await relationshipRepo.usersFollowing(user.id);
+
+    if (relationshipResponse.isFailure()) {
+        return failure(relationshipResponse.error);
+    }
+
+    const userIdsFollowing = relationshipResponse.value;
+
+    const usersResponse = await pgUserRepo.findByIds(userIdsFollowing, {
+        select: {
+            id: true,
+            name: true,
+            username: true,
+            imageUrl: true,
+        },
+    });
+
+    if (usersResponse.isFailure()) {
+        return failure(usersResponse.error);
+    }
+
+    const usersFollowing = usersResponse.value;
+    const finalContentIds = content.map((c) => c.id);
+
+    const contentFromRelationships = await contentSessionRepo.find({
+        where: {
+            contentId: In(finalContentIds),
+            userId: In(userIdsFollowing),
+        },
+        select: {
+            id: true,
+            userId: true,
+            contentId: true,
+        },
+    });
+
+    if (contentFromRelationships.isFailure()) {
+        return failure(contentFromRelationships.error);
+    }
+
+    const sessions = contentFromRelationships.value;
+
+    const sessionByContent = groupBy(sessions, (s) => s.contentId);
+    const userById = keyBy(usersFollowing, (u) => u.id);
+
+    const finalContent = content.map((c) => {
+        const sessions = sessionByContent[c.id] ?? [];
+        const users = sessions
+            .map((s) => userById[s.userId])
+            .filter(hasValue)
+            .map((u) => ({ ...u, avatarImageUrl: u.imageUrl }));
+
+        return {
+            ...c,
+            friends: users,
+        };
+    });
+
+    // console.log(skip);
+    // console.log(uniqContent.map((c) => c.title.slice(0, 3)));
+
+    return success(uniqBy(finalContent, (c) => c.id));
+};
+
 export const ContentService = {
     getSimilarContent,
     getSimilarContentFromQuery,
@@ -244,4 +321,5 @@ export const ContentService = {
     chunkContent: splitTextIntoChunks,
     next,
     prev,
+    decorateContentWithFriends,
 };

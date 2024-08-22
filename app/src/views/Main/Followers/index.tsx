@@ -19,12 +19,22 @@ import * as Haptics from "expo-haptics";
 import { Profile, Query } from "src/api/generated/types";
 import { ProfileService } from "src/modules/profileService";
 import ProfileIcon from "src/components/ProfileIcon";
+import { noop } from "lodash";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faChevronRight } from "@fortawesome/pro-solid-svg-icons";
+import Back from "src/components/Back";
 
 export const Followers = () => {
   const { params } = useRoute<RouteProp<RootStackParamList, "Followers">>();
   const username = params?.username;
+  const defaultMode = params?.defaultMode;
 
-  const [mode, setMode] = useState<"followers" | "following">("followers");
+  const [mode, setMode] = useState<"followers" | "following">(
+    defaultMode ?? "followers"
+  );
+
+  const fullTheme = useTheme();
 
   const {
     background,
@@ -34,65 +44,9 @@ export const Followers = () => {
     text,
     textSecondary,
     header,
-  } = useTheme();
+  } = fullTheme;
 
-  const { data: getProfileData, loading: loadingProfile } = useQuery<
-    Pick<Query, "getProfile">
-  >(api.users.getProfile, {
-    skip: !username,
-    variables: {
-      username,
-    },
-  });
-
-  const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
-
-  if (loadingProfile) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: background,
-          alignItems: "center",
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
-        }}
-      >
-        <ActivityIndicator size="small" color={activityIndicator} />
-      </View>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: background,
-          alignItems: "center",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <Header containerStyle={{ paddingTop: 15 }} hasBackButton />
-
-        <Text
-          style={{
-            color: textPrimary,
-            fontSize: 18,
-            flex: 1,
-            alignSelf: "center",
-            marginTop: 100,
-            fontFamily: "Mona-Sans-Regular",
-          }}
-        >
-          Profile not found.
-        </Text>
-      </View>
-    );
-  }
+  const insets = useSafeAreaInsets();
 
   return (
     <View
@@ -101,74 +55,79 @@ export const Followers = () => {
         backgroundColor: background,
       }}
     >
-      <Close style={{ top: 15 }} />
+      <Header
+        hasBackButton
+        backProps={{
+          hideBack: true,
+        }}
+        title={
+          <View
+            style={{
+              padding: 0,
+              flex: 6,
+              paddingHorizontal: 0,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setMode("followers")}
+              style={{
+                flex: 1,
+                alignItems: "center",
+                padding: 10,
+                borderRadius: 10,
+                backgroundColor:
+                  mode === "followers"
+                    ? fullTheme.medBackground
+                    : fullTheme.background,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Raleway-Bold",
+                  fontSize: 14,
+                  color: textPrimary,
+                }}
+              >
+                Followers
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setMode("following")}
+              style={{
+                flex: 1,
+                alignItems: "center",
+                padding: 10,
+                borderRadius: 10,
+                backgroundColor:
+                  mode === "following"
+                    ? fullTheme.medBackground
+                    : fullTheme.background,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Raleway-Bold",
+                  fontSize: 14,
+                  color: textPrimary,
+                }}
+              >
+                Following
+              </Text>
+            </TouchableOpacity>
+          </View>
+        }
+      />
+      {/* <Close style={{ marginTop: insets.top + 10 }} /> */}
 
       {/* <ProfileImage name={profile?.name} /> */}
 
-      <View
-        style={{
-          alignItems: "center",
-          marginTop: 50,
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <View
-          style={{
-            padding: 5,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setMode("followers")}
-            style={{
-              flex: 1,
-              alignItems: "center",
-              padding: 15,
-              borderBottomWidth: 2,
-              borderBottomColor: mode === "followers" ? header : "transparent",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "Mona-Sans-SemiBold",
-                fontSize: 16,
-                color: textPrimary,
-              }}
-            >
-              Followers
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setMode("following")}
-            style={{
-              flex: 1,
-              alignItems: "center",
-              padding: 15,
-              borderBottomWidth: 2,
-              borderBottomColor: mode === "following" ? header : "transparent",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "Mona-Sans-SemiBold",
-                fontSize: 16,
-                color: textPrimary,
-              }}
-            >
-              Following
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {!!username ? <Following mode={mode} username={username} /> : null}
-      </View>
+      {!!username ? <Following mode={mode} username={username} /> : null}
     </View>
   );
 };
@@ -199,22 +158,9 @@ const Following = ({
   const onSelectUser = (user: Profile) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    const routes = navigation.getState().routes;
-
-    const newRoutes = routes.slice(0, routes.length - 1);
-
-    // navigation.reset({
-    //   index: newRoutes.length,
-    //   routes: [
-    //     ...newRoutes,
-    //     {
-    //       name: "UserProfile",
-    //       params: {
-    //         username: user.username,
-    //       },
-    //     },
-    //   ],
-    // });
+    navigation.navigate("UserProfile", {
+      username: user?.username || "",
+    });
   };
 
   const follows = useMemo(() => getFollowsData?.getFollows, [getFollowsData]);
@@ -224,21 +170,22 @@ const Following = ({
   );
 
   return (
-    <View style={{ flex: 1, width: "100%" }}>
-      <FlatList
-        data={data ?? []}
-        keyExtractor={(e) => e.username}
-        renderItem={({ item }) => (
-          <UserRow user={item} onSelectUser={onSelectUser} />
-        )}
-        initialNumToRender={8}
-        // make it efficiently render
-        removeClippedSubviews
-        maxToRenderPerBatch={8}
-        windowSize={8}
-        style={{ flex: 1, width: "100%" }}
-      />
-    </View>
+    <FlatList
+      data={data ?? []}
+      keyExtractor={(e) => e.username}
+      renderItem={({ item }) => (
+        <UserRow user={item} onSelectUser={onSelectUser} />
+      )}
+      initialNumToRender={8}
+      contentContainerStyle={{
+        paddingTop: 10,
+        paddingBottom: 100,
+      }}
+      // make it efficiently render
+      removeClippedSubviews
+      maxToRenderPerBatch={8}
+      windowSize={8}
+    />
   );
 };
 
@@ -269,6 +216,8 @@ const UserRow = React.memo(
           backgroundColor: theme.background,
           paddingHorizontal: 15,
           paddingVertical: 15,
+          alignItems: "center",
+          justifyContent: "center",
           flex: 1,
           width: "100%",
           // borderBottomWidth: 1,
@@ -280,14 +229,14 @@ const UserRow = React.memo(
         <ProfileIcon
           initials={initials}
           profileImageUrl={user.avatarImageUrl || null}
+          onPress={noop}
         />
 
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginLeft: 10 }}>
           <Text
             style={{
-              fontFamily: "Mona-Sans-Expanded-SemiBold",
+              fontFamily: "Raleway-SemiBold",
               fontSize: 16,
-              marginBottom: 5,
               color: theme.textPrimary,
             }}
           >
@@ -295,13 +244,18 @@ const UserRow = React.memo(
           </Text>
           <Text
             style={{
-              fontFamily: "Mona-Sans-Regular",
-              fontSize: 16,
+              fontFamily: "Raleway-Regular",
+              fontSize: 14,
+              marginTop: 5,
               color: theme.textSecondary,
             }}
           >
             @{user.username}
           </Text>
+        </View>
+
+        <View>
+          <FontAwesomeIcon icon={faChevronRight} color={theme.text} />
         </View>
       </TouchableOpacity>
     );

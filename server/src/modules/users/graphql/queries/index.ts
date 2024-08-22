@@ -6,3 +6,4 @@ export * from "./getMobileUpdate";
 export * from "./getProfile";
 export * from "./checkValidUsername";
 export * from "./getFollows";
+export * from "./searchUsers";

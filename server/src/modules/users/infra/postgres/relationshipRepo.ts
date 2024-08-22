@@ -47,6 +47,22 @@ export class PostgresRelationshipRepository {
         });
     }
 
+    isFollowing = async (
+        userId: string,
+        myUserId: string
+    ): Promise<FailureOrSuccess<DefaultErrors, boolean>> => {
+        return Helpers.trySuccessFail(async () => {
+            const relationship = await this.repo.exists({
+                where: {
+                    fromUserId: myUserId,
+                    toUserId: userId,
+                },
+            });
+
+            return success(relationship);
+        });
+    };
+
     async findFollowersWithNotifications(
         userId: string,
         options: FindManyOptions<Relationship>

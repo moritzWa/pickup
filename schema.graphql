@@ -43,6 +43,7 @@ type Content {
   lengthMs: Int
   lengthSeconds: Int!
   ogDescription: String
+  releasedAt: Date
   sourceImageUrl: String
   summary: String
   thumbnailImageUrl: String
@@ -81,8 +82,8 @@ type ContentSession {
 }
 
 type ContentUserFollowingProfile {
+  avatarImageUrl: String
   id: ID!
-  imageUrl: String
   name: String
   username: String
 }
@@ -173,6 +174,7 @@ type Mutation {
   createContentFromUrl(authProviderId: String, url: String!): Content!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
+  followProfile(username: String!): String!
   getAuthToken: String!
   recordInteraction(contentId: ID!, eventType: InteractionTypeEnum!): Interaction!
   removeFromQueue(contentId: ID!): FeedItem!
@@ -183,6 +185,7 @@ type Mutation {
   showMore: String!
   startContent(contentId: ID!): ContentSession!
   startListening: ContentSession!
+  unfollowProfile(username: String!): String!
   updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean, lastListenedAt: Date): ContentSession!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, description: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, unreadCount: Int, username: String): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
@@ -208,10 +211,10 @@ type Profile {
 type Query {
   checkCode(referralCode: String!): Boolean!
   checkValidUsername(username: String!): String!
-  getActivity(filter: ActivityFilter): [Content!]!
+  getActivity(filter: ActivityFilter, username: String): [Content!]!
   getArchived: [Content!]!
   getAuthor(authorId: ID!): Author!
-  getBookmarks(limit: Int, page: Int): [Content!]!
+  getBookmarks(limit: Int, page: Int, username: String): [Content!]!
   getCategories: [CategorySection!]!
   getContent(contentId: ID!): Content!
   getContentSession(contentId: ID!): ContentSession!
@@ -225,10 +228,11 @@ type Query {
   getNextContent(afterContentId: ID!, currentMs: Int): FeedItem
   getPaymentMethods: [PaymentMethod!]!
   getPrevContent(beforeContentId: ID!, currentMs: Int): FeedItem
-  getProfile(userId: ID): Profile!
+  getProfile(username: String): Profile!
   getQueue: GetQueueResponse!
   me: User
   searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
+  searchUsers(query: String!): [UserSearchResult!]!
 }
 
 type SearchResult {
@@ -281,4 +285,12 @@ type User {
 
 enum UserAuthProviderEnum {
   Firebase
+}
+
+type UserSearchResult {
+  avatarImageUrl: String
+  id: ID!
+  isFollowing: Boolean
+  name: String
+  username: String
 }

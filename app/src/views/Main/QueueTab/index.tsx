@@ -9,7 +9,7 @@ import {
   Image,
   Animated,
 } from "react-native";
-import React, { useContext, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "src/hooks";
 import { useMutation, useQuery } from "@apollo/client";
@@ -46,7 +46,7 @@ import * as Haptics from "expo-haptics";
 import { CurrentAudio } from "src/components/CurrentAudio";
 import { hasValue } from "src/core";
 import { AppContext } from "context";
-import { setCurrentContent } from "src/redux/reducers/audio";
+import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
 
 const Activity = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -99,6 +99,14 @@ const Activity = () => {
   const onRefresh = async () => {
     await refetchQueue();
   };
+
+  useEffect(() => {
+    const content = (queueData?.getQueue?.queue ?? [])
+      .map((q) => q.content)
+      .filter(hasValue) as BaseContentFields[];
+
+    dispatch(setQueue(content));
+  }, [1, JSON.stringify(queueData?.getQueue)]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

@@ -63,6 +63,7 @@ export type Content = {
   lengthMs?: Maybe<Scalars['Int']['output']>;
   lengthSeconds: Scalars['Int']['output'];
   ogDescription?: Maybe<Scalars['String']['output']>;
+  releasedAt?: Maybe<Scalars['Date']['output']>;
   sourceImageUrl?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
   thumbnailImageUrl?: Maybe<Scalars['String']['output']>;
@@ -104,8 +105,8 @@ export type ContentSession = {
 
 export type ContentUserFollowingProfile = {
   __typename?: 'ContentUserFollowingProfile';
+  avatarImageUrl?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  imageUrl?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   username?: Maybe<Scalars['String']['output']>;
 };
@@ -201,6 +202,7 @@ export type Mutation = {
   createContentFromUrl: Content;
   createUser: CreateUserResponse;
   deleteMe: Scalars['String']['output'];
+  followProfile: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
   recordInteraction: Interaction;
   removeFromQueue: FeedItem;
@@ -211,6 +213,7 @@ export type Mutation = {
   showMore: Scalars['String']['output'];
   startContent: ContentSession;
   startListening: ContentSession;
+  unfollowProfile: Scalars['String']['output'];
   updateContentSession: ContentSession;
   updateUser: User;
   verifyPhoneNumber: User;
@@ -233,6 +236,7 @@ export type MutationArchiveContentArgs = {
 
 
 export type MutationBookmarkContentArgs = {
+  authProviderId?: InputMaybe<Scalars['String']['input']>;
   contentId: Scalars['ID']['input'];
 };
 
@@ -255,6 +259,11 @@ export type MutationCreateUserArgs = {
   password?: InputMaybe<Scalars['String']['input']>;
   referralCode?: InputMaybe<Scalars['String']['input']>;
   username?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationFollowProfileArgs = {
+  username: Scalars['String']['input'];
 };
 
 
@@ -294,6 +303,11 @@ export type MutationSetInterestsArgs = {
 
 export type MutationStartContentArgs = {
   contentId: Scalars['ID']['input'];
+};
+
+
+export type MutationUnfollowProfileArgs = {
+  username: Scalars['String']['input'];
 };
 
 
@@ -367,6 +381,7 @@ export type Query = {
   getQueue: GetQueueResponse;
   me?: Maybe<User>;
   searchSimilarLinks: Array<SearchResult>;
+  searchUsers: Array<UserSearchResult>;
 };
 
 
@@ -382,6 +397,7 @@ export type QueryCheckValidUsernameArgs = {
 
 export type QueryGetActivityArgs = {
   filter?: InputMaybe<ActivityFilter>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -393,6 +409,7 @@ export type QueryGetAuthorArgs = {
 export type QueryGetBookmarksArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -442,12 +459,17 @@ export type QueryGetPrevContentArgs = {
 
 
 export type QueryGetProfileArgs = {
-  userId?: InputMaybe<Scalars['ID']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QuerySearchSimilarLinksArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
+};
+
+
+export type QuerySearchUsersArgs = {
   query: Scalars['String']['input'];
 };
 
@@ -501,3 +523,12 @@ export type User = {
 export enum UserAuthProviderEnum {
   Firebase = 'Firebase'
 }
+
+export type UserSearchResult = {
+  __typename?: 'UserSearchResult';
+  avatarImageUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isFollowing?: Maybe<Scalars['Boolean']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  username?: Maybe<Scalars['String']['output']>;
+};

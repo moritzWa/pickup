@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import React, { useMemo } from "react";
 import { Text, TouchableOpacity, View, ViewProps } from "react-native";
 import { api } from "src/api";
-import { Mutation } from "src/api/generated/types";
+import { Mutation, Query, QueryGetProfileArgs } from "src/api/generated/types";
 import { useTheme } from "src/hooks/useTheme";
 import * as Haptics from "expo-haptics";
 import { useNavigation } from "@react-navigation/native";
@@ -18,19 +18,18 @@ export const FollowersInfo = ({
   const theme = useTheme();
 
   const variables = useMemo(
-    () => ({
+    (): QueryGetProfileArgs => ({
       username,
     }),
     [username]
   );
 
-  const getProfileData = {} as any;
-  //   const { data: getProfileData, loading: loadingProfile } = useQuery<{
-  //     getProfile: GetProfileResponse;
-  //   }>(api.profiles.getProfile, {
-  //     skip: !variables.username,
-  //     variables,
-  //   });
+  const { data: getProfileData, loading: loadingProfile } = useQuery<
+    Pick<Query, "getProfile">
+  >(api.users.getProfile, {
+    skip: !variables.username,
+    variables,
+  });
 
   const profile = useMemo(() => getProfileData?.getProfile, [getProfileData]);
 
@@ -40,6 +39,7 @@ export const FollowersInfo = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("Followers", {
       username: username || "",
+      defaultMode: mode,
     });
   };
 

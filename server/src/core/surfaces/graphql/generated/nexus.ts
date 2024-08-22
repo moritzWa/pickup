@@ -67,8 +67,8 @@ export interface NexusGenObjects {
   }
   ContentSession: entities.ContentSession ;
   ContentUserFollowingProfile: { // root type
+    avatarImageUrl?: string | null; // String
     id: string; // ID!
-    imageUrl?: string | null; // String
     name?: string | null; // String
     username?: string | null; // String
   }
@@ -141,6 +141,13 @@ export interface NexusGenObjects {
     userIds: number[]; // [Int!]!
   }
   User: entities.User ;
+  UserSearchResult: { // root type
+    avatarImageUrl?: string | null; // String
+    id: string; // ID!
+    isFollowing?: boolean | null; // Boolean
+    name?: string | null; // String
+    username?: string | null; // String
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -187,6 +194,7 @@ export interface NexusGenFieldTypes {
     lengthMs: number | null; // Int
     lengthSeconds: number; // Int!
     ogDescription: string | null; // String
+    releasedAt: NexusGenScalars['Date'] | null; // Date
     sourceImageUrl: string | null; // String
     summary: string | null; // String
     thumbnailImageUrl: string | null; // String
@@ -213,8 +221,8 @@ export interface NexusGenFieldTypes {
     userId: string; // String!
   }
   ContentUserFollowingProfile: { // field return type
+    avatarImageUrl: string | null; // String
     id: string; // ID!
-    imageUrl: string | null; // String
     name: string | null; // String
     username: string | null; // String
   }
@@ -280,6 +288,7 @@ export interface NexusGenFieldTypes {
     createContentFromUrl: NexusGenRootTypes['Content']; // Content!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
+    followProfile: string; // String!
     getAuthToken: string; // String!
     recordInteraction: NexusGenRootTypes['Interaction']; // Interaction!
     removeFromQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
@@ -290,6 +299,7 @@ export interface NexusGenFieldTypes {
     showMore: string; // String!
     startContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     startListening: NexusGenRootTypes['ContentSession']; // ContentSession!
+    unfollowProfile: string; // String!
     updateContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
@@ -333,6 +343,7 @@ export interface NexusGenFieldTypes {
     getQueue: NexusGenRootTypes['GetQueueResponse']; // GetQueueResponse!
     me: NexusGenRootTypes['User'] | null; // User
     searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
+    searchUsers: NexusGenRootTypes['UserSearchResult'][]; // [UserSearchResult!]!
   }
   SearchResult: { // field return type
     averageDistance: number; // Float!
@@ -377,6 +388,13 @@ export interface NexusGenFieldTypes {
     updatedAt: NexusGenScalars['Date']; // Date!
     username: string | null; // String
   }
+  UserSearchResult: { // field return type
+    avatarImageUrl: string | null; // String
+    id: string; // ID!
+    isFollowing: boolean | null; // Boolean
+    name: string | null; // String
+    username: string | null; // String
+  }
 }
 
 export interface NexusGenFieldTypeNames {
@@ -413,6 +431,7 @@ export interface NexusGenFieldTypeNames {
     lengthMs: 'Int'
     lengthSeconds: 'Int'
     ogDescription: 'String'
+    releasedAt: 'Date'
     sourceImageUrl: 'String'
     summary: 'String'
     thumbnailImageUrl: 'String'
@@ -439,8 +458,8 @@ export interface NexusGenFieldTypeNames {
     userId: 'String'
   }
   ContentUserFollowingProfile: { // field return type name
+    avatarImageUrl: 'String'
     id: 'ID'
-    imageUrl: 'String'
     name: 'String'
     username: 'String'
   }
@@ -506,6 +525,7 @@ export interface NexusGenFieldTypeNames {
     createContentFromUrl: 'Content'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
+    followProfile: 'String'
     getAuthToken: 'String'
     recordInteraction: 'Interaction'
     removeFromQueue: 'FeedItem'
@@ -516,6 +536,7 @@ export interface NexusGenFieldTypeNames {
     showMore: 'String'
     startContent: 'ContentSession'
     startListening: 'ContentSession'
+    unfollowProfile: 'String'
     updateContentSession: 'ContentSession'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
@@ -559,6 +580,7 @@ export interface NexusGenFieldTypeNames {
     getQueue: 'GetQueueResponse'
     me: 'User'
     searchSimilarLinks: 'SearchResult'
+    searchUsers: 'UserSearchResult'
   }
   SearchResult: { // field return type name
     averageDistance: 'Float'
@@ -603,6 +625,13 @@ export interface NexusGenFieldTypeNames {
     updatedAt: 'Date'
     username: 'String'
   }
+  UserSearchResult: { // field return type name
+    avatarImageUrl: 'String'
+    id: 'ID'
+    isFollowing: 'Boolean'
+    name: 'String'
+    username: 'String'
+  }
 }
 
 export interface NexusGenArgTypes {
@@ -635,6 +664,9 @@ export interface NexusGenArgTypes {
       referralCode?: string | null; // String
       username?: string | null; // String
     }
+    followProfile: { // args
+      username: string; // String!
+    }
     recordInteraction: { // args
       contentId: string; // ID!
       eventType: NexusGenEnums['InteractionTypeEnum']; // InteractionTypeEnum!
@@ -659,6 +691,9 @@ export interface NexusGenArgTypes {
     }
     startContent: { // args
       contentId: string; // ID!
+    }
+    unfollowProfile: { // args
+      username: string; // String!
     }
     updateContentSession: { // args
       contentSessionId: string; // ID!
@@ -692,6 +727,7 @@ export interface NexusGenArgTypes {
     }
     getActivity: { // args
       filter?: NexusGenEnums['ActivityFilter'] | null; // ActivityFilter
+      username?: string | null; // String
     }
     getAuthor: { // args
       authorId: string; // ID!
@@ -699,6 +735,7 @@ export interface NexusGenArgTypes {
     getBookmarks: { // args
       limit?: number | null; // Int
       page?: number | null; // Int
+      username?: string | null; // String
     }
     getContent: { // args
       contentId: string; // ID!
@@ -734,10 +771,13 @@ export interface NexusGenArgTypes {
       currentMs?: number | null; // Int
     }
     getProfile: { // args
-      userId?: string | null; // ID
+      username?: string | null; // String
     }
     searchSimilarLinks: { // args
       limit: number | null; // Int
+      query: string; // String!
+    }
+    searchUsers: { // args
       query: string; // String!
     }
   }

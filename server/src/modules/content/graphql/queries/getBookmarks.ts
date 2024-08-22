@@ -1,4 +1,12 @@
-import { idArg, intArg, list, nonNull, nullable, queryField } from "nexus";
+import {
+    idArg,
+    intArg,
+    list,
+    nonNull,
+    nullable,
+    queryField,
+    stringArg,
+} from "nexus";
 import {
     Context,
     throwIfNotAuthenticated,
@@ -8,10 +16,14 @@ import { throwIfError } from "src/core/surfaces/graphql/common";
 import { contentRepo, contentSessionRepo } from "../../infra";
 import { keyBy, omit, uniqBy } from "lodash";
 import { In } from "typeorm";
+import { ContentService } from "../../services/contentService";
+import { User } from "src/core/infra/postgres/entities";
+import { pgUserRepo } from "src/modules/users/infra/postgres";
 
 export const getBookmarks = queryField("getBookmarks", {
     type: nonNull(list(nonNull("Content"))),
     args: {
+        username: nullable(stringArg()),
         limit: nullable(intArg()),
         page: nullable(intArg()),
     },
@@ -19,7 +31,19 @@ export const getBookmarks = queryField("getBookmarks", {
         throwIfNotAuthenticated(ctx);
 
         const { limit, page } = args;
-        const user = ctx.me!;
+        const me = ctx.me!;
+
+        let user: User | null = null;
+
+        if (args.username) {
+            const userResponse = await pgUserRepo.findByUsername(args.username);
+
+            throwIfError(userResponse);
+
+            user = userResponse.value;
+        } else {
+            user = me;
+        }
 
         const contentSessionsResponse = await contentSessionRepo.findBookmarks(
             user.id,
@@ -53,6 +77,11 @@ export const getBookmarks = queryField("getBookmarks", {
             };
         });
 
-        return uniqBy(content, (v) => v.id);
+        const finalContentResponse =
+            await ContentService.decorateContentWithFriends(me, content);
+
+        throwIfError(finalContentResponse);
+
+        return finalContentResponse.value;
     },
 });
