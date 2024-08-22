@@ -97,8 +97,8 @@ export const ContentFromUrlService = {
                 return failure(savedContentResponse.error);
             }
 
-            const createAudioContent = true;
-            // process.env.NODE_ENV === "production" ? true : false;
+            const createAudioContent =
+                process.env.NODE_ENV === "production" ? true : false;
             if (createAudioContent) {
                 // Enqueue audio generation task
                 await AudioGenerationQueue.add("generateAudio", {
@@ -106,6 +106,10 @@ export const ContentFromUrlService = {
                     text: parsedContent.content || "",
                     title: parsedContent.title || "",
                 });
+            } else {
+                Logger.info(
+                    `Audio generation disabled in contentFromUrlService.ts because process.env.NODE_ENV is not production: ${content.title}`
+                );
             }
 
             return success(savedContentResponse.value);
