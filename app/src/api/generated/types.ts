@@ -73,12 +73,13 @@ export type Content = {
 };
 
 export enum ContentFeedFilter {
-  Archived = 'archived',
-  ForYou = 'for_you',
-  New = 'new',
-  Popular = 'popular',
-  Queue = 'queue',
-  Unread = 'unread'
+  Archived = 'Archived',
+  ForYou = 'ForYou',
+  Friends = 'Friends',
+  New = 'New',
+  Popular = 'Popular',
+  Queue = 'Queue',
+  Unread = 'Unread'
 }
 
 export type ContentRespondResponse = {
@@ -143,6 +144,12 @@ export type FollowersResponse = {
   following: Array<Profile>;
 };
 
+export type FriendProfile = {
+  __typename?: 'FriendProfile';
+  profile: Profile;
+  unreadCount: Scalars['Int']['output'];
+};
+
 export type GetMobileUpdateResponse = {
   __typename?: 'GetMobileUpdateResponse';
   latestVersion?: Maybe<Scalars['String']['output']>;
@@ -174,7 +181,8 @@ export enum InteractionTypeEnum {
   Queued = 'Queued',
   ScrolledPast = 'ScrolledPast',
   Skipped = 'Skipped',
-  StartedListening = 'StartedListening'
+  StartedListening = 'StartedListening',
+  Unbookmarked = 'Unbookmarked'
 }
 
 export type Metadata = {
@@ -371,7 +379,9 @@ export type Query = {
   getCurrentContentSession?: Maybe<ContentSession>;
   getFeed: Array<Content>;
   getFollows: FollowersResponse;
+  getFriends: Array<FriendProfile>;
   getIntercomMobileToken: Scalars['String']['output'];
+  getIsBookmarked: Scalars['Boolean']['output'];
   getLikes: Array<ContentSession>;
   getMobileUpdate: GetMobileUpdateResponse;
   getNextContent?: Maybe<FeedItem>;
@@ -435,8 +445,19 @@ export type QueryGetFollowsArgs = {
 };
 
 
+export type QueryGetFriendsArgs = {
+  username: Scalars['String']['input'];
+};
+
+
 export type QueryGetIntercomMobileTokenArgs = {
   platform?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryGetIsBookmarkedArgs = {
+  authProviderId?: InputMaybe<Scalars['String']['input']>;
+  contentId: Scalars['ID']['input'];
 };
 
 

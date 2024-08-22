@@ -8,6 +8,7 @@ export const ContentSession = objectType({
         t.nullable.float("timestampCursor", {
             resolve: (session) => session.currentMs ?? 0,
         });
+        t.nullable.string("notes");
         t.nullable.float("currentMs", {
             resolve: (session) => session.currentMs ?? 0,
         });

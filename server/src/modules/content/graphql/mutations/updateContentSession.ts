@@ -33,6 +33,7 @@ export const updateContentSession = mutationField("updateContentSession", {
         isLiked: nullable(booleanArg()),
         currentMs: nullable(intArg()),
         lastListenedAt: nullable(dateArg()),
+        notes: nullable(stringArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);
@@ -65,6 +66,7 @@ export const updateContentSession = mutationField("updateContentSession", {
                 isLiked: args.isLiked ?? contentSession.isLiked,
                 currentMs: args.currentMs ?? contentSession.currentMs,
                 percentFinished: percentFinished?.toNumber() ?? null,
+                notes: args.notes ?? contentSession.notes,
                 bookmarkedAt: args.isBookmarked
                     ? new Date()
                     : contentSession.bookmarkedAt,

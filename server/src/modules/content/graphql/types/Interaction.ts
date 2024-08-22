@@ -32,4 +32,5 @@ export const INTERACTION_TYPE_MAPPING: Record<
     finished: InteractionType.Finished,
     started_listening: InteractionType.StartedListening,
     queued: InteractionType.Queued,
+    unbookmarked: InteractionType.Unbookmarked,
 };

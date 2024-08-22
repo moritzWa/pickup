@@ -442,7 +442,7 @@ export const ContentRow = ({
                         }}
                       >
                         {c.releasedAt
-                          ? moment(c.releasedAt).format("MMM Do") + " • "
+                          ? moment(c.releasedAt).format("MMM Do, YYYY") + " • "
                           : ""}
                         {c.lengthFormatted}{" "}
                         {c.contentSession?.percentFinished ? " • " : ""}
@@ -653,7 +653,7 @@ const ContentFriends = ({
       {(friendsToShow ?? []).map((f, i) => (
         <ProfileIcon
           onPress={() => onPressUser(f)}
-          size={22}
+          size={25}
           style={{
             // negative left
             left: i === 0 ? 0 : -7,

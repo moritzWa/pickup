@@ -93,6 +93,24 @@ export class PostgresRelationshipRepository {
         }
     }
 
+    async findRelationship(
+        toUserId: string,
+        fromUserId: string
+    ): Promise<FailureOrSuccess<DefaultErrors, Relationship | null>> {
+        try {
+            const obj = await this.repo.findOne({
+                where: {
+                    toUserId,
+                    fromUserId,
+                },
+            });
+
+            return success(obj);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async getFollowersAndFollowing(userId: string): Promise<
         FailureOrSuccess<
             DefaultErrors,
@@ -208,6 +226,8 @@ export class PostgresRelationshipRepository {
             return failure(new UnexpectedError(err));
         }
     }
+
+    async;
 
     async update(
         id: string,

@@ -79,6 +79,14 @@ export class ContentSession {
     })
     percentFinished!: number | null;
 
+    //notes
+    @Column({
+        nullable: true,
+        name: "notes",
+        type: "text",
+    })
+    notes!: string | null;
+
     @Column({
         nullable: false,
         name: "content_id",

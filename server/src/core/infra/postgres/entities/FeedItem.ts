@@ -15,6 +15,16 @@ import {
 import { User } from "src/core/infra/postgres/entities/User";
 import { Content } from "./Content";
 
+export enum ContentFeedFilterEnum {
+    Popular = "popular",
+    ForYou = "for_you",
+    New = "new",
+    Unread = "unread",
+    Queue = "queue",
+    Archived = "archived",
+    Friends = "friends",
+}
+
 @Entity({
     name: "feed_items",
 })

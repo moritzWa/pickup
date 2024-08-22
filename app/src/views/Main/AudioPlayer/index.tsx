@@ -239,7 +239,7 @@ const AudioPlayer = () => {
         <View
           style={{
             marginHorizontal: 15,
-            marginTop: 10,
+            marginTop: 25,
             alignItems: "center",
             // backgroundColor: "blue",
           }}
@@ -258,7 +258,7 @@ const AudioPlayer = () => {
                 style={{
                   borderRadius: 10,
                 }}
-                size={175}
+                size={250}
                 content={content}
               />
             ) : null}
@@ -268,9 +268,10 @@ const AudioPlayer = () => {
             <Text
               style={{
                 color: colors.white,
-                fontSize: 18,
+                fontSize: 24,
+                marginHorizontal: 20,
                 textAlign: "center",
-                fontFamily: "Raleway-SemiBold",
+                fontFamily: "Raleway-Bold",
               }}
               numberOfLines={2}
             >
@@ -293,44 +294,6 @@ const AudioPlayer = () => {
                 ? extractDomain(content?.websiteUrl)
                 : null}
             </Text>
-
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={() => {
-                if (!content) return;
-                navigation.navigate("ContentDetails", {
-                  content: content!,
-                });
-              }}
-              style={{
-                marginTop: 0,
-              }}
-            >
-              <Text
-                style={{
-                  marginTop: 15,
-                  textAlign: "center",
-                  color: colors.white,
-                  fontSize: 16,
-                  fontFamily: "Raleway-Medium",
-                }}
-                ellipsizeMode="head"
-                numberOfLines={2}
-              >
-                {content?.summary || content?.ogDescription}.{" "}
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: colors.gray90,
-                    fontSize: 16,
-                    textDecorationLine: "underline",
-                    fontFamily: "Raleway-Medium",
-                  }}
-                >
-                  Read more.
-                </Text>
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
 
