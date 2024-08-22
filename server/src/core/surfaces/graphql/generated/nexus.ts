@@ -35,7 +35,7 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
   ContentFeedFilter: "archived" | "for_you" | "new" | "popular" | "queue" | "unread"
-  InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "queued" | "scrolled_past" | "skipped" | "started_listening"
+  InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "queued" | "scrolled_past" | "skipped" | "started_listening" | "unbookmarked"
   UserAuthProviderEnum: "firebase"
 }
 
@@ -333,6 +333,7 @@ export interface NexusGenFieldTypes {
     getFeed: NexusGenRootTypes['Content'][]; // [Content!]!
     getFollows: NexusGenRootTypes['FollowersResponse']; // FollowersResponse!
     getIntercomMobileToken: string; // String!
+    getIsBookmarked: boolean; // Boolean!
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
     getNextContent: NexusGenRootTypes['FeedItem'] | null; // FeedItem
@@ -569,6 +570,7 @@ export interface NexusGenFieldTypeNames {
     getFeed: 'Content'
     getFollows: 'FollowersResponse'
     getIntercomMobileToken: 'String'
+    getIsBookmarked: 'Boolean'
     getLikes: 'ContentSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
     getNextContent: 'FeedItem'
@@ -751,6 +753,10 @@ export interface NexusGenArgTypes {
     }
     getIntercomMobileToken: { // args
       platform?: string | null; // String
+    }
+    getIsBookmarked: { // args
+      authProviderId?: string | null; // String
+      contentId: string; // ID!
     }
     getLikes: { // args
       limit?: number | null; // Int

@@ -266,9 +266,10 @@ const GetArchived = gql`
 `;
 
 const Bookmark = gql`
-  mutation bookmarkContent($contentId: ID!) {
-    bookmarkContent(contentId: $contentId) {
+  mutation bookmarkContent($contentId: ID!, $authProviderId: String) {
+    bookmarkContent(contentId: $contentId, authProviderId: $authProviderId) {
       id
+      isBookmarked
     }
   }
 `;
@@ -411,6 +412,12 @@ const GetFollows = gql`
   }
 `;
 
+const GetIsBookmarked = gql`
+  query getIsBookmarked($contentId: ID!, $authProviderId: String) {
+    getIsBookmarked(contentId: $contentId, authProviderId: $authProviderId)
+  }
+`;
+
 export const api = {
   users: {
     getFollows: GetFollows,
@@ -445,6 +452,7 @@ export const api = {
     get: GetContent,
     startListening: StartListening,
     bookmarks: GetBookmarks,
+    getIsBookmarked: GetIsBookmarked,
     archived: GetArchived,
     bookmark: Bookmark,
     createFromUrl: CreateContentFromUrl,

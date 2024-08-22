@@ -148,6 +148,7 @@ enum InteractionTypeEnum {
   ScrolledPast
   Skipped
   StartedListening
+  Unbookmarked
 }
 
 type Metadata {
@@ -221,6 +222,7 @@ type Query {
   getFeed(filter: ContentFeedFilter, limit: Int, page: Int): [Content!]!
   getFollows(username: String!): FollowersResponse!
   getIntercomMobileToken(platform: String): String!
+  getIsBookmarked(authProviderId: String, contentId: ID!): Boolean!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
   getNextContent(afterContentId: ID!, currentMs: Int): FeedItem

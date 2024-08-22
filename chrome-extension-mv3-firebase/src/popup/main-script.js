@@ -16,6 +16,7 @@ function handleAuthStateChange(user) {
     console.log("current user:", user);
     document.getElementById("likeContent").style.display = "block";
     saveCurrentLink();
+    checkBookmarkStatus();
   } else {
     console.log("No user");
     window.location.replace("./popup.html");
@@ -45,7 +46,7 @@ function checkForExistingToken() {
 const apiUrl = process.env.API_URL;
 console.log(`API URL: ${apiUrl}`);
 
-function saveCurrentLink() {
+async function saveCurrentLink() {
   const messageDiv = document.getElementById("message");
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -79,6 +80,14 @@ function saveCurrentLink() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+
+        console.log("result", result.data);
+
+        const contentId = result.data.createContentFromUrl.id;
+        chrome.storage.local.set({ currentContentId: contentId }, () => {
+          console.log("Content ID saved:", contentId);
+        });
         messageDiv.textContent = "Link saved successfully!";
       } else {
         messageDiv.textContent = "Error saving link.";
@@ -88,12 +97,76 @@ function saveCurrentLink() {
       messageDiv.textContent = "Error saving link.";
     }
   });
+  await checkBookmarkStatus();
 }
 
-function likeContent() {
+async function checkBookmarkStatus() {
   const messageDiv = document.getElementById("message");
-  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-    const tab = tabs[0];
+  const likeButton = document.getElementById("likeContent");
+  const hintText = document.getElementById("hint");
+
+  chrome.storage.local.get(["currentContentId"], async (result) => {
+    const contentId = result.currentContentId;
+    if (!contentId) {
+      messageDiv.textContent =
+        "No content ID found. Please save the link first.";
+      return;
+    }
+
+    const user = auth.currentUser;
+    const authProviderId = user ? user.uid : null;
+
+    try {
+      const response = await fetch(`${apiUrl}/graphql`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `query($contentId: ID!, $authProviderId: String) {
+            getIsBookmarked(contentId: $contentId, authProviderId: $authProviderId)
+          }`,
+          variables: {
+            contentId: contentId,
+            authProviderId,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const isBookmarked = result.data.getIsBookmarked;
+
+        if (isBookmarked) {
+          likeButton.textContent = "Unlike Content";
+          hintText.textContent = "Will be removed from your profile";
+        } else {
+          likeButton.textContent = "Like Content";
+          hintText.textContent = "Will appear on your profile";
+        }
+      } else {
+        messageDiv.textContent = "Error checking bookmark status.";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      messageDiv.textContent = "Error checking bookmark status.";
+    }
+  });
+}
+
+async function toggleBookmark() {
+  const messageDiv = document.getElementById("message");
+  const likeButton = document.getElementById("likeContent");
+  const hintText = document.getElementById("hint");
+
+  chrome.storage.local.get(["currentContentId"], async (result) => {
+    const contentId = result.currentContentId;
+    if (!contentId) {
+      messageDiv.textContent =
+        "No content ID found. Please save the link first.";
+      return;
+    }
+
     const user = auth.currentUser;
     const authProviderId = user ? user.uid : null;
 
@@ -111,24 +184,38 @@ function likeContent() {
             }
           }`,
           variables: {
-            contentId: tab.id, // Assuming tab.id is the content ID
+            contentId: contentId,
             authProviderId,
           },
         }),
       });
 
       if (response.ok) {
-        messageDiv.textContent = "Content liked successfully!";
+        const result = await response.json();
+        const isBookmarked = result.data.bookmarkContent.isBookmarked;
+
+        // Update button text and hint immediately
+        if (isBookmarked) {
+          likeButton.textContent = "Unlike Content";
+          hintText.textContent = "Will be removed from your profile";
+          messageDiv.textContent = "Content liked successfully!";
+        } else {
+          likeButton.textContent = "Like Content";
+          hintText.textContent = "Will appear on your profile";
+          messageDiv.textContent = "Content unliked successfully!";
+        }
       } else {
-        messageDiv.textContent = "Error liking content.";
+        messageDiv.textContent = "Error toggling like.";
       }
     } catch (error) {
       console.error("Error:", error);
-      messageDiv.textContent = "Error liking content.";
+      messageDiv.textContent = "Error toggling like.";
     }
   });
 }
 
-document.getElementById("likeContent").addEventListener("click", likeContent);
+document
+  .getElementById("likeContent")
+  .addEventListener("click", toggleBookmark);
 
 onAuthStateChanged(auth, handleAuthStateChange);
