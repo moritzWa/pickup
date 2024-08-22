@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "version": "0.1",
-  "name": "Firebase Auth ( Google Sign IN SSO ) + MV3 Extension",
-  "description": "Webpack Modular Framework!",
+  "name": "Pickup: Share and listen to links and get AI recommendations",
+  "description": "Pickup is a social ai bookmarking platform to share the best content with friends.",
   "action": {
     "default_popup": "./popup.html",
     "default_icon": {
@@ -11,7 +11,7 @@
       "48": "./src/icons/get_started48.png",
       "128": "./src/icons/get_started128.png"
     },
-    "default_title": "Getting Started Firebase + MV3!"
+    "default_title": "Pickup Chrome Extension"
   },
   "permissions": ["storage", "activeTab", "scripting", "identity", "tabs"],
   "host_permissions": ["http://localhost:8888/*"],
