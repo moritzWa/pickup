@@ -45,7 +45,6 @@ const ProfileIcon = ({
               width: size,
               borderRadius: 100,
             },
-            ,
           ]}
         />
       </TouchableOpacity>
