@@ -427,8 +427,8 @@ const GetFollows = gql`
 `;
 
 const GetIsBookmarked = gql`
-  query getIsBookmarked($contentId: ID!, $authProviderId: String) {
-    getIsBookmarked(contentId: $contentId, authProviderId: $authProviderId)
+  query getIsBookmarked($url: String!, $authProviderId: String) {
+    getIsBookmarked(url: $url, authProviderId: $authProviderId)
   }
 `;
 

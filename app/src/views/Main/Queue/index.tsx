@@ -1,14 +1,14 @@
-import { View, Text, ScrollView, FlatList } from "react-native";
-import React from "react";
-import { useSelector } from "react-redux";
-import { getQueue } from "src/redux/reducers/audio";
-import { BaseContentFields } from "src/api/fragments";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faHeadset } from "@fortawesome/pro-solid-svg-icons";
-import { useTheme } from "src/hooks";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import React from "react";
+import { FlatList, Text, View } from "react-native";
 import FastImage from "react-native-fast-image";
-import Header from "src/components/Header";
+import { useSelector } from "react-redux";
+import { BaseContentFields } from "src/api/fragments";
 import Close from "src/components/Close";
+import { getDescription } from "src/components/Content/contentHelpers";
+import { useTheme } from "src/hooks";
+import { getQueue } from "src/redux/reducers/audio";
 
 const Queue = () => {
   const queue = useSelector(getQueue);
@@ -63,6 +63,7 @@ const Queue = () => {
   );
 };
 
+// TODO: merge this with ContentRow?
 const QueueRow = ({ content }: { content: BaseContentFields }) => {
   const theme = useTheme();
 
@@ -77,7 +78,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
         marginHorizontal: 10,
         marginBottom: 10,
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
       }}
     >
       <FastImage
@@ -89,13 +90,13 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
         }}
         resizeMode="cover"
         source={{
-          uri: content.thumbnailImageUrl,
+          uri: content.thumbnailImageUrl ?? undefined,
         }}
       />
 
       <View style={{ flex: 1 }}>
         <Text
-          numberOfLines={1}
+          numberOfLines={2}
           style={{
             color: theme.header,
             fontFamily: "Raleway-Bold",
@@ -104,6 +105,18 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
           }}
         >
           {content.title}
+        </Text>
+
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+            fontFamily: "Raleway-Medium",
+            marginBottom: 10,
+          }}
+          numberOfLines={2}
+        >
+          {getDescription(content)}
         </Text>
 
         <View
@@ -126,7 +139,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
               marginLeft: 5,
               color: theme.text,
               fontFamily: "Raleway-Regular",
-              fontSize: 16,
+              fontSize: 14,
             }}
           >
             {Math.ceil(content.lengthSeconds / 60)}min
