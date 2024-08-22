@@ -45,7 +45,7 @@ function checkForExistingToken() {
 const apiUrl = process.env.API_URL;
 console.log(`API URL: ${apiUrl}`);
 
-function saveCurrentLink() {
+async function saveCurrentLink() {
   const messageDiv = document.getElementById("message");
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -79,6 +79,14 @@ function saveCurrentLink() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+
+        console.log("result", result.data);
+
+        const contentId = result.data.createContentFromUrl.id;
+        chrome.storage.local.set({ currentContentId: contentId }, () => {
+          console.log("Content ID saved:", contentId);
+        });
         messageDiv.textContent = "Link saved successfully!";
       } else {
         messageDiv.textContent = "Error saving link.";
@@ -90,10 +98,16 @@ function saveCurrentLink() {
   });
 }
 
-function likeContent() {
+async function likeContent() {
   const messageDiv = document.getElementById("message");
-  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-    const tab = tabs[0];
+  chrome.storage.local.get(["currentContentId"], async (result) => {
+    const contentId = result.currentContentId;
+    if (!contentId) {
+      messageDiv.textContent =
+        "No content ID found. Please save the link first.";
+      return;
+    }
+
     const user = auth.currentUser;
     const authProviderId = user ? user.uid : null;
 
@@ -111,7 +125,7 @@ function likeContent() {
             }
           }`,
           variables: {
-            contentId: tab.id, // Assuming tab.id is the content ID
+            contentId: contentId,
             authProviderId,
           },
         }),
