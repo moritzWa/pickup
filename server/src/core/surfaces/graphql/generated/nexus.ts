@@ -577,6 +577,7 @@ export interface NexusGenArgTypes {
       contentId: string; // ID!
     }
     bookmarkContent: { // args
+      authProviderId?: string | null; // String
       contentId: string; // ID!
     }
     createAuthor: { // args

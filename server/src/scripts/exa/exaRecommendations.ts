@@ -1,6 +1,7 @@
 import { Logger } from "src/utils/logger";
 
 // fetch posts that user liked/listened to
+// TODO: change this to bookmarked
 const likedPosts = [
     {
         title: "The Concept That Explains Everything About Marketplaces",
