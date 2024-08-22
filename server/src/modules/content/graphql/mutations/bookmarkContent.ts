@@ -4,6 +4,7 @@ import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
+import { Logger } from "src/utils";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo, interactionRepo } from "../../infra";
 import { ContentSessionService } from "../../services/contentSessionService";
@@ -27,6 +28,8 @@ export const bookmarkContent = mutationField("bookmarkContent", {
         }
 
         const contentResponse = await contentRepo.findById(contentId);
+
+        Logger.info("contentResponse in bookmarkContent", contentResponse);
 
         throwIfError(contentResponse);
 

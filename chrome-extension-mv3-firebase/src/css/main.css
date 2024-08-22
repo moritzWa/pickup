@@ -8,10 +8,10 @@ body {
   background: white;
   font-family: "Lato", sans-serif;
   width: 200px;
-  height: 100px;
+  height: 150px;
   margin: 0;
-  padding: 0;
-  border-radius: 80px;
+  padding: 10px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -26,27 +26,37 @@ h1 {
 .btn {
   display: block;
   border: none;
-  height: 45px;
-  width: 80%;
-  border-radius: 5px;
+  border-radius: 3px;
   transition: all 0.3s ease;
   cursor: pointer;
   outline: none;
   font-family: "Lato", sans-serif;
-  font-weight: 600;
-  font-size: 18px;
-  background-color: #4285f4;
+  font-weight: 500;
+  font-size: 16px;
+  background-color: #733bf4;
   color: #fff;
+  margin-bottom: 10px;
+  padding: 10px;
+  width: 140px;
 }
 
 .btn:hover {
-  background-color: #3367d6;
+  background-color: #733bf4ba;
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#hint {
+  font-size: 12px;
+  color: #888;
+  margin: 0 0 15px;
+  text-align: center;
 }
 
 #message {
   margin-top: 10px;
   font-size: 14px;
   color: #333;
+  text-align: center;
+  min-height: 20px;
 }
