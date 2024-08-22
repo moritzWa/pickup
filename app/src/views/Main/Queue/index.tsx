@@ -63,6 +63,7 @@ const Queue = () => {
   );
 };
 
+// TODO: merge this with ContentRow?
 const QueueRow = ({ content }: { content: BaseContentFields }) => {
   const theme = useTheme();
 
@@ -77,7 +78,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
         marginHorizontal: 10,
         marginBottom: 10,
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
       }}
     >
       <FastImage
@@ -95,7 +96,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
 
       <View style={{ flex: 1 }}>
         <Text
-          numberOfLines={1}
+          numberOfLines={2}
           style={{
             color: theme.header,
             fontFamily: "Raleway-Bold",
@@ -104,6 +105,18 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
           }}
         >
           {content.title}
+        </Text>
+
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+            fontFamily: "Raleway-Medium",
+            marginBottom: 10,
+          }}
+          numberOfLines={2}
+        >
+          {content.summary || content.ogDescription}
         </Text>
 
         <View
@@ -126,7 +139,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
               marginLeft: 5,
               color: theme.text,
               fontFamily: "Raleway-Regular",
-              fontSize: 16,
+              fontSize: 14,
             }}
           >
             {Math.ceil(content.lengthSeconds / 60)}min

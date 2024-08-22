@@ -1,14 +1,15 @@
 import { useMutation } from "@apollo/client";
 import {
   faArchive,
-  faClock,
   faPause,
   faPlay,
   faPodcast,
 } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import moment from "moment";
 import React, { useEffect, useRef } from "react";
 import {
   Alert,
@@ -44,11 +45,8 @@ import {
   getIsPlaying,
   getQueueContentIdSet,
 } from "src/redux/reducers/audio";
-import { extractDomain } from "src/utils/author";
-import ProfileIcon from "../ProfileIcon";
-import moment from "moment";
-import * as Haptics from "expo-haptics";
 import { getGradientById } from "src/utils/helpers";
+import ProfileIcon from "../ProfileIcon";
 
 const IMAGE_SIZE = 32;
 
@@ -286,6 +284,17 @@ export const ContentRow = ({
     swipeableRef.current?.close();
   }, [filter]);
 
+  const getDescription = (content: BaseContentFields) => {
+    if (content.summary) return content.summary;
+    if (content.ogDescription) return content.ogDescription;
+    if (content.content)
+      return (
+        content.content.slice(0, 300) +
+        (content.content.length > 300 ? "..." : "")
+      );
+    return "";
+  };
+
   return (
     <View
       style={{
@@ -375,7 +384,7 @@ export const ContentRow = ({
                     }}
                     numberOfLines={2}
                   >
-                    {c.summary || c.ogDescription}
+                    {getDescription(c)}
                   </Text>
 
                   <View
