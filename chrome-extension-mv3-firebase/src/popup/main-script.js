@@ -139,9 +139,11 @@ async function checkBookmarkStatus() {
 
         if (isBookmarked) {
           likeButton.textContent = "Unlike Content";
+          likeButton.classList.add("btn-unlike");
           hintText.textContent = "Will be removed from your profile";
         } else {
           likeButton.textContent = "Like Content";
+          likeButton.classList.remove("btn-unlike");
           hintText.textContent = "Will appear on your profile";
         }
       } else {
@@ -194,13 +196,15 @@ async function toggleBookmark() {
         const result = await response.json();
         const isBookmarked = result.data.bookmarkContent.isBookmarked;
 
-        // Update button text and hint immediately
+        // Update button text, hint, and class immediately
         if (isBookmarked) {
           likeButton.textContent = "Unlike Content";
+          likeButton.classList.add("btn-unlike");
           hintText.textContent = "Will be removed from your profile";
           messageDiv.textContent = "Content liked successfully!";
         } else {
           likeButton.textContent = "Like Content";
+          likeButton.classList.remove("btn-unlike");
           hintText.textContent = "Will appear on your profile";
           messageDiv.textContent = "Content unliked successfully!";
         }
