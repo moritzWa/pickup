@@ -45,11 +45,6 @@ h1 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-#sign_out {
-  /* width: 100%; */
-  display: none;
-}
-
 #message {
   margin-top: 10px;
   font-size: 14px;
