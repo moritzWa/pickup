@@ -72,9 +72,12 @@ const Home = () => {
     [page, filter]
   );
 
-  const { data, refetch, fetchMore, error, loading } = useQuery<{
-    getFeed: BaseContentFields[];
-  }>(api.content.feed, {
+  const { data, refetch, fetchMore, error, loading } = useQuery<
+    {
+      getFeed: BaseContentFields[];
+    },
+    QueryGetFeedArgs
+  >(api.content.feed, {
     variables,
     fetchPolicy: "cache-and-network",
     onCompleted: (newData) => {
@@ -149,7 +152,9 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        variables: { page: 0, limit: LIMIT, filter },
+        page: 0,
+        limit: LIMIT,
+        filter,
       });
     } finally {
       setIsRefreshing(false);
@@ -161,7 +166,9 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        variables: { page: 0, limit: LIMIT, filter },
+        page: 0,
+        limit: LIMIT,
+        filter,
       });
     } finally {
       setIsRefreshing(false);
@@ -174,7 +181,9 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        variables: { page: 0, limit: LIMIT, filter },
+        page: 0,
+        limit: LIMIT,
+        filter,
       });
       apolloClient.refetchQueries({ include: [api.users.friends] });
     } finally {
