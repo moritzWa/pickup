@@ -65,7 +65,7 @@ const Home = () => {
 
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
-      filter: filter ?? ContentFeedFilter.ForYou,
+      filter: filter,
       limit: LIMIT,
       page,
     }),
@@ -149,7 +149,7 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        // variables: { page: 0, limit: LIMIT, filter },
+        variables: { page: 0, limit: LIMIT, filter },
       });
     } finally {
       setIsRefreshing(false);
@@ -161,7 +161,7 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        // variables: { page: 0, limit: LIMIT, filter },
+        variables: { page: 0, limit: LIMIT, filter },
       });
     } finally {
       setIsRefreshing(false);
@@ -174,7 +174,7 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        // variables: { page: 0, limit: LIMIT },
+        variables: { page: 0, limit: LIMIT, filter },
       });
       apolloClient.refetchQueries({ include: [api.users.friends] });
     } finally {
