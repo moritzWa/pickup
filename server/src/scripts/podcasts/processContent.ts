@@ -99,7 +99,7 @@ const run = async () => {
     console.time("processContent");
 
     // chunks of 10
-    const results = chunk(content, 1);
+    const results = chunk(content, 50);
 
     console.time("processContent");
 
