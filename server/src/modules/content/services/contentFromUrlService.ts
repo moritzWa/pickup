@@ -97,8 +97,8 @@ export const ContentFromUrlService = {
                 return failure(savedContentResponse.error);
             }
 
-            const createAudioContent =
-                process.env.NODE_ENV === "production" ? true : false;
+            const createAudioContent = true;
+            // process.env.NODE_ENV === "production" ? true : false;
             if (createAudioContent) {
                 // Enqueue audio generation task
                 await AudioGenerationQueue.add("generateAudio", {

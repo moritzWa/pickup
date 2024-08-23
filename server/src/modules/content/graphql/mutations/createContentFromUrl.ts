@@ -20,8 +20,15 @@ Example curl command:
 curl -X POST http://localhost:8888/graphql \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "mutation { createContentFromUrl(url: \"https://blog.dennishackethal.com/posts/libertarian-faq \") { id title websiteUrl content audioUrl thumbnailImageUrl } }"            
+    "query": "mutation { createContentFromUrl(url: \"http://www.paulgraham.com/todo.html\", authProviderId: \"XnI3T6fwiUZe5LZJnJDBP3AKNaE3\") { id title websiteUrl content audioUrl thumbnailImageUrl } }"
+  }'
 
+To call without authProviderId:
+curl -X POST http://localhost:8888/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation { createContentFromUrl(url: \"http://www.paulgraham.com/todo.html\") { id title websiteUrl content audioUrl thumbnailImageUrl } }"
+  }'
 */
 
 export const createContentFromUrl = mutationField("createContentFromUrl", {
@@ -81,6 +88,22 @@ async function getUserFromContextOrAuthProviderId(
     ctx: Context,
     authProviderId?: string | null
 ): Promise<User | null> {
+    console.log("ctx", ctx);
+    console.log("authProviderId", authProviderId);
+
+    // if ctx.authProviderId is present, use that
+    if (ctx.authProviderId && !authProviderId) {
+        const userResponse = await pgUserRepo.findOne({
+            where: { authProviderId: ctx.authProviderId },
+        });
+
+        console.log("userResponse", userResponse);
+
+        if (userResponse.isSuccess() && userResponse.value) {
+            return userResponse.value;
+        }
+    }
+
     if (ctx.me) {
         return ctx.me;
     }
