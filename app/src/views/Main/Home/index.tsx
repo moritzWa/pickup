@@ -891,19 +891,21 @@ const FriendsScroller = () => {
       horizontal
       style={{
         paddingLeft: 10,
-        paddingVertical: 5,
+        paddingVertical: 10,
+        marginHorizontal: 10,
+        borderRadius: 15,
         // backgroundColor: "red",
-        borderTopWidth: 1,
-        borderColor: theme.border,
-        borderBottomWidth: 1,
-        marginBottom: 15,
+        // borderTopWidth: 1,
+        // borderColor: theme.border,
+        // borderBottomWidth: 1,
+        marginBottom: 25,
         backgroundColor: theme.ternaryBackground,
       }}
       data={friends}
       renderItem={({ item: f }) => (
         <ProfileIcon
           style={{
-            marginRight: 5,
+            marginRight: 10,
             // borderWidth: 2,
             // borderColor: theme.border,
           }}
