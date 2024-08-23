@@ -184,6 +184,7 @@ type Mutation {
   deleteMe: String!
   followProfile(username: String!): String!
   getAuthToken: String!
+  readNotifications(notificationIds: [ID!]!): String!
   recordInteraction(contentId: ID!, eventType: InteractionTypeEnum!): Interaction!
   removeFromQueue(contentId: ID!): FeedItem!
   respondToContent(audioFileUrl: String!, contentId: ID!): ContentRespondResponse!
@@ -197,6 +198,19 @@ type Mutation {
   updateContentSession(contentSessionId: ID!, currentMs: Int, isBookmarked: Boolean, isLiked: Boolean, lastListenedAt: Date, notes: String): ContentSession!
   updateUser(avatarImageUrl: String, biometricPublicKey: String, description: String, hasMobile: Boolean, hasPushNotifications: Boolean, hasTwoFactorAuth: Boolean, name: String, phoneNumber: String, unreadCount: Int, username: String): User!
   verifyPhoneNumber(otpCode: String!, phoneNumber: String!): User!
+}
+
+type Notification {
+  createdAt: Date!
+  followerUser: PublicProfile
+  hasRead: Boolean!
+  hasSent: Boolean!
+  iconImageUrl: String
+  id: ID!
+  subtitle: String!
+  title: String!
+  type: String
+  userId: String!
 }
 
 type PaymentMethod {
@@ -213,6 +227,14 @@ type Profile {
   name: String!
   numFollowers: Int!
   numFollowing: Int!
+  username: String!
+}
+
+type PublicProfile {
+  avatarImageUrl: String
+  description: String!
+  id: ID!
+  name: String!
   username: String!
 }
 
@@ -236,10 +258,13 @@ type Query {
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
   getNextContent(afterContentId: ID!, currentMs: Int): FeedItem
+  getNotifications: [Notification!]!
+  getNumUnreadNotifications: Int!
   getPaymentMethods: [PaymentMethod!]!
   getPrevContent(beforeContentId: ID!, currentMs: Int): FeedItem
   getProfile(username: String): Profile!
   getQueue: GetQueueResponse!
+  getUserContacts(phoneNumbers: [String!]!): [UserContactProfile!]!
   me: User
   searchSimilarLinks(limit: Int = 8, query: String!): [SearchResult!]!
   searchUsers(query: String!): [UserSearchResult!]!
@@ -295,6 +320,15 @@ type User {
 
 enum UserAuthProviderEnum {
   Firebase
+}
+
+type UserContactProfile {
+  avatarImageUrl: String
+  description: String
+  id: ID!
+  name: String
+  phoneNumber: String
+  username: String
 }
 
 type UserSearchResult {

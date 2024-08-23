@@ -13,3 +13,16 @@ export const Profile = objectType({
         t.nonNull.boolean("isFollowing");
     },
 });
+
+export const PublicProfile = objectType({
+    name: "PublicProfile",
+    definition(t) {
+        t.nonNull.id("id");
+        t.nonNull.string("username");
+        t.nonNull.string("name");
+        t.nonNull.string("description");
+        t.nullable.string("avatarImageUrl", {
+            resolve: (t: any) => t.avatarImageUrl || t.imageUrl,
+        });
+    },
+});

@@ -47,6 +47,7 @@ import Friends from "src/views/Main/Friends";
 import EditProfile from "src/views/Main/EditProfile";
 import { Followers } from "src/views/Main/Followers";
 import { PhoneNumber } from "src/views/Authentication/PhoneNumber";
+import Notifications from "src/views/Main/Notifications";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -217,6 +218,14 @@ const MainTabNavigation = () => {
           headerShown: false,
         }}
         component={QueueTab}
+      />
+
+      <Tabs.Screen
+        name="Notifications"
+        options={{
+          headerShown: false,
+        }}
+        component={Notifications}
       />
 
       <Tabs.Screen

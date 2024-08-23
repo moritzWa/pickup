@@ -4,6 +4,7 @@ import {
   ContentSession,
   ContentUserFollowingProfile,
   FeedItem,
+  Notification,
   User,
 } from "./generated/types";
 
@@ -187,5 +188,29 @@ export const BaseFeedItemFields = gql`
     content {
       ...BaseContentFields
     }
+  }
+`;
+
+export type BaseNotificationFields = Pick<
+  Notification,
+  | "__typename"
+  | "id"
+  | "title"
+  | "iconImageUrl"
+  | "subtitle"
+  | "createdAt"
+  | "hasRead"
+  | "type"
+>;
+
+export const BaseNotificationFields = gql`
+  fragment BaseNotificationFields on Notification {
+    id
+    title
+    iconImageUrl
+    subtitle
+    createdAt
+    hasRead
+    type
   }
 `;

@@ -21,6 +21,7 @@ import {
 import { inngest } from "src/jobs/inngest/clients";
 import { InngestEventName } from "src/jobs/inngest/types";
 import { Datadog } from "src/utils";
+import { NotificationType } from "src/core/infra/postgres/entities/Notification";
 
 const find = async (options: FindManyOptions<Notification>) =>
     notificationRepo.find(options);
@@ -69,16 +70,22 @@ export const sendNotification = async (
         iconImageUrl: string | null;
         // for follower notifications
         followerUserId: string | null;
-    }
+        feedInsertionId: string | null;
+        type: NotificationType;
+    },
+    shouldSend: boolean
 ): Promise<FailureOrSuccess<DefaultErrors, Notification>> => {
     // create the notification
     const notificationResponse = await notificationRepo.create({
         iconImageUrl: params.iconImageUrl ?? null,
         title: params.title,
         subtitle: params.subtitle,
+        followerUserId: params.followerUserId,
+        type: params.type,
+        feedInsertionId: params.feedInsertionId,
         idempotency: uuidv4(),
         userId: user.id,
-        hasSent: false,
+        hasSent: true,
         id: uuidv4(),
         hasRead: false,
         createdAt: new Date(),
@@ -91,9 +98,11 @@ export const sendNotification = async (
 
     const notification = notificationResponse.value;
 
-    // let this fail silently for now otherwise the whole claim can get kinda botched
-    // just if SMS or push fails, really these should just be retried
-    await sendPushOrSMSNotification(user, notification);
+    if (shouldSend) {
+        // let this fail silently for now otherwise the whole claim can get kinda botched
+        // just if SMS or push fails, really these should just be retried
+        await sendPushOrSMSNotification(user, notification);
+    }
 
     // if (sendResponse.isFailure()) {
     //     // delete the notification in this case
@@ -127,12 +136,15 @@ export const create = async (params: {
     subtitle: string;
     iconImageUrl: string | null;
     followerUserId: string | null;
-    tokenContractAddress: string | null;
+    feedInsertionId: string | null;
+    type: NotificationType;
 }): Promise<FailureOrSuccess<DefaultErrors, Notification>> => {
     // create the notification
     const notificationResponse = await notificationRepo.create({
         iconImageUrl: params.iconImageUrl ?? null,
         title: params.title,
+        followerUserId: params.followerUserId,
+        feedInsertionId: params.feedInsertionId,
         subtitle: params.subtitle,
         userId: params.userId,
         id: uuidv4(),
@@ -141,6 +153,7 @@ export const create = async (params: {
         createdAt: new Date(),
         updatedAt: new Date(),
         idempotency: uuidv4(),
+        type: params.type,
     });
     if (notificationResponse.isFailure())
         return failure(notificationResponse.error);
@@ -152,9 +165,11 @@ export type SendNotificationParams = {
     idempotency: string; // to make sure not sent multiple times
     title: string;
     subtitle: string;
+    type: NotificationType;
     iconImageUrl: string | null;
     // for follower notifications
     followerUserId: string | null;
+    feedInsertionId: string | null;
 };
 
 export const createAndSend = async (
@@ -168,6 +183,9 @@ export const createAndSend = async (
             idempotency: params.idempotency,
             title: params.title,
             subtitle: params.subtitle,
+            followerUserId: params.followerUserId,
+            feedInsertionId: params.feedInsertionId,
+            type: params.type,
             userId: user.id,
             hasSent: false,
             id: uuidv4(),

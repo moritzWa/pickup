@@ -3,6 +3,7 @@ import {
   BaseContentFields,
   BaseContentSessionFields,
   BaseFeedItemFields,
+  BaseNotificationFields,
   BaseUserFields,
 } from "./fragments";
 
@@ -133,6 +134,18 @@ const SearchUsers = gql`
       name
       avatarImageUrl
       isFollowing
+    }
+  }
+`;
+
+const GetUserContacts = gql`
+  query GetUserContacts($phoneNumbers: [String!]!) {
+    getUserContacts(phoneNumbers: $phoneNumbers) {
+      id
+      username
+      name
+      avatarImageUrl
+      description
     }
   }
 `;
@@ -434,7 +447,33 @@ const GetIsBookmarked = gql`
   }
 `;
 
+const GetNotifications = gql`
+  ${BaseNotificationFields}
+  query GetNotifications {
+    getNotifications {
+      ...BaseNotificationFields
+    }
+  }
+`;
+
+const ReadNotifications = gql`
+  mutation ReadNotifications($notificationIds: [ID!]!) {
+    readNotifications(notificationIds: $notificationIds)
+  }
+`;
+
+const GetNumUnreadNotifications = gql`
+  query GetNumUnreadNotifications {
+    getNumUnreadNotifications
+  }
+`;
+
 export const api = {
+  notifications: {
+    list: GetNotifications,
+    markAsRead: ReadNotifications,
+    unread: GetNumUnreadNotifications,
+  },
   users: {
     friends: GetFriends,
     getFollows: GetFollows,
@@ -448,6 +487,7 @@ export const api = {
     verifyBiometric: VerifyBiometric,
     me: GetMe,
     search: SearchUsers,
+    getUserContacts: GetUserContacts,
     getProfile: GetProfile,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,

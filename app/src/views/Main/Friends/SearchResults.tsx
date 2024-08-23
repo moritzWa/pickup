@@ -1,4 +1,4 @@
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client";
 import { faSearch } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
@@ -23,7 +23,11 @@ import Contacts from "react-native-contacts";
 import { RefreshControl } from "react-native-gesture-handler";
 import { PERMISSIONS, check, request } from "react-native-permissions";
 import { api, apolloClient } from "src/api";
-import { Query, UserSearchResult } from "src/api/generated/types";
+import {
+  Query,
+  QueryGetUserContactsArgs,
+  UserSearchResult,
+} from "src/api/generated/types";
 import { colors } from "src/components";
 import { IS_IPAD } from "src/config";
 import { useMe } from "src/hooks";
@@ -31,6 +35,7 @@ import { useTheme } from "src/hooks/useTheme";
 import { NavigationProps } from "src/navigation";
 import { ContactRow } from "./ContactRow";
 import { UserRow } from "./UserRow";
+import { hasValue } from "src/core";
 
 export const SearchResults = () => {
   const fullTheme = useTheme();
@@ -41,15 +46,42 @@ export const SearchResults = () => {
   const { me } = useMe();
   const [isHidden, setIsHidden] = useState(false);
 
-  const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
+  const [_contacts, setContacts] = useState<Contacts.Contact[]>([]);
 
   const [search, setSearch] = useState("");
+
+  const contactPhoneNumbers = useMemo(
+    (): string[] =>
+      _contacts.map((c) => c.phoneNumbers.flatMap((p) => p.number)).flat(),
+    [_contacts]
+  );
 
   const [searchUsers, { data: resultsData, loading: loadingSearchResults }] =
     useLazyQuery<Pick<Query, "searchUsers">>(api.users.search, {
       notifyOnNetworkStatusChange: true,
       fetchPolicy: "cache-first",
     });
+
+  const { data: userContacts } = useQuery<
+    Pick<Query, "getUserContacts">,
+    QueryGetUserContactsArgs
+  >(api.users.getUserContacts, {
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-first",
+    variables: {
+      phoneNumbers: contactPhoneNumbers,
+    },
+  });
+
+  const userPhoneNumbers = useMemo(
+    () =>
+      new Set(
+        userContacts?.getUserContacts
+          ?.map((c) => c.phoneNumber)
+          .filter(hasValue)
+      ) ?? [],
+    [userContacts]
+  );
 
   const _getContactsPermission = async () => {
     const CONTACT_PERMISSION = Platform.select({
@@ -173,17 +205,20 @@ export const SearchResults = () => {
 
   // indexed contacts by some keys
   const contactSearch = useMemo(() => {
+    const contacts = _contacts.filter((c) => !userPhoneNumbers.has(c.recordID));
+
     return new Fuse(contacts, {
       threshold: 0.1,
       isCaseSensitive: false,
       keys: ["displayName", "givenName", "familyName"],
     });
-  }, [contacts.length]);
+  }, [_contacts.length, userPhoneNumbers]);
 
   const relevantContacts = useMemo((): Contacts.Contact[] => {
-    if (!search) return contacts;
+    if (!search)
+      return _contacts.filter((c) => !userPhoneNumbers.has(c.recordID));
     return contactSearch.search(search).map((i) => i.item);
-  }, [contactSearch, search, contacts.length]);
+  }, [contactSearch, search, _contacts.length, userPhoneNumbers]);
 
   const relevantUsers = useMemo((): UserSearchResult[] => {
     return resultsData?.searchUsers ?? [];
@@ -214,7 +249,7 @@ export const SearchResults = () => {
   );
 
   const hasResults =
-    (!!contacts && contacts.length > 0) ||
+    (!!_contacts && _contacts.length > 0) ||
     (!!relevantUsers && relevantUsers.length > 0);
 
   return (

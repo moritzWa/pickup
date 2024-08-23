@@ -33,3 +33,41 @@ export function getGradientById(id: string) {
   const index = stringToNumber(id) % gradients.length;
   return gradients[index];
 }
+
+export function abbreviateFromNow(momentDuration: moment.Moment) {
+  const fromNowString = momentDuration.fromNow();
+
+  // handle the a few seconds ago case
+  if (fromNowString === "a few seconds ago") {
+    // handle the a few seconds ago case
+    return "now";
+  }
+
+  // Define abbreviations
+  const abbreviations: Record<string, string> = {
+    seconds: "sec",
+    second: "sec",
+    minutes: "m",
+    minute: "m",
+    hours: "h",
+    hour: "h",
+    days: "d",
+    day: "d",
+    months: "mo",
+    month: "mo",
+    years: "y",
+    year: "y",
+  };
+
+  // Replace 'a ' or 'an ' with '1' and full words with abbreviations
+  let abbreviated = fromNowString.replace(/\ba(n)?\b/g, "1");
+  abbreviated = abbreviated.replace(
+    /\b(seconds|second|minutes|minute|hours|hour|days|day|months|month|years|year)\b/g,
+    (matched) => abbreviations[matched]
+  );
+
+  // Remove spaces between numbers and abbreviations
+  abbreviated = abbreviated.replace(/(\d) (\w)/g, "$1$2");
+
+  return abbreviated;
+}

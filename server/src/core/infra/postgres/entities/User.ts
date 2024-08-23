@@ -32,7 +32,7 @@ export class User {
         type: "text",
         name: "phone_number",
     })
-    // @Index("users_phone_number_idx", { unique: true })
+    @Index("users_phone_number_idx")
     phoneNumber!: Maybe<string>;
 
     @Column({
