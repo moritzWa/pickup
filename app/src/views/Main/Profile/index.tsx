@@ -483,13 +483,13 @@ const Profile = ({ username }: { username: string | null }) => {
         <View
           style={{
             alignItems: "flex-start",
-            marginTop: 25,
+            marginTop: 10,
             paddingHorizontal: 15,
           }}
         >
           <ProfilePicture />
 
-          <View style={{ marginTop: 20, alignItems: "flex-start" }}>
+          <View style={{ marginTop: 15, alignItems: "flex-start" }}>
             {!!profile?.name ? (
               <Text
                 style={{
@@ -569,7 +569,7 @@ const Profile = ({ username }: { username: string | null }) => {
         <View
           style={{
             position: "absolute",
-            top: 25,
+            top: 10,
             right: 15,
             display: "flex",
             flexDirection: "row",
@@ -667,7 +667,7 @@ const Profile = ({ username }: { username: string | null }) => {
         <View
           style={{
             position: "absolute",
-            top: 25,
+            top: 10,
             right: 15,
             display: "flex",
             flexDirection: "row",
