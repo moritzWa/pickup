@@ -11,3 +11,4 @@ export * from "./getLikes";
 export * from "./getNextContent";
 export * from "./getPrevContent";
 export * from "./getQueue";
+export * from "./getAuthorContent";

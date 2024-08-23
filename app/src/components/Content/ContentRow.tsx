@@ -302,15 +302,15 @@ export const ContentRow = ({
   return (
     <View
       style={{
-        shadowOffset: {
-          width: 0,
-          height: 0,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
+        // shadowOffset: {
+        //   width: 0,
+        //   height: 0,
+        // },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 3,
         elevation: 5,
         marginBottom: 10,
-        shadowColor: isActive ? "transparent" : colors.gray30,
+        // shadowColor: isActive ? "transparent" : colors.gray30,
       }}
     >
       <Swipeable
@@ -517,8 +517,8 @@ export const ContentRow = ({
           }}
         >
           <TouchableOpacity
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
+            // onPressIn={handlePressIn}
+            // onPressOut={handlePressOut}
             onPress={playOrPause}
             activeOpacity={1}
           >
@@ -672,6 +672,7 @@ const ContentFriends = ({
     >
       {(friendsToShow ?? []).map((f, i) => (
         <ProfileIcon
+          key={f.id}
           onPress={() => onPressUser(f)}
           size={25}
           style={{

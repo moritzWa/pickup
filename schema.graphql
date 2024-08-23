@@ -221,6 +221,7 @@ type Query {
   getActivity(filter: ActivityFilter, username: String): [Content!]!
   getArchived: [Content!]!
   getAuthor(authorId: ID!): Author!
+  getAuthorContent(authorId: ID!, limit: Int, page: Int): [Content!]!
   getBookmarks(limit: Int, page: Int, username: String): [Content!]!
   getCategories: [CategorySection!]!
   getContent(contentId: ID!): Content!

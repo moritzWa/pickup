@@ -1,5 +1,10 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { faCar, faPlus, faUserPlus } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faCar,
+  faPlus,
+  faSatelliteDish,
+  faUserPlus,
+} from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
 import { AppContext } from "context";
@@ -210,7 +215,7 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           // padding: 10,
-          paddingTop: filter === ContentFeedFilter.Friends ? 5 : 25,
+          paddingTop: 10,
           paddingBottom: 150,
         }}
         ListHeaderComponent={
@@ -271,7 +276,7 @@ const Home = () => {
               </View>
             ) : null}
 
-            {filter === ContentFeedFilter.Friends ? <FriendsScroller /> : null}
+            <FriendsScroller />
           </>
         }
         renderItem={({ item: c }) => (
@@ -498,13 +503,17 @@ const SingleFilter = ({
         flexDirection: "row",
         display: "flex",
         alignItems: "center",
-        padding: 10,
+        padding: 7,
+        paddingHorizontal: 12,
+        backgroundColor: isActive ? theme.medBackground : "transparent",
+        marginRight: 5,
+        borderRadius: 100,
       }}
     >
       <Text
         style={{
           color: isActive ? theme.header : theme.text,
-          fontFamily: isActive ? "Raleway-Bold" : "Raleway-Regular",
+          fontFamily: "Inter-Medium",
           fontSize: 16,
         }}
       >
@@ -709,6 +718,7 @@ const Options = ({
       <View
         style={{
           paddingHorizontal: 10,
+          paddingBottom: 5,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -717,51 +727,11 @@ const Options = ({
       >
         <View
           style={{
-            flex: 2,
+            flex: 3,
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-          }}
-        >
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={onOpenFriends}
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              borderRadius: 100,
-              // paddingVertical: 7,
-              padding: 7,
-              marginRight: 5,
-              backgroundColor: theme.medBackground,
-            }}
-          >
-            <FontAwesomeIcon
-              style={{ position: "relative", right: -2 }}
-              icon={faUserPlus}
-              size={18}
-              color={theme.text}
-            />
-            {/* <Text
-              style={{
-                color: theme.text,
-                fontFamily: "Inter-Medium",
-                fontSize: 16,
-              }}
-            >
-              Friends
-            </Text> */}
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={{
-            flex: 2,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
           }}
         >
           <SingleFilter
@@ -770,6 +740,14 @@ const Options = ({
             }}
             isActive={filter === ContentFeedFilter.ForYou}
             label="For you"
+          />
+
+          <SingleFilter
+            onPress={() => {
+              onPress(ContentFeedFilter.New);
+            }}
+            isActive={filter === ContentFeedFilter.New}
+            label="New"
           />
 
           <SingleFilter
@@ -810,6 +788,39 @@ const Options = ({
         >
           <TouchableOpacity
             activeOpacity={0.9}
+            onPress={onOpenFriends}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              borderRadius: 100,
+              // paddingVertical: 7,
+              padding: 7,
+              paddingHorizontal: 12,
+              marginRight: 5,
+              backgroundColor: colors.primary,
+            }}
+          >
+            <FontAwesomeIcon
+              style={{ position: "relative", right: -2 }}
+              icon={faUserPlus}
+              size={18}
+              color={colors.white}
+            />
+            <Text
+              style={{
+                marginLeft: 5,
+                color: colors.white,
+                fontFamily: "Inter-Medium",
+                fontSize: 16,
+              }}
+            >
+              Friends
+            </Text>
+          </TouchableOpacity>
+
+          {/* <TouchableOpacity
+            activeOpacity={0.9}
             onPress={onAddContentFromUrl}
             style={{
               display: "flex",
@@ -826,16 +837,8 @@ const Options = ({
               size={18}
               color={theme.text}
             />
-            {/* <Text
-              style={{
-                color: theme.text,
-                fontFamily: "Inter-Medium",
-                fontSize: 16,
-              }}
-            >
-              Add
-            </Text> */}
-          </TouchableOpacity>
+            
+          </TouchableOpacity> */}
 
           {/* <TouchableOpacity
             activeOpacity={0.9}
@@ -846,35 +849,18 @@ const Options = ({
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              paddingVertical: 7,
-              padding: 10,
+              padding: 7,
+              marginLeft: 5,
               backgroundColor:
                 theme.theme === "dark" ? colors.primary : theme.bgPrimary,
             }}
           >
             <FontAwesomeIcon
-            style={{ marginRight: 5 }}
-            icon={faSatelliteDish}
-            size={16}
-            color={theme.theme === "dark" ? colors.white : colors.primary}
-          /> 
-            <Text
-              style={{
-                color: theme.theme === "dark" ? colors.white : colors.primary,
-                fontFamily: "Inter-Bold",
-                fontSize: 16,
-              }}
-            >
-              More
-            </Text>
-
-            {loadingShowMore ? (
-              <ActivityIndicator
-                style={{ marginLeft: 5 }}
-                size="small"
-                color={colors.primary}
-              />
-            ) : null}
+              // style={{ marginRight: 5 }}
+              icon={faSatelliteDish}
+              size={16}
+              color={theme.theme === "dark" ? colors.white : colors.primary}
+            />
           </TouchableOpacity> */}
         </View>
       </View>
@@ -905,7 +891,7 @@ const FriendsScroller = () => {
       horizontal
       style={{
         paddingLeft: 10,
-        paddingVertical: 10,
+        paddingVertical: 5,
         // backgroundColor: "red",
         borderTopWidth: 1,
         borderColor: theme.border,

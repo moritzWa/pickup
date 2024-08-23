@@ -58,12 +58,15 @@ export class PostgresAuthorRepository {
         }
     };
 
-    async findById(userId: string): Promise<AuthorResponse> {
+    async findById(
+        userId: string,
+        opts?: FindOneOptions<Author>
+    ): Promise<AuthorResponse> {
         try {
-            const author = await this.repo
-                .createQueryBuilder()
-                .where("id = :userId", { userId })
-                .getOne();
+            const author = await this.repo.findOne({
+                ...opts,
+                where: { ...opts?.where, id: userId },
+            });
 
             if (!author) {
                 return failure(new NotFoundError("Author not found."));

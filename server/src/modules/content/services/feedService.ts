@@ -7,19 +7,19 @@ import {
     hasValue,
     success,
 } from "src/core/logic";
-import { In, MoreThan } from "typeorm";
+import { In, IsNull, MoreThan, Not } from "typeorm";
 import { groupBy, keyBy, uniqBy } from "lodash";
 import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
 import { ContentService } from "./contentService";
 import { ContentFeedFilterEnum } from "src/core/infra/postgres/entities/FeedItem";
+import { ContentWithDistance } from "../infra/contentRepo";
+import moment from "moment";
 
 const getFriendFeedForUser = async (
     user: User,
     limit: number,
     page: number
 ): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
-    console.log("getting feed for friends");
-
     const relationshipResponse = await relationshipRepo.usersFollowing(user.id);
 
     if (relationshipResponse.isFailure()) {
@@ -67,6 +67,40 @@ const getFriendFeedForUser = async (
     return finalContent;
 };
 
+const getRelevantNewContent = async (
+    user: User,
+    limit: number,
+    page: number
+): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
+    // const queries = [
+    //     (user.interestDescription || "").slice(0, 4_000),
+    //     (user.description || "").slice(0, 4_000),
+    //     ...user.interestCategories.map((c) => c.toLowerCase()),
+    // ].filter((v) => !!v);
+
+    const contentResponse = await contentRepo.find({
+        where: {
+            isProcessed: true,
+            audioUrl: Not(IsNull()),
+            releasedAt: Not(IsNull()),
+        },
+        order: {
+            releasedAt: "desc",
+        },
+        take: limit,
+        skip: page * limit,
+    });
+
+    const content = contentResponse.value;
+
+    const finalContent = await ContentService.decorateContentWithFriends(
+        user,
+        content
+    );
+
+    return finalContent;
+};
+
 const getFeed = async (
     user: User,
     limit: number,
@@ -75,6 +109,10 @@ const getFeed = async (
 ): Promise<FailureOrSuccess<DefaultErrors, Content[]>> => {
     if (filter === ContentFeedFilterEnum.Friends) {
         return getFriendFeedForUser(user, limit, page);
+    }
+
+    if (filter === ContentFeedFilterEnum.New) {
+        return getRelevantNewContent(user, limit, page);
     }
 
     const [feedResponse] = await Promise.all([

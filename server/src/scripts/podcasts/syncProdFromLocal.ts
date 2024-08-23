@@ -46,7 +46,9 @@ async function syncDatabases() {
         await productionClient.connect();
 
         // Fetch data from local
-        const localData = await localClient.query("SELECT * FROM content");
+        const localData = await localClient.query(
+            "SELECT * FROM content WHERE type = 'podcast'"
+        );
 
         // Fetch data from production
         const productionData = await productionClient.query(
@@ -58,11 +60,46 @@ async function syncDatabases() {
         const localRows = localData.rows ?? [];
         const prodRows = productionData.rows ?? [];
 
+        const prodRowIds = new Set(prodRows.map((p) => p.reference_id));
+
+        const localRowIds = localRows.map((l) => l.reference_id);
+        const localRowsNotInProd = localRows.filter(
+            (l) => !prodRowIds.has(l.reference_id)
+        );
+
         const rowByRefId = keyBy(localRows, (r) => r.reference_id);
 
         let count = 0;
 
         console.log(`syncing ${prodRows.length} rows with local`);
+
+        const insertPromises: any[] = [];
+
+        // for (const localRow of localRowsNotInProd) {
+        //     // add to production
+        //     console.log(`[adding ${localRow.reference_id} to production]`);
+
+        //     const keys = Object.keys(localRow).sort();
+
+        //     const insertExpression = keys // get all keys
+        //         .map((k, i) => `$${i + 1}`) // map to $1, $2, $3, etc
+        //         .join(", "); // join with commas
+
+        //     const expression = `INSERT INTO content (${keys
+        //         .map((k) => k)
+        //         .join(", ")}) VALUES (${insertExpression})`;
+
+        //     const values = keys.map((key) => localRow[key]);
+
+        //     // make an insert statement of ALL local row fields spilled to prod
+        //     const result = productionClient.query(expression, values);
+
+        //     insertPromises.push(result);
+        // }
+
+        await Promise.all(insertPromises);
+
+        debugger;
 
         const promises: any[] = [];
 
@@ -77,12 +114,12 @@ async function syncDatabases() {
                 `[updating ${row.reference_id} to ${localData.length_ms}]`
             );
 
-            if (localData.length_ms) {
+            if (localData.length_ms && localData.embedding) {
                 // Update the production database with the local data
                 promises.push(
                     productionClient.query(
-                        `UPDATE content SET length_ms = $1 WHERE id = $2`,
-                        [localData.length_ms, row.id]
+                        `UPDATE content SET length_ms = $1, embedding = $2 WHERE id = $3`,
+                        [localData.length_ms, localData.embedding, row.id]
                     )
                 );
             }
@@ -97,7 +134,7 @@ async function syncDatabases() {
             }
         }
 
-        await Promise.all(promises);
+        const rowsNotInProd = await Promise.all(promises);
 
         debugger;
     } catch (error) {

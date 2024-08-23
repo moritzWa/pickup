@@ -5,6 +5,7 @@ import {
     FindOneOptions,
     In,
     IsNull,
+    MoreThanOrEqual,
     Not,
     Raw,
     Repository,
@@ -310,6 +311,55 @@ export class PostgresContentRepository {
                 .orderBy("min_distance", "ASC")
                 .limit(limit)
                 .getRawAndEntities();
+
+            const linksWithDistance = result.entities.map((entity, index) => ({
+                ...entity,
+                averageDistance: parseFloat(result.raw[index].average_distance),
+                minDistance: parseFloat(result.raw[index].min_distance),
+            }));
+
+            return success(linksWithDistance);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
+    async findNewSimilarContent(
+        vector: number[],
+        limit: number = DEFAULT_LINKS_RETURN,
+        idsToExclude: string[],
+        afterDate?: Date,
+        page?: number
+    ): Promise<SimilarContentWithDistanceResponse> {
+        try {
+            const skip = (page || 0) * limit;
+
+            const fullQuery = this.repo
+                .createQueryBuilder("content")
+                .select("content")
+                .addSelect(
+                    "AVG(content.embedding <-> :embedding)",
+                    "average_distance"
+                )
+                .addSelect(
+                    "MIN(content.embedding <-> :embedding)",
+                    "min_distance"
+                )
+                .where({
+                    id: Not(In(idsToExclude)),
+                    audioUrl: Not(IsNull()),
+                    releasedAt: afterDate
+                        ? MoreThanOrEqual(afterDate)
+                        : Not(IsNull()),
+                })
+                .setParameter("embedding", pgvector.toSql(vector))
+                .groupBy("content.id")
+                .orderBy("min_distance", "ASC")
+                .orderBy("released_at", "DESC")
+                .limit(limit)
+                .skip(skip);
+
+            const result = await fullQuery.getRawAndEntities();
 
             const linksWithDistance = result.entities.map((entity, index) => ({
                 ...entity,

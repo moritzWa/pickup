@@ -625,6 +625,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
       onPress={_onClickNext}
       style={{
         marginTop: 25,
+        marginBottom: 50,
         marginHorizontal: 20,
         padding: 10,
         borderRadius: 15,
