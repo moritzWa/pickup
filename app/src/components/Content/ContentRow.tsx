@@ -1,6 +1,7 @@
 import { useMutation } from "@apollo/client";
 import {
   faArchive,
+  faBookReader,
   faPause,
   faPlay,
   faPodcast,
@@ -15,6 +16,7 @@ import {
   Alert,
   Animated,
   Image,
+  Linking,
   StyleProp,
   Text,
   TouchableOpacity,
@@ -183,25 +185,37 @@ export const ContentRow = ({
 
   const start = async () => {
     try {
-      if (onPress) onPress();
-
-      // navigation.navigate("AudioPlayer", {
-      //   contentId: c.id,
-      // });
+      if (c.websiteUrl) {
+        await Linking.openURL(c.websiteUrl);
+      } else if (c.audioUrl) {
+        if (onPress) onPress();
+      } else {
+        console.log("No website URL or audio URL available");
+      }
     } catch (err) {
       console.log(err);
       Alert.alert(
         "Error",
-        "There was an error starting the course. Please try again."
+        "There was an error opening the content. Please try again."
       );
     }
   };
 
   const playOrPause = async () => {
-    if (isActive) {
-      togglePlayOrPause();
-    } else {
-      onPlay();
+    if (c.audioUrl) {
+      if (isActive) {
+        togglePlayOrPause();
+      } else {
+        onPlay();
+      }
+    } else if (c.websiteUrl) {
+      // Open the website URL for non-audio items
+      try {
+        await Linking.openURL(c.websiteUrl);
+      } catch (error) {
+        console.error("An error occurred while opening the URL:", error);
+        Alert.alert("Error", "Unable to open the website. Please try again.");
+      }
     }
   };
 
@@ -509,12 +523,18 @@ export const ContentRow = ({
             activeOpacity={1}
           >
             <FontAwesomeIcon
-              icon={isActive && isPlaying ? faPause : faPlay}
+              icon={
+                c.audioUrl
+                  ? isActive && isPlaying
+                    ? faPause
+                    : faPlay
+                  : faBookReader
+              }
               color={colors.white}
               size={16}
               style={{
                 position: "relative",
-                right: isActive && isPlaying ? 0 : -1,
+                right: c.audioUrl ? (isActive && isPlaying ? 0 : -1) : 0.5,
               }}
             />
           </TouchableOpacity>
