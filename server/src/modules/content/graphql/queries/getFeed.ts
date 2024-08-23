@@ -64,6 +64,8 @@ export const getFeed = queryField("getFeed", {
 
         throwIfError(feedResponse);
 
+        console.log(feedResponse.value);
+
         return feedResponse.value;
     },
 });
