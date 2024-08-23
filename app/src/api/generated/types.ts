@@ -394,6 +394,7 @@ export type Query = {
   getPrevContent?: Maybe<FeedItem>;
   getProfile: Profile;
   getQueue: GetQueueResponse;
+  getUserContacts: Array<UserContactProfile>;
   me?: Maybe<User>;
   searchSimilarLinks: Array<SearchResult>;
   searchUsers: Array<UserSearchResult>;
@@ -491,6 +492,11 @@ export type QueryGetProfileArgs = {
 };
 
 
+export type QueryGetUserContactsArgs = {
+  phoneNumbers: Array<Scalars['String']['input']>;
+};
+
+
 export type QuerySearchSimilarLinksArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   query: Scalars['String']['input'];
@@ -551,6 +557,16 @@ export type User = {
 export enum UserAuthProviderEnum {
   Firebase = 'Firebase'
 }
+
+export type UserContactProfile = {
+  __typename?: 'UserContactProfile';
+  avatarImageUrl?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  phoneNumber?: Maybe<Scalars['String']['output']>;
+  username?: Maybe<Scalars['String']['output']>;
+};
 
 export type UserSearchResult = {
   __typename?: 'UserSearchResult';

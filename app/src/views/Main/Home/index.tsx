@@ -200,6 +200,8 @@ const Home = () => {
     );
   };
 
+  console.log(filter, list.length);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
@@ -211,6 +213,7 @@ const Home = () => {
       </View>
 
       <FlatList
+        extraData={filter}
         data={list}
         refreshControl={
           <RefreshControl
@@ -906,7 +909,7 @@ const FriendsScroller = () => {
         marginHorizontal: 10,
         borderRadius: 15,
         marginBottom: 25,
-        backgroundColor: theme.ternaryBackground,
+        backgroundColor: theme.secondaryBackground,
       }}
     >
       <View style={{ padding: 0, marginBottom: 10 }}>

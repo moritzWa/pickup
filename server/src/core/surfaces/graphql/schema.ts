@@ -8,6 +8,8 @@ import * as author from "src/modules/author/graphql";
 import * as content from "src/modules/content/graphql";
 import * as curius from "src/modules/curius/graphql";
 import * as users from "src/modules/users/graphql";
+import * as notifications from "src/modules/notifications/graphql";
+
 import * as schemas from "src/shared/schemas";
 
 const types = {
@@ -18,6 +20,7 @@ const types = {
     ...content,
     ...author,
     ...curius,
+    ...notifications,
 };
 
 export const schema = makeSchema({

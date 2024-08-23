@@ -113,6 +113,7 @@ export interface NexusGenObjects {
     siteName?: string | null; // String
   }
   Mutation: {};
+  Notification: entities.Notification ;
   PaymentMethod: { // root type
     last4: string; // String!
     paymentMethodId: string; // String!
@@ -145,6 +146,14 @@ export interface NexusGenObjects {
     userIds: number[]; // [Int!]!
   }
   User: entities.User ;
+  UserContactProfile: { // root type
+    avatarImageUrl?: string | null; // String
+    description?: string | null; // String
+    id: string; // ID!
+    name?: string | null; // String
+    phoneNumber?: string | null; // String
+    username?: string | null; // String
+  }
   UserSearchResult: { // root type
     avatarImageUrl?: string | null; // String
     id: string; // ID!
@@ -300,6 +309,7 @@ export interface NexusGenFieldTypes {
     deleteMe: string; // String!
     followProfile: string; // String!
     getAuthToken: string; // String!
+    readNotifications: string; // String!
     recordInteraction: NexusGenRootTypes['Interaction']; // Interaction!
     removeFromQueue: NexusGenRootTypes['FeedItem']; // FeedItem!
     respondToContent: NexusGenRootTypes['ContentRespondResponse']; // ContentRespondResponse!
@@ -313,6 +323,16 @@ export interface NexusGenFieldTypes {
     updateContentSession: NexusGenRootTypes['ContentSession']; // ContentSession!
     updateUser: NexusGenRootTypes['User']; // User!
     verifyPhoneNumber: NexusGenRootTypes['User']; // User!
+  }
+  Notification: { // field return type
+    createdAt: NexusGenScalars['Date']; // Date!
+    hasRead: boolean; // Boolean!
+    hasSent: boolean; // Boolean!
+    iconImageUrl: string | null; // String
+    id: string; // ID!
+    subtitle: string; // String!
+    title: string; // String!
+    userId: string; // String!
   }
   PaymentMethod: { // field return type
     last4: string; // String!
@@ -349,10 +369,13 @@ export interface NexusGenFieldTypes {
     getLikes: NexusGenRootTypes['ContentSession'][]; // [ContentSession!]!
     getMobileUpdate: NexusGenRootTypes['GetMobileUpdateResponse']; // GetMobileUpdateResponse!
     getNextContent: NexusGenRootTypes['FeedItem'] | null; // FeedItem
+    getNotifications: NexusGenRootTypes['Notification'][]; // [Notification!]!
+    getNumUnreadNotifications: number; // Int!
     getPaymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
     getPrevContent: NexusGenRootTypes['FeedItem'] | null; // FeedItem
     getProfile: NexusGenRootTypes['Profile']; // Profile!
     getQueue: NexusGenRootTypes['GetQueueResponse']; // GetQueueResponse!
+    getUserContacts: NexusGenRootTypes['UserContactProfile'][]; // [UserContactProfile!]!
     me: NexusGenRootTypes['User'] | null; // User
     searchSimilarLinks: NexusGenRootTypes['SearchResult'][]; // [SearchResult!]!
     searchUsers: NexusGenRootTypes['UserSearchResult'][]; // [UserSearchResult!]!
@@ -398,6 +421,14 @@ export interface NexusGenFieldTypes {
     role: string | null; // String
     timezone: string | null; // String
     updatedAt: NexusGenScalars['Date']; // Date!
+    username: string | null; // String
+  }
+  UserContactProfile: { // field return type
+    avatarImageUrl: string | null; // String
+    description: string | null; // String
+    id: string; // ID!
+    name: string | null; // String
+    phoneNumber: string | null; // String
     username: string | null; // String
   }
   UserSearchResult: { // field return type
@@ -545,6 +576,7 @@ export interface NexusGenFieldTypeNames {
     deleteMe: 'String'
     followProfile: 'String'
     getAuthToken: 'String'
+    readNotifications: 'String'
     recordInteraction: 'Interaction'
     removeFromQueue: 'FeedItem'
     respondToContent: 'ContentRespondResponse'
@@ -558,6 +590,16 @@ export interface NexusGenFieldTypeNames {
     updateContentSession: 'ContentSession'
     updateUser: 'User'
     verifyPhoneNumber: 'User'
+  }
+  Notification: { // field return type name
+    createdAt: 'Date'
+    hasRead: 'Boolean'
+    hasSent: 'Boolean'
+    iconImageUrl: 'String'
+    id: 'ID'
+    subtitle: 'String'
+    title: 'String'
+    userId: 'String'
   }
   PaymentMethod: { // field return type name
     last4: 'String'
@@ -594,10 +636,13 @@ export interface NexusGenFieldTypeNames {
     getLikes: 'ContentSession'
     getMobileUpdate: 'GetMobileUpdateResponse'
     getNextContent: 'FeedItem'
+    getNotifications: 'Notification'
+    getNumUnreadNotifications: 'Int'
     getPaymentMethods: 'PaymentMethod'
     getPrevContent: 'FeedItem'
     getProfile: 'Profile'
     getQueue: 'GetQueueResponse'
+    getUserContacts: 'UserContactProfile'
     me: 'User'
     searchSimilarLinks: 'SearchResult'
     searchUsers: 'UserSearchResult'
@@ -645,6 +690,14 @@ export interface NexusGenFieldTypeNames {
     updatedAt: 'Date'
     username: 'String'
   }
+  UserContactProfile: { // field return type name
+    avatarImageUrl: 'String'
+    description: 'String'
+    id: 'ID'
+    name: 'String'
+    phoneNumber: 'String'
+    username: 'String'
+  }
   UserSearchResult: { // field return type name
     avatarImageUrl: 'String'
     id: 'ID'
@@ -686,6 +739,9 @@ export interface NexusGenArgTypes {
     }
     followProfile: { // args
       username: string; // String!
+    }
+    readNotifications: { // args
+      notificationIds: string[]; // [ID!]!
     }
     recordInteraction: { // args
       contentId: string; // ID!
@@ -799,6 +855,9 @@ export interface NexusGenArgTypes {
     }
     getProfile: { // args
       username?: string | null; // String
+    }
+    getUserContacts: { // args
+      phoneNumbers: string[]; // [String!]!
     }
     searchSimilarLinks: { // args
       limit: number | null; // Int

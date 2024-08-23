@@ -137,6 +137,18 @@ const SearchUsers = gql`
   }
 `;
 
+const GetUserContacts = gql`
+  query GetUserContacts($phoneNumbers: [String!]!) {
+    getUserContacts(phoneNumbers: $phoneNumbers) {
+      id
+      username
+      name
+      avatarImageUrl
+      description
+    }
+  }
+`;
+
 const GetProfile = gql`
   query GetProfile($username: String) {
     getProfile(username: $username) {
@@ -448,6 +460,7 @@ export const api = {
     verifyBiometric: VerifyBiometric,
     me: GetMe,
     search: SearchUsers,
+    getUserContacts: GetUserContacts,
     getProfile: GetProfile,
     getAuthToken: GetAuthToken,
     paymentMethods: GetPaymentMethods,

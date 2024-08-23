@@ -8,3 +8,4 @@ export * from "./checkValidUsername";
 export * from "./getFollows";
 export * from "./searchUsers";
 export * from "./getFriends";
+export * from "./getUserContacts";
