@@ -1,11 +1,11 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
+import { useNavigation } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
 import React, { useMemo } from "react";
 import { Text, TouchableOpacity, View, ViewProps } from "react-native";
 import { api } from "src/api";
-import { Mutation, Query, QueryGetProfileArgs } from "src/api/generated/types";
+import { Query, QueryGetProfileArgs } from "src/api/generated/types";
 import { useTheme } from "src/hooks/useTheme";
-import * as Haptics from "expo-haptics";
-import { useNavigation } from "@react-navigation/native";
 import { NavigationProps } from "src/navigation";
 
 export const FollowersInfo = ({
@@ -69,7 +69,7 @@ export const FollowersInfo = ({
             fontSize: 16,
             color: theme.textPrimary,
             marginRight: 5,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
           }}
         >
           {profile?.numFollowers || 0}
@@ -78,7 +78,7 @@ export const FollowersInfo = ({
           style={{
             fontSize: 14,
             color: theme.textSecondary,
-            fontFamily: "Raleway-Regular",
+            fontFamily: "Inter-Regular",
           }}
         >
           followers
@@ -99,7 +99,7 @@ export const FollowersInfo = ({
             fontSize: 16,
             color: theme.textPrimary,
             marginRight: 5,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
           }}
         >
           {profile?.numFollowing || 0}
@@ -108,7 +108,7 @@ export const FollowersInfo = ({
           style={{
             fontSize: 14,
             color: theme.textSecondary,
-            fontFamily: "Raleway-Regular",
+            fontFamily: "Inter-Regular",
           }}
         >
           following

@@ -31,7 +31,7 @@ const Queue = () => {
             <Text
               style={{
                 marginHorizontal: 15,
-                fontFamily: "Raleway-Bold",
+                fontFamily: "Inter-Bold",
                 fontSize: 24,
                 marginTop: 5,
                 marginBottom: 20,
@@ -51,7 +51,7 @@ const Queue = () => {
                 fontSize: 22,
                 color: theme.text,
                 paddingVertical: 100,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
               }}
             >
               Your queue is empty.
@@ -99,7 +99,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
           numberOfLines={2}
           style={{
             color: theme.header,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
             fontSize: 16,
             marginBottom: 5,
           }}
@@ -111,7 +111,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
           style={{
             color: theme.text,
             fontSize: 14,
-            fontFamily: "Raleway-Medium",
+            fontFamily: "Inter-Medium",
             marginBottom: 10,
           }}
           numberOfLines={2}
@@ -138,7 +138,7 @@ const QueueRow = ({ content }: { content: BaseContentFields }) => {
             style={{
               marginLeft: 5,
               color: theme.text,
-              fontFamily: "Raleway-Regular",
+              fontFamily: "Inter-Regular",
               fontSize: 14,
             }}
           >

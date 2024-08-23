@@ -54,7 +54,7 @@ export const UserRow = React.memo(
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text
             style={{
-              fontFamily: "Raleway-SemiBold",
+              fontFamily: "Inter-Semibold",
               fontSize: 16,
               marginBottom: 5,
               color: theme.textPrimary,
@@ -64,7 +64,7 @@ export const UserRow = React.memo(
           </Text>
           <Text
             style={{
-              fontFamily: "Raleway-Regular",
+              fontFamily: "Inter-Regular",
               fontSize: 16,
               color: theme.textSecondary,
             }}

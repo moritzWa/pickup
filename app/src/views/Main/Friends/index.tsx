@@ -1,35 +1,14 @@
-import {
-  ApolloError,
-  useLazyQuery,
-  useMutation,
-  useQuery,
-} from "@apollo/client";
-import {
-  CommonActions,
-  RouteProp,
-  useIsFocused,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useNavigation } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { useTheme } from "src/hooks/useTheme";
-import Header from "src/components/Header";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { SearchBar } from "@rneui/base";
-import { SearchResults } from "./SearchResults";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "src/components";
-import { NavigationProps } from "src/navigation";
-import * as Haptics from "expo-haptics";
+import Header from "src/components/Header";
 import { useMe } from "src/hooks";
+import { useTheme } from "src/hooks/useTheme";
+import { NavigationProps } from "src/navigation";
+import { SearchResults } from "./SearchResults";
 
 const Friends = () => {
   const fullTheme = useTheme();
@@ -58,7 +37,7 @@ const Friends = () => {
               style={{
                 color: colors.lightBlue50,
                 fontSize: 16,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
                 textAlign: "center",
                 paddingVertical: 5,
               }}

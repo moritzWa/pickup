@@ -1,35 +1,24 @@
-import {
-  View,
-  Text,
-  Button,
-  SafeAreaView,
-  TouchableOpacity,
-  Alert,
-  Animated,
-} from "react-native";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import * as FileSystem from "expo-file-system";
-import { Audio } from "expo-av";
-import { useMe, useTheme } from "src/hooks";
-import { colors } from "src/components";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   faIslandTreePalm,
   faPause,
   faPlay,
   faRedo,
   faReplyAll,
-  faTree,
 } from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { RootStackParamList } from "src/navigation";
-import { useMutation, useQuery } from "@apollo/client";
-import { Mutation, Query, QueryGetLessonArgs } from "src/api/generated/types";
-import { api } from "src/api";
-import Back from "src/components/Back";
+import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Voice from "@react-native-voice/voice";
-import * as Speech from "expo-speech";
+import { api } from "src/api";
+import { Mutation, Query, QueryGetLessonArgs } from "src/api/generated/types";
+import { colors } from "src/components";
+import Back from "src/components/Back";
+import { useMe, useTheme } from "src/hooks";
+import { RootStackParamList } from "src/navigation";
 import { storage } from "src/utils/firebase";
 
 const SIZE = 150;
@@ -409,7 +398,7 @@ const LessonSession = () => {
                 style={{
                   color: theme.background,
                   fontSize: 18,
-                  fontFamily: "Raleway-Medium",
+                  fontFamily: "Inter-Medium",
                 }}
               >
                 Play Recording
@@ -425,7 +414,7 @@ const LessonSession = () => {
                 color: theme.text,
                 marginTop: 15,
                 fontSize: 16,
-                fontFamily: "Raleway-Regular",
+                fontFamily: "Inter-Regular",
               }}
             >
               {respondData?.respond?.transcription}
@@ -458,7 +447,7 @@ const LessonSession = () => {
                 style={{
                   color: theme.background,
                   fontSize: 18,
-                  fontFamily: "Raleway-Medium",
+                  fontFamily: "Inter-Medium",
                 }}
               >
                 Play Response
@@ -503,7 +492,7 @@ const LessonSession = () => {
               style={{
                 color: theme.header,
                 fontWeight: "bold",
-                fontFamily: "Raleway-Bold",
+                fontFamily: "Inter-Bold",
                 fontSize: 24,
                 flex: 1,
               }}
@@ -536,7 +525,7 @@ const LessonSession = () => {
               marginTop: 5,
               color: theme.text,
               fontSize: 18,
-              fontFamily: "Raleway-Regular",
+              fontFamily: "Inter-Regular",
             }}
           >
             {lesson?.subtitle}

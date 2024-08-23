@@ -1,16 +1,15 @@
-import {
-  View,
-  Text,
-  StyleProp,
-  ViewStyle,
-  TouchableOpacity,
-} from "react-native";
-import React from "react";
-import FastImage from "react-native-fast-image";
-import { colors } from ".";
-import { TextStyle } from "react-native";
-import { getGradientById } from "src/utils/helpers";
 import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import {
+  StyleProp,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
+import FastImage from "react-native-fast-image";
+import { getGradientById } from "src/utils/helpers";
+import { colors } from ".";
 
 const ProfileIcon = ({
   initials,
@@ -73,7 +72,7 @@ const ProfileIcon = ({
           style={[
             {
               fontSize: 16,
-              fontFamily: "Raleway-Bold",
+              fontFamily: "Inter-Bold",
               color: colors.black,
             },
             textStyle,

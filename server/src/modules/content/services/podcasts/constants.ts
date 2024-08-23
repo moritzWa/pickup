@@ -139,4 +139,61 @@ export const PODCASTS = [
         name: "NfX",
         url: "https://feeds.podcastai.com/Vrs8cvjnVNikq1eUBoiysC.xml",
     },
+    // new
+    {
+        name: "Metamuse",
+        url: "https://museapp.com/podcast.rss",
+    },
+    {
+        name: "The Generalist",
+        url: "https://anchor.fm/s/453ec840/podcast/rss",
+    },
+    {
+        name: "The Product Podcast",
+        url: "https://feeds.buzzsprout.com/90361.rss",
+    },
+    {
+        name: "BG2Pod with Brad Gerstner and Bill Gurley",
+        url: "https://anchor.fm/s/f06c2370/podcast/rss",
+    },
+    {
+        name: "Conversations with Tyler",
+        url: "https://cowenconvos.libsyn.com/rss",
+    },
+    {
+        name: "Power Law with John Coogan",
+        url: "https://feeds.transistor.fm/power-law",
+    },
+    {
+        name: "The Ben & Marc Show",
+        url: "https://feeds.simplecast.com/mAT9rqvu",
+    },
+    {
+        name: "Pattern Breakers",
+        url: "https://feeds.simplecast.com/MZz6Vcos",
+    },
+    {
+        name: "The Investor + Operator (IO) Podcast",
+        url: "https://feeds.captivate.fm/the-investor-operator/",
+    },
+    {
+        name: "The Product Podcast",
+        url: "https://feeds.buzzsprout.com/90361.rss",
+    },
+    {
+        name: "The Arena Magazine Podcast",
+        url: "https://anchor.fm/s/f96e50b0/podcast/rss",
+    },
+    {
+        name: "Software Engineering Daily",
+        url: "https://softwareengineeringdaily.com/feed/podcast/",
+    },
+    {
+        name: "Upstream with Erik Torenberg",
+        url: "https://feeds.megaphone.fm/RINTP2392005652",
+    },
+    {
+        name: "TED Talks Daily (TED)",
+        url: "http://feeds.feedburner.com/TEDTalks_audio",
+    },
 ];

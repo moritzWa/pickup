@@ -1,35 +1,18 @@
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import React, { useEffect, useRef } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Input, colors } from "src/components";
-import Button from "src/components/Button";
-import Back from "src/components/Back";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { ApolloError, useLazyQuery, useMutation } from "@apollo/client";
-import { api } from "src/api";
-import {
-  Mutation,
-  MutationCreateUserArgs,
-  MutationUpdateUserArgs,
-  Query,
-} from "src/api/generated/types";
-import * as Haptics from "expo-haptics";
+import { ApolloError, useMutation } from "@apollo/client";
 import { useNavigation } from "@react-navigation/core";
-import { NavigationProps } from "src/navigation";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { GoogleButton } from "src/components/GoogleButton";
-import { AppleButton } from "src/components/AppleButton";
-import { useTheme } from "src/hooks/useTheme";
-import { AppleRequestResponse } from "@invertase/react-native-apple-authentication";
+import * as Haptics from "expo-haptics";
+import React, { useEffect } from "react";
+import { Alert, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { api } from "src/api";
+import { Mutation, MutationUpdateUserArgs } from "src/api/generated/types";
+import { Input } from "src/components";
+import Back from "src/components/Back";
+import Button from "src/components/Button";
 import { useMe } from "src/hooks";
+import { useTheme } from "src/hooks/useTheme";
+import { NavigationProps } from "src/navigation";
 
 const FullName = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -106,7 +89,7 @@ const FullName = () => {
         <Text
           style={{
             fontSize: 28,
-            fontFamily: "Raleway-Bold",
+            fontFamily: "Inter-Bold",
             textAlign: "left",
             width: "100%",
             marginTop: 25,

@@ -271,7 +271,7 @@ const AudioPlayer = () => {
                 fontSize: 24,
                 marginHorizontal: 20,
                 textAlign: "center",
-                fontFamily: "Raleway-Bold",
+                fontFamily: "Inter-Bold",
               }}
               numberOfLines={2}
             >
@@ -285,7 +285,7 @@ const AudioPlayer = () => {
                 color: colors.gray50,
                 fontSize: 16,
                 marginHorizontal: 75,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
               }}
               numberOfLines={1}
             >
@@ -427,7 +427,7 @@ const AudioPlayer = () => {
               style={{
                 color: colors.white,
                 fontSize: 16,
-                fontFamily: "Raleway-SemiBold",
+                fontFamily: "Inter-Semibold",
               }}
             >
               {currentMs ? formatTime(currentMs) : "00:00"}
@@ -437,7 +437,7 @@ const AudioPlayer = () => {
               style={{
                 color: colors.white,
                 fontSize: 16,
-                fontFamily: "Raleway-SemiBold",
+                fontFamily: "Inter-Semibold",
               }}
             >
               {durationMs ? formatTime(durationMs) : "-"}
@@ -483,7 +483,7 @@ const AudioPlayer = () => {
                   style={{
                     color: session?.isBookmarked ? colors.white : colors.white,
                     fontSize: 14,
-                    fontFamily: "Raleway-Medium",
+                    fontFamily: "Inter-Medium",
                     marginLeft: 5,
                   }}
                 >
@@ -514,7 +514,7 @@ const AudioPlayer = () => {
                 style={{
                   color: session?.isBookmarked ? colors.white : colors.white,
                   fontSize: 14,
-                  fontFamily: "Raleway-Medium",
+                  fontFamily: "Inter-Medium",
                   marginLeft: 5,
                 }}
               >
@@ -543,7 +543,7 @@ const AudioPlayer = () => {
                 style={{
                   color: colors.white,
                   fontSize: 14,
-                  fontFamily: "Raleway-Bold",
+                  fontFamily: "Inter-Bold",
                 }}
               >
                 {speed}x
@@ -634,7 +634,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
       <Text
         style={{
           color: theme.background,
-          fontFamily: "Raleway-Black",
+          fontFamily: "Inter-Black",
           fontSize: 12,
           textTransform: "uppercase",
           marginBottom: 10,
@@ -656,7 +656,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
             numberOfLines={1}
             style={{
               color: theme.background,
-              fontFamily: "Raleway-Bold",
+              fontFamily: "Inter-Bold",
               fontSize: 16,
               marginBottom: 5,
             }}
@@ -683,7 +683,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
               style={{
                 marginLeft: 5,
                 color: theme.secondaryBackground,
-                fontFamily: "Raleway-Regular",
+                fontFamily: "Inter-Regular",
                 fontSize: 16,
               }}
             >

@@ -1,11 +1,8 @@
-import React from "react";
-import { useMemo } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
-import { IS_IPAD } from "src/config";
-import { useTheme } from "src/hooks/useTheme";
+import React, { useMemo } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import Contacts from "react-native-contacts";
-import { colors } from "src/components";
 import ProfileIcon from "src/components/ProfileIcon";
+import { useTheme } from "src/hooks/useTheme";
 
 export const ContactRow = React.memo(
   ({
@@ -50,7 +47,7 @@ export const ContactRow = React.memo(
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text
             style={{
-              fontFamily: "Raleway-SemiBold",
+              fontFamily: "Inter-Semibold",
               fontSize: 16,
               marginBottom: 2,
               color: theme.textPrimary,
@@ -60,7 +57,7 @@ export const ContactRow = React.memo(
           </Text>
           <Text
             style={{
-              fontFamily: "Raleway-Regular",
+              fontFamily: "Inter-Regular",
               fontSize: 14,
               color: theme.textSecondary,
             }}
@@ -87,7 +84,7 @@ export const ContactRow = React.memo(
           <Text
             style={{
               color: theme.text,
-              fontFamily: "Raleway-SemiBold",
+              fontFamily: "Inter-Semibold",
               fontSize: 16,
             }}
           >

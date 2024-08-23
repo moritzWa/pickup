@@ -1,39 +1,35 @@
+import { useLazyQuery } from "@apollo/client";
+import { faSearch } from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useNavigation } from "@react-navigation/native";
+import { SearchBar } from "@rneui/base";
+import * as Haptics from "expo-haptics";
+import Fuse from "fuse.js";
+import { debounce } from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  TouchableHighlight,
-  View,
-  Text,
-  ScrollView,
-  FlatList,
   ActivityIndicator,
+  Linking,
+  Platform,
   SectionList,
   SectionListData,
-  Linking,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
   Share,
-  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { IS_IPAD, constants } from "src/config";
-import { useTheme } from "src/hooks/useTheme";
-import * as Haptics from "expo-haptics";
-import { api, apolloClient } from "src/api";
-import { Maybe, Query, UserSearchResult } from "src/api/generated/types";
-import { RefreshControl } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
-import { NavigationProps } from "src/navigation";
-import { NetworkStatus, useLazyQuery } from "@apollo/client";
-import { debounce, noop } from "lodash";
-import { SearchBar } from "@rneui/base";
-import { PERMISSIONS, check, request } from "react-native-permissions";
-import { colors } from "src/components";
 import Contacts from "react-native-contacts";
-import Fuse from "fuse.js";
-import { ContactRow } from "./ContactRow";
+import { RefreshControl } from "react-native-gesture-handler";
+import { PERMISSIONS, check, request } from "react-native-permissions";
+import { api, apolloClient } from "src/api";
+import { Query, UserSearchResult } from "src/api/generated/types";
+import { colors } from "src/components";
+import { IS_IPAD } from "src/config";
 import { useMe } from "src/hooks";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faSearch, faTimes } from "@fortawesome/pro-solid-svg-icons";
+import { useTheme } from "src/hooks/useTheme";
+import { NavigationProps } from "src/navigation";
+import { ContactRow } from "./ContactRow";
 import { UserRow } from "./UserRow";
 
 export const SearchResults = () => {
@@ -260,7 +256,7 @@ export const SearchResults = () => {
         inputStyle={{
           color: text,
           fontSize: 16,
-          fontFamily: "Raleway-Regular",
+          fontFamily: "Inter-Regular",
         }}
         platform="ios"
         placeholder="Search"
@@ -321,7 +317,7 @@ export const SearchResults = () => {
             <Text
               style={{
                 flex: 1,
-                fontFamily: "Raleway-Medium",
+                fontFamily: "Inter-Medium",
                 fontSize: IS_IPAD ? 30 : 22,
                 color: header,
               }}
@@ -371,7 +367,7 @@ const ContactsPrompt = ({
           style={[
             styles.title,
             {
-              fontFamily: "Raleway-SemiBold",
+              fontFamily: "Inter-Semibold",
             },
           ]}
         >
@@ -382,7 +378,7 @@ const ContactsPrompt = ({
           style={[
             styles.message,
             {
-              fontFamily: "Raleway-Regular",
+              fontFamily: "Inter-Regular",
               paddingBottom: 20,
             },
           ]}
@@ -419,7 +415,7 @@ const ContactsPrompt = ({
               style={{
                 color: "#007bff",
                 fontSize: 16,
-                fontFamily: "Raleway-Regular",
+                fontFamily: "Inter-Regular",
               }}
             >
               No Thanks
@@ -438,7 +434,7 @@ const ContactsPrompt = ({
               style={{
                 color: "#007bff",
                 fontSize: 16,
-                fontFamily: "Raleway-SemiBold",
+                fontFamily: "Inter-Semibold",
               }}
             >
               Yes, Enable

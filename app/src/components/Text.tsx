@@ -16,7 +16,7 @@ export const Text = ({ children, ...other }: Props) => {
       {...other}
       style={[
         {
-          fontFamily: "Raleway-Regular",
+          fontFamily: "Inter-Regular",
           color,
         },
         other.style,
