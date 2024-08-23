@@ -110,7 +110,8 @@ const getFollowersAndFollowingFromUsername = (username: string) =>
 
 const followUser = async (
     toUser: User,
-    fromUser: User
+    fromUser: User,
+    sendNotification = true
 ): Promise<FailureOrSuccess<DefaultErrors, null>> => {
     if (toUser.id === fromUser.id) {
         return failure(new Error("You cannot follow yourself."));
@@ -127,13 +128,15 @@ const followUser = async (
         return failure(createResp.error);
     }
 
-    // send notification
-    await NotificationService.sendNotification(toUser, {
-        title: `${fromUser.name || ""} (@${fromUser.username || ""})`,
-        subtitle: `followed you on Pickup`,
-        iconImageUrl: null,
-        followerUserId: fromUser.id,
-    });
+    if (sendNotification) {
+        // send notification
+        await NotificationService.sendNotification(toUser, {
+            title: `${fromUser.name || ""} (@${fromUser.username || ""})`,
+            subtitle: `followed you on Pickup`,
+            iconImageUrl: null,
+            followerUserId: fromUser.id,
+        });
+    }
 
     return success(null);
 };
@@ -141,22 +144,24 @@ const followUser = async (
 const followFounders = async (fromUser: User) => {
     if (!isProduction()) return;
 
-    const yashId = "50a3fbc5-4202-4f2d-9098-1e6e25d121f9";
-    const andrewId = "7aeb1899-cd0e-4566-9a70-70334b2cd70c";
+    const moritzId = "50a3fbc5-4202-4f2d-9098-1e6e25d121f9";
+    const andrewId = "a0683da2-d8eb-4631-a759-1d98256e9345";
 
     // get founders
     const foundersResp = await UserService.find({
         where: {
-            id: In([yashId, andrewId]),
+            id: In([moritzId, andrewId]),
         },
     });
+
     if (foundersResp.isFailure()) return failure(foundersResp.error);
+
     const founders = foundersResp.value;
 
     // create relationships
     for (const founder of founders) {
-        const followUserResp = await followUser(founder, fromUser);
-        // don't throw if error
+        await followUser(founder, fromUser, true);
+        await followUser(fromUser, founder, false);
     }
 
     return;

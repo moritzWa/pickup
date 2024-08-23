@@ -154,7 +154,7 @@ export const SearchResults = () => {
 
     const phoneNumber = contact.phoneNumbers?.[0]?.number;
     const message =
-      "Try out Pickup to see what podcasts I listen to 🎙️\n\nhttps://testflight.apple.com/join/ets4bkPy";
+      "Get smarter with me on Pickup (podcasts + social). You can see what I listen to, and I can see what you listen to 🎙️\n\nhttps://testflight.apple.com/join/ets4bkPy";
 
     if (phoneNumber) {
       // open up to send to this contact on imessage
@@ -239,7 +239,7 @@ export const SearchResults = () => {
           />
         }
         inputContainerStyle={{
-          backgroundColor: fullTheme.medBackground,
+          backgroundColor: fullTheme.secondaryBackground,
           height: 45,
           paddingHorizontal: 10,
           paddingRight: 0,
@@ -305,36 +305,51 @@ export const SearchResults = () => {
           ) : null
         }
         ListHeaderComponent={
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 10,
-              paddingHorizontal: 15,
-              paddingBottom: 10,
-            }}
-          >
-            <Text
+          <>
+            <View
               style={{
-                flex: 1,
-                fontFamily: "Inter-Medium",
-                fontSize: IS_IPAD ? 30 : 22,
-                color: header,
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 10,
+                paddingHorizontal: 15,
+                paddingBottom: 10,
               }}
             >
-              {hasResults ? "Results" : ""}
-            </Text>
-
-            {loading && hasResults && (
-              <ActivityIndicator
-                size={IS_IPAD ? 30 : 24}
+              <Text
                 style={{
-                  marginLeft: 10,
+                  flex: 1,
+                  fontFamily: "Inter-Medium",
+                  fontSize: IS_IPAD ? 30 : 22,
+                  color: header,
                 }}
-                color={fullTheme.activityIndicator}
-              />
-            )}
-          </View>
+              >
+                {hasResults ? "Results" : ""}
+              </Text>
+
+              {loading && hasResults && (
+                <ActivityIndicator
+                  size={IS_IPAD ? 30 : 24}
+                  style={{
+                    marginLeft: 10,
+                  }}
+                  color={fullTheme.activityIndicator}
+                />
+              )}
+            </View>
+            <Text
+              style={{
+                textAlign: "left",
+                fontFamily: "Inter-Medium",
+                color: fullTheme.text,
+                fontSize: 16,
+                paddingHorizontal: 15,
+                paddingBottom: 20,
+              }}
+            >
+              Invite your smartest friends to Pickup so you can see what they
+              listen to 🧠
+            </Text>
+          </>
         }
       />
     </>

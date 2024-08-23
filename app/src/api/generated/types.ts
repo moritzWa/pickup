@@ -68,6 +68,7 @@ export type Content = {
   summary?: Maybe<Scalars['String']['output']>;
   thumbnailImageUrl?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
+  type: Scalars['String']['output'];
   updatedAt: Scalars['Date']['output'];
   websiteUrl: Scalars['String']['output'];
 };
@@ -98,6 +99,7 @@ export type ContentSession = {
   durationMs?: Maybe<Scalars['Float']['output']>;
   id: Scalars['String']['output'];
   isBookmarked?: Maybe<Scalars['Boolean']['output']>;
+  notes?: Maybe<Scalars['String']['output']>;
   percentFinished?: Maybe<Scalars['Float']['output']>;
   timestampCursor?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['Date']['output'];
@@ -325,6 +327,7 @@ export type MutationUpdateContentSessionArgs = {
   isBookmarked?: InputMaybe<Scalars['Boolean']['input']>;
   isLiked?: InputMaybe<Scalars['Boolean']['input']>;
   lastListenedAt?: InputMaybe<Scalars['Date']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -372,6 +375,7 @@ export type Query = {
   getActivity: Array<Content>;
   getArchived: Array<Content>;
   getAuthor: Author;
+  getAuthorContent: Array<Content>;
   getBookmarks: Array<Content>;
   getCategories: Array<CategorySection>;
   getContent: Content;
@@ -416,6 +420,13 @@ export type QueryGetAuthorArgs = {
 };
 
 
+export type QueryGetAuthorContentArgs = {
+  authorId: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryGetBookmarksArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
@@ -445,11 +456,6 @@ export type QueryGetFollowsArgs = {
 };
 
 
-export type QueryGetFriendsArgs = {
-  username: Scalars['String']['input'];
-};
-
-
 export type QueryGetIntercomMobileTokenArgs = {
   platform?: InputMaybe<Scalars['String']['input']>;
 };
@@ -457,7 +463,7 @@ export type QueryGetIntercomMobileTokenArgs = {
 
 export type QueryGetIsBookmarkedArgs = {
   authProviderId?: InputMaybe<Scalars['String']['input']>;
-  contentId: Scalars['ID']['input'];
+  url: Scalars['String']['input'];
 };
 
 

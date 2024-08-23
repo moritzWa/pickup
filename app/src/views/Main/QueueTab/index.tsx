@@ -3,10 +3,12 @@ import { useNavigation } from "@react-navigation/native";
 import { AppContext } from "context";
 import React, { useContext, useEffect, useMemo } from "react";
 import {
+  Alert,
   FlatList,
   RefreshControl,
   SafeAreaView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { useDispatch } from "react-redux";
@@ -19,6 +21,8 @@ import { useTheme } from "src/hooks";
 import { NavigationProps } from "src/navigation";
 import { setCurrentContent, setQueue } from "src/redux/reducers/audio";
 import { ContentRow } from "../../../components/Content/ContentRow";
+import { faPlus } from "@fortawesome/pro-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 
 const Activity = () => {
   const navigation = useNavigation<NavigationProps>();
@@ -37,6 +41,8 @@ const Activity = () => {
     fetchPolicy: "cache-and-network",
   });
 
+  const [createContentFromUrl] = useMutation(api.content.createFromUrl);
+
   const content = useMemo((): BaseContentFields[] => {
     return (queueData?.getQueue?.queue ?? [])
       .map((q) => q.content as BaseContentFields)
@@ -54,6 +60,38 @@ const Activity = () => {
     // alert("toggle");
     await toggle();
     dispatch(setCurrentContent(content));
+  };
+
+  const onAddContentFromUrl = () => {
+    Alert.prompt(
+      "Add Content",
+      "Enter the URL of the content you want to add:",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Add",
+          onPress: async (url) => {
+            if (url) {
+              try {
+                const { data } = await createContentFromUrl({
+                  variables: { url },
+                  refetchQueries: [api.content.feed, api.queue.list],
+                });
+                if (data) {
+                  Alert.alert("Success", "Content added to queue");
+                }
+              } catch (error) {
+                Alert.alert("Error", "Failed to add content");
+              }
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
   };
 
   const clearQueue = async () => {
@@ -87,7 +125,8 @@ const Activity = () => {
           flexDirection: "row",
           display: "flex",
           alignItems: "center",
-          padding: 10,
+          padding: 0,
+          paddingBottom: 15,
           paddingHorizontal: 20,
         }}
       >
@@ -131,6 +170,38 @@ const Activity = () => {
             </Text>
           </View>
         ) : null}
+
+        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={onAddContentFromUrl}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              borderRadius: 100,
+              padding: 7,
+              paddingHorizontal: 12,
+              backgroundColor: theme.secondaryBackground,
+            }}
+          >
+            <FontAwesomeIcon
+              style={{ marginRight: 5 }}
+              icon={faPlus}
+              size={18}
+              color={theme.text}
+            />
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: 16,
+                fontFamily: "Inter-Medium",
+              }}
+            >
+              Add
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList

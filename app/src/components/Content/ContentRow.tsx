@@ -185,7 +185,7 @@ export const ContentRow = ({
 
   const start = async () => {
     try {
-      if (c.websiteUrl) {
+      if (c.websiteUrl && c.type === "article") {
         await Linking.openURL(c.websiteUrl);
       } else if (c.audioUrl) {
         if (onPress) onPress();
@@ -327,7 +327,7 @@ export const ContentRow = ({
       >
         <TouchableOpacity
           onPress={start}
-          activeOpacity={0.9}
+          activeOpacity={1}
           style={{
             padding: 15,
             backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,

@@ -203,6 +203,7 @@ export interface NexusGenFieldTypes {
     summary: string | null; // String
     thumbnailImageUrl: string | null; // String
     title: string; // String!
+    type: string; // String!
     updatedAt: NexusGenScalars['Date']; // Date!
     websiteUrl: string; // String!
   }
@@ -447,6 +448,7 @@ export interface NexusGenFieldTypeNames {
     summary: 'String'
     thumbnailImageUrl: 'String'
     title: 'String'
+    type: 'String'
     updatedAt: 'Date'
     websiteUrl: 'String'
   }
