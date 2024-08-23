@@ -46,7 +46,9 @@ async function syncDatabases() {
         await productionClient.connect();
 
         // Fetch data from local
-        const localData = await localClient.query("SELECT * FROM content");
+        const localData = await localClient.query(
+            "SELECT * FROM content WHERE type = 'podcast'"
+        );
 
         // Fetch data from production
         const productionData = await productionClient.query(
@@ -58,46 +60,82 @@ async function syncDatabases() {
         const localRows = localData.rows ?? [];
         const prodRows = productionData.rows ?? [];
 
+        const prodRowIds = new Set(prodRows.map((p) => p.reference_id));
+
+        const localRowIds = localRows.map((l) => l.reference_id);
+        const localRowsNotInProd = localRows.filter(
+            (l) => !prodRowIds.has(l.reference_id)
+        );
+
         const rowByRefId = keyBy(localRows, (r) => r.reference_id);
 
         let count = 0;
 
         console.log(`syncing ${prodRows.length} rows with local`);
 
-        const promises: any[] = [];
+        const insertPromises: any[] = [];
 
-        for (const row of prodRows) {
-            const localData = rowByRefId[row.reference_id];
+        for (const localRow of localRowsNotInProd) {
+            // add to production
+            console.log(`[adding ${localRow.reference_id} to production]`);
 
-            if (!localData) {
-                continue;
-            }
+            const keys = Object.keys(localRow).sort();
 
-            console.log(
-                `[updating ${row.reference_id} to ${localData.length_ms}]`
-            );
+            const insertExpression = keys // get all keys
+                .map((k, i) => `$${i + 1}`) // map to $1, $2, $3, etc
+                .join(", "); // join with commas
 
-            if (localData.length_ms) {
-                // Update the production database with the local data
-                promises.push(
-                    productionClient.query(
-                        `UPDATE content SET length_ms = $1 WHERE id = $2`,
-                        [localData.length_ms, row.id]
-                    )
-                );
-            }
+            const expression = `INSERT INTO content (${keys
+                .map((k) => k)
+                .join(", ")}) VALUES (${insertExpression})`;
 
-            count += 1;
+            const values = keys.map((key) => localRow[key]);
 
-            // every 50, log
-            if (count % 50 === 0) {
-                console.log(
-                    `completed ${count} of ${productionData.rows.length}`
-                );
-            }
+            // make an insert statement of ALL local row fields spilled to prod
+            const result = await productionClient.query(expression, values);
+
+            debugger;
+            // insertPromises.push
         }
 
-        await Promise.all(promises);
+        await Promise.all(insertPromises);
+
+        debugger;
+
+        const promises: any[] = [];
+
+        // for (const row of prodRows) {
+        //     const localData = rowByRefId[row.reference_id];
+
+        //     if (!localData) {
+        //         continue;
+        //     }
+
+        //     console.log(
+        //         `[updating ${row.reference_id} to ${localData.length_ms}]`
+        //     );
+
+        //     if (localData.length_ms) {
+        //         // Update the production database with the local data
+        //         promises.push(
+        //             productionClient.query(
+        //                 `UPDATE content SET length_ms = $1 WHERE id = $2`,
+        //                 [localData.length_ms, row.id]
+        //             )
+        //         );
+        //     }
+
+        //     count += 1;
+
+        //     // every 50, log
+        //     if (count % 50 === 0) {
+        //         console.log(
+        //             `completed ${count} of ${productionData.rows.length}`
+        //         );
+        //     }
+        // }
+
+        const rowsNotInProd = await Promise.all(promises);
 
         debugger;
     } catch (error) {

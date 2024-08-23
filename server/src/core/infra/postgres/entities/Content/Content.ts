@@ -190,30 +190,30 @@ export class Content {
     @Column({ nullable: true })
     lang?: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "skipped_not_probably_readable" })
     skippedNotProbablyReadable?: boolean;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "skipped_inaccessible_pdf" })
     skippedInaccessiblePDF?: boolean;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "skipped_error_fetching_full_text" })
     skippedErrorFetchingFullText?: boolean;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "dead_link" })
     deadLink?: boolean;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "could_not_fetch_thumbnail" })
     couldntFetchThumbnail?: boolean;
 
     // pdf
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "total_pages_if_pdf" })
     totalPagesIfPDF?: number;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "fetched_pages_if_pdf" })
     fetchedPagesIfPDF?: number;
 
     // open graph service
-    @Column({ nullable: true })
+    @Column({ nullable: true, name: "og_site_name" })
     ogSiteName?: string;
 
     // TODO remove these?
