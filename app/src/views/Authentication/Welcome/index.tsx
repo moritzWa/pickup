@@ -20,7 +20,7 @@ const Welcome = () => {
 
   const signUp = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate("Signup");
+    navigation.navigate("PhoneNumber");
     // navigation.navigate("Interests");
   };
 

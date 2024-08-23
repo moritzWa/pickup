@@ -4,6 +4,7 @@ import {
   useLazyQuery,
   useMutation,
 } from "@apollo/client";
+import { faPhone } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBullhorn,
@@ -135,6 +136,14 @@ const Profile = () => {
       Alert.alert("Error", "Please try again later");
       return;
     }
+  };
+
+  const _updatePhoneNumber = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    navigation.navigate("PhoneNumber", {
+      onSuccess: () => navigation.goBack(),
+    });
   };
 
   const _deleteMyAccount = async () => {
@@ -319,6 +328,11 @@ const Profile = () => {
             onPress={_leaveFeedback}
             icon={<FontAwesomeIcon icon={faComment} color={text} />}
             name="Leave Feedback"
+          />
+          <Section
+            onPress={_updatePhoneNumber}
+            icon={<FontAwesomeIcon icon={faPhone} color={text} />}
+            name="Change Phone Number"
           />
           {canLeaveReview && (
             <Section

@@ -339,6 +339,7 @@ export type MutationUpdateUserArgs = {
   hasPushNotifications?: InputMaybe<Scalars['Boolean']['input']>;
   hasTwoFactorAuth?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  phoneNumber?: InputMaybe<Scalars['String']['input']>;
   unreadCount?: InputMaybe<Scalars['Int']['input']>;
   username?: InputMaybe<Scalars['String']['input']>;
 };

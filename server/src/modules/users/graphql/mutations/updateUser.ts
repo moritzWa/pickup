@@ -24,6 +24,7 @@ export const updateUser = mutationField("updateUser", {
         avatarImageUrl: nullable(stringArg()),
         username: nullable(stringArg()),
         description: nullable(stringArg()),
+        phoneNumber: nullable(stringArg()),
     },
     resolve: async (_parent, args, ctx, _info) => {
         throwIfNotAuthenticated(ctx);
@@ -40,6 +41,7 @@ export const updateUser = mutationField("updateUser", {
             imageUrl: args?.avatarImageUrl ?? user.imageUrl,
             username: args?.username ?? user.username,
             description: args?.description ?? user.description,
+            phoneNumber: args?.phoneNumber ?? user.phoneNumber,
         });
 
         throwIfError(newUserResponse);

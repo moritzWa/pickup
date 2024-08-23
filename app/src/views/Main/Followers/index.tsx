@@ -62,16 +62,16 @@ export const Followers = () => {
             }}
           >
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={1}
               onPress={() => setMode("followers")}
               style={{
                 flex: 1,
                 alignItems: "center",
                 padding: 10,
-                borderRadius: 10,
+                borderRadius: 100,
                 backgroundColor:
                   mode === "followers"
-                    ? fullTheme.medBackground
+                    ? fullTheme.secondaryBackground
                     : fullTheme.background,
               }}
             >
@@ -87,16 +87,16 @@ export const Followers = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={1}
               onPress={() => setMode("following")}
               style={{
                 flex: 1,
                 alignItems: "center",
                 padding: 10,
-                borderRadius: 10,
+                borderRadius: 100,
                 backgroundColor:
                   mode === "following"
-                    ? fullTheme.medBackground
+                    ? fullTheme.secondaryBackground
                     : fullTheme.background,
               }}
             >

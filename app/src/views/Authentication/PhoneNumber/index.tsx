@@ -1,12 +1,17 @@
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { FirebaseError } from "firebase/app";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import {
+  parsePhoneNumber,
+  parsePhoneNumberFromString,
+} from "libphonenumber-js";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  NativeSyntheticEvent,
   Text,
   TextInput,
+  TextInputChangeEventData,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -18,26 +23,29 @@ import * as Haptics from "expo-haptics";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "src/hooks/useTheme";
-import { RootStackParamList } from "src/navigation";
+import { NavigationProps, RootStackParamList } from "src/navigation";
+import { useMutation } from "@apollo/client";
+import { api } from "src/api";
+import { Mutation, MutationUpdateUserArgs } from "src/api/generated/types";
+import Header from "src/components/Header";
 
-export function PhoneVerification() {
-  const { params } =
-    useRoute<RouteProp<RootStackParamList, "PhoneVerification">>();
+export function PhoneNumber() {
+  const { params } = useRoute<RouteProp<RootStackParamList, "PhoneNumber">>();
   const { background, header, text } = useTheme();
 
-  const flowType = params?.flowType;
-  const multiFactorError = params?.multiFactorError;
-  const session = params?.session;
-  const multiFactorHint = params?.multiFactorHint;
   const onSuccess = params?.onSuccess;
+
+  const [updateUser] = useMutation<
+    Pick<Mutation, "updateUser">,
+    MutationUpdateUserArgs
+  >(api.users.update);
+
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProps>();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [verificationId, setVerificationId] = useState("");
-  const [step, setStep] = useState<"phone" | "code">(
-    multiFactorHint ? "code" : "phone"
-  );
+  const [step, setStep] = useState<"phone" | "code">("phone");
   const [isSendingCode, setIsSendingCode] = useState<boolean>(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState<boolean>(false);
 
@@ -46,17 +54,45 @@ export function PhoneVerification() {
   const _onSubmit = async function () {
     try {
       if (step === "phone") {
-        await _sendCode();
+        console.log(phoneNumber);
+
+        const parsedPhoneNumber = parsePhoneNumber(phoneNumber, "US"); // Replace 'US' with the relevant default country code
+
+        if (!parsedPhoneNumber || !parsedPhoneNumber.isValid()) {
+          // toast log it
+          Alert.alert("Please enter a valid phone number.");
+          return;
+        }
+
+        const formattedNumber =
+          parsedPhoneNumber?.format("E.164") ?? phoneNumber;
+
+        const variables: MutationUpdateUserArgs = {
+          phoneNumber: formattedNumber,
+        };
+
+        await updateUser({
+          variables,
+        });
+
+        if (onSuccess) {
+          onSuccess();
+          return;
+        }
+
+        navigation.navigate("EnablePushNotifications");
+
         return;
       }
 
-      if (step === "code") {
-        await _verifyCode();
+      // if (step === "code") {
+      //   await _verifyCode();
 
-        return;
-      }
+      //   return;
+      // }
     } catch (err) {
       // console.log(err);
+      Alert.alert((err as any)?.message || "An error occurred.");
     }
   };
 
@@ -66,28 +102,12 @@ export function PhoneVerification() {
 
       const user = auth().currentUser;
 
-      const userSession =
-        session || (user ? await auth().multiFactor(user).getSession() : null);
+      const userSession = user
+        ? await auth().multiFactor(user).getSession()
+        : null;
 
       if (!userSession) {
         Alert.alert("No session. Please refresh and try again.");
-        return;
-      }
-
-      if (multiFactorHint) {
-        // Send SMS verification code.
-        console.log("[sending verification code]");
-
-        const verificationId =
-          await auth().verifyPhoneNumberWithMultiFactorInfo(
-            multiFactorHint,
-            userSession
-          );
-
-        setVerificationId(verificationId);
-        setStep("code");
-
-        verifyInputRef.current?.focus();
         return;
       }
 
@@ -166,30 +186,6 @@ export function PhoneVerification() {
 
       //     return;
       //   }
-
-      if (flowType === "sign_in" && multiFactorError) {
-        const multiFactorResolver =
-          auth().getMultiFactorResolver(multiFactorError);
-
-        await multiFactorResolver.resolveSignIn(multiFactorAssertion);
-
-        console.log("[signed in 2 factor]");
-
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-        navigation.goBack();
-
-        // Note: the on success is responsible
-        // for closing the modal. this is bc the on success may have a navigate()
-        // and a navigate will need to close the modal before progressing
-        if (onSuccess) {
-          await onSuccess();
-        }
-
-        return;
-      }
-
-      console.log("unhandled: ", flowType);
     } catch (err) {
       console.log(err);
 
@@ -211,8 +207,7 @@ export function PhoneVerification() {
     }
   };
 
-  const _onChange = (event: any) => {
-    const inputNumber = event.target.value;
+  const _onChange = (inputNumber: string) => {
     const parsedNumber = parsePhoneNumberFromString(inputNumber, "US"); // Replace 'US' with the relevant country code if needed
 
     // Format the number or keep the raw input if it's not a valid number yet
@@ -221,12 +216,6 @@ export function PhoneVerification() {
       : inputNumber;
     setPhoneNumber(formattedNumber);
   };
-
-  useEffect(() => {
-    if (!multiFactorHint?.uid) return;
-    // hack to wait for render so the recaptcha can load
-    _sendCode();
-  }, [multiFactorHint?.uid]);
 
   useEffect(() => {
     if (!verificationId) return;
@@ -239,9 +228,9 @@ export function PhoneVerification() {
     <View
       style={{
         backgroundColor: background,
-        paddingHorizontal: 20,
       }}
     >
+      <Header hasBackButton />
       {/* <View
       style={{
         justifyContent: "flex-start",
@@ -259,6 +248,7 @@ export function PhoneVerification() {
           flexDirection: "column",
           display: "flex",
           height: "100%",
+          paddingHorizontal: 20,
         }}
       >
         <Text
@@ -267,36 +257,37 @@ export function PhoneVerification() {
             textAlign: "left",
             width: "100%",
             marginTop: 25,
-            marginBottom: 25,
             color: header,
+            fontFamily: "Inter-Bold",
           }}
         >
-          {flowType === "sign_in" ? "Sign in with" : ""} Two-Factor
-          Authentication
+          Add your phone
         </Text>
 
-        {multiFactorHint && (
-          <Text
-            style={{
-              marginBottom: 10,
-              color: text,
-            }}
-          >
-            We sent a code to {multiFactorHint.displayName?.toLowerCase()}
-          </Text>
-        )}
+        <Text
+          style={{
+            fontSize: 16,
+            textAlign: "left",
+            width: "100%",
+            marginTop: 10,
+            marginBottom: 25,
+            color: text,
+          }}
+        >
+          This helps your friends discover and follow the content you listen to.
+        </Text>
 
         {step === "phone" && (
           <Input
             value={phoneNumber}
-            onChange={_onChange}
+            onChangeText={_onChange}
             autoFocus
             label="Phone Number"
             // label="Client Full Name"
             placeholder="123-456-7890"
             autoComplete="tel"
             keyboardType="phone-pad"
-            ref={verifyInputRef}
+            // ref={verifyInputRef}
           />
         )}
 

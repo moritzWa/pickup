@@ -46,6 +46,7 @@ import { BaseContentFields } from "src/api/fragments";
 import Friends from "src/views/Main/Friends";
 import EditProfile from "src/views/Main/EditProfile";
 import { Followers } from "src/views/Main/Followers";
+import { PhoneNumber } from "src/views/Authentication/PhoneNumber";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -112,6 +113,9 @@ export type RootStackParamList = {
   ClaimCode?: undefined;
   Authentication: { screen?: string } | undefined;
   Interests?: undefined;
+  PhoneNumber?: {
+    onSuccess?: () => void;
+  };
   FullName?: undefined;
   Friends?: undefined;
 };
@@ -163,6 +167,14 @@ const AuthenticationNavigationStack = () => {
       <Stack.Screen
         name="Interests"
         component={Interests}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="PhoneNumber"
+        component={PhoneNumber}
         options={{
           headerShown: false,
         }}
@@ -318,6 +330,14 @@ export const MainNavigationStack = () => {
           <Stack.Screen
             name="Settings"
             component={Settings}
+            options={{
+              headerShown: false,
+            }}
+          />
+
+          <Stack.Screen
+            name="PhoneNumber"
+            component={PhoneNumber}
             options={{
               headerShown: false,
             }}
