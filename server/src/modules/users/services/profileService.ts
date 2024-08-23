@@ -20,6 +20,7 @@ import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
 import { In } from "typeorm";
 import { isProduction } from "src/config";
 import { NotificationService } from "src/modules/notifications/services/notificationService";
+import { NotificationType } from "src/core/infra/postgres/entities/Notification";
 
 const generateUsername = () => {
     while (true) {
@@ -128,15 +129,19 @@ const followUser = async (
         return failure(createResp.error);
     }
 
-    if (sendNotification) {
-        // send notification
-        await NotificationService.sendNotification(toUser, {
+    // send notification
+    await NotificationService.sendNotification(
+        toUser,
+        {
             title: `${fromUser.name || ""} (@${fromUser.username || ""})`,
-            subtitle: `followed you on Pickup`,
+            subtitle: `followed you`,
             iconImageUrl: null,
             followerUserId: fromUser.id,
-        });
-    }
+            type: NotificationType.GainedFollower,
+            feedInsertionId: null,
+        },
+        sendNotification
+    );
 
     return success(null);
 };

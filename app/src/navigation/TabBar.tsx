@@ -2,7 +2,7 @@ import { useQuery } from "@apollo/client";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import { isNil } from "lodash";
-import React from "react";
+import React, { useMemo } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "src/api";
@@ -11,6 +11,7 @@ import { colors } from "src/components";
 import { CurrentAudio } from "src/components/CurrentAudio";
 import { Maybe } from "src/core";
 import { useMe } from "src/hooks";
+import { useInterval } from "src/hooks/useInterval";
 import { useTheme } from "src/hooks/useTheme";
 
 const HomeIcon = require("src/assets/icons/home.png");
@@ -55,6 +56,20 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
     fetchPolicy: "cache-and-network",
   });
 
+  const { data: numUnreadNotifsData, refetch: refetchNumUnreadNotifs } =
+    useQuery<{
+      getNumUnreadNotifications: number;
+    }>(api.notifications.unread, {
+      notifyOnNetworkStatusChange: true,
+    });
+
+  const numUnreadNotifs = useMemo(
+    () => numUnreadNotifsData?.getNumUnreadNotifications ?? 0,
+    [numUnreadNotifsData]
+  );
+
+  useInterval(refetchNumUnreadNotifs, 15_000); // refetch every 15s
+
   const queueCount = queueData?.getQueue?.queue?.length ?? 0;
 
   return (
@@ -82,7 +97,7 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
           style={{
             paddingTop: 20,
             paddingHorizontal: 20,
-            maxWidth: 375,
+            // maxWidth: 375,
             alignSelf: "center",
             flexDirection: "row",
             paddingBottom: 0,
@@ -96,8 +111,20 @@ function _TabBar(tabBarProps: BottomTabBarProps) {
                 index={index}
                 tabBarProps={tabBarProps}
                 route={route}
-                badgeCount={index === 1 ? queueCount : null}
-                badgeColor={index === 1 ? colors.primary : null}
+                badgeCount={
+                  index === 1
+                    ? queueCount
+                    : index === 2
+                    ? numUnreadNotifs
+                    : null
+                }
+                badgeColor={
+                  index === 1
+                    ? colors.primary
+                    : index === 2
+                    ? colors.red50
+                    : null
+                }
               />
             );
           })}
@@ -208,7 +235,7 @@ const SingleTab = ({
             justifyContent: "center",
             borderRadius: 100,
             position: "absolute",
-            right: 30,
+            right: 20,
             bottom: paddingBottom - 10,
             borderColor: fullTheme.background,
             borderWidth: 1,
@@ -263,6 +290,11 @@ const _getImage = (
       return {
         image: CarIcon,
         active: CarIconFilled,
+      };
+    case "Notifications":
+      return {
+        image: BellIcon,
+        active: BellIconFilled,
       };
     case "Activity":
       return {

@@ -115,6 +115,7 @@ async function addContentToUserQueue(user: User, content: ContentEntity) {
     if (feedItemExistsResponse.isFailure() || !feedItemExistsResponse.value) {
         const feedItemResponse = await feedRepo.create({
             id: uuidv4(),
+            insertionId: null,
             position: 0,
             queuedAt: new Date(),
             isArchived: false,

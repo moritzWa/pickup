@@ -129,6 +129,12 @@ export interface NexusGenObjects {
     numFollowing: number; // Int!
     username: string; // String!
   }
+  PublicProfile: { // root type
+    description: string; // String!
+    id: string; // ID!
+    name: string; // String!
+    username: string; // String!
+  }
   Query: {};
   SearchResult: { // root type
     averageDistance: number; // Float!
@@ -326,12 +332,14 @@ export interface NexusGenFieldTypes {
   }
   Notification: { // field return type
     createdAt: NexusGenScalars['Date']; // Date!
+    followerUser: NexusGenRootTypes['PublicProfile'] | null; // PublicProfile
     hasRead: boolean; // Boolean!
     hasSent: boolean; // Boolean!
     iconImageUrl: string | null; // String
     id: string; // ID!
     subtitle: string; // String!
     title: string; // String!
+    type: string | null; // String
     userId: string; // String!
   }
   PaymentMethod: { // field return type
@@ -347,6 +355,13 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     numFollowers: number; // Int!
     numFollowing: number; // Int!
+    username: string; // String!
+  }
+  PublicProfile: { // field return type
+    avatarImageUrl: string | null; // String
+    description: string; // String!
+    id: string; // ID!
+    name: string; // String!
     username: string; // String!
   }
   Query: { // field return type
@@ -593,12 +608,14 @@ export interface NexusGenFieldTypeNames {
   }
   Notification: { // field return type name
     createdAt: 'Date'
+    followerUser: 'PublicProfile'
     hasRead: 'Boolean'
     hasSent: 'Boolean'
     iconImageUrl: 'String'
     id: 'ID'
     subtitle: 'String'
     title: 'String'
+    type: 'String'
     userId: 'String'
   }
   PaymentMethod: { // field return type name
@@ -614,6 +631,13 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     numFollowers: 'Int'
     numFollowing: 'Int'
+    username: 'String'
+  }
+  PublicProfile: { // field return type name
+    avatarImageUrl: 'String'
+    description: 'String'
+    id: 'ID'
+    name: 'String'
     username: 'String'
   }
   Query: { // field return type name

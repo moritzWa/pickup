@@ -202,12 +202,14 @@ type Mutation {
 
 type Notification {
   createdAt: Date!
+  followerUser: PublicProfile
   hasRead: Boolean!
   hasSent: Boolean!
   iconImageUrl: String
   id: ID!
   subtitle: String!
   title: String!
+  type: String
   userId: String!
 }
 
@@ -225,6 +227,14 @@ type Profile {
   name: String!
   numFollowers: Int!
   numFollowing: Int!
+  username: String!
+}
+
+type PublicProfile {
+  avatarImageUrl: String
+  description: String!
+  id: ID!
+  name: String!
   username: String!
 }
 

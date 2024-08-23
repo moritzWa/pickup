@@ -19,6 +19,7 @@ export const getNotifications = queryField("getNotifications", {
             take: DEFAULT_LIMIT,
             skip: 0,
             order: { createdAt: "desc" },
+            relations: { followerUser: true },
         });
 
         throwIfError(notificationResponse);

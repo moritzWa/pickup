@@ -20,6 +20,8 @@ import { contentRepo, feedRepo, interactionRepo } from "../../infra";
 import { ContentWithDistance } from "../../infra/contentRepo";
 import { ContentService } from "../contentService";
 import moment = require("moment");
+import { NotificationService } from "src/modules/notifications/services/notificationService";
+import { NotificationType } from "src/core/infra/postgres/entities/Notification";
 
 // needs to be idempotent
 export const buildQueue = async (
@@ -154,19 +156,43 @@ export const buildQueue = async (
 
     const queueResponse = await buildQueueFromContent(user, rankedContent);
 
-    return queueResponse;
+    if (queueResponse.isFailure()) {
+        return failure(queueResponse.error);
+    }
+
+    const firstTitle = rankedContent[0]?.title;
+
+    await NotificationService.sendNotification(
+        user,
+        {
+            title: `New podcast reccs ready ✨`,
+            subtitle: `${firstTitle || "View now"}`,
+            iconImageUrl: null,
+            followerUserId: null,
+            type: NotificationType.NewRecommendations,
+            feedInsertionId: queueResponse.value.insertionId,
+        },
+        true
+    );
+
+    return success(queueResponse.value.items);
 };
 
 const buildQueueFromContent = async (
     user: User,
     content: Content[]
-): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
+): Promise<
+    FailureOrSuccess<DefaultErrors, { items: FeedItem[]; insertionId: string }>
+> => {
+    const insertionId = uuidv4();
+
     const queueResponses = await Promise.all(
         content.reverse().map((c, i) =>
             feedRepo.create({
                 id: uuidv4(),
                 position: Date.now() + i, // date + the index
                 isQueued: false,
+                insertionId,
                 isArchived: false,
                 queuedAt: null,
                 userId: user.id,
@@ -186,7 +212,10 @@ const buildQueueFromContent = async (
 
     const queue = queueResponses.map((r) => r.value);
 
-    return success(queue);
+    return success({
+        items: queue,
+        insertionId,
+    });
 };
 
 const convertCuriusToContent = async (

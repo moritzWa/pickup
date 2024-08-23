@@ -68,6 +68,7 @@ export const addToQueue = mutationField("addToQueue", {
         const feedItemResponse = await feedRepo.create({
             id: uuidv4(),
             position: 0,
+            insertionId: null,
             queuedAt: new Date(),
             isArchived: false,
             isQueued: true,

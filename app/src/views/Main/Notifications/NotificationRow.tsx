@@ -8,8 +8,7 @@ import moment from "moment-timezone";
 import { IS_IPAD } from "src/config";
 import * as Haptics from "expo-haptics";
 import { useNavigation } from "@react-navigation/native";
-import { AssetDetailsParams, NavigationProps } from "src/navigation";
-import { segment } from "src/hooks";
+import { NavigationProps } from "src/navigation";
 
 const MessageIcon = require("src/assets/icons/message-filled.png");
 const BellIcon = require("src/assets/icons/bell-solid.png");
@@ -33,89 +32,49 @@ export const NotificationRow = ({
   const isFollow = useMemo(
     (): boolean =>
       notification.subtitle.toLowerCase().includes("follow") ||
-      notification.title.toLowerCase().includes("follow") ||
-      notification.followerUserId !== null,
+      notification.title.toLowerCase().includes("follow"),
     [notification]
   );
 
-  const username = useMemo(() => {
-    if (!isFollow) return null;
-    if (notification.followerUserUsername) {
-      return notification.followerUserUsername;
-    }
-
-    const title = notification.title;
-    // otherwise fine the @ and get all the consecutive characters after it
-    const atIndex = title.indexOf("@");
-    // all characters after @ but before a whitespace
-    const usernameRaw = title.slice(atIndex).split(" ")[0];
-    // remove @ and any parantheses
-    const username = usernameRaw
-      .replace("@", "")
-      .replace("(", "")
-      .replace(")", "");
-    return username ?? null;
-  }, [notification, isFollow]);
-
   const isClickable = useMemo(() => {
-    if (username) return true;
+    // const hasToken =
+    //   !!notification.tokenContractAddress && !!notification.tokenProvider;
+    // if (hasToken) return true;
 
-    const hasToken =
-      !!notification.tokenContractAddress && !!notification.tokenProvider;
-    if (hasToken) return true;
-
-    return false;
-  }, [username, notification]);
-
-  const _goToAsset = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    if (!notification.tokenContractAddress || !notification.tokenProvider) {
-      return;
-    }
-
-    segment.track("Notification Trade Clicked", {
-      provider: notification.tokenProvider,
-      contractAddress: notification.tokenContractAddress,
-    });
-
-    const data: AssetDetailsParams = {
-      provider: notification.tokenProvider,
-      contractAddress: notification.tokenContractAddress,
-      symbol: null,
-      iconImageUrl: notification.iconImageUrl,
-      name: null,
-    };
-
-    navigation.navigate("AssetDetails", data);
+    return true;
   }, [notification]);
 
   const _onPress = useCallback(() => {
-    if (username) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      navigation.navigate("UserProfile", { username });
+    if (title.toLowerCase().includes("new podcast")) {
+      // go to home page
+      navigation.navigate("Home");
       return;
     }
-
-    if (notification.tokenContractAddress && notification.tokenProvider) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      _goToAsset();
-      return;
-    }
-  }, [username, notification]);
+    // if (username) {
+    //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    //   navigation.navigate("UserProfile", { username });
+    //   return;
+    // }
+    // if (notification.tokenContractAddress && notification.tokenProvider) {
+    //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    //   _goToAsset();
+    //   return;
+    // }
+  }, [notification]);
 
   const title = useMemo(() => {
-    if (isFollow && notification.followerUserName && username) {
-      return `${notification.followerUserName} (@${username})`;
-    }
+    // if (isFollow && notification.followerUserName && username) {
+    //   return `${notification.followerUserName} (@${username})`;
+    // }
 
     return notification.title;
   }, [notification]);
 
   return (
     <TouchableOpacity
-      activeOpacity={1}
-      onPress={noop}
+      activeOpacity={0.9}
+      disabled={!isClickable}
+      onPress={_onPress}
       style={{
         display: "flex",
         flexDirection: "row",
@@ -157,14 +116,10 @@ export const NotificationRow = ({
           marginRight: 15,
         }}
       >
-        <TouchableOpacity
-          disabled={!isClickable}
-          activeOpacity={0.9}
-          onPress={_onPress}
-        >
+        <View>
           <Text
             style={{
-              fontFamily: "Mona-Sans-SemiBold",
+              fontFamily: "Inter-SemiBold",
               fontSize: IS_IPAD ? 22 : 16,
               color: theme.textPrimary,
             }}
@@ -172,12 +127,12 @@ export const NotificationRow = ({
           >
             {title}
           </Text>
-        </TouchableOpacity>
+        </View>
 
         <Text
           style={{
             marginTop: 5,
-            fontFamily: "Mona-Sans-Regular",
+            fontFamily: "Inter-Regular",
             fontSize: IS_IPAD ? 22 : 16,
             color: theme.textSecondary,
           }}
@@ -204,7 +159,7 @@ export const NotificationRow = ({
             style={{
               color: theme.header,
               fontSize: 16,
-              fontFamily: "Mona-Sans-Medium",
+              fontFamily: "Inter-Medium",
             }}
             numberOfLines={1}
           >

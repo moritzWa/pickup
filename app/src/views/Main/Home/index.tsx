@@ -510,15 +510,15 @@ const SingleFilter = ({
   return (
     <TouchableOpacity
       onPress={onPress}
-      activeOpacity={0.9}
+      activeOpacity={1}
       style={{
         flexDirection: "row",
         display: "flex",
         alignItems: "center",
         padding: 7,
-        paddingHorizontal: 12,
+        paddingHorizontal: 10,
         backgroundColor: isActive ? theme.secondaryBackground : "transparent",
-        marginRight: 5,
+        marginRight: 3,
         borderRadius: 100,
       }}
     >
@@ -806,8 +806,8 @@ const Options = ({
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
+              height: 35,
               // paddingVertical: 7,
-              padding: 7,
               paddingHorizontal: 12,
               backgroundColor: colors.primary,
             }}
@@ -860,17 +860,18 @@ const Options = ({
               flexDirection: "row",
               alignItems: "center",
               borderRadius: 100,
-              padding: 7,
+              justifyContent: "center",
+              width: 35,
+              height: 35,
               marginLeft: 5,
-              backgroundColor:
-                theme.theme === "dark" ? colors.primary : theme.bgPrimary,
+              backgroundColor: theme.bgPrimaryLight,
             }}
           >
             <FontAwesomeIcon
               // style={{ marginRight: 5 }}
               icon={faSatelliteDish}
               size={16}
-              color={theme.theme === "dark" ? colors.white : colors.primary}
+              color={theme.header}
             />
           </TouchableOpacity> */}
         </View>

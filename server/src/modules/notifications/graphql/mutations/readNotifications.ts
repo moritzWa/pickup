@@ -26,6 +26,8 @@ export const readNotifications = mutationField("readNotifications", {
         const user = ctx.me!;
         const { notificationIds } = args;
 
+        console.log(`[marking ${notificationIds.length} as read]`);
+
         const notificationsResponse = await notificationRepo.findForUser(
             user.id,
             {

@@ -87,6 +87,14 @@ export class FeedItem {
     @Index("feed_items_content_id_idx")
     contentId!: string;
 
+    @Column({
+        nullable: true,
+        name: "insertion_id",
+        type: "uuid",
+    })
+    @Index("feed_items_content_id_idx")
+    insertionId!: string | null;
+
     @ManyToOne(() => User, (t) => t.id, {
         nullable: false,
         onDelete: "CASCADE",

@@ -214,6 +214,7 @@ export type Mutation = {
   deleteMe: Scalars['String']['output'];
   followProfile: Scalars['String']['output'];
   getAuthToken: Scalars['String']['output'];
+  readNotifications: Scalars['String']['output'];
   recordInteraction: Interaction;
   removeFromQueue: FeedItem;
   respondToContent: ContentRespondResponse;
@@ -274,6 +275,11 @@ export type MutationCreateUserArgs = {
 
 export type MutationFollowProfileArgs = {
   username: Scalars['String']['input'];
+};
+
+
+export type MutationReadNotificationsArgs = {
+  notificationIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -350,6 +356,19 @@ export type MutationVerifyPhoneNumberArgs = {
   phoneNumber: Scalars['String']['input'];
 };
 
+export type Notification = {
+  __typename?: 'Notification';
+  createdAt: Scalars['Date']['output'];
+  hasRead: Scalars['Boolean']['output'];
+  hasSent: Scalars['Boolean']['output'];
+  iconImageUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  subtitle: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  type?: Maybe<Scalars['String']['output']>;
+  userId: Scalars['String']['output'];
+};
+
 export type PaymentMethod = {
   __typename?: 'PaymentMethod';
   last4: Scalars['String']['output'];
@@ -390,6 +409,8 @@ export type Query = {
   getLikes: Array<ContentSession>;
   getMobileUpdate: GetMobileUpdateResponse;
   getNextContent?: Maybe<FeedItem>;
+  getNotifications: Array<Notification>;
+  getNumUnreadNotifications: Scalars['Int']['output'];
   getPaymentMethods: Array<PaymentMethod>;
   getPrevContent?: Maybe<FeedItem>;
   getProfile: Profile;
