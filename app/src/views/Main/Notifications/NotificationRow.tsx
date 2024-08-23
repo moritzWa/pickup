@@ -45,9 +45,17 @@ export const NotificationRow = ({
   }, [notification]);
 
   const _onPress = useCallback(() => {
-    if (title.toLowerCase().includes("new podcast")) {
+    console.log(notification);
+    if (
+      notification.type === "gained_follower" &&
+      notification.followerUser &&
+      notification.followerUser.username
+    ) {
       // go to home page
-      navigation.navigate("Home");
+      navigation.navigate("UserProfile", {
+        forceBackButton: true,
+        username: notification.followerUser.username,
+      });
       return;
     }
     // if (username) {
@@ -183,7 +191,7 @@ const _getImage = (
   theme: ReturnType<typeof useTheme>,
   notification: BaseNotificationFields
 ) => {
-  if (notification.subtitle.includes("follow")) {
+  if (notification.type === "gained_follower") {
     return (
       <Image
         source={Friends}

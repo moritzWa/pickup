@@ -359,6 +359,7 @@ export type MutationVerifyPhoneNumberArgs = {
 export type Notification = {
   __typename?: 'Notification';
   createdAt: Scalars['Date']['output'];
+  followerUser?: Maybe<PublicProfile>;
   hasRead: Scalars['Boolean']['output'];
   hasSent: Scalars['Boolean']['output'];
   iconImageUrl?: Maybe<Scalars['String']['output']>;
@@ -385,6 +386,15 @@ export type Profile = {
   name: Scalars['String']['output'];
   numFollowers: Scalars['Int']['output'];
   numFollowing: Scalars['Int']['output'];
+  username: Scalars['String']['output'];
+};
+
+export type PublicProfile = {
+  __typename?: 'PublicProfile';
+  avatarImageUrl?: Maybe<Scalars['String']['output']>;
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
   username: Scalars['String']['output'];
 };
 
@@ -584,6 +594,7 @@ export type UserContactProfile = {
   avatarImageUrl?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  isFollowing?: Maybe<Scalars['Boolean']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   phoneNumber?: Maybe<Scalars['String']['output']>;
   username?: Maybe<Scalars['String']['output']>;

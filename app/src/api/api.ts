@@ -146,6 +146,8 @@ const GetUserContacts = gql`
       name
       avatarImageUrl
       description
+      isFollowing
+      phoneNumber
     }
   }
 `;

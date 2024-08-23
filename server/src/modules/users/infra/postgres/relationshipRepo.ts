@@ -37,6 +37,30 @@ export class PostgresRelationshipRepository {
         return dataSource.getRepository(this.model);
     }
 
+    async getFollowers(userId: string): Promise<RelationshipArrayResponse> {
+        return Helpers.trySuccessFail(async () => {
+            const res = await this.repo.find({
+                where: {
+                    toUserId: userId,
+                },
+            });
+
+            return success(res);
+        });
+    }
+
+    async getFollowing(userId: string): Promise<RelationshipArrayResponse> {
+        return Helpers.trySuccessFail(async () => {
+            const res = await this.repo.find({
+                where: {
+                    fromUserId: userId,
+                },
+            });
+
+            return success(res);
+        });
+    }
+
     async find(
         options: FindManyOptions<Relationship>
     ): Promise<RelationshipArrayResponse> {

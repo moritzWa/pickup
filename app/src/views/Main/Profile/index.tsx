@@ -70,12 +70,13 @@ const ProfileContext = createContext<{
 });
 
 export const UserProfile = () => {
-  const { me, refetchMe } = useMe("network-only");
+  const { me, refetchMe } = useMe("cache-and-network");
 
   const navigation = useNavigation<NavigationProps>();
   const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
 
+  const forceBackButton = params?.forceBackButton === true;
   const username = params?.username ?? me?.username;
   const insets = useSafeAreaInsets();
   const isME = username === me?.username;
@@ -367,11 +368,11 @@ export const UserProfile = () => {
       <View
         style={{
           flex: 1,
-          paddingTop: isME ? insets.top : 0,
+          paddingTop: !isME || forceBackButton ? 0 : insets.top,
           backgroundColor: background,
         }}
       >
-        {!isME ? <Header hasBackButton /> : null}
+        {!isME || forceBackButton ? <Header hasBackButton /> : null}
 
         {/* <ProfileImage name={profile?.name} /> */}
 
@@ -394,7 +395,7 @@ export const UserProfile = () => {
 };
 
 const Profile = ({ username }: { username: string | null }) => {
-  const { me } = useMe("network-only");
+  const { me } = useMe("cache-and-network");
   const isME = username === me?.username;
 
   const navigation = useNavigation<NavigationProps>();
@@ -483,7 +484,7 @@ const Profile = ({ username }: { username: string | null }) => {
         <View
           style={{
             alignItems: "flex-start",
-            marginTop: 10,
+            marginTop: 20,
             paddingHorizontal: 15,
           }}
         >

@@ -8,7 +8,7 @@ import _ = require("lodash");
 import { hasValue } from "src/core/logic";
 import { ProfileService } from "../../services/profileService";
 import { NexusGenObjects } from "src/core/surfaces/graphql/generated/nexus";
-import { pgUserRepo } from "../../infra/postgres";
+import { pgUserRepo, relationshipRepo } from "../../infra/postgres";
 
 export const UserContactProfile = objectType({
     name: "UserContactProfile",
@@ -19,6 +19,7 @@ export const UserContactProfile = objectType({
         t.nullable.string("description");
         t.nullable.string("phoneNumber");
         t.nullable.string("avatarImageUrl");
+        t.nullable.boolean("isFollowing");
     },
 });
 
@@ -61,9 +62,18 @@ export const getUserContacts = queryField("getUserContacts", {
             .map((u) => u.value)
             .flat();
 
+        const myFollowersResponse = await relationshipRepo.getFollowing(me.id);
+
+        throwIfError(myFollowersResponse);
+
+        const myFollowerUserIds = new Set(
+            myFollowersResponse.value.map((r) => r.toUserId)
+        );
+
         return users.map((u) => ({
             ...u,
             avatarImageUrl: u.imageUrl,
+            isFollowing: myFollowerUserIds.has(u.id),
         }));
     },
 });

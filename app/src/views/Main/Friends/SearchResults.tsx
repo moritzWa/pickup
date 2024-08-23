@@ -26,6 +26,7 @@ import { api, apolloClient } from "src/api";
 import {
   Query,
   QueryGetUserContactsArgs,
+  UserContactProfile,
   UserSearchResult,
 } from "src/api/generated/types";
 import { colors } from "src/components";
@@ -36,6 +37,9 @@ import { NavigationProps } from "src/navigation";
 import { ContactRow } from "./ContactRow";
 import { UserRow } from "./UserRow";
 import { hasValue } from "src/core";
+import parsePhoneNumberFromString, {
+  parsePhoneNumber,
+} from "libphonenumber-js";
 
 export const SearchResults = () => {
   const fullTheme = useTheme();
@@ -50,11 +54,27 @@ export const SearchResults = () => {
 
   const [search, setSearch] = useState("");
 
-  const contactPhoneNumbers = useMemo(
-    (): string[] =>
-      _contacts.map((c) => c.phoneNumbers.flatMap((p) => p.number)).flat(),
-    [_contacts]
-  );
+  const contactPhoneNumbers = useMemo((): string[] => {
+    const rawPhones = Array.from(
+      new Set(
+        (_contacts ?? []).map((c) => c.phoneNumbers[0]?.number).filter(hasValue)
+      )
+    );
+
+    const formattedPhones = rawPhones
+      .map((p): string | null => {
+        const parsed = parsePhoneNumberFromString(p, "US");
+
+        if (parsed && parsed.isValid()) {
+          return parsed.format("E.164");
+        }
+
+        return null;
+      })
+      .filter(hasValue);
+
+    return Array.from(new Set(formattedPhones));
+  }, [_contacts]);
 
   const [searchUsers, { data: resultsData, loading: loadingSearchResults }] =
     useLazyQuery<Pick<Query, "searchUsers">>(api.users.search, {
@@ -62,26 +82,34 @@ export const SearchResults = () => {
       fetchPolicy: "cache-first",
     });
 
+  const variables = useMemo(
+    () => ({ phoneNumbers: contactPhoneNumbers }),
+    [contactPhoneNumbers]
+  );
+
   const { data: userContacts } = useQuery<
     Pick<Query, "getUserContacts">,
     QueryGetUserContactsArgs
   >(api.users.getUserContacts, {
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-first",
-    variables: {
-      phoneNumbers: contactPhoneNumbers,
-    },
+    fetchPolicy: "cache-and-network",
+    skip: !variables.phoneNumbers.length,
+    variables,
   });
 
-  const userPhoneNumbers = useMemo(
-    () =>
-      new Set(
-        userContacts?.getUserContacts
-          ?.map((c) => c.phoneNumber)
-          .filter(hasValue)
-      ) ?? [],
-    [userContacts]
+  // console.log(userContacts?.getUserContacts?.map((u) => u.isFollowing));
+
+  const users = useMemo(
+    () => userContacts?.getUserContacts ?? [],
+    [userContacts?.getUserContacts]
   );
+
+  const userPhoneNumbers = useMemo(() => {
+    const rawPhones = new Set(
+      userContacts?.getUserContacts?.map((c) => c.phoneNumber).filter(hasValue)
+    );
+
+    return rawPhones;
+  }, [userContacts?.getUserContacts]);
 
   const _getContactsPermission = async () => {
     const CONTACT_PERMISSION = Platform.select({
@@ -166,14 +194,18 @@ export const SearchResults = () => {
 
     try {
       await apolloClient.refetchQueries({
-        include: [api.users.search],
+        include: [
+          api.users.search,
+          api.users.getUserContacts,
+          api.users.search,
+        ],
       });
     } finally {
       setRefreshing(false);
     }
   }, []);
 
-  const onSelectUser = (user: UserSearchResult) => {
+  const onSelectUser = (user: UserSearchResult | UserContactProfile) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     navigation.navigate("UserProfile", {
@@ -205,7 +237,9 @@ export const SearchResults = () => {
 
   // indexed contacts by some keys
   const contactSearch = useMemo(() => {
-    const contacts = _contacts.filter((c) => !userPhoneNumbers.has(c.recordID));
+    const contacts = _contacts.filter(
+      (c) => !c.phoneNumbers || !userPhoneNumbers.has(c.phoneNumbers[0]?.number)
+    );
 
     return new Fuse(contacts, {
       threshold: 0.1,
@@ -215,26 +249,37 @@ export const SearchResults = () => {
   }, [_contacts.length, userPhoneNumbers]);
 
   const relevantContacts = useMemo((): Contacts.Contact[] => {
-    if (!search)
-      return _contacts.filter((c) => !userPhoneNumbers.has(c.recordID));
+    if (!search) {
+      const contacts = _contacts.filter((c) => {
+        if (!c.phoneNumbers) return true;
+        // parse the phone number and check against user phone numbers
+        const parsed = parsePhoneNumber(c.phoneNumbers[0]?.number, "US");
+
+        return !parsed || !userPhoneNumbers.has(parsed.format("E.164"));
+      });
+
+      return contacts;
+    }
     return contactSearch.search(search).map((i) => i.item);
   }, [contactSearch, search, _contacts.length, userPhoneNumbers]);
 
   const relevantUsers = useMemo((): UserSearchResult[] => {
+    if (!search) return [];
     return resultsData?.searchUsers ?? [];
   }, [resultsData]);
 
-  const userSection: SectionListData<UserSearchResult> = useMemo(
-    () => ({
-      key: "user",
-      data: relevantUsers ?? [],
-      keyExtractor: (item) => item.id,
-      renderItem: ({ item }) => (
-        <UserRow onSelectUser={onSelectUser} user={item} />
-      ),
-    }),
-    [relevantUsers]
-  );
+  const userSection: SectionListData<UserSearchResult | UserContactProfile> =
+    useMemo(
+      () => ({
+        key: "user",
+        data: relevantUsers.length > 0 ? relevantUsers : users,
+        keyExtractor: (item) => item.id,
+        renderItem: ({ item }) => (
+          <UserRow onSelectUser={onSelectUser} user={item} />
+        ),
+      }),
+      [relevantUsers, users]
+    );
 
   const contactSection: SectionListData<Contacts.Contact> = useMemo(
     () => ({
@@ -312,6 +357,14 @@ export const SearchResults = () => {
         style={{
           flex: 1,
         }}
+        SectionSeparatorComponent={() => (
+          <View
+            style={{
+              height: 1,
+              backgroundColor: fullTheme.border,
+            }}
+          />
+        )}
         contentContainerStyle={{
           paddingBottom: 100,
         }}

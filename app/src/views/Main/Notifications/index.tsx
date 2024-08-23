@@ -66,6 +66,7 @@ import moment from "moment-timezone";
 import { noop } from "lodash";
 import { RefreshControl } from "react-native-gesture-handler";
 import { NotificationRow } from "./NotificationRow";
+import { BaseNotificationFields } from "src/api/fragments";
 
 const Notifications = () => {
   const { height } = Dimensions.get("window");
@@ -77,7 +78,10 @@ const Notifications = () => {
     Pick<Query, "getNotifications">
   >(api.notifications.list);
 
-  const notifications = useMemo(() => data?.getNotifications ?? [], [data]);
+  const notifications = useMemo(
+    () => (data?.getNotifications ?? []) as BaseNotificationFields[],
+    [data]
+  );
   const [loadedNotifs, setLoadedNotifs] = useState(false);
   const isFocused = useIsFocused();
   const [isRefreshing, setIsRefreshing] = useState(false);

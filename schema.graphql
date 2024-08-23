@@ -326,6 +326,7 @@ type UserContactProfile {
   avatarImageUrl: String
   description: String
   id: ID!
+  isFollowing: Boolean
   name: String
   phoneNumber: String
   username: String
