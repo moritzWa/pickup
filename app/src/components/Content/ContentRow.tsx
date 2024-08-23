@@ -185,7 +185,7 @@ export const ContentRow = ({
 
   const start = async () => {
     try {
-      if (c.websiteUrl) {
+      if (c.websiteUrl && c.type === "article") {
         await Linking.openURL(c.websiteUrl);
       } else if (c.audioUrl) {
         if (onPress) onPress();

@@ -48,6 +48,7 @@ type Content {
   summary: String
   thumbnailImageUrl: String
   title: String!
+  type: String!
   updatedAt: Date!
   websiteUrl: String!
 }

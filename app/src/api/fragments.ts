@@ -84,6 +84,7 @@ export type BaseContentFields = Pick<
   | "lengthFormatted"
   | "content"
   | "releasedAt"
+  | "type"
 > & {
   contentSession?: Pick<
     ContentSession,
@@ -102,6 +103,7 @@ export type BaseContentFields = Pick<
 export const BaseContentFields = gql`
   fragment BaseContentFields on Content {
     id
+    type
     audioUrl
     websiteUrl
     content

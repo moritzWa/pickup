@@ -24,6 +24,7 @@ export const Content = objectType({
     name: "Content",
     definition(t) {
         t.nonNull.string("id");
+        t.nonNull.string("type");
         t.nullable.string("context"); // not used
         t.nullable.string("content");
         t.nullable.string("audioUrl");
