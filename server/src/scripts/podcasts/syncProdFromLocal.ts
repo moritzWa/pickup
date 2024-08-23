@@ -75,28 +75,27 @@ async function syncDatabases() {
 
         const insertPromises: any[] = [];
 
-        for (const localRow of localRowsNotInProd) {
-            // add to production
-            console.log(`[adding ${localRow.reference_id} to production]`);
+        // for (const localRow of localRowsNotInProd) {
+        //     // add to production
+        //     console.log(`[adding ${localRow.reference_id} to production]`);
 
-            const keys = Object.keys(localRow).sort();
+        //     const keys = Object.keys(localRow).sort();
 
-            const insertExpression = keys // get all keys
-                .map((k, i) => `$${i + 1}`) // map to $1, $2, $3, etc
-                .join(", "); // join with commas
+        //     const insertExpression = keys // get all keys
+        //         .map((k, i) => `$${i + 1}`) // map to $1, $2, $3, etc
+        //         .join(", "); // join with commas
 
-            const expression = `INSERT INTO content (${keys
-                .map((k) => k)
-                .join(", ")}) VALUES (${insertExpression})`;
+        //     const expression = `INSERT INTO content (${keys
+        //         .map((k) => k)
+        //         .join(", ")}) VALUES (${insertExpression})`;
 
-            const values = keys.map((key) => localRow[key]);
+        //     const values = keys.map((key) => localRow[key]);
 
-            // make an insert statement of ALL local row fields spilled to prod
-            const result = await productionClient.query(expression, values);
+        //     // make an insert statement of ALL local row fields spilled to prod
+        //     const result = productionClient.query(expression, values);
 
-            debugger;
-            // insertPromises.push
-        }
+        //     insertPromises.push(result);
+        // }
 
         await Promise.all(insertPromises);
 
@@ -104,36 +103,36 @@ async function syncDatabases() {
 
         const promises: any[] = [];
 
-        // for (const row of prodRows) {
-        //     const localData = rowByRefId[row.reference_id];
+        for (const row of prodRows) {
+            const localData = rowByRefId[row.reference_id];
 
-        //     if (!localData) {
-        //         continue;
-        //     }
+            if (!localData) {
+                continue;
+            }
 
-        //     console.log(
-        //         `[updating ${row.reference_id} to ${localData.length_ms}]`
-        //     );
+            console.log(
+                `[updating ${row.reference_id} to ${localData.length_ms}]`
+            );
 
-        //     if (localData.length_ms) {
-        //         // Update the production database with the local data
-        //         promises.push(
-        //             productionClient.query(
-        //                 `UPDATE content SET length_ms = $1 WHERE id = $2`,
-        //                 [localData.length_ms, row.id]
-        //             )
-        //         );
-        //     }
+            if (localData.length_ms && localData.embedding) {
+                // Update the production database with the local data
+                promises.push(
+                    productionClient.query(
+                        `UPDATE content SET length_ms = $1, embedding = $2 WHERE id = $3`,
+                        [localData.length_ms, localData.embedding, row.id]
+                    )
+                );
+            }
 
-        //     count += 1;
+            count += 1;
 
-        //     // every 50, log
-        //     if (count % 50 === 0) {
-        //         console.log(
-        //             `completed ${count} of ${productionData.rows.length}`
-        //         );
-        //     }
-        // }
+            // every 50, log
+            if (count % 50 === 0) {
+                console.log(
+                    `completed ${count} of ${productionData.rows.length}`
+                );
+            }
+        }
 
         const rowsNotInProd = await Promise.all(promises);
 

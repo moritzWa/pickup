@@ -334,6 +334,7 @@ export interface NexusGenFieldTypes {
     getActivity: NexusGenRootTypes['Content'][]; // [Content!]!
     getArchived: NexusGenRootTypes['Content'][]; // [Content!]!
     getAuthor: NexusGenRootTypes['Author']; // Author!
+    getAuthorContent: NexusGenRootTypes['Content'][]; // [Content!]!
     getBookmarks: NexusGenRootTypes['Content'][]; // [Content!]!
     getCategories: NexusGenRootTypes['CategorySection'][]; // [CategorySection!]!
     getContent: NexusGenRootTypes['Content']; // Content!
@@ -577,6 +578,7 @@ export interface NexusGenFieldTypeNames {
     getActivity: 'Content'
     getArchived: 'Content'
     getAuthor: 'Author'
+    getAuthorContent: 'Content'
     getBookmarks: 'Content'
     getCategories: 'CategorySection'
     getContent: 'Content'
@@ -748,6 +750,11 @@ export interface NexusGenArgTypes {
     }
     getAuthor: { // args
       authorId: string; // ID!
+    }
+    getAuthorContent: { // args
+      authorId: string; // ID!
+      limit?: number | null; // Int
+      page?: number | null; // Int
     }
     getBookmarks: { // args
       limit?: number | null; // Int
