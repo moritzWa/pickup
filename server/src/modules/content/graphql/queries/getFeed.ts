@@ -48,9 +48,7 @@ export const getFeed = queryField("getFeed", {
     resolve: async (_parent, args, ctx: Context) => {
         throwIfNotAuthenticated(ctx);
 
-        console.log(args.filter);
-
-        // console.log(args);
+        console.log(args);
 
         const { limit = 20, page = 0 } = args;
         const user = ctx.me!;
@@ -63,6 +61,8 @@ export const getFeed = queryField("getFeed", {
         );
 
         throwIfError(feedResponse);
+
+        // console.log(feedResponse.value);
 
         return feedResponse.value;
     },

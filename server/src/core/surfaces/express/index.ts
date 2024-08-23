@@ -150,9 +150,7 @@ const startServer = async () => {
 
     await httpServer.listen({ port });
 
-    console.log(
-        `🚀 Server ready at http://localhost:${config.port}${gqlServer.graphqlPath}`
-    );
+    console.log(`🚀 Server ready at http://localhost:${config.port}/graphql`);
 
     return httpServer;
 };

@@ -731,6 +731,7 @@ export interface NexusGenArgTypes {
       hasPushNotifications?: boolean | null; // Boolean
       hasTwoFactorAuth?: boolean | null; // Boolean
       name?: string | null; // String
+      phoneNumber?: string | null; // String
       unreadCount?: number | null; // Int
       username?: string | null; // String
     }

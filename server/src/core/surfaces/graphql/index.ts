@@ -1,36 +1,42 @@
 import * as http from "http";
-import { ApolloServer } from "apollo-server-express";
 import { Express } from "express";
-import {
-    ApolloServerPluginDrainHttpServer,
-    ApolloServerPluginLandingPageGraphQLPlayground,
-    ApolloServerPluginLandingPageLocalDefault,
-} from "apollo-server-core";
 import { schema } from "./schema";
 import { createContext as context } from "./context";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.js";
 import { config } from "src/config";
 import { hasValue } from "src/core/logic";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import cors from "cors";
+import express from "express";
+import { InMemoryLRUCache } from "@apollo/utils.keyvaluecache";
 
 const startApolloServer = async (app: Express) => {
     const httpServer = http.createServer(app);
 
     const server = new ApolloServer({
         schema,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })].filter(
-            hasValue
-        ),
-        context,
+        cache: new InMemoryLRUCache({
+            maxSize: Math.pow(2, 20) * 100,
+            // 5 minutes (in seconds)
+            ttl: 300,
+        }),
+        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     });
 
     await server.start();
 
     app.use(graphqlUploadExpress({}));
 
-    server.applyMiddleware({
-        app,
-        path: "/graphql",
-    });
+    app.use(
+        "/graphql",
+        cors<cors.CorsRequest>(),
+        express.json(),
+        expressMiddleware(server, {
+            context: context,
+        })
+    );
 
     return server;
 };

@@ -53,6 +53,7 @@ const UpdateUser = gql`
     $avatarImageUrl: String
     $description: String
     $username: String
+    $phoneNumber: String
   ) {
     updateUser(
       name: $name
@@ -63,6 +64,7 @@ const UpdateUser = gql`
       avatarImageUrl: $avatarImageUrl
       description: $description
       username: $username
+      phoneNumber: $phoneNumber
     ) {
       ...BaseUserFields
     }

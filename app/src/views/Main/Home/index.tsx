@@ -65,16 +65,19 @@ const Home = () => {
 
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
-      filter: filter ?? ContentFeedFilter.ForYou,
+      filter: filter,
       limit: LIMIT,
       page,
     }),
     [page, filter]
   );
 
-  const { data, refetch, fetchMore, error, loading } = useQuery<{
-    getFeed: BaseContentFields[];
-  }>(api.content.feed, {
+  const { data, refetch, fetchMore, error, loading } = useQuery<
+    {
+      getFeed: BaseContentFields[];
+    },
+    QueryGetFeedArgs
+  >(api.content.feed, {
     variables,
     fetchPolicy: "cache-and-network",
     onCompleted: (newData) => {
@@ -149,7 +152,9 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        // variables: { page: 0, limit: LIMIT, filter },
+        page: 0,
+        limit: LIMIT,
+        filter,
       });
     } finally {
       setIsRefreshing(false);
@@ -161,7 +166,9 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        // variables: { page: 0, limit: LIMIT, filter },
+        page: 0,
+        limit: LIMIT,
+        filter,
       });
     } finally {
       setIsRefreshing(false);
@@ -174,7 +181,9 @@ const Home = () => {
       setPage(0);
       setHasMore(true);
       await refetch({
-        // variables: { page: 0, limit: LIMIT },
+        page: 0,
+        limit: LIMIT,
+        filter,
       });
       apolloClient.refetchQueries({ include: [api.users.friends] });
     } finally {
@@ -324,7 +333,7 @@ const Home = () => {
         ListFooterComponent={
           hasMore ? (
             renderFooter()
-          ) : (
+          ) : list.length > LIMIT ? (
             <Text
               style={{
                 textAlign: "center",
@@ -336,7 +345,7 @@ const Home = () => {
             >
               No more data
             </Text>
-          )
+          ) : null
         }
       />
 
@@ -797,7 +806,6 @@ const Options = ({
               // paddingVertical: 7,
               padding: 7,
               paddingHorizontal: 12,
-              marginRight: 5,
               backgroundColor: colors.primary,
             }}
           >
@@ -886,40 +894,66 @@ const FriendsScroller = () => {
 
   const friends = data?.getFriends ?? [];
 
+  if (!friends.length) {
+    return null;
+  }
+
   return (
-    <FlatList
-      horizontal
+    <View
       style={{
         paddingLeft: 10,
         paddingVertical: 10,
         marginHorizontal: 10,
         borderRadius: 15,
-        // backgroundColor: "red",
-        // borderTopWidth: 1,
-        // borderColor: theme.border,
-        // borderBottomWidth: 1,
         marginBottom: 25,
         backgroundColor: theme.ternaryBackground,
       }}
-      data={friends}
-      renderItem={({ item: f }) => (
-        <ProfileIcon
+    >
+      <View style={{ padding: 0, marginBottom: 10 }}>
+        <Text
           style={{
-            marginRight: 10,
-            // borderWidth: 2,
-            // borderColor: theme.border,
+            color: theme.header,
+            fontFamily: "Inter-Bold",
+            fontSize: 12,
+            marginBottom: 0,
+            textTransform: "uppercase",
           }}
-          size={50}
-          onPress={() => onPressUsername(f.profile.username || "")}
-          profileImageUrl={f.profile.avatarImageUrl}
-          textStyle={{ fontSize: 18 }}
-          initials={ProfileService.getInitials(
-            f.profile.name,
-            f.profile.username
-          )}
-        />
-      )}
-    />
+        >
+          Your Friends
+        </Text>
+      </View>
+
+      <FlatList
+        horizontal
+        style={
+          {
+            // backgroundColor: "red",
+            // borderTopWidth: 1,
+            // borderColor: theme.border,
+            // borderBottomWidth: 1,
+          }
+        }
+        data={friends}
+        renderItem={({ item: f }) => (
+          <ProfileIcon
+            style={{
+              marginRight: 10,
+              // borderWidth: 2,
+              // borderColor: theme.border,
+            }}
+            size={50}
+            onPress={() => onPressUsername(f.profile.username || "")}
+            profileImageUrl={f.profile.avatarImageUrl}
+            textStyle={{ fontSize: 18 }}
+            initials={ProfileService.getInitials(
+              f.profile.name,
+              f.profile.username
+            )}
+          />
+        )}
+      />
+    </View>
   );
 };
+
 export default Home;

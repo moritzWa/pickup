@@ -90,7 +90,7 @@ const Interests = () => {
         variables,
       });
 
-      return navigation.navigate("EnablePushNotifications");
+      return navigation.navigate("PhoneNumber");
     } catch (err) {
       console.log("=== error ===");
       console.log(JSON.stringify(err, null, 2));

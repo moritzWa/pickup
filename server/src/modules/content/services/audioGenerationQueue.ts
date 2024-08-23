@@ -5,7 +5,9 @@ import { contentRepo } from "src/modules/content/infra";
 import { AudioService } from "src/shared/audioService";
 import { Logger } from "src/utils";
 
-const connection = new IORedis(config.redis.persistedRedisUrl);
+const connection = new IORedis(config.redis.persistedRedisUrl, {
+    maxRetriesPerRequest: null,
+});
 
 const audioGenerationQueue = new Queue("audioGeneration", {
     connection,

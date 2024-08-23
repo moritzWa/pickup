@@ -3,8 +3,8 @@ import { propOr } from "lodash/fp";
 import { User } from "src/core/infra/postgres/entities";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { NextFunction, Request, Response } from "express";
-import { ApolloError, ContextFunction } from "apollo-server-core";
-import { ExpressContext } from "apollo-server-express";
+import { ContextFunction } from "@apollo/server";
+import { ApolloError, ExpressContext } from "apollo-server-express";
 import { UserAuthProvider } from "src/core/infra/postgres/entities/User";
 import { StatusCodes } from "http-status-codes";
 import { MagicUserMetadata } from "@magic-sdk/admin";
@@ -185,7 +185,7 @@ const buildContext = async (
     }
 };
 
-export const createContext: ContextFunction<ExpressContext, object> = async ({
+export const createContext: ContextFunction<any, object> = async ({
     req,
 }: {
     req: Request;
