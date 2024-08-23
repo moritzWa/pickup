@@ -16,6 +16,7 @@ import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
 import { createFullUser } from "../../services/createFullUser";
 import { loops } from "src/utils/loops";
 import { auth } from "firebase-admin";
+import { ProfileService } from "../../services/profileService";
 
 export const CreateUserResponse = objectType({
     name: "CreateUserResponse",
@@ -92,6 +93,8 @@ export const createUser = mutationField("createUser", {
             fullName: user.name,
             userId: user.id,
         });
+
+        await ProfileService.followFounders(user);
 
         return {
             token,

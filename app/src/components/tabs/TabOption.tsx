@@ -21,7 +21,7 @@ export const TabOption = ({
         paddingVertical: 7,
         paddingHorizontal: 15,
         borderRadius: 100,
-        backgroundColor: isActive ? theme.medBackground : "transparent",
+        backgroundColor: isActive ? theme.secondaryBackground : "transparent",
         marginRight: 5,
         display: "flex",
         flexDirection: "column",

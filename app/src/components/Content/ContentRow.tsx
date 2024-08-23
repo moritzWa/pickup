@@ -313,7 +313,7 @@ export const ContentRow = ({
       >
         <TouchableOpacity
           onPress={start}
-          activeOpacity={0.9}
+          activeOpacity={1}
           style={{
             padding: 15,
             backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,

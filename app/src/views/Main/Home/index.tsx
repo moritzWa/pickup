@@ -505,7 +505,7 @@ const SingleFilter = ({
         alignItems: "center",
         padding: 7,
         paddingHorizontal: 12,
-        backgroundColor: isActive ? theme.medBackground : "transparent",
+        backgroundColor: isActive ? theme.secondaryBackground : "transparent",
         marginRight: 5,
         borderRadius: 100,
       }}

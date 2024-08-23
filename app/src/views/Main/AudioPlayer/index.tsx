@@ -629,12 +629,12 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
         marginHorizontal: 20,
         padding: 10,
         borderRadius: 15,
-        backgroundColor: theme.textPrimary,
+        backgroundColor: colors.black,
       }}
     >
       <Text
         style={{
-          color: theme.background,
+          color: colors.white,
           fontFamily: "Inter-Black",
           fontSize: 12,
           textTransform: "uppercase",
@@ -656,7 +656,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
           <Text
             numberOfLines={1}
             style={{
-              color: theme.background,
+              color: colors.white,
               fontFamily: "Inter-Bold",
               fontSize: 16,
               marginBottom: 5,
@@ -676,14 +676,14 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
             <FontAwesomeIcon
               icon={faHeadset}
               style={{
-                color: theme.secondaryBackground,
+                color: colors.gray80,
               }}
             />
 
             <Text
               style={{
                 marginLeft: 5,
-                color: theme.secondaryBackground,
+                color: colors.gray80,
                 fontFamily: "Inter-Regular",
                 fontSize: 16,
               }}
@@ -695,7 +695,7 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
 
         <FontAwesomeIcon
           icon={faChevronRight}
-          color={theme.background}
+          color={colors.white}
           size={18}
           style={{ marginRight: 5 }}
         />
