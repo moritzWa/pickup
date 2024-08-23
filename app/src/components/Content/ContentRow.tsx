@@ -503,8 +503,8 @@ export const ContentRow = ({
           }}
         >
           <TouchableOpacity
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
+            // onPressIn={handlePressIn}
+            // onPressOut={handlePressOut}
             onPress={playOrPause}
             activeOpacity={1}
           >

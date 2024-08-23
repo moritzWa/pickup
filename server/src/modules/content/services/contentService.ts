@@ -20,7 +20,9 @@ import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
 const getSimilarContentFromQuery = async (
     user: User,
     query: string,
-    limit: number
+    limit: number,
+    afterDate?: Date,
+    page?: number
 ): Promise<SimilarContentWithDistanceResponse> => {
     try {
         const feedResponse = await feedRepo.findForUser(user.id, {
@@ -43,10 +45,12 @@ const getSimilarContentFromQuery = async (
 
         const embedding = embeddingResponse.value;
 
-        const similarContentResponse = await contentRepo.findSimilarContent(
+        const similarContentResponse = await contentRepo.findNewSimilarContent(
             embedding,
             limit,
-            Array.from(contentIds)
+            Array.from(contentIds),
+            afterDate,
+            page
         );
 
         return similarContentResponse;
@@ -58,7 +62,8 @@ const getSimilarContentFromQuery = async (
 const getSimilarContent = async (
     user: User,
     content: Content,
-    limit: number
+    limit: number,
+    afterDate?: Date
 ): Promise<SimilarContentWithDistanceResponse> => {
     try {
         const feedResponse = await feedRepo.findForUser(user.id, {
@@ -79,10 +84,11 @@ const getSimilarContent = async (
             feedResponse.value.map((f) => f.contentId)
         );
 
-        const similarContentResponse = await contentRepo.findSimilarContent(
+        const similarContentResponse = await contentRepo.findNewSimilarContent(
             content.embedding,
             limit,
-            Array.from(contentIds)
+            Array.from(contentIds),
+            afterDate
         );
 
         return similarContentResponse;

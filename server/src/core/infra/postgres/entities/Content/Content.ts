@@ -31,6 +31,8 @@ export enum ContentType {
     // if type if article
     where: "\"type\" = 'article'",
 })
+// index content_released_at_idx desc
+@Index("content_released_at_idx", ["releasedAt"])
 export class Content {
     @PrimaryGeneratedColumn("uuid")
     id!: string;

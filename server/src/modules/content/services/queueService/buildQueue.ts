@@ -24,7 +24,8 @@ import moment = require("moment");
 // needs to be idempotent
 export const buildQueue = async (
     user: User,
-    limit: number
+    limit: number,
+    afterDate?: Date
 ): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
     const description = user.interestDescription;
 

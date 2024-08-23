@@ -292,8 +292,8 @@ export const CurrentAudio = () => {
           </View>
 
           <TouchableOpacity
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
+            // onPressIn={handlePressIn}
+            // onPressOut={handlePressOut}
             onPress={playOrPause}
             activeOpacity={1}
             style={{ marginRight: 5 }}
