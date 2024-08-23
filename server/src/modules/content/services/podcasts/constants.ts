@@ -196,4 +196,8 @@ export const PODCASTS = [
         name: "TED Talks Daily (TED)",
         url: "http://feeds.feedburner.com/TEDTalks_audio",
     },
+    {
+        name: "The Knowledge Project",
+        url: "https://anchor.fm/s/f6891d6c/podcast/rsst",
+    },
 ];
