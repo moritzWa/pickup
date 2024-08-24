@@ -13,7 +13,7 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import * as React from "react";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { OneSignal } from "react-native-onesignal";
 import { useDispatch, useSelector } from "react-redux";
 import { api } from "src/api";
@@ -254,13 +254,12 @@ export const MainNavigationStack = () => {
     if (authStatus !== "LOGGED_IN") return;
 
     const setInitialPermission = async () => {
-      const permission = OneSignal.Notifications.hasPermission();
-      const hasPushNotifications = permission;
+      const permission = await OneSignal.Notifications.getPermissionAsync();
 
       await updateUser({
         variables: {
           hasMobile: true,
-          hasPushNotifications,
+          hasPushNotifications: permission,
         },
       });
     };
