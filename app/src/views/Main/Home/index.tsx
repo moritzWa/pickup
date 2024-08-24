@@ -866,6 +866,7 @@ const FriendsScroller = () => {
 
       <FlatList
         horizontal
+        showsHorizontalScrollIndicator={false}
         style={
           {
             // backgroundColor: "red",
