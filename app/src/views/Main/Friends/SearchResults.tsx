@@ -421,44 +421,15 @@ export const SearchResults = () => {
         }
         ListHeaderComponent={
           <>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 10,
-                paddingHorizontal: 15,
-                paddingBottom: 10,
-              }}
-            >
-              <Text
-                style={{
-                  flex: 1,
-                  fontFamily: "Inter-Medium",
-                  fontSize: IS_IPAD ? 30 : 22,
-                  color: header,
-                }}
-              >
-                {hasResults ? "Results" : ""}
-              </Text>
-
-              {loading && hasResults && (
-                <ActivityIndicator
-                  size={IS_IPAD ? 30 : 24}
-                  style={{
-                    marginLeft: 10,
-                  }}
-                  color={fullTheme.activityIndicator}
-                />
-              )}
-            </View>
             <Text
               style={{
                 textAlign: "left",
                 fontFamily: "Inter-Medium",
                 color: fullTheme.text,
-                fontSize: 16,
+                fontSize: 18,
                 paddingHorizontal: 15,
                 paddingBottom: 20,
+                marginTop: 10,
               }}
             >
               Invite your smartest friends to Pickup so you can see what they
