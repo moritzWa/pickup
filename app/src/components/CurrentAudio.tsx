@@ -178,6 +178,7 @@ export const CurrentAudio = () => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
+        backgroundColor: theme.background,
       }}
     >
       <View
@@ -197,6 +198,7 @@ export const CurrentAudio = () => {
           flexDirection: "column",
           width: "95%",
           borderWidth: 1,
+          backgroundColor: theme.background,
           borderColor: theme.medBackground,
           // shadow
         }}
