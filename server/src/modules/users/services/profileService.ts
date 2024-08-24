@@ -133,7 +133,7 @@ const followUser = async (
     await NotificationService.sendNotification(
         toUser,
         {
-            title: `${fromUser.name || ""} (@${fromUser.username || ""})`,
+            title: `${fromUser.name || ""}`,
             subtitle: `followed you`,
             iconImageUrl: null,
             followerUserId: fromUser.id,
