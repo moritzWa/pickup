@@ -37,9 +37,7 @@ import { NavigationProps } from "src/navigation";
 import { ContactRow } from "./ContactRow";
 import { UserRow } from "./UserRow";
 import { hasValue } from "src/core";
-import parsePhoneNumberFromString, {
-  parsePhoneNumber,
-} from "libphonenumber-js";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 export const SearchResults = () => {
   const fullTheme = useTheme();
@@ -54,26 +52,26 @@ export const SearchResults = () => {
 
   const [search, setSearch] = useState("");
 
-  const contactPhoneNumbers = useMemo((): string[] => {
-    const rawPhones = Array.from(
-      new Set(
-        (_contacts ?? []).map((c) => c.phoneNumbers[0]?.number).filter(hasValue)
-      )
-    );
+  const contactWithPhoneNumbers = useMemo((): (Contacts.Contact & {
+    formattedPhoneNumber: string | null;
+  })[] => {
+    return _contacts.map((c) => {
+      const firstPhone = (c.phoneNumbers ?? [])[0]?.number;
 
-    const formattedPhones = rawPhones
-      .map((p): string | null => {
-        const parsed = parsePhoneNumberFromString(p, "US");
+      if (!firstPhone) {
+        return { ...c, formattedPhoneNumber: null };
+      }
 
-        if (parsed && parsed.isValid()) {
-          return parsed.format("E.164");
-        }
+      const parsed = parsePhoneNumberFromString(firstPhone, "US");
 
-        return null;
-      })
-      .filter(hasValue);
+      const formatted =
+        parsed && parsed.isValid() ? parsed.format("E.164") : null;
 
-    return Array.from(new Set(formattedPhones));
+      return {
+        ...c,
+        formattedPhoneNumber: formatted,
+      };
+    });
   }, [_contacts]);
 
   const [searchUsers, { data: resultsData, loading: loadingSearchResults }] =
@@ -83,8 +81,16 @@ export const SearchResults = () => {
     });
 
   const variables = useMemo(
-    () => ({ phoneNumbers: contactPhoneNumbers }),
-    [contactPhoneNumbers]
+    () => ({
+      phoneNumbers: Array.from(
+        new Set<string>(
+          contactWithPhoneNumbers
+            .map((c) => c.formattedPhoneNumber)
+            .filter(hasValue)
+        )
+      ),
+    }),
+    [contactWithPhoneNumbers]
   );
 
   const { data: userContacts } = useQuery<
@@ -250,18 +256,15 @@ export const SearchResults = () => {
 
   const relevantContacts = useMemo((): Contacts.Contact[] => {
     if (!search) {
-      const contacts = _contacts.filter((c) => {
-        if (!c.phoneNumbers) return true;
-        // parse the phone number and check against user phone numbers
-        const parsed = parsePhoneNumber(c.phoneNumbers[0]?.number, "US");
-
-        return !parsed || !userPhoneNumbers.has(parsed.format("E.164"));
+      const contacts = contactWithPhoneNumbers.filter((c) => {
+        if (!c.formattedPhoneNumber) return true;
+        return !userPhoneNumbers.has(c.formattedPhoneNumber);
       });
 
       return contacts;
     }
     return contactSearch.search(search).map((i) => i.item);
-  }, [contactSearch, search, _contacts.length, userPhoneNumbers]);
+  }, [contactSearch, search, contactWithPhoneNumbers, userPhoneNumbers]);
 
   const relevantUsers = useMemo((): UserSearchResult[] => {
     if (!search) return [];

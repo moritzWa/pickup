@@ -1,3 +1,4 @@
+import { isArray } from "lodash";
 import { list, nonNull, nullable, objectType } from "nexus";
 import { Author } from "src/modules/author/graphql";
 
@@ -49,7 +50,14 @@ export const Content = objectType({
         t.nullable.string("sourceImageUrl"); // not used
         t.nonNull.string("title");
         // categories list of string
-        t.nonNull.list.nonNull.string("categories");
+        t.field("categories", {
+            type: nullable(list(nonNull("String"))),
+            resolve: (content) => {
+                // some reason it is not always an array? TODO: fix this
+                const isArr = isArray(content.categories);
+                return isArr ? content.categories || [] : null;
+            },
+        });
         t.nullable.string("summary");
         t.nullable.int("lengthMs");
         t.nonNull.int("lengthSeconds", {

@@ -129,6 +129,9 @@ const Interests = () => {
           height: "100%",
           paddingHorizontal: 15,
         }}
+        contentContainerStyle={{
+          paddingBottom: 100,
+        }}
       >
         <Text
           style={{

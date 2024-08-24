@@ -182,6 +182,8 @@ const getFeed = async (
         };
     });
 
+    console.log(content.map((c) => c.id));
+
     const finalContent = await ContentService.decorateContentWithFriends(
         user,
         content

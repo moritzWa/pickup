@@ -201,7 +201,7 @@ export interface NexusGenFieldTypes {
     authorImageUrl: string | null; // String
     authorName: string | null; // String
     authors: NexusGenRootTypes['Author'][] | null; // [Author!]
-    categories: string[]; // [String!]!
+    categories: string[] | null; // [String!]
     content: string | null; // String
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string | null; // String

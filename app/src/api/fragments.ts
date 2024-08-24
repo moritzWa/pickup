@@ -73,7 +73,6 @@ export type BaseContentFields = Pick<
   | "authorImageUrl"
   | "authorName"
   | "context"
-  | "followUpQuestions"
   | "title"
   | "summary"
   | "ogDescription"
@@ -113,11 +112,6 @@ export const BaseContentFields = gql`
     authorName
     context
     releasedAt
-    followUpQuestions {
-      id
-      question
-      answer
-    }
     friends {
       id
       name

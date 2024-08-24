@@ -337,7 +337,7 @@ export function PhoneNumber() {
           style={{ marginTop: 30 }}
           onPress={_onSubmit}
           loading={step === "phone" ? isSendingCode : isVerifyingCode}
-          label={step === "phone" ? "Send Code" : "Verify Code"}
+          label={step === "phone" ? "Continue" : "Verify Code"}
         />
       </KeyboardAwareScrollView>
     </View>

@@ -32,6 +32,7 @@ import {
   View,
 } from "react-native";
 import ActionSheet from "react-native-action-sheet";
+import FastImage from "react-native-fast-image";
 import ImagePicker, {
   Image as ImageResponse,
 } from "react-native-image-crop-picker";
@@ -52,6 +53,7 @@ import { Button, colors } from "src/components";
 import { ContentRow } from "src/components/Content/ContentRow";
 import { FollowersInfo } from "src/components/FollowersInfo";
 import Header from "src/components/Header";
+import ProfileIcon from "src/components/ProfileIcon";
 import { TabBar } from "src/components/tabs";
 import { hasValue } from "src/core";
 import { useMe } from "src/hooks";
@@ -937,43 +939,12 @@ const ProfilePicture = () => {
       style={{ position: "relative" }}
       onPress={showActionSheet}
     >
-      {profileUrl ? (
-        <Image
-          style={{
-            height: 75,
-            width: 75,
-            borderRadius: 100,
-            borderWidth: 2,
-            borderColor: fullTheme.borderDark,
-          }}
-          source={{
-            uri: profileUrl || "",
-          }}
-        />
-      ) : (
-        <View
-          style={{
-            height: 75,
-            width: 75,
-            borderRadius: 100,
-            backgroundColor: fullTheme.header,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 28,
-              color: fullTheme.background,
-              fontFamily: "Inter-Bold",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
-      )}
+      <ProfileIcon
+        textStyle={{ fontSize: 24 }}
+        size={75}
+        profileImageUrl={profileUrl}
+        initials={initials}
+      />
 
       {isME && (
         <View

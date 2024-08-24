@@ -109,16 +109,13 @@ const Notifications = () => {
   // E.g. if I get new notifications while on this page, we shouldn't mark them as read
   useEffect(() => {
     if (!notifications) {
-      console.log("no notifications");
       return;
     }
     if (notifications.every((n) => n.hasRead)) {
-      console.log("all has read");
       return;
     }
 
     if (loadedNotifs) {
-      console.log("loaded notif");
       return;
     }
 

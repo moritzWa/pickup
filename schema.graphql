@@ -30,7 +30,7 @@ type Content {
   authorImageUrl: String
   authorName: String
   authors: [Author!]
-  categories: [String!]!
+  categories: [String!]
   content: String
   contentSession: ContentSession
   context: String
