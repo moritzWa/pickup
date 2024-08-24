@@ -743,8 +743,8 @@ const Options = ({
               alignItems: "center",
               borderRadius: 100,
               height: 35,
-              // paddingVertical: 7,
-              paddingHorizontal: 12,
+              width: 35,
+              justifyContent: "center",
               backgroundColor: colors.primary,
             }}
           >
@@ -754,7 +754,7 @@ const Options = ({
               size={18}
               color={colors.white}
             />
-            <Text
+            {/* <Text
               style={{
                 marginLeft: 5,
                 color: colors.white,
@@ -763,7 +763,7 @@ const Options = ({
               }}
             >
               Friends
-            </Text>
+            </Text> */}
           </TouchableOpacity>
 
           {/* <TouchableOpacity

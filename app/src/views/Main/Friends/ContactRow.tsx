@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import Contacts from "react-native-contacts";
 import ProfileIcon from "src/components/ProfileIcon";
 import { useTheme } from "src/hooks/useTheme";
+import { ProfileService } from "src/modules/profileService";
 
 export const ContactRow = React.memo(
   ({
@@ -19,12 +20,8 @@ export const ContactRow = React.memo(
     };
 
     const initials = useMemo(() => {
-      const initials = contact.displayName || contact.givenName || "";
-      return initials
-        .split(" ")
-        .map((word) => word[0])
-        .join("")
-        .toUpperCase();
+      const name = contact.displayName || contact.givenName || "";
+      return ProfileService.getInitials(name, "");
     }, [contact]);
 
     return (

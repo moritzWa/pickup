@@ -90,6 +90,10 @@ export const ContentRow = ({
     api.content.removeFromQueue
   );
 
+  const [bookmark] = useMutation<Pick<Mutation, "bookmarkContent">>(
+    api.content.bookmark
+  );
+
   const [archiveContent] = useMutation<Pick<Mutation, "archiveContent">>(
     api.content.archive
   );
@@ -129,6 +133,38 @@ export const ContentRow = ({
       );
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const bookmarkContent = async () => {
+    try {
+      const response = await bookmark({
+        variables: {
+          contentId: c?.id || "",
+        },
+        refetchQueries: [
+          api.content.get,
+          api.content.bookmarks,
+          api.content.feed,
+        ],
+      });
+
+      const data = response.data?.bookmarkContent;
+
+      swipeableRef.current?.close();
+
+      Toast.show({
+        type: "success",
+        text1: `${data?.isBookmarked ? "Liked" : "Unliked"} ${c.title.slice(
+          0,
+          24
+        )}`,
+        position: "bottom",
+      });
+      // console.log(response.data);
+      // console.log(JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
     }
   };
 
@@ -254,15 +290,17 @@ export const ContentRow = ({
         />
       </TouchableOpacity>
 
-      {/* <TouchableOpacity
-        onPress={onArchiveContent}
+      <TouchableOpacity
+        onPress={bookmarkContent}
         activeOpacity={0.9}
         style={{
           justifyContent: "center",
           alignItems: "center",
           display: "flex",
           flexDirection: "row",
-          backgroundColor: isActive ? theme.text : theme.text,
+          backgroundColor: c.contentSession?.isBookmarked
+            ? colors.pink50
+            : theme.text,
           width: 55,
           marginRight: 10,
           height: 55,
@@ -273,12 +311,12 @@ export const ContentRow = ({
           icon={faHeart}
           color={
             c.contentSession?.isBookmarked
-              ? colors.pink50
+              ? colors.white
               : theme.secondaryBackground
           }
           size={22}
         />
-      </TouchableOpacity> */}
+      </TouchableOpacity>
 
       <TouchableOpacity
         onPress={onAddOrRemoveContentToQueue}

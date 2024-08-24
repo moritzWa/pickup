@@ -171,7 +171,6 @@ export const CurrentAudio = () => {
         height: 75,
         paddingHorizontal: 0,
         paddingBottom: 0,
-        backgroundColor: theme.background,
         opacity: 1,
         display: "flex",
         alignSelf: "center",
@@ -198,7 +197,7 @@ export const CurrentAudio = () => {
           flexDirection: "column",
           width: "95%",
           borderWidth: 1,
-          // borderColor: theme.medBackground,
+          borderColor: theme.medBackground,
           // shadow
         }}
 
