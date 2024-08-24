@@ -7,6 +7,7 @@ import {
   Notification,
   User,
 } from "./generated/types";
+import { Maybe } from "src/core";
 
 export type BaseUserFields = Pick<
   User,
@@ -72,7 +73,6 @@ export type BaseContentFields = Pick<
   | "authorImageUrl"
   | "authorName"
   | "context"
-  | "followUpQuestions"
   | "title"
   | "summary"
   | "ogDescription"
@@ -112,11 +112,6 @@ export const BaseContentFields = gql`
     authorName
     context
     releasedAt
-    followUpQuestions {
-      id
-      question
-      answer
-    }
     friends {
       id
       name
@@ -201,7 +196,9 @@ export type BaseNotificationFields = Pick<
   | "createdAt"
   | "hasRead"
   | "type"
->;
+> & {
+  followerUser: Maybe<{ id: string; username: string | null }>;
+};
 
 export const BaseNotificationFields = gql`
   fragment BaseNotificationFields on Notification {
@@ -212,5 +209,9 @@ export const BaseNotificationFields = gql`
     createdAt
     hasRead
     type
+    followerUser {
+      id
+      username
+    }
   }
 `;

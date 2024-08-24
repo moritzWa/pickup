@@ -14,7 +14,7 @@ import { buildQueue } from "src/modules/content/services/queueService";
 
 export const run = async () => {
     const userResponse = await pgUserRepo.findByEmail(
-        "andrew.j.duca@gmail.com"
+        "andrew+testprod@awaken.tax"
     );
 
     // take all the content and seed a queue for each user

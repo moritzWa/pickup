@@ -1,4 +1,4 @@
-import { orderBy, uniq } from "lodash";
+import { orderBy, uniq, uniqBy } from "lodash";
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
@@ -121,11 +121,16 @@ export const buildQueue = async (
     }
 
     // relevant to not as relevant
-    let rankedContent = orderBy(
-        allContent.flatMap((c) => c.content),
-        (c) => c.averageDistance,
-        "asc"
-    ).slice(0, limit);
+    let allRankedContent = uniqBy(
+        orderBy(
+            allContent.flatMap((c) => c.content),
+            (c) => c.averageDistance,
+            "asc"
+        ),
+        (c) => c.id
+    );
+
+    let rankedContent = allRankedContent.slice(0, limit);
 
     debugger;
 

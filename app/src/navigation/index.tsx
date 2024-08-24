@@ -110,7 +110,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Queue: undefined;
   EditProfile?: undefined;
-  UserProfile?: { username: string };
+  UserProfile?: { username: string; forceBackButton?: boolean };
   ClaimCode?: undefined;
   Authentication: { screen?: string } | undefined;
   Interests?: undefined;

@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/client";
 import {
   faArchive,
   faBookReader,
+  faHeart,
   faPause,
   faPlay,
   faPodcast,
@@ -50,8 +51,9 @@ import {
 import { getGradientById } from "src/utils/helpers";
 import ProfileIcon from "../ProfileIcon";
 import { getDescription } from "./contentHelpers";
+import { truncate } from "lodash";
 
-const IMAGE_SIZE = 32;
+const IMAGE_SIZE = 35;
 
 export const ContentRow = ({
   content: c,
@@ -86,6 +88,10 @@ export const ContentRow = ({
 
   const [removeFromQueue] = useMutation<Pick<Mutation, "removeFromQueue">>(
     api.content.removeFromQueue
+  );
+
+  const [bookmark] = useMutation<Pick<Mutation, "bookmarkContent">>(
+    api.content.bookmark
   );
 
   const [archiveContent] = useMutation<Pick<Mutation, "archiveContent">>(
@@ -127,6 +133,38 @@ export const ContentRow = ({
       );
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const bookmarkContent = async () => {
+    try {
+      const response = await bookmark({
+        variables: {
+          contentId: c?.id || "",
+        },
+        refetchQueries: [
+          api.content.get,
+          api.content.bookmarks,
+          api.content.feed,
+        ],
+      });
+
+      const data = response.data?.bookmarkContent;
+
+      swipeableRef.current?.close();
+
+      Toast.show({
+        type: "success",
+        text1: `${data?.isBookmarked ? "Liked" : "Unliked"} ${c.title.slice(
+          0,
+          24
+        )}`,
+        position: "bottom",
+      });
+      // console.log(response.data);
+      // console.log(JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
     }
   };
 
@@ -237,13 +275,12 @@ export const ContentRow = ({
           justifyContent: "center",
           alignItems: "center",
           display: "flex",
+          marginRight: 10,
           flexDirection: "row",
           backgroundColor: isActive ? theme.text : theme.text,
           width: 55,
           height: 55,
           borderRadius: 50,
-          marginTop: 10,
-          marginBottom: 10,
         }}
       >
         <FontAwesomeIcon
@@ -252,6 +289,34 @@ export const ContentRow = ({
           size={22}
         />
       </TouchableOpacity>
+
+      {/* <TouchableOpacity
+        onPress={bookmarkContent}
+        activeOpacity={0.9}
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "row",
+          backgroundColor: c.contentSession?.isBookmarked
+            ? colors.pink50
+            : theme.text,
+          width: 55,
+          marginRight: 10,
+          height: 55,
+          borderRadius: 50,
+        }}
+      >
+        <FontAwesomeIcon
+          icon={faHeart}
+          color={
+            c.contentSession?.isBookmarked
+              ? colors.white
+              : theme.secondaryBackground
+          }
+          size={22}
+        />
+      </TouchableOpacity> */}
 
       <TouchableOpacity
         onPress={onAddOrRemoveContentToQueue}
@@ -265,9 +330,7 @@ export const ContentRow = ({
           width: 55,
           height: 55,
           borderRadius: 50,
-          marginTop: 10,
-          marginLeft: 15,
-          marginBottom: 10,
+          // marginTop: 5,
         }}
       >
         {isQueued ? (
@@ -455,8 +518,13 @@ export const ContentRow = ({
                           fontFamily: "Inter-Medium",
                         }}
                       >
+                        {truncate(c.authorName || "", {
+                          length: 14,
+                          omission: ".",
+                        })}{" "}
+                        •{" "}
                         {c.releasedAt
-                          ? moment(c.releasedAt).format("MMM Do, YYYY") + " • "
+                          ? moment(c.releasedAt).format("M/D/YY") + " • "
                           : ""}
                         {c.lengthFormatted}{" "}
                         {c.contentSession?.percentFinished ? " • " : ""}

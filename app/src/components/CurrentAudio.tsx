@@ -171,17 +171,17 @@ export const CurrentAudio = () => {
         height: 75,
         paddingHorizontal: 0,
         paddingBottom: 0,
-        backgroundColor: theme.background,
         opacity: 1,
         display: "flex",
         alignSelf: "center",
-        position: "relative",
+        position: "absolute",
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
+        backgroundColor: theme.background,
       }}
     >
-      <BlurView
+      <View
         style={{
           position: "absolute",
           bottom: 10,
@@ -189,7 +189,6 @@ export const CurrentAudio = () => {
           padding: 8,
           paddingHorizontal: 0,
           paddingBottom: 0,
-          backgroundColor: bg,
           display: "flex",
           alignSelf: "center",
           opacity: 0.97,
@@ -199,11 +198,11 @@ export const CurrentAudio = () => {
           flexDirection: "column",
           width: "95%",
           borderWidth: 1,
+          backgroundColor: theme.background,
           borderColor: theme.medBackground,
           // shadow
         }}
-        intensity={75} // You can adjust the intensity of the blur
-        tint={theme.theme}
+
         // colors={
         //   theme.theme === "dark"
         //     ? [colors.back, colors.primary, colors.pink70]
@@ -348,7 +347,7 @@ export const CurrentAudio = () => {
             }}
           />
         </View>
-      </BlurView>
+      </View>
     </View>
   );
 };

@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import { isNil } from "lodash";
 import { enumType, list, nonNull, nullable, objectType } from "nexus";
 
 export const ContentSession = objectType({
@@ -17,7 +18,13 @@ export const ContentSession = objectType({
         });
         t.nonNull.string("contentId");
         t.nonNull.string("userId");
-        t.nullable.float("percentFinished");
+        t.nullable.float("percentFinished", {
+            resolve: (session) => {
+                if (isNil(session.percentFinished)) return null;
+                const finished = Math.min(session.percentFinished, 100);
+                return finished;
+            },
+        });
         t.nullable.boolean("isBookmarked");
         t.nullable.date("bookmarkedAt");
         t.nonNull.date("createdAt");

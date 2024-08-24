@@ -32,6 +32,7 @@ import {
   View,
 } from "react-native";
 import ActionSheet from "react-native-action-sheet";
+import FastImage from "react-native-fast-image";
 import ImagePicker, {
   Image as ImageResponse,
 } from "react-native-image-crop-picker";
@@ -52,6 +53,7 @@ import { Button, colors } from "src/components";
 import { ContentRow } from "src/components/Content/ContentRow";
 import { FollowersInfo } from "src/components/FollowersInfo";
 import Header from "src/components/Header";
+import ProfileIcon from "src/components/ProfileIcon";
 import { TabBar } from "src/components/tabs";
 import { hasValue } from "src/core";
 import { useMe } from "src/hooks";
@@ -70,12 +72,13 @@ const ProfileContext = createContext<{
 });
 
 export const UserProfile = () => {
-  const { me, refetchMe } = useMe("network-only");
+  const { me, refetchMe } = useMe("cache-and-network");
 
   const navigation = useNavigation<NavigationProps>();
   const { startPlayingContent, toggle } = useContext(AppContext).audio!;
   const { params } = useRoute<RouteProp<RootStackParamList, "UserProfile">>();
 
+  const forceBackButton = params?.forceBackButton === true;
   const username = params?.username ?? me?.username;
   const insets = useSafeAreaInsets();
   const isME = username === me?.username;
@@ -367,11 +370,11 @@ export const UserProfile = () => {
       <View
         style={{
           flex: 1,
-          paddingTop: isME ? insets.top : 0,
+          paddingTop: !isME || forceBackButton ? 0 : insets.top,
           backgroundColor: background,
         }}
       >
-        {!isME ? <Header hasBackButton /> : null}
+        {!isME || forceBackButton ? <Header hasBackButton /> : null}
 
         {/* <ProfileImage name={profile?.name} /> */}
 
@@ -394,7 +397,7 @@ export const UserProfile = () => {
 };
 
 const Profile = ({ username }: { username: string | null }) => {
-  const { me } = useMe("network-only");
+  const { me } = useMe("cache-and-network");
   const isME = username === me?.username;
 
   const navigation = useNavigation<NavigationProps>();
@@ -483,7 +486,7 @@ const Profile = ({ username }: { username: string | null }) => {
         <View
           style={{
             alignItems: "flex-start",
-            marginTop: 10,
+            marginTop: 20,
             paddingHorizontal: 15,
           }}
         >
@@ -936,43 +939,12 @@ const ProfilePicture = () => {
       style={{ position: "relative" }}
       onPress={showActionSheet}
     >
-      {profileUrl ? (
-        <Image
-          style={{
-            height: 75,
-            width: 75,
-            borderRadius: 100,
-            borderWidth: 2,
-            borderColor: fullTheme.borderDark,
-          }}
-          source={{
-            uri: profileUrl || "",
-          }}
-        />
-      ) : (
-        <View
-          style={{
-            height: 75,
-            width: 75,
-            borderRadius: 100,
-            backgroundColor: fullTheme.header,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 28,
-              color: fullTheme.background,
-              fontFamily: "Inter-Bold",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
-      )}
+      <ProfileIcon
+        textStyle={{ fontSize: 24 }}
+        size={75}
+        profileImageUrl={profileUrl}
+        initials={initials}
+      />
 
       {isME && (
         <View

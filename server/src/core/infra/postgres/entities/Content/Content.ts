@@ -130,6 +130,7 @@ export class Content {
         name: "categories",
         type: "jsonb",
         default: "[]",
+        array: true,
     })
     categories!: string[];
 

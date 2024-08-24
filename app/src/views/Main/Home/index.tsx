@@ -62,6 +62,7 @@ const Home = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [clear] = useMutation(api.queue.clear);
+  const flatlistRef = useRef<FlatList<BaseContentFields> | null>(null);
 
   const variables = useMemo(
     (): QueryGetFeedArgs => ({
@@ -80,6 +81,7 @@ const Home = () => {
   >(api.content.feed, {
     variables,
     fetchPolicy: "cache-and-network",
+    notifyOnNetworkStatusChange: true,
     onCompleted: (newData) => {
       const newItems = newData.getFeed ?? [];
       if (page === 0) {
@@ -120,10 +122,6 @@ const Home = () => {
     }
   }, 300); // 300ms throttle to prevent rapid firing
 
-  const content = useMemo((): BaseContentFields[] => {
-    return uniqBy(data?.getFeed ?? [], (i) => i.id) as BaseContentFields[];
-  }, [data]);
-
   const onPressContent = async (content: BaseContentFields) => {
     navigation.navigate("AudioPlayer", {
       contentId: content.id,
@@ -151,11 +149,8 @@ const Home = () => {
     try {
       setPage(0);
       setHasMore(true);
-      await refetch({
-        page: 0,
-        limit: LIMIT,
-        filter,
-      });
+      await refetch();
+      flatlistRef.current?.scrollToOffset({ animated: true, offset: 0 });
     } finally {
       setIsRefreshing(false);
     }
@@ -165,11 +160,8 @@ const Home = () => {
     try {
       setPage(0);
       setHasMore(true);
-      await refetch({
-        page: 0,
-        limit: LIMIT,
-        filter,
-      });
+      await refetch();
+      flatlistRef.current?.scrollToOffset({ animated: true, offset: 0 });
     } finally {
       setIsRefreshing(false);
     }
@@ -180,11 +172,7 @@ const Home = () => {
     try {
       setPage(0);
       setHasMore(true);
-      await refetch({
-        page: 0,
-        limit: LIMIT,
-        filter,
-      });
+      await refetch();
       apolloClient.refetchQueries({ include: [api.users.friends] });
     } finally {
       setIsRefreshing(false);
@@ -193,14 +181,17 @@ const Home = () => {
 
   const renderFooter = () => {
     if (!loading) return null;
+    if (isRefreshing) return null;
     return (
       <View style={{ padding: 10 }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="small" />
       </View>
     );
   };
 
-  console.log(filter, list.length);
+  if (error && __DEV__) {
+    console.log(JSON.stringify(error, null, 2));
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -213,8 +204,8 @@ const Home = () => {
       </View>
 
       <FlatList
-        extraData={filter}
         data={list}
+        ref={flatlistRef}
         refreshControl={
           <RefreshControl
             tintColor={theme.activityIndicator}
@@ -233,61 +224,6 @@ const Home = () => {
         ListHeaderComponent={
           <>
             <HomeHeader />
-            {filter === ContentFeedFilter.Queue ? (
-              <View
-                style={{
-                  marginTop: 10,
-                  marginBottom: 10,
-                  marginHorizontal: 20,
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                {content.length > 0 ? (
-                  <Text
-                    style={{
-                      flex: 1,
-                      color: theme.header,
-                      fontFamily: "Inter-Bold",
-                      fontSize: 24,
-                      textAlign: "left",
-                    }}
-                  >
-                    Next up...
-                  </Text>
-                ) : (
-                  <Text
-                    style={{
-                      flex: 1,
-                      paddingVertical: 25,
-                      color: theme.header,
-                      fontFamily: "Inter-Bold",
-                      fontSize: 24,
-                      textAlign: "left",
-                    }}
-                  >
-                    Queue is empty.
-                  </Text>
-                )}
-                {content.length > 0 ? (
-                  <TouchableOpacity activeOpacity={0.9} onPress={clearQueue}>
-                    <Text
-                      style={{
-                        color: theme.text,
-                        fontFamily: "Inter-Bold",
-                        fontSize: 16,
-                        textAlign: "center",
-                        padding: 10,
-                      }}
-                    >
-                      Clear Queue
-                    </Text>
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            ) : null}
-
             <FriendsScroller />
           </>
         }
@@ -807,8 +743,8 @@ const Options = ({
               alignItems: "center",
               borderRadius: 100,
               height: 35,
-              // paddingVertical: 7,
-              paddingHorizontal: 12,
+              width: 35,
+              justifyContent: "center",
               backgroundColor: colors.primary,
             }}
           >
@@ -818,7 +754,7 @@ const Options = ({
               size={18}
               color={colors.white}
             />
-            <Text
+            {/* <Text
               style={{
                 marginLeft: 5,
                 color: colors.white,
@@ -827,7 +763,7 @@ const Options = ({
               }}
             >
               Friends
-            </Text>
+            </Text> */}
           </TouchableOpacity>
 
           {/* <TouchableOpacity
@@ -851,7 +787,7 @@ const Options = ({
             
           </TouchableOpacity> */}
 
-          {/* <TouchableOpacity
+          <TouchableOpacity
             activeOpacity={0.9}
             onPress={_onPressMore}
             disabled={loadingShowMore}
@@ -864,7 +800,7 @@ const Options = ({
               width: 35,
               height: 35,
               marginLeft: 5,
-              backgroundColor: theme.bgPrimaryLight,
+              backgroundColor: theme.secondaryBackground,
             }}
           >
             <FontAwesomeIcon
@@ -873,7 +809,7 @@ const Options = ({
               size={16}
               color={theme.header}
             />
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </View>
     </>
@@ -905,30 +841,32 @@ const FriendsScroller = () => {
   return (
     <View
       style={{
-        paddingLeft: 10,
-        paddingVertical: 10,
+        paddingLeft: 5,
+        marginTop: 5,
+        paddingVertical: 0,
         marginHorizontal: 10,
         borderRadius: 15,
         marginBottom: 25,
-        backgroundColor: theme.secondaryBackground,
+        // backgroundColor: theme.secondaryBackground,
       }}
     >
-      <View style={{ padding: 0, marginBottom: 10 }}>
+      <View style={{ padding: 0, marginBottom: 15 }}>
         <Text
           style={{
-            color: theme.header,
-            fontFamily: "Inter-Bold",
+            color: theme.textSecondary,
+            fontFamily: "Inter-Black",
             fontSize: 12,
             marginBottom: 0,
             textTransform: "uppercase",
           }}
         >
-          Your Friends
+          your friends
         </Text>
       </View>
 
       <FlatList
         horizontal
+        showsHorizontalScrollIndicator={false}
         style={
           {
             // backgroundColor: "red",
@@ -945,7 +883,7 @@ const FriendsScroller = () => {
               // borderWidth: 2,
               // borderColor: theme.border,
             }}
-            size={50}
+            size={65}
             onPress={() => onPressUsername(f.profile.username || "")}
             profileImageUrl={f.profile.avatarImageUrl}
             textStyle={{ fontSize: 18 }}

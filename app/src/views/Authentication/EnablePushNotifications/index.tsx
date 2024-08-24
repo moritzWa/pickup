@@ -111,10 +111,7 @@ const EnablePushNotifications = () => {
         start={[0, 0]}
         end={[0, 1]}
         locations={[0.7, 1]}
-        colors={[
-          background,
-          theme === "light" ? colors.lightBlue90 : colors.lightBlue10,
-        ]}
+        colors={[background, background]}
       >
         <View
           style={{
@@ -195,7 +192,7 @@ const PushNotificationPrompt = ({
   onAllow: () => void;
   onDeny: () => void;
 }) => {
-  const { theme, text } = useTheme();
+  const fullTheme = useTheme();
 
   return (
     <View style={[styles.container, {}]}>
@@ -204,8 +201,9 @@ const PushNotificationPrompt = ({
           styles.dialogBox,
           {
             width: 275,
-            backgroundColor: theme === "dark" ? colors.gray80 : colors.gray95,
-            borderColor: colors.gray80,
+            backgroundColor:
+              fullTheme.theme === "dark" ? colors.gray80 : colors.gray95,
+            borderColor: fullTheme.textSubtle,
             borderWidth: 1,
           },
         ]}
@@ -235,7 +233,10 @@ const PushNotificationPrompt = ({
 
         <View
           style={{
-            backgroundColor: colors.gray80,
+            backgroundColor:
+              fullTheme.theme === "dark"
+                ? fullTheme.text
+                : fullTheme.textSubtle,
             height: 1,
             width: "100%",
           }}
@@ -252,7 +253,10 @@ const PushNotificationPrompt = ({
               flex: 1,
               padding: 13,
               alignItems: "center",
-              borderRightColor: colors.gray80,
+              borderRightColor:
+                fullTheme.theme === "dark"
+                  ? fullTheme.text
+                  : fullTheme.textSubtle,
               borderRightWidth: 1,
             }}
             onPress={onDeny}
@@ -260,9 +264,8 @@ const PushNotificationPrompt = ({
           >
             <Text
               style={{
-                color: text,
                 fontSize: 16,
-                fontFamily: "Inter-Semibold",
+                fontFamily: "Inter-Regular",
               }}
             >
               No Thanks

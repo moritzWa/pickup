@@ -149,8 +149,8 @@ const followUser = async (
 const followFounders = async (fromUser: User) => {
     if (!isProduction()) return;
 
-    const moritzId = "50a3fbc5-4202-4f2d-9098-1e6e25d121f9";
-    const andrewId = "a0683da2-d8eb-4631-a759-1d98256e9345";
+    const moritzId = "a0683da2-d8eb-4631-a759-1d98256e9345";
+    const andrewId = "50a64961-19bf-4487-8657-226c43c6a26e";
 
     // get founders
     const foundersResp = await UserService.find({

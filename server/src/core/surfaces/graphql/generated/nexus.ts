@@ -156,6 +156,7 @@ export interface NexusGenObjects {
     avatarImageUrl?: string | null; // String
     description?: string | null; // String
     id: string; // ID!
+    isFollowing?: boolean | null; // Boolean
     name?: string | null; // String
     phoneNumber?: string | null; // String
     username?: string | null; // String
@@ -200,7 +201,7 @@ export interface NexusGenFieldTypes {
     authorImageUrl: string | null; // String
     authorName: string | null; // String
     authors: NexusGenRootTypes['Author'][] | null; // [Author!]
-    categories: string[]; // [String!]!
+    categories: string[] | null; // [String!]
     content: string | null; // String
     contentSession: NexusGenRootTypes['ContentSession'] | null; // ContentSession
     context: string | null; // String
@@ -442,6 +443,7 @@ export interface NexusGenFieldTypes {
     avatarImageUrl: string | null; // String
     description: string | null; // String
     id: string; // ID!
+    isFollowing: boolean | null; // Boolean
     name: string | null; // String
     phoneNumber: string | null; // String
     username: string | null; // String
@@ -718,6 +720,7 @@ export interface NexusGenFieldTypeNames {
     avatarImageUrl: 'String'
     description: 'String'
     id: 'ID'
+    isFollowing: 'Boolean'
     name: 'String'
     phoneNumber: 'String'
     username: 'String'

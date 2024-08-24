@@ -14,6 +14,7 @@ import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
 import { isNil } from "lodash";
 import { inngest } from "src/jobs/inngest/clients";
 import { InngestEventName } from "src/jobs/inngest/types";
+import { buildQueue } from "src/modules/content/services/queueService";
 
 export const setInterests = mutationField("setInterests", {
     type: nonNull("User"),
@@ -38,10 +39,7 @@ export const setInterests = mutationField("setInterests", {
         const newUser = newUserResponse.value;
 
         // enqueue building the new queue
-        await inngest.send({
-            name: InngestEventName.BuildUserQueue,
-            data: { userId: user.id },
-        });
+        await buildQueue(newUser, 10);
 
         return newUser;
     },
