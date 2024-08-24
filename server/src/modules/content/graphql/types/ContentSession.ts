@@ -20,9 +20,10 @@ export const ContentSession = objectType({
         t.nonNull.string("userId");
         t.nullable.float("percentFinished", {
             resolve: (session) => {
-                if(isNil(session.percentFinished)) return null;
+                if (isNil(session.percentFinished)) return null;
                 const finished = Math.min(session.percentFinished, 100);
                 return finished;
+            },
         });
         t.nullable.boolean("isBookmarked");
         t.nullable.date("bookmarkedAt");
