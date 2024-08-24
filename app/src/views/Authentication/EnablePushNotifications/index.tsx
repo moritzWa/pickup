@@ -203,7 +203,7 @@ const PushNotificationPrompt = ({
             width: 275,
             backgroundColor:
               fullTheme.theme === "dark" ? colors.gray80 : colors.gray95,
-            borderColor: fullTheme.border,
+            borderColor: fullTheme.textSubtle,
             borderWidth: 1,
           },
         ]}
@@ -233,7 +233,10 @@ const PushNotificationPrompt = ({
 
         <View
           style={{
-            backgroundColor: fullTheme.text,
+            backgroundColor:
+              fullTheme.theme === "dark"
+                ? fullTheme.text
+                : fullTheme.textSubtle,
             height: 1,
             width: "100%",
           }}
@@ -250,7 +253,10 @@ const PushNotificationPrompt = ({
               flex: 1,
               padding: 13,
               alignItems: "center",
-              borderRightColor: fullTheme.text,
+              borderRightColor:
+                fullTheme.theme === "dark"
+                  ? fullTheme.text
+                  : fullTheme.textSubtle,
               borderRightWidth: 1,
             }}
             onPress={onDeny}
