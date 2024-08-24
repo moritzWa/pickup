@@ -1,5 +1,4 @@
 import { OpenAI } from "openai";
-import * as pgvector from "pgvector/pg";
 import { dataSource } from "src/core/infra/postgres";
 import { contentRepo } from "src/modules/content/infra";
 import { Logger } from "src/utils/logger";
@@ -27,28 +26,31 @@ const searchAndFindSimilarArticles = async (searchString: string) => {
         // Find similar content
         const similarContentResponse =
             await contentRepo.findSimilarContentFromChunks(
-                pgvector.toSql(embedding),
+                embedding,
                 10, // limit
                 [] // idsToExclude
             );
 
         if (similarContentResponse.isFailure()) {
-            throw new Error(
-                `Failed to find similar content: ${similarContentResponse.error}`
+            Logger.error(
+                `Failed to find similar content: ${JSON.stringify(
+                    similarContentResponse.error
+                )}`
             );
+            return;
         }
 
         const similarContent = similarContentResponse.value;
         Logger.info(`Found ${similarContent.length} similar articles:`);
         similarContent.forEach((content, index) => {
             Logger.info(
-                `${index + 1}. ${content.title} (Distance: ${
-                    content.minDistance
-                })`
+                `${index + 1} . Title: ${content.title}, Website URL: ${
+                    content.websiteUrl
+                }, Distance: ${content.minDistance})`
             );
         });
     } catch (error) {
-        Logger.error("Error during search and find similar articles:", error);
+        Logger.error(`Error during search and find similar articles: ${error}`);
     } finally {
         if (dataSource.isInitialized) {
             await dataSource.destroy();
@@ -56,7 +58,8 @@ const searchAndFindSimilarArticles = async (searchString: string) => {
     }
 };
 
-const searchString = "Your hardcoded search string here";
+const searchString =
+    "Economics is a moral philosophy, not just a science. Reducing labor to mere metrics harms workers and communities by detaching employers from their moral responsibilities. Globalization worsens this by allowing shareholders to neglect local accountability, undermining the natural connection between employers and their labor force.";
 searchAndFindSimilarArticles(searchString).catch((error) =>
     Logger.error("Unhandled error:", error)
 );
