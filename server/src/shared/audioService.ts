@@ -15,6 +15,7 @@ import { PassThrough } from "stream";
 import { promisify } from "util";
 import _ = require("lodash");
 import internal = require("stream");
+import { chunkText } from "src/modules/content/services/utils";
 
 const bucket = Firebase.storage().bucket();
 
@@ -137,35 +138,6 @@ const slugify = (str: string) => {
         .replace(/-+/g, "-"); // remove consecutive hyphens
     return str;
 };
-
-const MAX_CHUNK_SIZE = 4000;
-
-function chunkText(text: string): string[] {
-    const chunks: string[] = [];
-    let currentChunk = "";
-
-    // Split text into sentences
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-
-    for (let sentence of sentences) {
-        sentence = sentence.trim();
-        if (currentChunk.length + sentence.length > MAX_CHUNK_SIZE) {
-            if (currentChunk) {
-                chunks.push(currentChunk.trim());
-            }
-            currentChunk = sentence + " ";
-        } else {
-            currentChunk += sentence + " ";
-        }
-    }
-
-    // Push the last chunk if it exists
-    if (currentChunk.trim()) {
-        chunks.push(currentChunk.trim());
-    }
-
-    return chunks;
-}
 
 const toSpeech = async (
     _text: string,

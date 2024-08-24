@@ -200,4 +200,8 @@ export const PODCASTS = [
         name: "Litecone",
         url: "https://anchor.fm/s/f58d3330/podcast/rss",
     },
+    {
+        name: "The Knowledge Project",
+        url: "https://anchor.fm/s/f6891d6c/podcast/rsst",
+    },
 ];

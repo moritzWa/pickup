@@ -91,5 +91,33 @@
   "workbench.editor.wrapTabs": true,
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "sqltools.connections": [
+    {
+      "previewLimit": 100,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "local",
+      "database": "pickup",
+      "username": "user",
+      "password": "password"
+    },
+    {
+      "pgOptions": {
+        "ssl": {
+          "rejectUnauthorized": false,
+          "requestCert": false
+        }
+      },
+      "previewLimit": 100,
+      "server": "dpg-cqeqm00gph6c73ava1t0-a",
+      "driver": "PostgreSQL",
+      "connectString": "postgresql://pickup_user:AuFpGo87bNr3vcCB9vN6wmtDw9Jp4Dy8@dpg-cqeqm00gph6c73ava1t0-a.oregon-postgres.render.com/pickup",
+      "name": "prod",
+      "database": "pickup",
+      "username": "pickup_user",
+      "password": "AuFpGo87bNr3vcCB9vN6wmtDw9Jp4Dy8"
+    }
+  ]
 }

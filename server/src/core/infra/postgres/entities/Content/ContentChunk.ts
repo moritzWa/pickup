@@ -54,12 +54,12 @@ export class ContentChunk {
         name: "transcript",
         type: "text",
     })
-    transcript!: string;
+    transcript!: string; // aka the text of the content chunk
 
     @Column({
         type: "vector" as any,
     })
-    embedding!: any;
+    embedding!: any; // actually VECTOR(256). vector type not supported: https://github.com/typeorm/typeorm/issues/10056
 
     @Column({
         nullable: false,

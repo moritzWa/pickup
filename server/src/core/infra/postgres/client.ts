@@ -1,4 +1,3 @@
-import { last } from "lodash/fp";
 import { config } from "src/config";
 import {
     DefaultErrors,
@@ -19,9 +18,7 @@ export const connect = async (
 ): Promise<DataSource> => {
     // console.log(postgresUrl);
     console.log(
-        `[postgres]: connecting to ${last(
-            (postgresUrl || "").split("/")
-        )} (ssl: ${config.postgres.ssl})`
+        `[postgres]: connecting to ${postgresUrl} (ssl: ${config.postgres.ssl})`
     );
 
     dataSource = await makeDataSource(params).initialize();
