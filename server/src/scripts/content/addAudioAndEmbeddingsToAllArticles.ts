@@ -16,11 +16,19 @@ const processArticle = async (article) => {
 
         // log the article url
         Logger.info(`Processing article: ${article.websiteUrl}`);
+        const startTime = performance.now();
 
+        // Generate audio
+        const audioStartTime = performance.now();
         const audioResult = await AudioService.generate(
             article.content,
             article.title
         );
+        const audioEndTime = performance.now();
+        Logger.info(
+            `Audio generation took ${(audioEndTime - audioStartTime) / 1000}s`
+        );
+
         if (audioResult.isFailure()) {
             throw new Error(`Failed to generate audio: ${audioResult.error}`);
         }
@@ -61,6 +69,12 @@ const processArticle = async (article) => {
 
         // Save updated article
         await contentRepo.save(article);
+        const endTime = performance.now();
+        Logger.info(
+            `Total processing time for article: ${
+                (endTime - startTime) / 1000
+            }s`
+        );
     } catch (error) {
         Logger.error(`Failed to process article ${article.id}:`, error);
     }
@@ -77,7 +91,7 @@ const addAudioAndEmbeddingsToAllArticles = async () => {
     );
 
     try {
-        const limit = 10; // Adjust as needed
+        const limit = 5; // Adjust as needed
         let articlesResponse;
 
         do {
@@ -101,11 +115,11 @@ const addAudioAndEmbeddingsToAllArticles = async () => {
             Logger.info(`Processing batch of ${articles.length} articles...`);
             const startTime = performance.now();
 
-            // await Promise.all(articles.map(processArticle));
+            await Promise.all(articles.map(processArticle));
             // changes to be sequential bc audio service doesn't support concurrency yet I think
-            for (const article of articles) {
-                await processArticle(article);
-            }
+            // for (const article of articles) {
+            //     await processArticle(article);
+            // }
 
             const batchTime = (performance.now() - startTime) / 1000;
             Logger.info(
