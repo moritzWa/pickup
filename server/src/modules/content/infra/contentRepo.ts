@@ -178,6 +178,28 @@ export class PostgresContentRepository {
         }
     }
 
+    async findArticlesWithoutAudioAndEmbeddings(
+        limit?: number
+    ): Promise<ContentArrayResponse> {
+        try {
+            const articles = await this.repo.find({
+                where: {
+                    type: ContentType.ARTICLE,
+                    audioUrl: IsNull(),
+                    embedding: IsNull(),
+                    content: Not(IsNull()),
+                },
+                take: limit,
+                order: {
+                    length: "ASC",
+                },
+            });
+            return success(articles);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async getSingleTestContent(): Promise<ContentArrayResponse> {
         try {
             const contents = await this.repo.find({

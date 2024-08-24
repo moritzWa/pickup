@@ -92,17 +92,17 @@ async function getUserFromContextOrAuthProviderId(
     console.log("authProviderId", authProviderId);
 
     // if ctx.authProviderId is present, use that
-    if (ctx.authProviderId && !authProviderId) {
-        const userResponse = await pgUserRepo.findOne({
-            where: { authProviderId: ctx.authProviderId },
-        });
+    // if (ctx.authProviderId && !authProviderId) {
+    //     const userResponse = await pgUserRepo.findOne({
+    //         where: { authProviderId: ctx.authProviderId },
+    //     });
 
-        console.log("userResponse", userResponse);
+    //     console.log("userResponse", userResponse);
 
-        if (userResponse.isSuccess() && userResponse.value) {
-            return userResponse.value;
-        }
-    }
+    //     if (userResponse.isSuccess() && userResponse.value) {
+    //         return userResponse.value;
+    //     }
+    // }
 
     if (ctx.me) {
         return ctx.me;
