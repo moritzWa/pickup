@@ -196,4 +196,8 @@ export const PODCASTS = [
         name: "TED Talks Daily (TED)",
         url: "http://feeds.feedburner.com/TEDTalks_audio",
     },
+    {
+        name: "Litecone",
+        url: "https://anchor.fm/s/f58d3330/podcast/rss",
+    },
 ];

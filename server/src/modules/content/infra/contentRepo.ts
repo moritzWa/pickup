@@ -55,6 +55,24 @@ export class PostgresContentRepository {
         });
     }
 
+    findRandomUnprocessedPodcasts = async (): Promise<ContentArrayResponse> => {
+        try {
+            const contentResponse = await this.repo
+                .createQueryBuilder("content")
+                .where("content.isProcessed = :isProcessed", {
+                    isProcessed: false,
+                })
+                .andWhere("content.type = :type", { type: ContentType.PODCAST })
+                .orderBy("RANDOM()")
+                .take(50)
+                .getMany();
+
+            return success(contentResponse);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    };
+
     findForIdsWithAuthor = async (
         ids: string[]
     ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> => {

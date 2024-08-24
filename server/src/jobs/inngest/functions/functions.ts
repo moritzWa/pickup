@@ -2,17 +2,19 @@ import { buildUserQueue } from "./buildUserQueue";
 import { processContent } from "./processContent";
 import { morningReminderCron } from "./scheduled";
 import { buildDailyQueueCron } from "./scheduled/buildDailyQueueCron";
+import { processContentCron } from "./scheduled/processContentCron";
 import { syncRSSFeedCron } from "./scheduled/syncRssFeedsCron";
 import { sendNotification } from "./sendNotification";
 
 export const inngestFunctions = [
     sendNotification,
     buildUserQueue,
-    // processContent,
+    processContent,
 ];
 
 export const cronInngestFunctions = [
     morningReminderCron,
     buildDailyQueueCron,
     syncRSSFeedCron,
+    processContentCron,
 ];
