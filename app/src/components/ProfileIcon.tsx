@@ -14,19 +14,21 @@ import { colors } from ".";
 const ProfileIcon = ({
   initials,
   profileImageUrl,
+  id,
   size = 40,
   textStyle,
   style,
   onPress,
 }: {
   initials?: string | null;
+  id: string;
   profileImageUrl?: string | null;
   size?: number;
   textStyle?: StyleProp<TextStyle>;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
 }) => {
-  const gradient = getGradientById(initials || "");
+  const gradient = getGradientById(id || initials || "");
 
   if (profileImageUrl) {
     // return the fast image

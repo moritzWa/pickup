@@ -741,6 +741,7 @@ const ContentFriends = ({
       {(friendsToShow ?? []).map((f, i) => (
         <ProfileIcon
           key={f.id}
+          id={f.id}
           onPress={() => onPressUser(f)}
           size={25}
           style={{

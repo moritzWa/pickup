@@ -38,6 +38,7 @@ export const ContactRow = React.memo(
       >
         <ProfileIcon
           initials={initials}
+          id={contact.recordID}
           profileImageUrl={contact.hasThumbnail ? contact.thumbnailPath : null}
         />
 

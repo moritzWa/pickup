@@ -878,6 +878,7 @@ const FriendsScroller = () => {
         data={friends}
         renderItem={({ item: f }) => (
           <ProfileIcon
+            id={f.profile.id}
             style={{
               marginRight: 10,
               // borderWidth: 2,

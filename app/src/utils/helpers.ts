@@ -27,6 +27,18 @@ export function getGradientById(id: string) {
     ["#CE99FF", "#F599FF"], // Gradient 18
     ["#FFB8B3", "#FFDBC6"], // Gradient 19
     ["#FFCC99", "#FFF1B3"], // Gradient 20
+    // add 5 more blue gradients
+    ["#B3E9FF", "#CFDFFF"], // Gradient 21
+    ["#99E5FF", "#C7FBFF"], // Gradient 22
+    ["#B9F0FF", "#ECF3FF"], // Gradient 23
+    ["#99E8FF", "#FFB88A"], // Gradient 24
+    ["#B8EAB0", "#DFFFC6"], // Gradient
+    // add 5 more green
+    ["#C6FFB2", "#ADFFE9"], // Gradient 26
+    ["#B8EAB0", "#DFFFC6"], // Gradient 27
+    ["#99EBC3", "#FFF5A3"], // Gradient 28
+    ["#B9F0FF", "#ECF3FF"], // Gradient 29
+    ["#99E5FF", "#C7FBFF"], // Gradient
   ];
 
   // Use the id to pick a gradient, using modulo to wrap around if id exceeds array length

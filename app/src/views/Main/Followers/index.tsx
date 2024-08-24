@@ -218,6 +218,7 @@ const UserRow = React.memo(
       >
         <ProfileIcon
           initials={initials}
+          id={user.id}
           profileImageUrl={user.avatarImageUrl || null}
           onPress={noop}
         />
