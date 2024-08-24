@@ -286,6 +286,8 @@ const convertCuriusToContent = async (
             const authorResponse = await authorRepo.create({
                 id: uuidv4(),
                 name,
+                createdAt: new Date(),
+                updatedAt: new Date(),
                 imageUrl: null,
                 contents: [content], // Pass the Content object here
             });

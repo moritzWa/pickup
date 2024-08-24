@@ -12,6 +12,8 @@ export const createAuthor = mutationField("createAuthor", {
     resolve: async (_parent, { name, imageUrl }) => {
         const authorResponse = await authorRepo.create({
             id: uuidv4(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
             name,
             imageUrl: imageUrl ?? null,
             contents: [],

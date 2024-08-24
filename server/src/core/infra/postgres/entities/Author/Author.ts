@@ -1,5 +1,6 @@
 import {
     Column,
+    CreateDateColumn,
     Entity,
     JoinTable,
     ManyToMany,
@@ -37,4 +38,18 @@ export class Author {
         inverseJoinColumn: { name: "content_id", referencedColumnName: "id" },
     })
     contents!: Content[];
+
+    @CreateDateColumn({
+        name: "created_at",
+        type: "timestamp",
+        default: () => "CURRENT_TIMESTAMP",
+    })
+    createdAt!: Date;
+
+    @CreateDateColumn({
+        name: "updated_at",
+        type: "timestamp",
+        default: () => "CURRENT_TIMESTAMP",
+    })
+    updatedAt!: Date;
 }

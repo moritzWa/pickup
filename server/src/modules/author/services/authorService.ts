@@ -18,6 +18,8 @@ const findOrCreate = async (
         id: uuidv4(),
         imageUrl: a.imageUrl || "",
         name,
+        createdAt: new Date(),
+        updatedAt: new Date(),
     };
 
     const saveResponse = await authorRepo.save(author);
