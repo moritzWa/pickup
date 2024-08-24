@@ -120,9 +120,12 @@ const _embedContent = async (contentId: string) => {
         console.log(`[no summary for ${content.title}]`);
         return Promise.resolve();
     }
-    const embeddingResponse = await openai.embeddings.create(
-        `Title: ${content.title}. Summary: ${content.summary || ""}`
-    );
+
+    const query = `Title: ${content.title}. Summary: ${content.summary || ""}`;
+    // 4000 tokens
+    const queryTokens = query.slice(0, 4000);
+
+    const embeddingResponse = await openai.embeddings.create(queryTokens);
 
     if (embeddingResponse.isFailure()) {
         throw embeddingResponse.error;
