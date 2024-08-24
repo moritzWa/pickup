@@ -7,6 +7,7 @@ import {
 import { faPhone } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
+  faBookmark,
   faBullhorn,
   faComment,
   faHeart,
@@ -19,6 +20,7 @@ import * as Haptics from "expo-haptics";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Linking,
   RefreshControl,
   ScrollView,
   Share,
@@ -324,6 +326,20 @@ const Profile = () => {
             display: "flex",
           }}
         >
+          <Section
+            onPress={() => {
+              Linking.openURL(
+                "https://chromewebstore.google.com/detail/pickup/dncdlmhejngpacajdfcjdgakjinohlab?authuser=0&hl=en"
+              );
+            }}
+            icon={<FontAwesomeIcon icon={faBookmark} color={text} />}
+            name="Get Chrome Extension"
+          />
+          <Section
+            onPress={_navigateToInterests}
+            icon={<FontAwesomeIcon icon={faHeart} color={text} />}
+            name="Update Interests"
+          />
           <Section
             onPress={_leaveFeedback}
             icon={<FontAwesomeIcon icon={faComment} color={text} />}
