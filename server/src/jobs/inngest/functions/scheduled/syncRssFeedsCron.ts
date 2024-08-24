@@ -32,6 +32,8 @@ const syncRSSFeedCron = inngest.createFunction(
         const insertionId = uuidv4();
 
         for (const podcast of podcasts) {
+            // console.log(`[syncing ${podcast.name}]`);
+
             const contentResponse = await RSSFeedService.scrapeRssFeed(
                 podcast.url,
                 podcast.name,
@@ -51,6 +53,10 @@ const syncRSSFeedCron = inngest.createFunction(
             if (upsertedResponse.isFailure()) {
                 throw upsertedResponse.error;
             }
+
+            console.log(
+                `[${podcast.name}]: inserted: ${upsertedResponse.value.added}, updated: ${upsertedResponse.value.upserted}`
+            );
         }
     }
 );
