@@ -38,6 +38,7 @@ import {
   Dimensions,
   Linking,
   Share,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
@@ -49,6 +50,7 @@ import { useTheme } from "src/hooks/useTheme";
 import { NavigationProps, RootStackParamList } from "src/navigation";
 import {
   faCheck,
+  faChevronRight,
   faClone,
   faComment,
   faCopy,
@@ -67,6 +69,13 @@ import { noop } from "lodash";
 import { RefreshControl } from "react-native-gesture-handler";
 import { NotificationRow } from "./NotificationRow";
 import { BaseNotificationFields } from "src/api/fragments";
+import FastImage from "react-native-fast-image";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  check,
+  checkNotifications,
+  PERMISSIONS,
+} from "react-native-permissions";
 
 const Notifications = () => {
   const { height } = Dimensions.get("window");
@@ -85,6 +94,7 @@ const Notifications = () => {
   const [loadedNotifs, setLoadedNotifs] = useState(false);
   const isFocused = useIsFocused();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasPermission, setHasPermission] = useState(true);
 
   // update read status
   const [readNotifications, { error }] = useMutation<
@@ -103,6 +113,25 @@ const Notifications = () => {
     if (isFocused) {
       void refetch();
     }
+  }, [isFocused]);
+
+  const _setPushPermission = async () => {
+    if (Platform.OS === "ios" || Platform.OS === "android") {
+      const { status } = await checkNotifications();
+
+      if (status !== "granted") {
+        setHasPermission(false);
+      } else {
+        setHasPermission(true);
+      }
+    } else {
+      console.log("Push notifications are not supported on this platform.");
+    }
+  };
+
+  useEffect(() => {
+    // set the has permission using the check
+    _setPushPermission();
   }, [isFocused]);
 
   // mark as read after some time -- only the first time the page loads though!
@@ -141,6 +170,18 @@ const Notifications = () => {
     isFocused,
   ]);
 
+  const _askForPush = async () => {
+    navigation.navigate("EnablePushNotifications", {
+      hideHeader: false,
+      isSignupFlow: false,
+      onOverrideAccept: () => navigation.goBack(),
+      onOverrideDeny: () => navigation.goBack(),
+      isAirdropFlow: false,
+      onAccept: noop,
+      onDeny: noop,
+    });
+  };
+
   const _onRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -170,11 +211,56 @@ const Notifications = () => {
         data={notifications}
         keyExtractor={(item) => item.id}
         initialNumToRender={8}
+        ListHeaderComponent={
+          hasPermission ? null : (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={_askForPush}
+              style={{
+                padding: 20,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 5,
+                backgroundColor: colors.lightBlue50,
+              }}
+            >
+              <Image
+                source={require("src/assets/icons/bell-solid.png")}
+                tintColor={colors.white}
+                style={{
+                  width: 20,
+                  height: 20,
+                  alignSelf: "center",
+                  marginRight: 10,
+                }}
+              />
+
+              <Text
+                style={{
+                  flex: 1,
+                  fontFamily: "Inter-Bold",
+                  color: colors.white,
+                  fontSize: 16,
+                  textAlign: "left",
+                }}
+              >
+                Enable push notifications
+              </Text>
+
+              <FontAwesomeIcon
+                icon={faChevronRight}
+                size={16}
+                color={colors.white}
+              />
+            </TouchableOpacity>
+          )
+        }
         // render the rows efficiently:
         removeClippedSubviews={true}
         maxToRenderPerBatch={8}
         windowSize={8}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 5 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
           <RefreshControl
             tintColor={fullTheme.activityIndicator}

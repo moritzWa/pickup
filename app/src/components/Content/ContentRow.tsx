@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/client";
 import {
   faArchive,
   faBookReader,
+  faHeart,
   faPause,
   faPlay,
   faPodcast,
@@ -50,8 +51,9 @@ import {
 import { getGradientById } from "src/utils/helpers";
 import ProfileIcon from "../ProfileIcon";
 import { getDescription } from "./contentHelpers";
+import { truncate } from "lodash";
 
-const IMAGE_SIZE = 32;
+const IMAGE_SIZE = 35;
 
 export const ContentRow = ({
   content: c,
@@ -237,13 +239,12 @@ export const ContentRow = ({
           justifyContent: "center",
           alignItems: "center",
           display: "flex",
+          marginRight: 10,
           flexDirection: "row",
           backgroundColor: isActive ? theme.text : theme.text,
           width: 55,
           height: 55,
           borderRadius: 50,
-          marginTop: 10,
-          marginBottom: 10,
         }}
       >
         <FontAwesomeIcon
@@ -252,6 +253,32 @@ export const ContentRow = ({
           size={22}
         />
       </TouchableOpacity>
+
+      {/* <TouchableOpacity
+        onPress={onArchiveContent}
+        activeOpacity={0.9}
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "row",
+          backgroundColor: isActive ? theme.text : theme.text,
+          width: 55,
+          marginRight: 10,
+          height: 55,
+          borderRadius: 50,
+        }}
+      >
+        <FontAwesomeIcon
+          icon={faHeart}
+          color={
+            c.contentSession?.isBookmarked
+              ? colors.pink50
+              : theme.secondaryBackground
+          }
+          size={22}
+        />
+      </TouchableOpacity> */}
 
       <TouchableOpacity
         onPress={onAddOrRemoveContentToQueue}
@@ -265,9 +292,7 @@ export const ContentRow = ({
           width: 55,
           height: 55,
           borderRadius: 50,
-          marginTop: 10,
-          marginLeft: 15,
-          marginBottom: 10,
+          // marginTop: 5,
         }}
       >
         {isQueued ? (
@@ -455,8 +480,13 @@ export const ContentRow = ({
                           fontFamily: "Inter-Medium",
                         }}
                       >
+                        {truncate(c.authorName || "", {
+                          length: 14,
+                          omission: ".",
+                        })}{" "}
+                        •{" "}
                         {c.releasedAt
-                          ? moment(c.releasedAt).format("MMM Do, YYYY") + " • "
+                          ? moment(c.releasedAt).format("M/D/YY") + " • "
                           : ""}
                         {c.lengthFormatted}{" "}
                         {c.contentSession?.percentFinished ? " • " : ""}

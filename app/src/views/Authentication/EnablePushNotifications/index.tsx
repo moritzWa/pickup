@@ -258,9 +258,8 @@ const PushNotificationPrompt = ({
           >
             <Text
               style={{
-                color: fullTheme.header,
                 fontSize: 16,
-                fontFamily: "Inter-Semibold",
+                fontFamily: "Inter-Regular",
               }}
             >
               No Thanks
