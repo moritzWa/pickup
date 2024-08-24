@@ -360,14 +360,38 @@ export const SearchResults = () => {
         style={{
           flex: 1,
         }}
-        SectionSeparatorComponent={() => (
-          <View
-            style={{
-              height: 1,
-              backgroundColor: fullTheme.border,
-            }}
-          />
-        )}
+        renderSectionHeader={({ section }) => {
+          return (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 10,
+                paddingHorizontal: 15,
+                paddingBottom: 10,
+              }}
+            >
+              <Text
+                style={{
+                  flex: 1,
+                  fontFamily: "Inter-Medium",
+                  fontSize: IS_IPAD ? 30 : 18,
+                  color: header,
+                }}
+              >
+                {section.key === "user" ? "Users" : "Your Contacts"}
+              </Text>
+            </View>
+          );
+        }}
+        // SectionSeparatorComponent={() => (
+        //   <View
+        //     style={{
+        //       height: 1,
+        //       backgroundColor: fullTheme.border,
+        //     }}
+        //   />
+        // )}
         contentContainerStyle={{
           paddingBottom: 100,
         }}
