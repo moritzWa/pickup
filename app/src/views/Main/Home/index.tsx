@@ -841,25 +841,26 @@ const FriendsScroller = () => {
   return (
     <View
       style={{
-        paddingLeft: 10,
-        paddingVertical: 10,
+        paddingLeft: 5,
+        marginTop: 5,
+        paddingVertical: 0,
         marginHorizontal: 10,
         borderRadius: 15,
         marginBottom: 25,
-        backgroundColor: theme.secondaryBackground,
+        // backgroundColor: theme.secondaryBackground,
       }}
     >
-      <View style={{ padding: 0, marginBottom: 10 }}>
+      <View style={{ padding: 0, marginBottom: 15 }}>
         <Text
           style={{
-            color: theme.header,
-            fontFamily: "Inter-Bold",
+            color: theme.textSecondary,
+            fontFamily: "Inter-Black",
             fontSize: 12,
             marginBottom: 0,
             textTransform: "uppercase",
           }}
         >
-          Your Friends
+          your friends
         </Text>
       </View>
 
@@ -881,7 +882,7 @@ const FriendsScroller = () => {
               // borderWidth: 2,
               // borderColor: theme.border,
             }}
-            size={50}
+            size={65}
             onPress={() => onPressUsername(f.profile.username || "")}
             profileImageUrl={f.profile.avatarImageUrl}
             textStyle={{ fontSize: 18 }}
