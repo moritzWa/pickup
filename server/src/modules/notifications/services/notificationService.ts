@@ -204,24 +204,24 @@ export const createAndSend = async (
 
         const notification = notificationResponse.value;
 
-        // if (user.hasPushNotificationsEnabled) {
-        const data: OnesignalJobData = {
-            userId: user.id,
-            title: notification.title,
-            message: notification.subtitle,
-            channel: NotificationChannel.Onesignal,
-        };
+        if (user.hasPushNotificationsEnabled) {
+            const data: OnesignalJobData = {
+                userId: user.id,
+                title: notification.title,
+                message: notification.subtitle,
+                channel: NotificationChannel.Onesignal,
+            };
 
-        console.log(`[sending push to ${user.id}]`);
+            console.log(`[sending push to ${user.id}]`);
 
-        await inngest.send({
-            id: params.idempotency,
-            name: InngestEventName.SendNotification,
-            data,
-        });
-        // } else {
-        //     console.log(`[not sending push to ${user.id}]`);
-        // }
+            await inngest.send({
+                id: params.idempotency,
+                name: InngestEventName.SendNotification,
+                data,
+            });
+        } else {
+            console.log(`[not sending push to ${user.id}]`);
+        }
 
         Datadog.increment("notification.create_and_send.ok");
 
