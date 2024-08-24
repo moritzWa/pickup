@@ -290,7 +290,7 @@ export const ContentRow = ({
         />
       </TouchableOpacity>
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={bookmarkContent}
         activeOpacity={0.9}
         style={{
@@ -316,7 +316,7 @@ export const ContentRow = ({
           }
           size={22}
         />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <TouchableOpacity
         onPress={onAddOrRemoveContentToQueue}
