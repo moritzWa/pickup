@@ -26,7 +26,9 @@ const processContentCron = inngest.createFunction(
             return failure(contentResponse.error);
         }
 
-        console.log(`[processing ${contentResponse.value.length} content]`);
+        console.log(
+            `[processing ${contentResponse.value.length} pieces of content]`
+        );
 
         for (const content of contentResponse.value) {
             await inngest.send({

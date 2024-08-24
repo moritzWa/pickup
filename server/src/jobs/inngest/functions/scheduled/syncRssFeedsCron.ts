@@ -22,43 +22,37 @@ const syncRSSFeedCron = inngest.createFunction(
     },
     { cron: CRON },
     async ({}) => {
-        const usersResponse = await pgUserRepo.find({ select: { id: true } });
-
-        throwIfError(usersResponse);
-
-        const userIds = usersResponse.value.map((user) => user.id);
-
         const podcasts = PODCASTS;
         const insertionId = uuidv4();
 
-        for (const podcast of podcasts) {
-            // console.log(`[syncing ${podcast.name}]`);
-
-            const contentResponse = await RSSFeedService.scrapeRssFeed(
-                podcast.url,
-                podcast.name,
-                ContentType.PODCAST
-            );
-
-            if (contentResponse.isFailure()) {
-                throw contentResponse.error;
-            }
-
-            const content = contentResponse.value;
-
-            const upsertedResponse = await RSSFeedService.upsertRssFeed(
-                content
-            );
-
-            if (upsertedResponse.isFailure()) {
-                throw upsertedResponse.error;
-            }
-
-            console.log(
-                `[${podcast.name}]: inserted: ${upsertedResponse.value.added}, updated: ${upsertedResponse.value.upserted}`
-            );
-        }
+        await parallel(5, PODCASTS, _processPodcast(insertionId));
     }
 );
+
+const _processPodcast =
+    (insertionId: string) => async (podcast: (typeof PODCASTS)[number]) => {
+        const contentResponse = await RSSFeedService.scrapeRssFeed(
+            podcast.url,
+            podcast.name,
+            ContentType.PODCAST,
+            insertionId
+        );
+
+        if (contentResponse.isFailure()) {
+            throw contentResponse.error;
+        }
+
+        const content = contentResponse.value;
+
+        const upsertedResponse = await RSSFeedService.upsertRssFeed(content);
+
+        if (upsertedResponse.isFailure()) {
+            throw upsertedResponse.error;
+        }
+
+        console.log(
+            `[${podcast.name}]: inserted: ${upsertedResponse.value.added}, updated: ${upsertedResponse.value.upserted}`
+        );
+    };
 
 export { syncRSSFeedCron };
