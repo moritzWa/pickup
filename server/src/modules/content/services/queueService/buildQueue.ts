@@ -23,26 +23,13 @@ import moment = require("moment");
 import { NotificationService } from "src/modules/notifications/services/notificationService";
 import { NotificationType } from "src/core/infra/postgres/entities/Notification";
 
-// needs to be idempotent
-export const buildQueue = async (
-    user: User,
-    limit: number,
-    afterDate?: Date
-): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
-    const description = user.interestDescription;
-
-    const feedResponse = await feedRepo.findForUser(user.id, {
-        select: { contentId: true },
-    });
-
-    if (feedResponse.isFailure()) {
-        return failure(feedResponse.error);
-    }
-
+const getRecentlyLikedContent = async (
+    userId: string
+): Promise<FailureOrSuccess<DefaultErrors, string[]>> => {
     // v0 is just get content interacted with
     const recentlyLikedContentResponse = await interactionRepo.find({
         where: {
-            userId: user.id,
+            userId,
             type: In([
                 InteractionType.Bookmarked,
                 InteractionType.Finished,
@@ -68,6 +55,33 @@ export const buildQueue = async (
     const recentlyLikedContentIds: string[] = uniq(
         recentlyLikedContentResponse.value.map((c) => c.contentId)
     );
+
+    return success(recentlyLikedContentIds);
+};
+
+// needs to be idempotent
+export const buildQueue = async (
+    user: User,
+    limit: number
+): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
+    const description = user.interestDescription;
+
+    const feedResponse = await feedRepo.findForUser(user.id, {
+        select: { contentId: true },
+    });
+
+    if (feedResponse.isFailure()) {
+        return failure(feedResponse.error);
+    }
+
+    const recentlyLikedContentIdsResponse = await getRecentlyLikedContent(
+        user.id
+    );
+    if (recentlyLikedContentIdsResponse.isFailure()) {
+        return failure(recentlyLikedContentIdsResponse.error);
+    }
+
+    const recentlyLikedContentIds = recentlyLikedContentIdsResponse.value;
 
     const contentResponse = await contentRepo.findByIds(
         recentlyLikedContentIds,
