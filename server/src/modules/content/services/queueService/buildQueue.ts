@@ -1,7 +1,6 @@
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
-import { NotificationType } from "src/core/infra/postgres/entities/Notification";
 import {
     DefaultErrors,
     failure,
@@ -11,7 +10,6 @@ import {
 import { authorRepo } from "src/modules/author/infra";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkWithDistance } from "src/modules/curius/infra/linkRepo";
-import { NotificationService } from "src/modules/notifications/services/notificationService";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
 import { v4 as uuidv4 } from "uuid";
@@ -20,6 +18,7 @@ import {
     getRecentlyLikedContent,
     getSimilarContentForUser,
     getTopContent,
+    sendNewRecommendationsNotification,
 } from "./utils";
 import moment = require("moment");
 
@@ -84,17 +83,10 @@ export const buildQueue = async (
 
     const firstTitle = rankedContent[0]?.title;
 
-    await NotificationService.sendNotification(
+    await sendNewRecommendationsNotification(
         user,
-        {
-            title: `New podcast reccs ready ✨`,
-            subtitle: `${firstTitle || "View now"}`,
-            iconImageUrl: null,
-            followerUserId: null,
-            type: NotificationType.NewRecommendations,
-            feedInsertionId: queueResponse.value.insertionId,
-        },
-        true
+        firstTitle,
+        queueResponse.value.insertionId
     );
 
     return success(queueResponse.value.items);

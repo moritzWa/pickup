@@ -4,6 +4,15 @@ import { UnexpectedError } from ".";
 
 export type FailureOrSuccess<E, V> = Failure<E, never> | Success<never, V>;
 
+export const handleFailure = <E, V>(
+    result: FailureOrSuccess<E, V>
+): FailureOrSuccess<E, V> | null => {
+    if (result.isFailure()) {
+        return failure(result.error);
+    }
+    return null;
+};
+
 export const isSuccess = <E, V>(
     result: FailureOrSuccess<E, V>
 ): result is Success<never, V> => {

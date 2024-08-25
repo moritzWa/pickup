@@ -1,6 +1,7 @@
 import { orderBy, uniq, uniqBy } from "lodash";
 import { Content } from "src/core/infra/postgres/entities";
 import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
+import { NotificationType } from "src/core/infra/postgres/entities/Notification";
 import { User } from "src/core/infra/postgres/entities/User";
 import {
     DefaultErrors,
@@ -8,6 +9,7 @@ import {
     FailureOrSuccess,
     success,
 } from "src/core/logic";
+import { NotificationService } from "src/modules/notifications/services/notificationService";
 import { In } from "typeorm";
 import { contentRepo, interactionRepo } from "../../infra";
 import { ContentWithDistance } from "../../infra/contentRepo";
@@ -129,4 +131,23 @@ export const getTopContent = async (
     );
 
     return success(randomContent);
+};
+
+export const sendNewRecommendationsNotification = async (
+    user: User,
+    firstTitle: string | undefined,
+    insertionId: string
+): Promise<void> => {
+    await NotificationService.sendNotification(
+        user,
+        {
+            title: `New podcast reccs ready ✨`,
+            subtitle: `${firstTitle || "View now"}`,
+            iconImageUrl: null,
+            followerUserId: null,
+            type: NotificationType.NewRecommendations,
+            feedInsertionId: insertionId,
+        },
+        true
+    );
 };
