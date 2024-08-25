@@ -246,6 +246,24 @@ const handleHTMLContentProcessingError = (content: Content, error: Error) => {
     markSkip(content, "skippedErrorFetchingFullText");
 };
 
+const containsMarkdownElements = (text: string): boolean => {
+    const markdownPatterns = [
+        /\[.*?\]\(.*?\)/, // Links
+        /\*\*.*?\*\*/, // Bold
+        /__.*?__/, // Underline
+        /\*.*?\*/, // Italic
+        /^#+\s/, // Headers
+        /^\s*[-*+]\s/, // Unordered lists
+        /^\s*\d+\.\s/, // Ordered lists
+        /`.*?`/, // Inline code
+        /^```[\s\S]*?```/, // Code blocks
+        /^\s*>\s/, // Blockquotes
+        /!\[.*?\]\(.*?\)/, // Images
+    ];
+
+    return markdownPatterns.some((pattern) => pattern.test(text));
+};
+
 const updateContentWithParsedContent = async (
     content: Content,
     result: ReadabilityResult
@@ -257,6 +275,13 @@ const updateContentWithParsedContent = async (
         content.deadLink = false;
     }
 
+    const plainTextContent = result.textContent;
+    if (containsMarkdownElements(plainTextContent)) {
+        Logger.error(
+            `Markdown elements detected in plain text content for article (scrapeContentTextService): ${content.title}`
+        );
+    }
+
     // Use a type-safe way to update content properties
     const contentUpdate: Partial<Content> = {
         length: result.length,
@@ -266,7 +291,7 @@ const updateContentWithParsedContent = async (
             ? new Date(result.publishedTime)
             : null,
         title: result.title || content.title,
-        content: result.textContent,
+        content: plainTextContent,
         contentAsMarkdown: NodeHtmlMarkdown.translate(result.content || ""),
     };
 
