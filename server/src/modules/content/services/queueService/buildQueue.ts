@@ -1,8 +1,7 @@
-import { orderBy, uniq, uniqBy } from "lodash";
 import { connect } from "src/core/infra/postgres";
 import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import { ContentType } from "src/core/infra/postgres/entities/Content";
-import { InteractionType } from "src/core/infra/postgres/entities/Interaction";
+import { NotificationType } from "src/core/infra/postgres/entities/Notification";
 import {
     DefaultErrors,
     failure,
@@ -12,60 +11,23 @@ import {
 import { authorRepo } from "src/modules/author/infra";
 import { curiusLinkRepo } from "src/modules/curius/infra";
 import { LinkWithDistance } from "src/modules/curius/infra/linkRepo";
+import { NotificationService } from "src/modules/notifications/services/notificationService";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { AudioService } from "src/shared/audioService";
-import { In } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-import { contentRepo, feedRepo, interactionRepo } from "../../infra";
-import { ContentWithDistance } from "../../infra/contentRepo";
-import { ContentService } from "../contentService";
+import { contentRepo, feedRepo } from "../../infra";
+import {
+    getRecentlyLikedContent,
+    getSimilarContentForUser,
+    getTopContent,
+} from "./utils";
 import moment = require("moment");
-import { NotificationService } from "src/modules/notifications/services/notificationService";
-import { NotificationType } from "src/core/infra/postgres/entities/Notification";
-
-const getRecentlyLikedContent = async (
-    userId: string
-): Promise<FailureOrSuccess<DefaultErrors, string[]>> => {
-    // v0 is just get content interacted with
-    const recentlyLikedContentResponse = await interactionRepo.find({
-        where: {
-            userId,
-            type: In([
-                InteractionType.Bookmarked,
-                InteractionType.Finished,
-                InteractionType.ListenedToBeginning,
-                InteractionType.Queued,
-            ]),
-        },
-        select: {
-            id: true,
-            type: true,
-            contentId: true,
-        },
-        order: {
-            createdAt: "desc",
-        },
-        take: 100, // just get last 100
-    });
-
-    if (recentlyLikedContentResponse.isFailure()) {
-        return failure(recentlyLikedContentResponse.error);
-    }
-
-    const recentlyLikedContentIds: string[] = uniq(
-        recentlyLikedContentResponse.value.map((c) => c.contentId)
-    );
-
-    return success(recentlyLikedContentIds);
-};
 
 // needs to be idempotent
 export const buildQueue = async (
     user: User,
     limit: number
 ): Promise<FailureOrSuccess<DefaultErrors, FeedItem[]>> => {
-    const description = user.interestDescription;
-
     const feedResponse = await feedRepo.findForUser(user.id, {
         select: { contentId: true },
     });
@@ -80,97 +42,38 @@ export const buildQueue = async (
     if (recentlyLikedContentIdsResponse.isFailure()) {
         return failure(recentlyLikedContentIdsResponse.error);
     }
-
     const recentlyLikedContentIds = recentlyLikedContentIdsResponse.value;
 
+    // get embeddings of recently liked content
     const contentResponse = await contentRepo.findByIds(
         recentlyLikedContentIds,
         {
             select: { embedding: true },
         }
     );
-
     if (contentResponse.isFailure()) {
         return failure(contentResponse.error);
     }
-
     const recentlyLikedContent = contentResponse.value;
 
-    const queries = [
-        (description || "").slice(0, 4_000),
-        ...user.interestCategories.map((c) => c.toLowerCase()),
-    ].filter((v) => !!v);
-
-    const allContent: { content: ContentWithDistance[]; query: string }[] = [];
-
-    for (const query of queries) {
-        const similarContentResponse =
-            await ContentService.getSimilarContentFromQuery(user, query, limit);
-
-        if (similarContentResponse.isFailure()) {
-            continue;
-        }
-
-        allContent.push({
-            content: similarContentResponse.value,
-            query,
-        });
-    }
-
-    for (const content of recentlyLikedContent) {
-        const similarContentResponse = await ContentService.getSimilarContent(
-            user,
-            content,
-            limit
-        );
-
-        if (similarContentResponse.isFailure()) {
-            continue;
-        }
-
-        allContent.push({
-            content: similarContentResponse.value,
-            query: `Content like: ${content.title}`,
-        });
-    }
-
-    // relevant to not as relevant
-    let allRankedContent = uniqBy(
-        orderBy(
-            allContent.flatMap((c) => c.content),
-            (c) => c.averageDistance,
-            "asc"
-        ),
-        (c) => c.id
+    const allRankedContent = await getSimilarContentForUser(
+        user,
+        recentlyLikedContent,
+        limit
     );
 
     let rankedContent = allRankedContent.slice(0, limit);
 
-    debugger;
-
-    // this is possible if no interests were filled out
-    // but we still want to be able to show the user something
     if (!rankedContent.length) {
-        const topContentResponse = await contentRepo.find({
-            order: {
-                releasedAt: "desc",
-            },
-            take: limit,
-        });
+        // this is possible if no interests were filled out
+        // but we still want to be able to show the user something
+        const topContentResponse = await getTopContent(limit);
 
         if (topContentResponse.isFailure()) {
             return failure(topContentResponse.error);
         }
 
-        const randomContent = topContentResponse.value.map(
-            (c): ContentWithDistance => ({
-                ...c,
-                minDistance: 1,
-                averageDistance: 1,
-            })
-        );
-
-        rankedContent = randomContent;
+        rankedContent = topContentResponse.value;
     }
 
     const queueResponse = await buildQueueFromContent(user, rankedContent);
