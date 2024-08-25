@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import ffmpeg from "fluent-ffmpeg";
 import { unlinkSync, writeFileSync } from "fs";
 import mp3Duration from "mp3-duration";
@@ -10,12 +11,12 @@ import {
     success,
     UnexpectedError,
 } from "src/core/logic";
+import { chunkText } from "src/modules/content/services/utils";
 import { Firebase, Logger } from "src/utils";
 import { PassThrough } from "stream";
 import { promisify } from "util";
 import _ = require("lodash");
 import internal = require("stream");
-import { chunkText } from "src/modules/content/services/utils";
 
 const bucket = Firebase.storage().bucket();
 
@@ -34,24 +35,25 @@ type AudioUrlResult = FailureOrSuccess<
 const mp3DurationPromise = promisify(mp3Duration);
 
 async function stitchAndStreamAudioFiles(
-    buffers: Buffer[],
-    fileOutputName: string
+    contentTitleSlug: string,
+    buffers: Buffer[]
 ): Promise<AudioUrlResult> {
     return new Promise<AudioUrlResult>((resolve) => {
         const ffmpegCommand = ffmpeg();
 
-        console.log(`Processing ${buffers.length} audio buffers`);
+        Logger.info(`Processing ${buffers.length} audio buffers`);
 
-        // Create temp, local input buffer files
+        // Create temp, local input buffer files with unique names
         const tempInputFileBuffers = buffers.map((buffer, index) => {
-            const tempFilePath = `./temp_input_${index}.mp3`;
+            const uniqueId = crypto.randomBytes(4).toString("hex");
+            const tempFilePath = `./temp_input_${index}_${contentTitleSlug}_${uniqueId}.mp3`;
             writeFileSync(tempFilePath, buffer);
             return tempFilePath;
         });
 
         // add input buffers to ffmpeg command
         tempInputFileBuffers.forEach((filePath, index) => {
-            console.log(`Adding file ${index + 1} to FFmpeg command`);
+            Logger.info(`Adding file ${index + 1} to FFmpeg command`);
             ffmpegCommand.input(filePath);
         });
 
@@ -62,7 +64,8 @@ async function stitchAndStreamAudioFiles(
         const durationStream = new PassThrough();
 
         // Stream the merged audio directly to Firebase Storage
-        const fireBaseFileRef = bucket.file(fileOutputName);
+        const outputFileName = `${contentTitleSlug}.mp3`;
+        const fireBaseFileRef = bucket.file(outputFileName);
 
         const writeStream = fireBaseFileRef.createWriteStream({
             contentType: "audio/mpeg",
@@ -71,11 +74,16 @@ async function stitchAndStreamAudioFiles(
         // Pipe the ffmpeg output to both streams
         ffmpegCommand
             .on("error", (err) => {
-                console.error("FFmpeg error:", err);
+                Logger.error(
+                    `FFmpeg error: ${JSON.stringify(
+                        err,
+                        Object.getOwnPropertyNames(err)
+                    )}`
+                );
                 resolve(failure(new UnexpectedError(err)));
             })
             .on("end", async () => {
-                console.log("Files have been merged and streamed successfully");
+                Logger.info("Files have been merged and streamed successfully");
                 const [url] = await fireBaseFileRef.getSignedUrl({
                     action: "read",
                     expires: "03-01-2500",
@@ -87,7 +95,7 @@ async function stitchAndStreamAudioFiles(
                 );
                 resolve(success({ url, lengthMs: null })); // We'll update this later
             })
-            .mergeToFile(passThroughStream, "./temp")
+            .mergeToFile(passThroughStream, "./temp") // dir for ffmpeg to store intermediate files
             .format("mp3");
 
         // Pipe the pass-through stream to both Firebase and duration calculation
@@ -114,18 +122,16 @@ async function stitchAndStreamAudioFiles(
                     })
                 );
             } catch (error) {
-                console.error("Error calculating audio duration:", error);
+                Logger.error(
+                    `Error calculating audio duration: ${JSON.stringify(error)}`
+                );
                 // The original resolve will still be called, but without lengthMs
             }
         });
 
         ffmpegCommand
-            .on("start", (commandLine) => {
-                // console.log("FFmpeg process started:", commandLine);
-            })
-            .on("progress", (progress) => {
-                // console.log("FFmpeg progress:", progress);
-            });
+            .on("start", (commandLine) => {})
+            .on("progress", (progress) => {});
     });
 }
 
@@ -148,34 +154,8 @@ const toSpeech = async (
     const startTime = performance.now();
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    // TODO: bring this back but chunk-wise
-    // const openPromptResponse = await openai.chat.completions.create([
-    //     {
-    //         role: "system",
-    //         content:
-    //             "Here is a batch of text. Clean it up and only return the cleaned up text. The text will be used to transform into audio content for a listener.",
-    //     },
-    //     {
-    //         role: "user",
-    //         content: `Text: ${_text}`,
-    //     },
-    // ]);
-
-    // if (openPromptResponse.isFailure()) {
-    //     return failure(openPromptResponse.error);
-    // }
-
-    // const openPrompt = openPromptResponse.value;
-    // const prompt = openPrompt.choices[0].message.content;
-
-    // if (!prompt) {
-    //     return failure(new Error("Prompt was empty"));
-    // }
-    // const chunks = chunkText(prompt);
-
     const chunks = chunkText(_text);
 
-    // log how many chunks were created
     Logger.info(`chunks: ${chunks.length}`);
 
     const buffers: Buffer[] = [];
@@ -228,8 +208,8 @@ const toSpeech = async (
     const contentTitleSlug = slugify(rawContentTitle);
     const stitchingStartTime = performance.now();
     const audioFileResponse = await stitchAndStreamAudioFiles(
-        buffers,
-        `${contentTitleSlug}.mp3`
+        contentTitleSlug,
+        buffers
     );
     const stitchingEndTime = performance.now();
     Logger.info(

@@ -21,7 +21,7 @@ import { failure, FailureOrSuccess, success } from "src/core/logic";
 import { NotFoundError, UnexpectedError } from "src/core/logic/errors";
 import { DefaultErrors } from "src/core/logic/errors/default";
 import { DEFAULT_LINKS_RETURN } from "src/modules/curius/infra/linkRepo";
-import { Helpers } from "src/utils";
+import { Helpers, Logger } from "src/utils";
 
 type ContentResponse = FailureOrSuccess<DefaultErrors, ContentModel>;
 type ContentArrayResponse = FailureOrSuccess<DefaultErrors, ContentModel[]>;
@@ -321,6 +321,12 @@ export class PostgresContentRepository {
 
             return success(linksWithDistance);
         } catch (err) {
+            Logger.error(
+                `Error in findSimilarContentFromChunks: ${JSON.stringify(
+                    err,
+                    Object.getOwnPropertyNames(err)
+                )}`
+            );
             return failure(new UnexpectedError(err));
         }
     }
