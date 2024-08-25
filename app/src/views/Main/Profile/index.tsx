@@ -940,7 +940,7 @@ const ProfilePicture = () => {
       onPress={showActionSheet}
     >
       <ProfileIcon
-        id={me?.id || ""}
+        id={profile?.id || ""}
         textStyle={{ fontSize: 24 }}
         size={75}
         profileImageUrl={profileUrl}
