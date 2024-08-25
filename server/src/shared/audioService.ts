@@ -130,8 +130,12 @@ async function stitchAndStreamAudioFiles(
         });
 
         ffmpegCommand
-            .on("start", (commandLine) => {})
-            .on("progress", (progress) => {});
+            .on("start", (commandLine) => {
+                // Logger.info(`FFmpeg process started: ${commandLine}`);
+            })
+            .on("progress", (progress) => {
+                // Logger.info(`FFmpeg progress: ${JSON.stringify(progress)}`);
+            });
     });
 }
 

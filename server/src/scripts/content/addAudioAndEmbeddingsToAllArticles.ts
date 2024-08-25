@@ -83,16 +83,17 @@ const processArticle = async (article) => {
 const addAudioAndEmbeddingsToAllArticles = async () => {
     await dataSource.initialize();
 
-    // ok briefly at the start of this log how much the total result of findArticlesWithoutAudioAndEmbeddings is
-    const articlesResponse =
+    const initialArticlesResponse =
         await contentRepo.findArticlesWithoutAudioAndEmbeddings();
+    const totalArticles = initialArticlesResponse.value.length;
     Logger.info(
-        `Total articles without audio and embeddings: ${articlesResponse.value.length}`
+        `Total articles without audio and embeddings: ${totalArticles}`
     );
 
     try {
         const limit = 5; // Adjust as needed
         let articlesResponse;
+        let processedCount = 0;
 
         do {
             articlesResponse =
@@ -116,16 +117,21 @@ const addAudioAndEmbeddingsToAllArticles = async () => {
             const startTime = performance.now();
 
             await Promise.all(articles.map(processArticle));
-            // changes to be sequential bc audio service doesn't support concurrency yet I think
-            // for (const article of articles) {
-            //     await processArticle(article);
-            // }
+            processedCount += articles.length;
 
             const batchTime = (performance.now() - startTime) / 1000;
             Logger.info(
                 `Processed ${articles.length} articles in ${batchTime.toFixed(
                     2
                 )}s.`
+            );
+
+            const percentageProcessed = (
+                (processedCount / totalArticles) *
+                100
+            ).toFixed(2);
+            Logger.info(
+                `Total processed: ${processedCount}/${totalArticles} (${percentageProcessed}%)`
             );
         } while (articlesResponse.value.length > 0);
 
