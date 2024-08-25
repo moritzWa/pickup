@@ -1,5 +1,6 @@
 import * as pgvector from "pgvector/pg";
 import {
+    Brackets,
     EntityManager,
     FindManyOptions,
     FindOneOptions,
@@ -196,48 +197,45 @@ export class PostgresContentRepository {
         }
     }
 
-    async findArticlesWithoutAudioOrContent(
+    /**
+     * Finds articles that need processing:
+     * - Are of type ARTICLE
+     * - Not marked as skipped or dead
+     * - Missing either content, audio, or embeddings
+     */
+    async findArticlesWithoutAudioOrContentOrEmbedding(
         limit?: number
     ): Promise<ContentArrayResponse> {
         try {
-            const articles = await this.repo.find({
-                where: [
-                    {
-                        type: ContentType.ARTICLE,
-                        audioUrl: IsNull(),
-                        content: Not(IsNull()),
-                        skippedErrorFetchingFullText: Raw(
-                            (alias) => `${alias} IS NOT TRUE`
-                        ),
-                        skippedNotProbablyReadable: Raw(
-                            (alias) => `${alias} IS NOT TRUE`
-                        ),
-                        skippedInaccessiblePDF: Raw(
-                            (alias) => `${alias} IS NOT TRUE`
-                        ),
-                        deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
-                    },
-                    {
-                        type: ContentType.ARTICLE,
-                        audioUrl: IsNull(),
-                        content: IsNull(),
-                        skippedErrorFetchingFullText: Raw(
-                            (alias) => `${alias} IS NOT TRUE`
-                        ),
-                        skippedNotProbablyReadable: Raw(
-                            (alias) => `${alias} IS NOT TRUE`
-                        ),
-                        skippedInaccessiblePDF: Raw(
-                            (alias) => `${alias} IS NOT TRUE`
-                        ),
-                        deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
-                    },
-                ],
-                take: limit,
-                order: {
-                    createdAt: "ASC",
-                },
-            });
+            const articles = await this.repo
+                .createQueryBuilder("content")
+                .leftJoinAndSelect("content.chunks", "chunks")
+                .where("content.type = :type", { type: ContentType.ARTICLE })
+                .andWhere("content.embedding IS NULL")
+                .andWhere("content.skippedErrorFetchingFullText IS NOT TRUE")
+                .andWhere("content.skippedNotProbablyReadable IS NOT TRUE")
+                .andWhere("content.skippedInaccessiblePDF IS NOT TRUE")
+                .andWhere("content.deadLink IS NOT TRUE")
+                // not "fully processed"
+                .andWhere(
+                    new Brackets((qb) => {
+                        qb.where("content.content IS NULL")
+                            .orWhere("content.audioUrl IS NULL")
+                            .orWhere((subQb) => {
+                                const subQuery = subQb
+                                    .subQuery()
+                                    .select("1")
+                                    .from(ContentChunk, "chunk")
+                                    .where("chunk.contentId = content.id")
+                                    .getQuery();
+                                return `NOT EXISTS (${subQuery})`;
+                            });
+                    })
+                )
+                .take(limit)
+                .orderBy("content.createdAt", "ASC")
+                .getMany();
+
             return success(articles);
         } catch (err) {
             return failure(new UnexpectedError(err));

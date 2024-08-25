@@ -1,8 +1,11 @@
 import { OpenAI } from "openai";
 import { performance } from "perf_hooks";
+import * as pgvector from "pgvector/pg";
 import { dataSource } from "src/core/infra/postgres";
-import { contentRepo } from "src/modules/content/infra";
+import { ContentChunk } from "src/core/infra/postgres/entities";
+import { contentChunkRepo, contentRepo } from "src/modules/content/infra";
 import { ScrapeContentTextService } from "src/modules/content/services/scrapeContentTextService";
+import { chunkText } from "src/modules/content/services/utils";
 import { AudioService } from "src/shared/audioService";
 import { Logger } from "src/utils/logger";
 
@@ -22,6 +25,37 @@ const processArticle = async (article) => {
                 await contentRepo.save(article);
                 return;
             }
+        }
+
+        if (article.chunks.length === 0) {
+            Logger.info(
+                `Generating embeddings for article: ${article.websiteUrl}`
+            );
+            const chunks = chunkText(article.content, 1200);
+            const embeddings = await Promise.all(
+                chunks.map((chunk) =>
+                    openai.embeddings.create({
+                        model: "text-embedding-3-large",
+                        dimensions: 256,
+                        input: chunk,
+                        encoding_format: "float",
+                    })
+                )
+            );
+
+            // Save embeddings as content chunks
+            article.chunks = await Promise.all(
+                embeddings.map((embedding, index) => {
+                    const contentChunk = new ContentChunk();
+                    contentChunk.chunkIndex = index;
+                    contentChunk.transcript = chunks[index];
+                    contentChunk.embedding = pgvector.toSql(
+                        embedding.data[0].embedding
+                    );
+                    contentChunk.content = article;
+                    return contentChunkRepo.save(contentChunk);
+                })
+            );
         }
 
         if (!article.audioUrl) {
@@ -64,11 +98,32 @@ const addMissingColumnsToArticles = async () => {
     await dataSource.initialize();
 
     const initialArticlesResponse =
-        await contentRepo.findArticlesWithoutAudioOrContent();
-    const totalArticles = initialArticlesResponse.value.length;
-    Logger.info(
-        `Total articles without content or audio (or embeddings): ${totalArticles}`
-    );
+        await contentRepo.findArticlesWithoutAudioOrContentOrEmbedding();
+
+    if (initialArticlesResponse.isFailure()) {
+        Logger.error(
+            "Failed to fetch initial articles:",
+            initialArticlesResponse.error
+        );
+        return;
+    }
+
+    const articles = initialArticlesResponse.value;
+    const totalArticles = articles.length;
+
+    const missingContent = articles.filter((a) => !a.content).length;
+    const missingAudio = articles.filter((a) => !a.audioUrl).length;
+    const missingEmbeddings = articles.filter(
+        (a) => a.chunks.length === 0
+    ).length;
+
+    Logger.info(`
+Total articles to process: ${totalArticles}
+Breakdown:
+- Missing content: ${missingContent}
+- Missing audio: ${missingAudio}
+- Missing embeddings: ${missingEmbeddings}
+    `);
 
     try {
         const limit = 3; // Adjust as needed
@@ -76,7 +131,9 @@ const addMissingColumnsToArticles = async () => {
 
         while (true) {
             const articlesResponse =
-                await contentRepo.findArticlesWithoutAudioOrContent(limit);
+                await contentRepo.findArticlesWithoutAudioOrContentOrEmbedding(
+                    limit
+                );
             if (articlesResponse.isFailure()) {
                 Logger.error(
                     "Failed to fetch articles:",
