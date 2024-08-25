@@ -196,20 +196,46 @@ export class PostgresContentRepository {
         }
     }
 
-    async findArticlesWithoutAudioAndEmbeddings(
+    async findArticlesWithoutAudioOrContent(
         limit?: number
     ): Promise<ContentArrayResponse> {
         try {
             const articles = await this.repo.find({
-                where: {
-                    type: ContentType.ARTICLE,
-                    audioUrl: IsNull(),
-                    embedding: IsNull(),
-                    content: Not(IsNull()),
-                },
+                where: [
+                    {
+                        type: ContentType.ARTICLE,
+                        audioUrl: IsNull(),
+                        content: Not(IsNull()),
+                        skippedErrorFetchingFullText: Raw(
+                            (alias) => `${alias} IS NOT TRUE`
+                        ),
+                        skippedNotProbablyReadable: Raw(
+                            (alias) => `${alias} IS NOT TRUE`
+                        ),
+                        skippedInaccessiblePDF: Raw(
+                            (alias) => `${alias} IS NOT TRUE`
+                        ),
+                        deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+                    },
+                    {
+                        type: ContentType.ARTICLE,
+                        audioUrl: IsNull(),
+                        content: IsNull(),
+                        skippedErrorFetchingFullText: Raw(
+                            (alias) => `${alias} IS NOT TRUE`
+                        ),
+                        skippedNotProbablyReadable: Raw(
+                            (alias) => `${alias} IS NOT TRUE`
+                        ),
+                        skippedInaccessiblePDF: Raw(
+                            (alias) => `${alias} IS NOT TRUE`
+                        ),
+                        deadLink: Raw((alias) => `${alias} IS NOT TRUE`),
+                    },
+                ],
                 take: limit,
                 order: {
-                    length: "ASC",
+                    createdAt: "ASC",
                 },
             });
             return success(articles);

@@ -38,9 +38,7 @@ export const buildQueue = async (
     const recentlyLikedContentIdsResponse = await getRecentlyLikedContent(
         user.id
     );
-    if (recentlyLikedContentIdsResponse.isFailure()) {
-        return failure(recentlyLikedContentIdsResponse.error);
-    }
+
     const recentlyLikedContentIds = recentlyLikedContentIdsResponse.value;
 
     // get embeddings of recently liked content
