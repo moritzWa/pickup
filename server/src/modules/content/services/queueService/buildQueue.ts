@@ -16,7 +16,8 @@ import { v4 as uuidv4 } from "uuid";
 import { contentRepo, feedRepo } from "../../infra";
 import {
     getRecentlyLikedContent,
-    getSimilarContentForUser,
+    getSimilarArticlesForUser,
+    getSimilarPodcastsForUser,
     getTopContent,
     sendNewRecommendationsNotification,
 } from "./utils";
@@ -51,13 +52,33 @@ export const buildQueue = async (
 
     const recentlyLikedContent = podcastContentResponse.value;
 
-    const allRankedContent = await getSimilarContentForUser(
+    // Get recently liked Articles
+    const articleContentResponse = await contentRepo.findArticlesByIds(
+        recentlyLikedContentIds
+    );
+    if (articleContentResponse.isFailure())
+        return failure(articleContentResponse.error);
+
+    const recentlyLikedArticles = articleContentResponse.value;
+
+    // get ranked podcasts
+    const allRankedPodcasts = await getSimilarPodcastsForUser(
         user,
         recentlyLikedContent,
         limit
     );
 
-    let rankedContent = allRankedContent.slice(0, limit);
+    // todo implement article type
+    const allRankedArticles = await getSimilarArticlesForUser(
+        user,
+        recentlyLikedArticles,
+        limit
+    );
+
+    let rankedContent = [
+        ...allRankedPodcasts.slice(0, limit),
+        ...allRankedArticles.slice(0, limit),
+    ];
 
     if (!rankedContent.length) {
         // this is possible if no interests were filled out

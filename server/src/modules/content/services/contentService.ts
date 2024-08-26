@@ -1,5 +1,5 @@
-import { openai } from "src/utils";
-import { contentRepo, contentSessionRepo, feedRepo } from "../infra";
+import { groupBy, keyBy, uniqBy } from "lodash";
+import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
 import {
     DefaultErrors,
     failure,
@@ -9,14 +9,15 @@ import {
     success,
     UnexpectedError,
 } from "src/core/logic";
-import { SimilarContentWithDistanceResponse } from "../infra/contentRepo";
 import { inngest } from "src/jobs/inngest/clients";
 import { InngestEventName } from "src/jobs/inngest/types";
-import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
-import { In, LessThan, MoreThan, MoreThanOrEqual } from "typeorm";
-import { groupBy, keyBy, uniqBy } from "lodash";
 import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
+import { openai } from "src/utils";
+import { In, LessThan } from "typeorm";
+import { contentRepo, contentSessionRepo, feedRepo } from "../infra";
+import { SimilarContentWithDistanceResponse } from "../infra/contentRepo";
 
+// podcasts
 const getSimilarContentFromQuery = async (
     user: User,
     query: string,
@@ -97,6 +98,92 @@ const getSimilarContent = async (
     }
 };
 
+// articles
+const getSimilarArticlesFromQuery = async (
+    user: User,
+    query: string,
+    limit: number,
+    afterDate?: Date,
+    page?: number
+): Promise<SimilarContentWithDistanceResponse> => {
+    try {
+        const feedResponse = await feedRepo.findForUser(user.id, {
+            select: { contentId: true },
+        });
+
+        if (feedResponse.isFailure()) {
+            return failure(feedResponse.error);
+        }
+
+        const feedContentIdsToExlude = new Set<string>(
+            feedResponse.value.map((f) => f.contentId)
+        );
+
+        const embeddingResponse = await openai.embeddings.create(query);
+
+        if (embeddingResponse.isFailure()) {
+            return failure(embeddingResponse.error);
+        }
+
+        const embedding = embeddingResponse.value;
+
+        const similarContentResponse =
+            await contentRepo.findSimilarContentFromChunks(
+                embedding,
+                limit,
+                Array.from(feedContentIdsToExlude)
+            );
+
+        return similarContentResponse;
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
+const getSimilarArticles = async (
+    user: User,
+    article: Content,
+    limit: number,
+    afterDate?: Date
+): Promise<SimilarContentWithDistanceResponse> => {
+    try {
+        const feedResponse = await feedRepo.findForUser(user.id, {
+            select: { contentId: true },
+        });
+
+        if (feedResponse.isFailure()) {
+            return failure(feedResponse.error);
+        }
+
+        if (!article.chunks || article.chunks.length === 0) {
+            return failure(
+                new UnexpectedError(
+                    "Article does not have any chunks with embeddings"
+                )
+            );
+        }
+
+        const feedContentIdsToExlude = new Set<string>(
+            feedResponse.value.map((f) => f.contentId)
+        );
+
+        // Use the first chunk's embedding as a representative for the article
+        const embedding = article.chunks[0].embedding;
+
+        const similarContentResponse =
+            await contentRepo.findSimilarContentFromChunks(
+                embedding,
+                limit,
+                Array.from(feedContentIdsToExlude)
+            );
+
+        return similarContentResponse;
+    } catch (err) {
+        return failure(new UnexpectedError(err));
+    }
+};
+
+// other
 const enqueueContentForProcessing = async (): Promise<
     FailureOrSuccess<DefaultErrors, null>
 > => {
@@ -321,8 +408,14 @@ const decorateContentWithFriends = async (
 };
 
 export const ContentService = {
+    // podcasts
     getSimilarContent,
     getSimilarContentFromQuery,
+    // article
+    getSimilarArticles,
+    getSimilarArticlesFromQuery,
+
+    // other
     enqueueContentForProcessing,
     chunkContent: splitTextIntoChunks,
     next,

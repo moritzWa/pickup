@@ -10,6 +10,7 @@ import {
     success,
 } from "src/core/logic";
 import { NotificationService } from "src/modules/notifications/services/notificationService";
+import { Logger } from "src/utils";
 import { In } from "typeorm";
 import { contentRepo, interactionRepo } from "../../infra";
 import { ContentWithDistance } from "../../infra/contentRepo";
@@ -58,7 +59,7 @@ const getInterestQueries = (user: User) => {
     ].filter((v) => !!v);
 };
 
-export const getSimilarContentForUser = async (
+export const getSimilarPodcastsForUser = async (
     user: User,
     recentlyLikedContent: Content[],
     limit: number
@@ -95,6 +96,80 @@ export const getSimilarContentForUser = async (
         allContent.push({
             content: similarContentResponse.value,
             query: `Content like: ${content.title}`,
+        });
+    }
+
+    return uniqBy(
+        orderBy(
+            allContent.flatMap((c) => c.content),
+            (c) => c.averageDistance,
+            "asc"
+        ),
+        (c) => c.id
+    );
+};
+
+export const getSimilarArticlesForUser = async (
+    user: User,
+    recentlyLikedArticles: Content[],
+    limit: number
+): Promise<ContentWithDistance[]> => {
+    const queries = getInterestQueries(user);
+    const allContent: { content: ContentWithDistance[]; query: string }[] = [];
+
+    Logger.info("Getting similar articles for user", {
+        user: user.id,
+        recentlyLikedArticles: recentlyLikedArticles.map((a) => a.id),
+    });
+
+    for (const query of queries) {
+        const similarContentResponse =
+            await ContentService.getSimilarArticlesFromQuery(
+                user,
+                query,
+                limit
+            );
+
+        if (similarContentResponse.isFailure()) {
+            continue;
+        }
+
+        Logger.info(
+            "Got similar articles for query",
+            JSON.stringify({
+                query,
+                content: similarContentResponse.value,
+            })
+        );
+
+        allContent.push({
+            content: similarContentResponse.value,
+            query,
+        });
+    }
+
+    for (const article of recentlyLikedArticles) {
+        const similarContentResponse = await ContentService.getSimilarArticles(
+            user,
+            article,
+            limit
+        );
+
+        if (similarContentResponse.isFailure()) {
+            continue;
+        }
+
+        Logger.info(
+            "Got similar articles for liked article",
+            JSON.stringify({
+                article: article.id,
+                content: similarContentResponse.value,
+            })
+        );
+
+        allContent.push({
+            content: similarContentResponse.value,
+            query: `Content like: ${article.title}`,
         });
     }
 
