@@ -232,8 +232,12 @@ export class PostgresContentRepository {
                             });
                     })
                 )
+                .addSelect(
+                    "COALESCE(LENGTH(content.content), 0)",
+                    "calculated_content_length"
+                )
+                .orderBy("calculated_content_length", "ASC")
                 .take(limit)
-                .orderBy("content.createdAt", "ASC")
                 .getMany();
 
             return success(articles);

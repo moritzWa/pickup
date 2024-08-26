@@ -126,7 +126,7 @@ Breakdown:
     `);
 
     try {
-        const limit = 3; // Adjust as needed
+        const limit = 1; // Adjust as needed
         let processedCount = 0;
 
         while (true) {
