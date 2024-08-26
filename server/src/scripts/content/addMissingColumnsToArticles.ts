@@ -184,6 +184,9 @@ Breakdown:
             );
 
             Logger.info(`Total processed: ${processedCount}`);
+
+            // Add a delay of 5 seconds between processing articles
+            await new Promise((resolve) => setTimeout(resolve, 5000));
         }
 
         Logger.info("Finished processing all articles.");
