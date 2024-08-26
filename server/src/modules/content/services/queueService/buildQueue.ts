@@ -31,9 +31,7 @@ export const buildQueue = async (
         select: { contentId: true },
     });
 
-    if (feedResponse.isFailure()) {
-        return failure(feedResponse.error);
-    }
+    if (feedResponse.isFailure()) return failure(feedResponse.error);
 
     const recentlyLikedContentIdsResponse = await getRecentlyLikedContent(
         user.id
@@ -48,9 +46,8 @@ export const buildQueue = async (
             select: { embedding: true },
         }
     );
-    if (contentResponse.isFailure()) {
-        return failure(contentResponse.error);
-    }
+    if (contentResponse.isFailure()) return failure(contentResponse.error);
+
     const recentlyLikedContent = contentResponse.value;
 
     const allRankedContent = await getSimilarContentForUser(
@@ -66,18 +63,15 @@ export const buildQueue = async (
         // but we still want to be able to show the user something
         const topContentResponse = await getTopContent(limit);
 
-        if (topContentResponse.isFailure()) {
+        if (topContentResponse.isFailure())
             return failure(topContentResponse.error);
-        }
 
         rankedContent = topContentResponse.value;
     }
 
     const queueResponse = await buildQueueFromContent(user, rankedContent);
 
-    if (queueResponse.isFailure()) {
-        return failure(queueResponse.error);
-    }
+    if (queueResponse.isFailure()) return failure(queueResponse.error);
 
     const firstTitle = rankedContent[0]?.title;
 
@@ -118,9 +112,7 @@ const buildQueueFromContent = async (
 
     const queueFailures = queueResponses.filter((r) => r.isFailure());
 
-    if (queueFailures.length > 0) {
-        return failure(queueFailures[0].error);
-    }
+    if (queueFailures.length > 0) return failure(queueFailures[0].error);
 
     const queue = queueResponses.map((r) => r.value);
 
@@ -145,9 +137,7 @@ const convertCuriusToContent = async (
         link.title
     );
 
-    if (audioResponse.isFailure()) {
-        return failure(audioResponse.error);
-    }
+    if (audioResponse.isFailure()) return failure(audioResponse.error);
 
     const audio = audioResponse.value;
 
@@ -181,9 +171,7 @@ const convertCuriusToContent = async (
         ogDescription: null,
     });
 
-    if (contentResponse.isFailure()) {
-        return failure(contentResponse.error);
-    }
+    if (contentResponse.isFailure()) return failure(contentResponse.error);
 
     const content = contentResponse.value;
 
