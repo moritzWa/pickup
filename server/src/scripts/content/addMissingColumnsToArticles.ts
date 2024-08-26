@@ -13,18 +13,27 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const processArticle = async (article) => {
     try {
+        if (article.content && article.audioUrl && article.chunks.length > 0) {
+            Logger.info(
+                `Article ${article.id} is already fully processed. Skipping.`
+            );
+            return;
+        }
+
         if (!article.content) {
             Logger.info(`Fetching content for article: ${article.websiteUrl}`);
             await ScrapeContentTextService.processContent(article);
 
-            if (!article.content) {
-                Logger.warn(
-                    `Failed to fetch content for article: ${article.websiteUrl}`
-                );
-                // save the skippedErrorFetchingFullText etc
-                await contentRepo.save(article);
-                return;
-            }
+            // if (!article.content) {
+            //     Logger.warn(
+            //         `Failed to fetch content for article: ${article.websiteUrl}`
+            //     );
+            //     // save the skippedErrorFetchingFullText etc
+            //     await contentRepo.save(article);
+            //     return;
+            // }
+
+            await contentRepo.save(article);
         }
 
         const successfullyScrapedContent =
@@ -63,6 +72,8 @@ const processArticle = async (article) => {
                     return contentChunkRepo.save(contentChunk);
                 })
             );
+
+            await contentRepo.save(article);
         }
 
         if (successfullyScrapedContent && !article.audioUrl) {
@@ -90,10 +101,13 @@ const processArticle = async (article) => {
             article.lengthMs = audioResult.value.lengthMs;
 
             Logger.info(`Audio URL done: ${article.audioUrl}`);
+
+            await contentRepo.save(article);
+            Logger.info(`Saved article: ${article.title}`);
         }
 
         // Save updated article
-        await contentRepo.save(article);
+        // await contentRepo.save(article);
     } catch (error) {
         Logger.error(`Failed to process article ${article.title}:`, error);
         // Ensure we save the article even if there's an error
