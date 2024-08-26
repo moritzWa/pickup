@@ -5,7 +5,7 @@ import {
   DefaultOptions,
   ApolloLink,
 } from "@apollo/client";
-import { constants } from "src/config";
+import { constants, X_USER_EMAIL_KEY } from "src/config";
 import { setContext } from "@apollo/client/link/context";
 import { RetryLink } from "@apollo/client/link/retry";
 import { success } from "src/core";
@@ -66,6 +66,7 @@ const authLink = setContext(async (_, { headers }) => {
   const token = await getAuthToken();
   const deviceId = await _getDeviceId();
   const platform = Platform.OS;
+  const xUserEmail = await AsyncStorage.getItem(X_USER_EMAIL_KEY);
 
   // console.log(token);
 
@@ -74,6 +75,7 @@ const authLink = setContext(async (_, { headers }) => {
     headers: {
       ...headers,
       Authorization: token ? `Bearer ${token}` : "",
+      ...(xUserEmail ? { "x-user-email": xUserEmail } : {}),
       "x-app-version": constants.version,
       "x-device-id": deviceId || "",
       "x-mobile-platform": platform || "",

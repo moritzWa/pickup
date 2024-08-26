@@ -4,7 +4,7 @@ import {
   useLazyQuery,
   useMutation,
 } from "@apollo/client";
-import { faPhone } from "@fortawesome/pro-solid-svg-icons";
+import { faPhone, faUndo, faUser } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBookmark,
@@ -15,9 +15,10 @@ import {
   faServer,
   faSignOut,
 } from "@fortawesome/sharp-solid-svg-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused, useNavigation } from "@react-navigation/core";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Linking,
@@ -34,13 +35,13 @@ import FastImage from "react-native-fast-image";
 import InAppReview from "react-native-in-app-review";
 import { OneSignal } from "react-native-onesignal";
 import { useDispatch } from "react-redux";
-import { api } from "src/api";
+import { api, apolloClient } from "src/api";
 import { BaseUserFields } from "src/api/fragments";
 import { Query } from "src/api/generated/types";
 import { colors } from "src/components";
 import Header from "src/components/Header";
 import Section from "src/components/Section";
-import { constants } from "src/config";
+import { constants, X_USER_EMAIL_KEY } from "src/config";
 import { Maybe } from "src/core";
 import { useMe } from "src/hooks";
 import { useTheme } from "src/hooks/useTheme";
@@ -408,38 +409,8 @@ const Profile = () => {
             showRightIcon={false}
           />
           <View style={{ height: 1, backgroundColor: secondaryBackground }} />
-          {me?.isSuperuser && (
-            <View>
-              <Text
-                style={{
-                  fontSize: 12,
-                  paddingVertical: 10,
-                  paddingHorizontal: 30,
-                  fontFamily: "Inter-Bold",
-                  backgroundColor: secondaryBackground,
-                  color: header,
-                }}
-              >
-                Admin Only 🕵️‍♂️
-              </Text>
-              <View
-                style={{ height: 1, backgroundColor: secondaryBackground }}
-              />
 
-              <Section
-                onPress={() =>
-                  Alert.alert(
-                    "Nvm, going to add this later bc would be helpful."
-                  )
-                }
-                icon={<FontAwesomeIcon icon={faServer} color={text} />}
-                name="Server API Url"
-              />
-              <View
-                style={{ height: 1, backgroundColor: secondaryBackground }}
-              />
-            </View>
-          )}
+          <AdminSection />
 
           <View style={{ marginTop: 35, alignItems: "center" }}>
             <Text
@@ -483,77 +454,117 @@ const _numToFormat = (n: number) => {
   return n + "th";
 };
 
-const _ProfilePicture = ({
-  user,
-}: {
-  user?: Maybe<BaseUserFields>;
-  numberUser?: Maybe<number>;
-}) => {
-  const [profileUrl, setProfileUrl] = useState(user?.avatarImageUrl);
+const AdminSection = () => {
+  const { me, refetchMe } = useMe();
 
-  useEffect(
-    () => setProfileUrl(user?.avatarImageUrl || ""),
-    [user?.avatarImageUrl]
-  );
+  const fullTheme = useTheme();
+  const { secondaryBackground, header, text, background } = fullTheme;
 
-  if (profileUrl) {
-    const isGithub = profileUrl.includes("github.com");
-    const imageUrl = isGithub ? profileUrl + "?raw=true" : profileUrl;
-    const isVideo = imageUrl.includes(".mp4");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const key = X_USER_EMAIL_KEY;
 
-    if (!isVideo) {
-      return (
-        <FastImage
-          source={{ uri: imageUrl }}
-          resizeMode="cover"
-          style={{
-            width: 75,
-            height: 75,
-            overflow: "hidden",
-            flexShrink: 0,
-            borderRadius: 100,
-            // border: "1px solid " + colors.gray60,
-          }}
-        />
-      );
+  const _onPressSection = useCallback(async () => {
+    if (userEmail) {
+      await AsyncStorage.removeItem(key);
+
+      apolloClient.refetchQueries({ include: "all" });
+
+      return;
     }
+
+    // prompt the user for the email
+
+    Alert.prompt(
+      "Enter the user's email",
+      undefined,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: async (email) => {
+            if (!email) return;
+
+            await AsyncStorage.setItem(key, email);
+            setUserEmail(email);
+
+            // reload the entire app
+
+            apolloClient.refetchQueries({ include: "all" });
+          },
+        },
+      ],
+      "plain-text"
+    );
+  }, [userEmail]);
+
+  const _removeUser = useCallback(async () => {
+    await AsyncStorage.removeItem(key);
+
+    await refetchMe();
+    // reload the entire app
+    apolloClient.refetchQueries({ include: "all" });
+  }, []);
+
+  const _setEmailFromLocalStorage = useCallback(async () => {
+    const email = await AsyncStorage.getItem(key);
+    setUserEmail(email);
+  }, []);
+
+  useEffect(() => {
+    _setEmailFromLocalStorage();
+  }, []);
+
+  // if there is a user email, let them unset it
+  if (userEmail) {
+    return (
+      <View>
+        <Section
+          onPress={_removeUser}
+          icon={<FontAwesomeIcon icon={faUndo} color={text} />}
+          name="Unset user"
+        />
+      </View>
+    );
+  }
+
+  if (!me?.isSuperuser) {
+    return null;
   }
 
   return (
-    <View
-      style={{
-        width: 75,
-        height: 75,
-        borderRadius: 100,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        flexShrink: 0,
-        flexGrow: 0,
-        justifyContent: "center",
-        backgroundColor: colors.purple80,
-        marginRight: 0,
-      }}
-    >
+    <View>
       <Text
         style={{
-          fontSize: 28,
-          fontFamily: "Inter-Semibold",
-          color: colors.white,
+          fontSize: 12,
+          paddingVertical: 10,
+          paddingHorizontal: 30,
+          fontFamily: "Mona-Sans-Bold",
+          backgroundColor: secondaryBackground,
+          color: header,
         }}
       >
-        {user?.name?.charAt(0).toUpperCase()}
+        Admin Only 🕵️‍♂️
       </Text>
+      <View style={{ height: 1, backgroundColor: secondaryBackground }} />
+      <Section
+        onPress={_onPressSection}
+        icon={<FontAwesomeIcon icon={faUser} color={text} />}
+        name="Set User"
+      />
+      <Section
+        onPress={() =>
+          Alert.alert("Nvm, going to add this later bc would be helpful.")
+        }
+        icon={<FontAwesomeIcon icon={faServer} color={text} />}
+        name="Server API Url"
+      />
+      <View style={{ height: 1, backgroundColor: secondaryBackground }} />
     </View>
   );
 };
-
-const ProfilePicture = React.memo(_ProfilePicture, (prevProps, nextProps) => {
-  return (
-    prevProps.user?.avatarImageUrl === nextProps.user?.avatarImageUrl &&
-    prevProps.numberUser === nextProps.numberUser
-  );
-});
 
 const styles = StyleSheet.create({
   avatar: {

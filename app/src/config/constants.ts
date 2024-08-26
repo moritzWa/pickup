@@ -1,6 +1,8 @@
 import { Platform } from "react-native";
 import VersionNumber from "react-native-version-number";
 
+export const X_USER_EMAIL_KEY = "x-user-email";
+
 const FIREBASE_DEV_WEB_CLIENT =
   "85484920800-0v8gfdu63893tl2539sm3sjl674c16qi.apps.googleusercontent.com";
 
