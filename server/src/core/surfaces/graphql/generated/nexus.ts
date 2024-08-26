@@ -754,7 +754,6 @@ export interface NexusGenArgTypes {
       name: string; // String!
     }
     createContentFromUrl: { // args
-      authProviderId?: string | null; // String
       url: string; // String!
     }
     createUser: { // args
@@ -865,7 +864,6 @@ export interface NexusGenArgTypes {
       platform?: string | null; // String
     }
     getIsBookmarked: { // args
-      authProviderId?: string | null; // String
       url: string; // String!
     }
     getLikes: { // args

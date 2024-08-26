@@ -70,6 +70,12 @@ h1 {
   font-size: 18px;
 }
 
+.btn__sign_out {
+  margin-top: 10px;
+  background-color: #f44336;
+  color: white;
+}
+
 .btn__google:hover {
   background-color: #fff;
   color: #4285f4;
@@ -92,6 +98,6 @@ h1 {
   display: none;
 }
 
-#main-content {
+/* #main-content {
   display: none;
-}
+} */

@@ -26,7 +26,8 @@ const truncateText = (text: string, maxLength: number = 100): string => {
 
 export const ContentFromUrlService = {
     createFromUrl: async (
-        url: string
+        url: string,
+        generateAudioImmediately: boolean
     ): Promise<FailureOrSuccess<DefaultErrors, Content>> => {
         try {
             // Only turn this of if scraping content from json like response where author is already extracted/created
@@ -97,8 +98,11 @@ export const ContentFromUrlService = {
                 return failure(savedContentResponse.error);
             }
 
-            const createAudioContent = true;
-            // process.env.NODE_ENV === "production" ? true : false;
+            const createAudioContent =
+                process.env.NODE_ENV === "production" &&
+                generateAudioImmediately
+                    ? true
+                    : false;
             if (createAudioContent) {
                 // Enqueue audio generation task
                 await AudioGenerationQueue.add("generateAudio", {

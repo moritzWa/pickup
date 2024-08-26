@@ -17,7 +17,8 @@ function handleAuthStateChange(user) {
     window.location.replace("./main.html");
   } else {
     console.log("No user logged in");
-    checkForExistingToken();
+    // checkForExistingToken();
+    showLoginButton();
   }
 }
 
@@ -44,7 +45,7 @@ function checkForExistingToken() {
 function showLoginButton() {
   document.querySelector(".btn__google").style.display = "block";
   document.getElementById("loading").classList.add("hidden");
-  document.getElementById("main-content").classList.remove("hidden");
+  // document.getElementById("main-content").classList.remove("hidden");
 }
 
 function startGoogleSignIn() {
