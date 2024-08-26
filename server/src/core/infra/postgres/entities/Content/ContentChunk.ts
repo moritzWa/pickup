@@ -68,7 +68,9 @@ export class ContentChunk {
     })
     contentId!: string;
 
-    @ManyToOne(() => Content, (c) => c.chunks)
+    @ManyToOne(() => Content, (c) => c.chunks, {
+        onDelete: "CASCADE",
+    })
     @JoinColumn({ name: "content_id" })
     content!: Relation<Content>;
 }

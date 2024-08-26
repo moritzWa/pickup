@@ -30,14 +30,16 @@ export class Author {
     imageUrl!: string | null;
 
     @ManyToMany(() => Content, (content) => content.authors, {
+        cascade: false,
         eager: false,
-        cascade: false, // Add this line to explicitly set cascade to false
     })
     @JoinTable({
         name: "content_authors",
         joinColumn: { name: "author_id", referencedColumnName: "id" },
         inverseJoinColumn: { name: "content_id", referencedColumnName: "id" },
     })
+    // Note: Cascade delete for content is handled at the database level in the content_authors junction table.
+    // See migration: UpdateContentAuthorFK1723675580018
     contents!: Content[];
 
     @CreateDateColumn({

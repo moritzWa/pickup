@@ -140,6 +140,8 @@ export class Content {
         cascade: false,
         eager: true,
     })
+    // Note: Cascade delete is handled at the database level in the content_authors junction table.
+    // See migration: UpdateContentAuthorFK1723675580018
     authors!: Author[];
 
     @Column({
@@ -157,8 +159,10 @@ export class Content {
     })
     referenceId!: string | null;
 
-    @OneToMany(() => ContentChunk, (t) => t.content)
-    // join on the content_id column of the chunks table
+    @OneToMany(() => ContentChunk, (t) => t.content, {
+        cascade: true,
+        onDelete: "CASCADE",
+    })
     chunks!: Relation<ContentChunk[]>;
 
     @Column({
