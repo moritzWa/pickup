@@ -27,7 +27,14 @@ const processArticle = async (article) => {
             }
         }
 
-        if (article.chunks.length === 0) {
+        const successfullyScrapedContent =
+            article.content &&
+            !article.skippedErrorFetchingFullText &&
+            !article.skippedNotProbablyReadable &&
+            !article.skippedInaccessiblePDF &&
+            !article.deadLink;
+
+        if (successfullyScrapedContent && article.chunks.length === 0) {
             Logger.info(
                 `Generating embeddings for article: ${article.websiteUrl}`
             );
@@ -58,7 +65,7 @@ const processArticle = async (article) => {
             );
         }
 
-        if (!article.audioUrl) {
+        if (successfullyScrapedContent && !article.audioUrl) {
             Logger.info(`Generating audio for article: ${article.websiteUrl}`);
             const audioStartTime = performance.now();
             const audioResult = await AudioService.generate(
@@ -88,7 +95,7 @@ const processArticle = async (article) => {
         // Save updated article
         await contentRepo.save(article);
     } catch (error) {
-        Logger.error(`Failed to process article ${article.id}:`, error);
+        Logger.error(`Failed to process article ${article.title}:`, error);
         // Ensure we save the article even if there's an error
         await contentRepo.save(article);
     }

@@ -89,6 +89,9 @@ export class Content {
     })
     audioUrl!: string | null;
 
+    @Column({ nullable: true, name: "skipped_error_generating_speech" })
+    skippedErrorGeneratingSpeech?: boolean;
+
     // estimated length of the audio
     @Column({
         nullable: true,
@@ -134,7 +137,7 @@ export class Content {
     categories!: string[];
 
     @ManyToMany(() => Author, (author) => author.contents, {
-        cascade: true,
+        cascade: false,
         eager: true,
     })
     authors!: Author[];

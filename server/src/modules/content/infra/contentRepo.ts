@@ -216,6 +216,7 @@ export class PostgresContentRepository {
                 .andWhere("content.skippedNotProbablyReadable IS NOT TRUE")
                 .andWhere("content.skippedInaccessiblePDF IS NOT TRUE")
                 .andWhere("content.deadLink IS NOT TRUE")
+                .andWhere("content.skippedErrorGeneratingSpeech IS NOT TRUE")
                 // not "fully processed"
                 .andWhere(
                     new Brackets((qb) => {

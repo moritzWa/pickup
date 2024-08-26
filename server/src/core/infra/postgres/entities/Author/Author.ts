@@ -31,6 +31,7 @@ export class Author {
 
     @ManyToMany(() => Content, (content) => content.authors, {
         eager: false,
+        cascade: false, // Add this line to explicitly set cascade to false
     })
     @JoinTable({
         name: "content_authors",
