@@ -39,16 +39,17 @@ export const buildQueue = async (
 
     const recentlyLikedContentIds = recentlyLikedContentIdsResponse.value;
 
-    // get embeddings of recently liked content
-    const contentResponse = await contentRepo.findByIds(
+    // get embeddings of recently liked Podcasts (embedding direcly in content schema)
+    const podcastContentResponse = await contentRepo.findByIds(
         recentlyLikedContentIds,
         {
             select: { embedding: true },
         }
     );
-    if (contentResponse.isFailure()) return failure(contentResponse.error);
+    if (podcastContentResponse.isFailure())
+        return failure(podcastContentResponse.error);
 
-    const recentlyLikedContent = contentResponse.value;
+    const recentlyLikedContent = podcastContentResponse.value;
 
     const allRankedContent = await getSimilarContentForUser(
         user,
