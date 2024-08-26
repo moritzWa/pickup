@@ -247,7 +247,7 @@ export class User {
     @ManyToOne(() => ContentSession, (t) => t.id, {
         nullable: true,
         eager: false,
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
     })
     @JoinColumn({ name: "current_content_session_id" })
     currentContentSession!: Maybe<Relation<ContentSession>>;
@@ -255,7 +255,7 @@ export class User {
     @ManyToOne(() => FeedItem, (t) => t.id, {
         nullable: true,
         eager: false,
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
     })
     @JoinColumn({ name: "current_feed_item_id" })
     currentFeedItem!: Maybe<Relation<FeedItem>>;
