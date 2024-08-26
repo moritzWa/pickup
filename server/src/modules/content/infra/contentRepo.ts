@@ -293,6 +293,23 @@ export class PostgresContentRepository {
         }
     }
 
+    async findArticlesByIds(
+        ids: string[]
+    ): Promise<FailureOrSuccess<DefaultErrors, ContentModel[]>> {
+        try {
+            const articles = await this.repo.find({
+                where: {
+                    id: In(ids),
+                    type: ContentType.ARTICLE,
+                },
+                relations: ["chunks"],
+            });
+            return success(articles);
+        } catch (err) {
+            return failure(new UnexpectedError(err));
+        }
+    }
+
     async findByIds(
         contentIds: string[],
         opts?: FindManyOptions<ContentModel>

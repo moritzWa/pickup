@@ -16,7 +16,8 @@ import { v4 as uuidv4 } from "uuid";
 import { contentRepo, feedRepo } from "../../infra";
 import {
     getRecentlyLikedContent,
-    getSimilarContentForUser,
+    getSimilarArticlesForUser,
+    getSimilarPodcastsForUser,
     getTopContent,
     sendNewRecommendationsNotification,
 } from "./utils";
@@ -39,24 +40,45 @@ export const buildQueue = async (
 
     const recentlyLikedContentIds = recentlyLikedContentIdsResponse.value;
 
-    // get embeddings of recently liked content
-    const contentResponse = await contentRepo.findByIds(
+    // get embeddings of recently liked Podcasts (embedding direcly in content schema)
+    const podcastContentResponse = await contentRepo.findByIds(
         recentlyLikedContentIds,
         {
             select: { embedding: true },
         }
     );
-    if (contentResponse.isFailure()) return failure(contentResponse.error);
+    if (podcastContentResponse.isFailure())
+        return failure(podcastContentResponse.error);
 
-    const recentlyLikedContent = contentResponse.value;
+    const recentlyLikedContent = podcastContentResponse.value;
 
-    const allRankedContent = await getSimilarContentForUser(
+    // Get recently liked Articles
+    const articleContentResponse = await contentRepo.findArticlesByIds(
+        recentlyLikedContentIds
+    );
+    if (articleContentResponse.isFailure())
+        return failure(articleContentResponse.error);
+
+    const recentlyLikedArticles = articleContentResponse.value;
+
+    // get ranked podcasts
+    const allRankedPodcasts = await getSimilarPodcastsForUser(
         user,
         recentlyLikedContent,
         limit
     );
 
-    let rankedContent = allRankedContent.slice(0, limit);
+    // todo implement article type
+    const allRankedArticles = await getSimilarArticlesForUser(
+        user,
+        recentlyLikedArticles,
+        limit
+    );
+
+    let rankedContent = [
+        ...allRankedPodcasts.slice(0, limit),
+        ...allRankedArticles.slice(0, limit),
+    ];
 
     if (!rankedContent.length) {
         // this is possible if no interests were filled out
