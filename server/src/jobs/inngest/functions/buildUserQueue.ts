@@ -1,28 +1,14 @@
-import { Tags } from "hot-shots";
-import { DefaultErrors, failure, FailureOrSuccess } from "src/core/logic";
-import { Datadog } from "src/utils";
-import SendGrid, {
-    EmailData,
-    SendGridTemplateData,
-    TemplateName,
-} from "src/utils/sendgrid";
-import { Sentry } from "src/utils/sentry";
-import { Slack } from "src/utils/slack";
-import { trackError } from "src/utils/trackDatadog";
-import { inngest } from "../clients";
-import { InngestEventName } from "../types";
-import { NonRetriableError, slugify } from "inngest";
-import { contentRepo } from "src/modules/content/infra";
-import { curiusLinkRepo } from "src/modules/curius/infra";
+import { slugify } from "inngest";
 import { buildQueue } from "src/modules/content/services/queueService";
 import { pgUserRepo } from "src/modules/users/infra/postgres";
-import { DEFAULT_LINKS_RETURN } from "src/modules/curius/infra/linkRepo";
 import { onesignal } from "src/utils/onesignal";
+import { inngest } from "../clients";
+import { InngestEventName } from "../types";
 
 const NAME = "Build User Queue";
 const CONCURRENCY = 50;
 const RETRIES = 3;
-const DEFAULT_NUMBER = 10;
+const DEFAULT_NUMBER = 25;
 
 const buildUserQueue = inngest.createFunction(
     {
