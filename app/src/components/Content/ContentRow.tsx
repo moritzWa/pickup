@@ -2,7 +2,6 @@ import { useMutation } from "@apollo/client";
 import {
   faArchive,
   faBookReader,
-  faHeart,
   faPause,
   faPlay,
   faPodcast,
@@ -11,13 +10,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { truncate } from "lodash";
 import moment from "moment";
 import React, { useEffect, useRef } from "react";
 import {
   Alert,
   Animated,
   Image,
-  Linking,
   StyleProp,
   Text,
   TouchableOpacity,
@@ -51,7 +50,6 @@ import {
 import { getGradientById } from "src/utils/helpers";
 import ProfileIcon from "../ProfileIcon";
 import { getDescription } from "./contentHelpers";
-import { truncate } from "lodash";
 
 const IMAGE_SIZE = 35;
 
@@ -224,7 +222,7 @@ export const ContentRow = ({
   const start = async () => {
     try {
       if (c.websiteUrl && c.type === "article") {
-        await Linking.openURL(c.websiteUrl);
+        navigation.navigate("InternalBrowser", { url: c.websiteUrl });
       } else if (c.audioUrl) {
         if (onPress) onPress();
       } else {
@@ -247,13 +245,7 @@ export const ContentRow = ({
         onPlay();
       }
     } else if (c.websiteUrl) {
-      // Open the website URL for non-audio items
-      try {
-        await Linking.openURL(c.websiteUrl);
-      } catch (error) {
-        console.error("An error occurred while opening the URL:", error);
-        Alert.alert("Error", "Unable to open the website. Please try again.");
-      }
+      navigation.navigate("InternalBrowser", { url: c.websiteUrl });
     }
   };
 

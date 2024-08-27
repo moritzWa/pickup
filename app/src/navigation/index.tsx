@@ -13,41 +13,42 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import * as React from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import { OneSignal } from "react-native-onesignal";
 import { useDispatch, useSelector } from "react-redux";
 import { api } from "src/api";
+import { BaseContentFields } from "src/api/fragments";
 import { useMe } from "src/hooks";
 import { useOneSignal } from "src/hooks/useOneSignal";
 import { useTheme } from "src/hooks/useTheme";
 import EnablePushNotifications from "src/views/Authentication/EnablePushNotifications";
 import FullName from "src/views/Authentication/FullName";
 import Interests from "src/views/Authentication/Interests";
+import { PhoneNumber } from "src/views/Authentication/PhoneNumber";
 import Welcome from "src/views/Authentication/Welcome";
+import InternalBrowser from "src/views/InternalBrowser";
 import AudioPlayer from "src/views/Main/AudioPlayer";
+import ContentDetails from "src/views/Main/ContentDetails";
 import CourseDetails from "src/views/Main/CourseDetails";
+import EditProfile from "src/views/Main/EditProfile";
+import { Followers } from "src/views/Main/Followers";
+import Friends from "src/views/Main/Friends";
 import Home from "src/views/Main/Home";
 import {
   default as Lesson,
   default as LessonDetails,
 } from "src/views/Main/LessonDetails";
 import LessonSession from "src/views/Main/LessonSession";
+import Notifications from "src/views/Main/Notifications";
 import { UserProfile } from "src/views/Main/Profile";
+import Queue from "src/views/Main/Queue";
+import QueueTab from "src/views/Main/QueueTab";
 import Settings from "src/views/Main/Settings";
 import { getUserAuthStatus } from "../redux/reducers/user";
 import Login from "../views/Authentication/Login";
 import Signup from "../views/Authentication/Signup";
 import { LINKING } from "./linking";
 import { TabBar } from "./TabBar";
-import Queue from "src/views/Main/Queue";
-import QueueTab from "src/views/Main/QueueTab";
-import ContentDetails from "src/views/Main/ContentDetails";
-import { BaseContentFields } from "src/api/fragments";
-import Friends from "src/views/Main/Friends";
-import EditProfile from "src/views/Main/EditProfile";
-import { Followers } from "src/views/Main/Followers";
-import { PhoneNumber } from "src/views/Authentication/PhoneNumber";
-import Notifications from "src/views/Main/Notifications";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -110,6 +111,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Queue: undefined;
   EditProfile?: undefined;
+  InternalBrowser?: WebViewParams;
   UserProfile?: { username: string; forceBackButton?: boolean };
   ClaimCode?: undefined;
   Authentication: { screen?: string } | undefined;
@@ -316,6 +318,14 @@ export const MainNavigationStack = () => {
             options={{
               headerShown: false,
               gestureEnabled: false,
+            }}
+          />
+
+          <Stack.Screen
+            name="InternalBrowser"
+            component={InternalBrowser}
+            options={{
+              headerShown: false,
             }}
           />
 
