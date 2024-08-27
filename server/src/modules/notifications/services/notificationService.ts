@@ -43,6 +43,8 @@ const sendPushOrSMSNotification = async (
             message: notification.subtitle,
         });
 
+        console.log(response);
+
         // if success, return early. otherwise try the other methods
         if (response.isSuccess()) {
             return success(null);
