@@ -365,7 +365,7 @@ export const ContentRow = ({
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
-              gap: 10,
+              gap: 5,
               marginBottom: 10,
             }}
           >
@@ -389,6 +389,7 @@ export const ContentRow = ({
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 10,
+                paddingTop: 10,
               }}
             >
               {/* bottom bar actions */}

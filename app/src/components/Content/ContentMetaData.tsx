@@ -32,12 +32,14 @@ export const ContentMetaData = ({
           color: theme.textSecondary,
           fontSize: 14,
           fontFamily: "Inter-Medium",
+          alignItems: "center",
         }}
       >
         <FontAwesomeIcon
           icon={content.type === "article" ? faNewspaper : faPodcast}
           color={theme.textSecondary}
           size={14}
+          style={{ marginBottom: -2, height: 14 }}
         />
         <Separator />
         {content.authorName && (
