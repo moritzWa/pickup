@@ -329,13 +329,13 @@ export class PostgresContentRepository {
     }
 
     async findSimilarContentFromChunks(
-        vector: number[],
+        rawEmbedding: number[],
         limit: number = DEFAULT_LINKS_RETURN,
         idsToExclude: string[]
     ): Promise<SimilarContentWithDistanceResponse> {
         try {
-            // logg the type of vector
-            console.log(typeof vector);
+            // log the type of rawEmbedding
+            console.log(typeof rawEmbedding);
 
             const result = await this.repo
                 .createQueryBuilder("content")
@@ -356,7 +356,7 @@ export class PostgresContentRepository {
                 .where({
                     id: Not(In(idsToExclude)),
                 })
-                .setParameter("embedding", vector)
+                .setParameter("embedding", pgvector.toSql(rawEmbedding))
                 .groupBy("content.id")
                 .orderBy("min_distance", "ASC")
                 .limit(limit)
@@ -382,7 +382,7 @@ export class PostgresContentRepository {
 
     // unused!
     async findSimilarContent(
-        vector: number[],
+        rawEmbedding: number[],
         limit: number = DEFAULT_LINKS_RETURN,
         idsToExclude: string[]
     ): Promise<SimilarContentWithDistanceResponse> {
@@ -402,7 +402,7 @@ export class PostgresContentRepository {
                     id: Not(In(idsToExclude)),
                     audioUrl: Not(IsNull()),
                 })
-                .setParameter("embedding", vector)
+                .setParameter("embedding", pgvector.toSql(rawEmbedding))
                 .groupBy("content.id")
                 .orderBy("min_distance", "ASC")
                 .limit(limit)

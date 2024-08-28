@@ -382,7 +382,11 @@ export const ContentRow = ({
           marginHorizontal: 10,
           borderRadius: 15,
           backgroundColor: theme.ternaryBackground,
-          borderColor: isActive ? theme.border : theme.border,
+          borderColor: isActive
+            ? theme.theme === "dark"
+              ? theme.borderDark
+              : theme.border
+            : theme.border,
           borderWidth: 2,
         }}
       >
@@ -419,7 +423,11 @@ export const ContentRow = ({
                 <Text
                   numberOfLines={2}
                   style={{
-                    color: isActive ? colors.primary : theme.header,
+                    color: isActive
+                      ? theme.theme === "dark"
+                        ? colors.purple90 // Use a lighter color for dark mode
+                        : colors.primary
+                      : theme.header,
                     fontSize: 16,
                     // underline it if active
                     // textDecorationLine: isActive ? "underline" : "none",

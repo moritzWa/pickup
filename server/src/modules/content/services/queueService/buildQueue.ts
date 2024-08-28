@@ -97,11 +97,14 @@ export const buildQueue = async (
 
     const firstTitle = rankedContent[0]?.title;
 
-    await sendNewRecommendationsNotification(
-        user,
-        firstTitle,
-        queueResponse.value.insertionId
-    );
+    // temporarily dont do this in dev
+    if (process.env.NODE_ENV === "production") {
+        await sendNewRecommendationsNotification(
+            user,
+            firstTitle,
+            queueResponse.value.insertionId
+        );
+    }
 
     return success(queueResponse.value.items);
 };

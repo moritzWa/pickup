@@ -125,11 +125,11 @@ const getSimilarArticlesFromQuery = async (
             return failure(embeddingResponse.error);
         }
 
-        const embedding = embeddingResponse.value;
+        const rawEmbedding = embeddingResponse.value;
 
         const similarContentResponse =
             await contentRepo.findSimilarContentFromChunks(
-                embedding,
+                rawEmbedding,
                 limit,
                 Array.from(feedContentIdsToExlude)
             );
@@ -167,12 +167,12 @@ const getSimilarArticles = async (
             feedResponse.value.map((f) => f.contentId)
         );
 
-        // Use the first chunk's embedding as a representative for the article
-        const embedding = article.chunks[0].embedding;
+        // TODO: do we need fromSql here?
+        const rawEmbedding = article.chunks[0].embedding;
 
         const similarContentResponse =
             await contentRepo.findSimilarContentFromChunks(
-                embedding,
+                rawEmbedding,
                 limit,
                 Array.from(feedContentIdsToExlude)
             );
