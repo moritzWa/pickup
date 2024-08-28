@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/client";
 import {
   faArchive,
   faBookReader,
+  faNewspaper,
   faPause,
   faPlay,
   faPodcast,
@@ -52,6 +53,10 @@ import ProfileIcon from "../ProfileIcon";
 import { getDescription } from "./contentHelpers";
 
 const IMAGE_SIZE = 35;
+
+const Separator = () => (
+  <Text style={{ fontSize: 12, opacity: 0.6, lineHeight: 18 }}> • </Text>
+);
 
 export const ContentRow = ({
   content: c,
@@ -510,17 +515,35 @@ export const ContentRow = ({
                           fontFamily: "Inter-Medium",
                         }}
                       >
-                        {truncate(c.authorName || "", {
-                          length: 14,
-                          omission: ".",
-                        })}{" "}
-                        •{" "}
-                        {c.releasedAt
-                          ? moment(c.releasedAt).format("M/D/YY") + " • "
-                          : ""}
-                        {c.lengthFormatted}{" "}
-                        {c.contentSession?.percentFinished ? " • " : ""}
+                        {c.authorName && (
+                          <>
+                            {truncate(c.authorName || "", {
+                              length: 14,
+                              omission: ".",
+                            })}
+                            <Separator />
+                          </>
+                        )}
+                        {c.releasedAt && (
+                          <>
+                            {moment(c.releasedAt).format("M/D/YY")}
+                            <Separator />
+                          </>
+                        )}
+                        {c.lengthFormatted}
+                        {c.lengthFormatted && <Separator />}
+                        {c.contentSession?.percentFinished && (
+                          <>
+                            {c.contentSession?.percentFinished}%
+                            <Separator />
+                          </>
+                        )}
                       </Text>
+                      <FontAwesomeIcon
+                        icon={c.type === "article" ? faNewspaper : faPodcast}
+                        color={theme.textSecondary}
+                        size={14}
+                      />
                     </View>
 
                     {c.contentSession?.percentFinished ? (
