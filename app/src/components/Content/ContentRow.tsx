@@ -74,11 +74,11 @@ export const ContentRow = ({
   const [startContent, { error }] = useMutation(api.content.start);
   const animation = useRef(new Animated.Value(1)).current; // Initial scale value of 1
 
-  const contentIds = useSelector(getQueueContentIdSet);
+  const queuedContentIds = useSelector(getQueueContentIdSet);
   const activeContent = useSelector(getCurrentContent);
   const isActive = activeContent?.id === c.id;
   const isPlaying = useSelector(getIsPlaying);
-  const isQueued = contentIds.has(c.id);
+  const isQueued = queuedContentIds.has(c.id);
 
   const [addToQueue] = useMutation<Pick<Mutation, "addToQueue">>(
     api.content.addToQueue
@@ -294,7 +294,6 @@ export const ContentRow = ({
           width: 55,
           height: 55,
           borderRadius: 50,
-          // marginTop: 5,
         }}
       >
         {isQueued ? (
@@ -399,7 +398,6 @@ export const ContentRow = ({
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginRight: 10,
                   flex: 1,
                 }}
               >
@@ -409,7 +407,7 @@ export const ContentRow = ({
                     alignItems: "center",
                     display: "flex",
                     flexDirection: "row",
-                    gap: 10,
+                    gap: 20,
                   }}
                 >
                   <ContentFriends friends={c.friends ?? []} />
@@ -422,19 +420,12 @@ export const ContentRow = ({
                       alignItems: "center",
                       display: "flex",
                       flexDirection: "row",
-                      // backgroundColor: c.contentSession?.isBookmarked
-                      //   ? colors.pink50
-                      //   : theme.text,
-                      marginRight: 10,
                       borderRadius: 50,
                     }}
                   >
                     <FontAwesomeIcon
                       icon={faHeart}
                       color={
-                        // c.contentSession?.isBookmarked
-                        //   ? colors.white
-                        //   : theme.secondaryBackground
                         c.contentSession?.isBookmarked
                           ? colors.primary
                           : theme.textTertiary
@@ -444,7 +435,9 @@ export const ContentRow = ({
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => {}} // Todo
+                    onPress={() => {
+                      Alert.alert("Todo");
+                    }} // Todo
                     activeOpacity={0.9}
                     style={{
                       justifyContent: "center",
@@ -459,6 +452,60 @@ export const ContentRow = ({
                       size={25}
                     />
                   </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={onArchiveContent}
+                    activeOpacity={0.9}
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      display: "flex",
+                      flexDirection: "row",
+                      borderRadius: 50,
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faArchive}
+                      color={isActive ? colors.primary : theme.textTertiary}
+                      size={25}
+                    />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={onAddOrRemoveContentToQueue}
+                    activeOpacity={0.9}
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      display: "flex",
+                      flexDirection: "row",
+                      borderRadius: 50,
+                    }}
+                  >
+                    {isQueued ? (
+                      <Image
+                        source={require("src/assets/icons/solid-list-circle-minus.png")}
+                        tintColor={colors.primary}
+                        resizeMode="contain"
+                        style={{
+                          width: 25,
+                          height: 25,
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={require("src/assets/icons/solid-list-circle-plus.png")}
+                        tintColor={theme.textTertiary}
+                        resizeMode="contain"
+                        style={{
+                          width: 25,
+                          height: 25,
+                        }}
+                      />
+                    )}
+                  </TouchableOpacity>
+
+                  {/* end of bottom bar actions */}
                 </View>
 
                 <PlayButton
