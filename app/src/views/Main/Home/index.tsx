@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client";
 import {
   faCar,
-  faPlus,
   faSatelliteDish,
   faUserPlus,
 } from "@fortawesome/pro-solid-svg-icons";
@@ -273,17 +272,31 @@ const Home = () => {
           hasMore ? (
             renderFooter()
           ) : list.length > LIMIT ? (
-            <Text
+            <TouchableOpacity
               style={{
-                textAlign: "center",
-                padding: 10,
-                color: theme.text,
-                fontFamily: "Inter-Regular",
-                fontSize: 16,
+                padding: 5,
+                margin: 15,
+                borderRadius: 15,
+                backgroundColor: theme.secondaryBackground,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
               }}
+              activeOpacity={0.8}
+              onPress={onPressMore}
             >
-              No more data
-            </Text>
+              <Text
+                style={{
+                  color: colors.primary,
+                  fontFamily: "Inter-Bold",
+                  fontSize: 16,
+                  textAlign: "center",
+                  padding: 10,
+                }}
+              >
+                Show more 👀
+              </Text>
+            </TouchableOpacity>
           ) : null
         }
       />
