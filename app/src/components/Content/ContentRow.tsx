@@ -24,8 +24,9 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import FastImage from "react-native-fast-image";
 import { Swipeable } from "react-native-gesture-handler";
-import { Circle, Svg } from "react-native-svg";
+import { Circle, Svg, SvgUri } from "react-native-svg";
 import Toast from "react-native-toast-message";
 import { useSelector } from "react-redux";
 import { api } from "src/api";
@@ -640,41 +641,32 @@ export const ContentRowImage = ({
 
   let thumbnailImageUrl: Maybe<string> | undefined = c.thumbnailImageUrl;
 
-  // if thubnail is http make it https
+  // this fixes some images that otherwise fail to load
   if (thumbnailImageUrl && thumbnailImageUrl.startsWith("http://")) {
     thumbnailImageUrl = thumbnailImageUrl.replace("http", "https");
   }
 
-  // work: .x-icon, .gif, png,
-  // dont work: svgs, jpegs
-  // examples:
-  // natural history of beauty: https://firebasestorage.googleapis.com/v0/b/learning-dev-ai.appspot.com/o/images%2F5428f789-25cd-462c-92a3-611040f0d772.svg%2Bxml?alt=media
+  // TODO: permission error for learning---prod.appspot.com images
+  // https://firebasestorage.googleapis.com/v0/b/learning---prod.appspot.com/o/images%2F68ced13e-65c4-4f3d-be3d-e5f2bff99ccf.jpeg?alt=media
+  // https://firebasestorage.googleapis.com/v0/b/learning---prod.appspot.com/o/images%2F13e24d1e-8ce9-4138-a665-66cf1fbaecdc.jpeg?alt=media
 
-  if (c.thumbnailImageUrl) {
-    console.log(c.thumbnailImageUrl, c.title);
-
-    // return (
-    //   <FastImage
-    //     source={{
-    //       uri: c.thumbnailImageUrl,
-    //       // uri: ""
-    //     }}
-    //     style={{
-    //       width: size || IMAGE_SIZE,
-    //       height: size || IMAGE_SIZE,
-    //       borderRadius: 5,
-    //       // @ts-ignore
-    //       ...style,
-    //     }}
-    //   />
-    // );
+  // if .svg in the url use SvgUri
+  if (c.thumbnailImageUrl && c.thumbnailImageUrl.includes(".svg")) {
+    return (
+      <SvgUri
+        width={size || IMAGE_SIZE}
+        height={size || IMAGE_SIZE}
+        uri={c.thumbnailImageUrl}
+      />
+    );
+  } else if (c.thumbnailImageUrl) {
+    // console.log(c.thumbnailImageUrl, c.title);
 
     return (
-      <Image
-        // @ts-ignore
+      <FastImage
         source={{
+          // @ts-ignore
           uri: thumbnailImageUrl,
-          // uri: "https://softwareengineeringdaily.com/wp-content/uploads/2024/02/sed_logo.png",
         }}
         style={{
           width: size || IMAGE_SIZE,
