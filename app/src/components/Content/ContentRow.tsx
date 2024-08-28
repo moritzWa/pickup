@@ -383,7 +383,7 @@ export const ContentRow = ({
           borderRadius: 15,
           backgroundColor: theme.ternaryBackground,
           borderColor: isActive ? theme.border : theme.border,
-          borderWidth: 1,
+          borderWidth: 2,
         }}
       >
         <TouchableOpacity
@@ -533,12 +533,13 @@ export const ContentRow = ({
                         )}
                         {c.lengthFormatted}
                         {c.lengthFormatted && <Separator />}
-                        {c.contentSession?.percentFinished && (
-                          <>
-                            {c.contentSession?.percentFinished}%
-                            <Separator />
-                          </>
-                        )}
+                        {c.contentSession?.percentFinished &&
+                          c.contentSession?.percentFinished > 0 && (
+                            <>
+                              {c.contentSession?.percentFinished}%
+                              <Separator />
+                            </>
+                          )}
                       </Text>
                       <FontAwesomeIcon
                         icon={c.type === "article" ? faNewspaper : faPodcast}
