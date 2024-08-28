@@ -1,18 +1,9 @@
 import { useMutation } from "@apollo/client";
-import {
-  faArchive,
-  faBookReader,
-  faNewspaper,
-  faPause,
-  faPlay,
-  faPodcast,
-} from "@fortawesome/pro-solid-svg-icons";
+import { faArchive, faPodcast } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { truncate } from "lodash";
-import moment from "moment";
 import React, { useEffect, useRef } from "react";
 import {
   Alert,
@@ -50,8 +41,10 @@ import {
 } from "src/redux/reducers/audio";
 import { getGradientById } from "src/utils/helpers";
 import ProfileIcon from "../ProfileIcon";
-import { getDescription } from "./contentHelpers";
-import { Separator } from "./ContentRowComponents";
+import { ContentDescription } from "./ContentDescription";
+import { ContentMetaData } from "./ContentMetaData";
+import { ContentRowTitle } from "./ContentRowTitle";
+import { PlayButton } from "./PlayButton";
 
 const IMAGE_SIZE = 35;
 
@@ -378,11 +371,7 @@ export const ContentRow = ({
           marginHorizontal: 10,
           borderRadius: 15,
           backgroundColor: theme.ternaryBackground,
-          borderColor: isActive
-            ? theme.theme === "dark"
-              ? theme.borderDark
-              : theme.border
-            : theme.border,
+          borderColor: isActive ? theme.borderDark : theme.border,
           borderWidth: 2,
         }}
       >
@@ -406,34 +395,7 @@ export const ContentRow = ({
               }}
             >
               <ContentRowImage content={c} />
-
-              <View
-                style={{
-                  marginLeft: 10,
-                  marginRight: 10,
-                  flex: 1,
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                }}
-              >
-                <Text
-                  numberOfLines={2}
-                  style={{
-                    color: isActive
-                      ? theme.theme === "dark"
-                        ? colors.purple90 // Use a lighter color for dark mode
-                        : colors.primary
-                      : theme.header,
-                    fontSize: 16,
-                    // underline it if active
-                    // textDecorationLine: isActive ? "underline" : "none",
-                    // marginRight: 20,
-                    fontFamily: "Inter-Semibold",
-                  }}
-                >
-                  {c.title}
-                </Text>
-              </View>
+              <ContentRowTitle content={c} isActive={isActive} />
             </View>
 
             <View style={{}}>
@@ -444,17 +406,7 @@ export const ContentRow = ({
                 }}
               >
                 <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      color: theme.text,
-                      fontSize: 14,
-                      // marginRight: 50,
-                      fontFamily: "Inter-Medium",
-                    }}
-                    numberOfLines={2}
-                  >
-                    {getDescription(c)}
-                  </Text>
+                  <ContentDescription content={c} />
 
                   <View
                     style={{
@@ -476,52 +428,7 @@ export const ContentRow = ({
                       <ContentFriends friends={c.friends ?? []} />
                     </View>
 
-                    <View
-                      style={{
-                        display: "flex",
-                        marginLeft: 15,
-                        flexDirection: "row",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: theme.textSecondary,
-                          fontSize: 14,
-                          fontFamily: "Inter-Medium",
-                        }}
-                      >
-                        {c.authorName && (
-                          <>
-                            {truncate(c.authorName || "", {
-                              length: 15,
-                              omission: "...",
-                            })}
-                            <Separator />
-                          </>
-                        )}
-                        {c.releasedAt && (
-                          <>
-                            {moment(c.releasedAt).format("M/D/YY")}
-                            <Separator />
-                          </>
-                        )}
-                        {c.lengthFormatted}
-                        {c.lengthFormatted && <Separator />}
-                        {c.contentSession?.percentFinished &&
-                          c.contentSession?.percentFinished > 0 && (
-                            <>
-                              {c.contentSession?.percentFinished}%
-                              <Separator />
-                            </>
-                          )}
-                      </Text>
-                      <FontAwesomeIcon
-                        icon={c.type === "article" ? faNewspaper : faPodcast}
-                        color={theme.textSecondary}
-                        size={14}
-                      />
-                    </View>
+                    <ContentMetaData content={c} />
 
                     {/* Do we still want this? It caused the UI to shift weirdly */}
                     {/* <ContentSessionProgress content={c} isActive={isActive} /> */}
@@ -532,46 +439,13 @@ export const ContentRow = ({
           </View>
         </TouchableOpacity>
 
-        <Animated.View
-          style={{
-            width: IMAGE_SIZE,
-            height: IMAGE_SIZE,
-            marginRight: 0,
-            position: "absolute",
-            top: 15,
-            right: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 100,
-            backgroundColor: colors.primary,
-            alignSelf: "center",
-            transform: [{ scale: animation }],
-          }}
-        >
-          <TouchableOpacity
-            // onPressIn={handlePressIn}
-            // onPressOut={handlePressOut}
-            onPress={playOrPause}
-            activeOpacity={1}
-          >
-            <FontAwesomeIcon
-              icon={
-                c.audioUrl
-                  ? isActive && isPlaying
-                    ? faPause
-                    : faPlay
-                  : faBookReader
-              }
-              color={colors.white}
-              size={16}
-              style={{
-                position: "relative",
-                right: c.audioUrl ? (isActive && isPlaying ? 0 : -1) : 0.5,
-              }}
-            />
-          </TouchableOpacity>
-        </Animated.View>
+        <PlayButton
+          animation={animation}
+          playOrPause={playOrPause}
+          c={c}
+          isActive={isActive}
+          isPlaying={isPlaying}
+        />
       </Swipeable>
     </View>
   );
