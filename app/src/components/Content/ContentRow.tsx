@@ -360,119 +360,117 @@ export const ContentRow = ({
             backgroundColor: isActive ? theme.bgPrimaryLight : theme.background,
           }}
         >
-          <View>
+          {/* row */}
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 10,
+            }}
+          >
+            <ContentRowImage content={c} />
+            <ContentRowTitle content={c} isActive={isActive} />
+          </View>
+
+          <View
+            style={{
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: 10,
+            }}
+          >
+            <ContentDescription content={c} />
+            <ContentMetaData content={c} />
+
             <View
               style={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
-                flex: 1,
+                gap: 10,
               }}
             >
-              <ContentRowImage content={c} />
-              <ContentRowTitle content={c} isActive={isActive} />
-            </View>
-
-            <View style={{}}>
+              {/* bottom bar actions */}
               <View
                 style={{
+                  display: "flex",
                   flexDirection: "row",
-                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginRight: 10,
+                  flex: 1,
                 }}
               >
-                <View style={{ flex: 1 }}>
-                  <ContentDescription content={c} />
-                  <ContentMetaData content={c} />
+                {/* friends, upvote/downvote, and share */}
+                <View
+                  style={{
+                    alignItems: "center",
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 10,
+                  }}
+                >
+                  <ContentFriends friends={c.friends ?? []} />
 
-                  <View
+                  <TouchableOpacity
+                    onPress={bookmarkContent}
+                    activeOpacity={0.9}
                     style={{
-                      marginTop: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
                       display: "flex",
                       flexDirection: "row",
-                      alignItems: "center",
+                      // backgroundColor: c.contentSession?.isBookmarked
+                      //   ? colors.pink50
+                      //   : theme.text,
+                      marginRight: 10,
+                      borderRadius: 50,
                     }}
                   >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginRight: 10,
-                        flex: 1,
-                      }}
-                    >
-                      {/* friends, upvote/downvote, and share */}
-                      <View
-                        style={{
-                          alignItems: "center",
-                          display: "flex",
-                          flexDirection: "row",
-                          gap: 10,
-                        }}
-                      >
-                        <ContentFriends friends={c.friends ?? []} />
+                    <FontAwesomeIcon
+                      icon={faHeart}
+                      color={
+                        // c.contentSession?.isBookmarked
+                        //   ? colors.white
+                        //   : theme.secondaryBackground
+                        c.contentSession?.isBookmarked
+                          ? colors.primary
+                          : theme.textTertiary
+                      }
+                      size={25}
+                    />
+                  </TouchableOpacity>
 
-                        <TouchableOpacity
-                          onPress={() => {}} // Todo
-                          activeOpacity={0.9}
-                          style={{
-                            justifyContent: "center",
-                            alignItems: "center",
-                            display: "flex",
-                            flexDirection: "row",
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faThumbsDown}
-                            color={theme.text}
-                            size={25}
-                          />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          onPress={bookmarkContent}
-                          activeOpacity={0.9}
-                          style={{
-                            justifyContent: "center",
-                            alignItems: "center",
-                            display: "flex",
-                            flexDirection: "row",
-                            // backgroundColor: c.contentSession?.isBookmarked
-                            //   ? colors.pink50
-                            //   : theme.text,
-                            marginRight: 10,
-                            borderRadius: 50,
-                          }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faHeart}
-                            color={
-                              // c.contentSession?.isBookmarked
-                              //   ? colors.white
-                              //   : theme.secondaryBackground
-                              c.contentSession?.isBookmarked
-                                ? colors.purple50
-                                : theme.textTertiary
-                            }
-                            size={25}
-                          />
-                        </TouchableOpacity>
-                      </View>
-
-                      <PlayButton
-                        animation={animation}
-                        playOrPause={playOrPause}
-                        c={c}
-                        isActive={isActive}
-                        isPlaying={isPlaying}
-                      />
-                    </View>
-
-                    {/* Do we still want this? It caused the UI to shift weirdly */}
-                    {/* <ContentSessionProgress content={c} isActive={isActive} /> */}
-                  </View>
+                  <TouchableOpacity
+                    onPress={() => {}} // Todo
+                    activeOpacity={0.9}
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      display: "flex",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faThumbsDown}
+                      color={theme.text}
+                      size={25}
+                    />
+                  </TouchableOpacity>
                 </View>
+
+                <PlayButton
+                  animation={animation}
+                  playOrPause={playOrPause}
+                  c={c}
+                  isActive={isActive}
+                  isPlaying={isPlaying}
+                />
+
+                {/* Do we still want this? It caused the UI to shift weirdly */}
+                {/* <ContentSessionProgress content={c} isActive={isActive} /> */}
               </View>
             </View>
           </View>
