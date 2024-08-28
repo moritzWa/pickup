@@ -24,7 +24,6 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import FastImage from "react-native-fast-image";
 import { Swipeable } from "react-native-gesture-handler";
 import { Circle, Svg } from "react-native-svg";
 import Toast from "react-native-toast-message";
@@ -41,6 +40,7 @@ import {
 } from "src/api/generated/types";
 import { colors } from "src/components";
 import { IS_IPAD } from "src/config";
+import { Maybe } from "src/core";
 import { useTheme } from "src/hooks";
 import { NavigationProps } from "src/navigation";
 import {
@@ -638,11 +638,43 @@ export const ContentRowImage = ({
 }) => {
   const gradient = getGradientById(c.id);
 
+  let thumbnailImageUrl: Maybe<string> | undefined = c.thumbnailImageUrl;
+
+  // if thubnail is http make it https
+  if (thumbnailImageUrl && thumbnailImageUrl.startsWith("http://")) {
+    thumbnailImageUrl = thumbnailImageUrl.replace("http", "https");
+  }
+
+  // work: .x-icon, .gif, png,
+  // dont work: svgs, jpegs
+  // examples:
+  // natural history of beauty: https://firebasestorage.googleapis.com/v0/b/learning-dev-ai.appspot.com/o/images%2F5428f789-25cd-462c-92a3-611040f0d772.svg%2Bxml?alt=media
+
   if (c.thumbnailImageUrl) {
+    console.log(c.thumbnailImageUrl, c.title);
+
+    // return (
+    //   <FastImage
+    //     source={{
+    //       uri: c.thumbnailImageUrl,
+    //       // uri: ""
+    //     }}
+    //     style={{
+    //       width: size || IMAGE_SIZE,
+    //       height: size || IMAGE_SIZE,
+    //       borderRadius: 5,
+    //       // @ts-ignore
+    //       ...style,
+    //     }}
+    //   />
+    // );
+
     return (
-      <FastImage
+      <Image
+        // @ts-ignore
         source={{
-          uri: c.thumbnailImageUrl,
+          uri: thumbnailImageUrl,
+          // uri: "https://softwareengineeringdaily.com/wp-content/uploads/2024/02/sed_logo.png",
         }}
         style={{
           width: size || IMAGE_SIZE,
