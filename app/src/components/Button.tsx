@@ -82,6 +82,7 @@ const Button = ({
           color={activityColor ?? theme.background}
           size={16}
           style={{
+            // @ts-ignore
             ...activityStyle,
             alignSelf: "center",
             justifyContent: "center",

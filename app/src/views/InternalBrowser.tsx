@@ -7,7 +7,7 @@ const InternalBrowser = ({ route }: { route: any }) => {
 
   return (
     <View style={styles.container}>
-      <WebView source={{ uri: url }} />
+      <WebView source={{ uri: url }} allowsBackForwardNavigationGestures />
     </View>
   );
 };
@@ -15,6 +15,7 @@ const InternalBrowser = ({ route }: { route: any }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 70,
   },
 });
 
