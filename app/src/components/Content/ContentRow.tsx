@@ -1,6 +1,11 @@
 import { useMutation } from "@apollo/client";
-import { faArchive, faPodcast } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faArchive,
+  faPodcast,
+  faThumbsDown,
+} from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faHeart } from "@fortawesome/sharp-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -146,16 +151,16 @@ export const ContentRow = ({
 
       swipeableRef.current?.close();
 
-      Toast.show({
-        type: "success",
-        text1: `${data?.isBookmarked ? "Liked" : "Unliked"} ${c.title.slice(
-          0,
-          24
-        )}`,
-        position: "bottom",
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: `${data?.isBookmarked ? "Liked" : "Unliked"} ${c.title.slice(
+      //     0,
+      //     24
+      //   )}`,
+      //   position: "bottom",
+      // });
       // console.log(response.data);
-      // console.log(JSON.stringify(data, null, 2));
+      console.log(JSON.stringify(data, null, 2));
     } catch (err) {
       console.log(JSON.stringify(err, null, 2));
     }
@@ -277,34 +282,6 @@ export const ContentRow = ({
         />
       </TouchableOpacity>
 
-      {/* <TouchableOpacity
-        onPress={bookmarkContent}
-        activeOpacity={0.9}
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          display: "flex",
-          flexDirection: "row",
-          backgroundColor: c.contentSession?.isBookmarked
-            ? colors.pink50
-            : theme.text,
-          width: 55,
-          marginRight: 10,
-          height: 55,
-          borderRadius: 50,
-        }}
-      >
-        <FontAwesomeIcon
-          icon={faHeart}
-          color={
-            c.contentSession?.isBookmarked
-              ? colors.white
-              : theme.secondaryBackground
-          }
-          size={22}
-        />
-      </TouchableOpacity> */}
-
       <TouchableOpacity
         onPress={onAddOrRemoveContentToQueue}
         activeOpacity={0.9}
@@ -359,7 +336,7 @@ export const ContentRow = ({
         // shadowOpacity: 0.1,
         // shadowRadius: 3,
         elevation: 5,
-        marginBottom: 10,
+        // marginBottom: 10,
         // shadowColor: isActive ? "transparent" : colors.gray30,
       }}
     >
@@ -368,7 +345,7 @@ export const ContentRow = ({
         overshootRight={false}
         ref={swipeableRef}
         containerStyle={{
-          marginHorizontal: 10,
+          margin: 10,
           borderRadius: 15,
           backgroundColor: theme.ternaryBackground,
           borderColor: isActive ? theme.borderDark : theme.border,
@@ -386,8 +363,6 @@ export const ContentRow = ({
           <View>
             <View
               style={{
-                paddingRight: 50,
-                marginBottom: 10,
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
@@ -407,6 +382,7 @@ export const ContentRow = ({
               >
                 <View style={{ flex: 1 }}>
                   <ContentDescription content={c} />
+                  <ContentMetaData content={c} />
 
                   <View
                     style={{
@@ -420,15 +396,78 @@ export const ContentRow = ({
                       style={{
                         display: "flex",
                         flexDirection: "row",
+                        justifyContent: "space-between",
                         alignItems: "center",
                         marginRight: 10,
                         flex: 1,
                       }}
                     >
-                      <ContentFriends friends={c.friends ?? []} />
-                    </View>
+                      {/* friends, upvote/downvote, and share */}
+                      <View
+                        style={{
+                          alignItems: "center",
+                          display: "flex",
+                          flexDirection: "row",
+                          gap: 10,
+                        }}
+                      >
+                        <ContentFriends friends={c.friends ?? []} />
 
-                    <ContentMetaData content={c} />
+                        <TouchableOpacity
+                          onPress={() => {}} // Todo
+                          activeOpacity={0.9}
+                          style={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={faThumbsDown}
+                            color={theme.text}
+                            size={25}
+                          />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={bookmarkContent}
+                          activeOpacity={0.9}
+                          style={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                            display: "flex",
+                            flexDirection: "row",
+                            // backgroundColor: c.contentSession?.isBookmarked
+                            //   ? colors.pink50
+                            //   : theme.text,
+                            marginRight: 10,
+                            borderRadius: 50,
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={faHeart}
+                            color={
+                              // c.contentSession?.isBookmarked
+                              //   ? colors.white
+                              //   : theme.secondaryBackground
+                              c.contentSession?.isBookmarked
+                                ? colors.purple50
+                                : theme.textTertiary
+                            }
+                            size={25}
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <PlayButton
+                        animation={animation}
+                        playOrPause={playOrPause}
+                        c={c}
+                        isActive={isActive}
+                        isPlaying={isPlaying}
+                      />
+                    </View>
 
                     {/* Do we still want this? It caused the UI to shift weirdly */}
                     {/* <ContentSessionProgress content={c} isActive={isActive} /> */}
@@ -438,14 +477,6 @@ export const ContentRow = ({
             </View>
           </View>
         </TouchableOpacity>
-
-        <PlayButton
-          animation={animation}
-          playOrPause={playOrPause}
-          c={c}
-          isActive={isActive}
-          isPlaying={isPlaying}
-        />
       </Swipeable>
     </View>
   );

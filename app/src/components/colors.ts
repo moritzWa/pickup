@@ -170,6 +170,10 @@ export const textDarkNeutralPrimary = "#FFFFFF";
 export const textLightNeutralSecondary = "#666666";
 export const textDarkNeutralSecondary = "#999999";
 
+// tertiary text
+export const textLightNeutralTertiary = "#707070";
+export const textDarkNeutralTertiary = "#A7A7A7";
+
 export const bgDarkNeutralTertiary = "#1F1F1F";
 export const bgLightNeutralTertiary = "#FAFAFA";
 

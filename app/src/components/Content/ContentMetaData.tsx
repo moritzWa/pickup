@@ -19,7 +19,6 @@ export const ContentMetaData = ({
     <View
       style={{
         display: "flex",
-        marginLeft: 15,
         flexDirection: "row",
         alignItems: "center",
       }}
@@ -31,6 +30,12 @@ export const ContentMetaData = ({
           fontFamily: "Inter-Medium",
         }}
       >
+        <FontAwesomeIcon
+          icon={content.type === "article" ? faNewspaper : faPodcast}
+          color={theme.textSecondary}
+          size={14}
+        />
+        <Separator />
         {content.authorName && (
           <>
             {truncate(content.authorName || "", {
@@ -50,17 +55,9 @@ export const ContentMetaData = ({
         {content.lengthFormatted && <Separator />}
         {content.contentSession?.percentFinished &&
           content.contentSession?.percentFinished > 0 && (
-            <>
-              {content.contentSession?.percentFinished}%
-              <Separator />
-            </>
+            <>{content.contentSession?.percentFinished}%</>
           )}
       </Text>
-      <FontAwesomeIcon
-        icon={content.type === "article" ? faNewspaper : faPodcast}
-        color={theme.textSecondary}
-        size={14}
-      />
     </View>
   );
 };

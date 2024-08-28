@@ -49,6 +49,11 @@ export const useTheme = () => {
         theme === "light"
           ? colors.textLightNeutralSecondary
           : colors.textDarkNeutralSecondary,
+      // make tertiary text
+      textTertiary:
+        theme === "light"
+          ? colors.textLightNeutralTertiary
+          : colors.textDarkNeutralTertiary,
       textSubtle:
         theme === "light"
           ? colors.textLightNeutralSubtle
