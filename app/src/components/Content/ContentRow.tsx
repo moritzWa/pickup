@@ -40,7 +40,6 @@ import {
   MutationRemoveFromQueueArgs,
 } from "src/api/generated/types";
 import { colors } from "src/components";
-import { IS_IPAD } from "src/config";
 import { Maybe } from "src/core";
 import { useTheme } from "src/hooks";
 import { NavigationProps } from "src/navigation";
@@ -52,12 +51,9 @@ import {
 import { getGradientById } from "src/utils/helpers";
 import ProfileIcon from "../ProfileIcon";
 import { getDescription } from "./contentHelpers";
+import { Separator } from "./ContentRowComponents";
 
 const IMAGE_SIZE = 35;
-
-const Separator = () => (
-  <Text style={{ fontSize: 12, opacity: 0.6, lineHeight: 18 }}> • </Text>
-);
 
 export const ContentRow = ({
   content: c,
@@ -468,17 +464,6 @@ export const ContentRow = ({
                       alignItems: "center",
                     }}
                   >
-                    {/* <Text
-                  style={{
-                    flex: 1,
-                    color: theme.text,
-                    fontSize: 14,
-                    fontFamily: "Inter-Medium",
-                  }}
-                >
-                  {c.authorName}
-                </Text> */}
-
                     <View
                       style={{
                         display: "flex",
@@ -488,24 +473,6 @@ export const ContentRow = ({
                         flex: 1,
                       }}
                     >
-                      {/* <FontAwesomeIcon
-                    icon={faHeadSide}
-                    color={theme.text}
-                    size={14}
-                    style={{ marginRight: 5 }}
-                  /> */}
-
-                      {/* <Text
-                        style={{
-                          color: theme.header,
-                          fontSize: 14,
-                          fontFamily: "Inter-Medium",
-                        }}
-                        numberOfLines={1}
-                      >
-                        {c.authorName || extractDomain(c.websiteUrl)}
-                      </Text> */}
-
                       <ContentFriends friends={c.friends ?? []} />
                     </View>
 
@@ -556,35 +523,8 @@ export const ContentRow = ({
                       />
                     </View>
 
-                    {c.contentSession?.percentFinished ? (
-                      <View
-                        style={{
-                          display: "flex",
-                          marginLeft: 5,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          // marginRight: 15,
-                        }}
-                      >
-                        <CircularProgress
-                          size={IS_IPAD ? 26 : 14}
-                          strokeWidth={IS_IPAD ? 5 : 3}
-                          bg={isActive ? theme.textSubtle : theme.textSubtle}
-                          percentage={c.contentSession?.percentFinished || 0}
-                        />
-
-                        <Text
-                          style={{
-                            marginLeft: 5,
-                            color: theme.text,
-                            fontSize: 14,
-                            fontFamily: "Inter-Medium",
-                          }}
-                        >
-                          {c.contentSession?.percentFinished}%
-                        </Text>
-                      </View>
-                    ) : null}
+                    {/* Do we still want this? It caused the UI to shift weirdly */}
+                    {/* <ContentSessionProgress content={c} isActive={isActive} /> */}
                   </View>
                 </View>
               </View>
@@ -711,7 +651,7 @@ export const ContentRowImage = ({
   );
 };
 
-const CircularProgress = ({
+export const CircularProgress = ({
   size,
   strokeWidth,
   percentage,
@@ -755,7 +695,6 @@ const CircularProgress = ({
     </View>
   );
 };
-
 const ContentFriends = ({
   friends,
 }: {
