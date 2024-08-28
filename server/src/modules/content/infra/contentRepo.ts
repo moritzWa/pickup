@@ -334,6 +334,9 @@ export class PostgresContentRepository {
         idsToExclude: string[]
     ): Promise<SimilarContentWithDistanceResponse> {
         try {
+            // logg the type of vector
+            console.log(typeof vector);
+
             const result = await this.repo
                 .createQueryBuilder("content")
                 .select("content")
@@ -353,7 +356,7 @@ export class PostgresContentRepository {
                 .where({
                     id: Not(In(idsToExclude)),
                 })
-                .setParameter("embedding", pgvector.toSql(vector))
+                .setParameter("embedding", vector)
                 .groupBy("content.id")
                 .orderBy("min_distance", "ASC")
                 .limit(limit)
@@ -377,6 +380,7 @@ export class PostgresContentRepository {
         }
     }
 
+    // unused!
     async findSimilarContent(
         vector: number[],
         limit: number = DEFAULT_LINKS_RETURN,
@@ -398,7 +402,7 @@ export class PostgresContentRepository {
                     id: Not(In(idsToExclude)),
                     audioUrl: Not(IsNull()),
                 })
-                .setParameter("embedding", pgvector.toSql(vector))
+                .setParameter("embedding", vector)
                 .groupBy("content.id")
                 .orderBy("min_distance", "ASC")
                 .limit(limit)
