@@ -2,17 +2,18 @@ import {
     EntityManager,
     FindManyOptions,
     FindOneOptions,
-    getRepository,
     Repository,
 } from "typeorm";
 
-import { success, failure, Maybe } from "src/core/logic";
-import { UnexpectedError, NotFoundError } from "src/core/logic/errors";
-import { DefaultErrors } from "src/core/logic/errors/default";
-import { FailureOrSuccess } from "src/core/logic";
-import { ContentSession as ContentSessionModel } from "src/core/infra/postgres/entities";
 import { dataSource } from "src/core/infra/postgres";
-import { Helpers } from "src/utils";
+import {
+    Content,
+    ContentSession as ContentSessionModel,
+} from "src/core/infra/postgres/entities";
+import { failure, FailureOrSuccess, success } from "src/core/logic";
+import { NotFoundError, UnexpectedError } from "src/core/logic/errors";
+import { DefaultErrors } from "src/core/logic/errors/default";
+import { Helpers, Logger } from "src/utils";
 
 type ContentSessionResponse = FailureOrSuccess<
     DefaultErrors,
@@ -61,6 +62,18 @@ export class PostgresContentSessionRepository {
         { contentId, userId }: { contentId: string; userId: string },
         options?: FindManyOptions<ContentSessionModel>
     ): Promise<ContentSessionResponse> {
+        if (!contentId || !userId) {
+            // search and log the title of the content
+            const content = await dataSource.getRepository(Content).findOne({
+                where: { id: contentId },
+            });
+            Logger.error(
+                `error in findForContentAndUser — content?.title: ${content?.title} contentId: ${contentId} userId: ${userId}`
+            );
+
+            return failure(new UnexpectedError("Invalid contentId or userId"));
+        }
+
         return Helpers.trySuccessFail(async () => {
             const res = await this.repo.findOne({
                 ...options,
