@@ -519,8 +519,8 @@ export const ContentRow = ({
                         {c.authorName && (
                           <>
                             {truncate(c.authorName || "", {
-                              length: 14,
-                              omission: ".",
+                              length: 15,
+                              omission: "...",
                             })}
                             <Separator />
                           </>
