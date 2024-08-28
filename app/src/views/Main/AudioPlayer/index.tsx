@@ -648,11 +648,12 @@ const NextQueue = ({ content }: { content: BaseContentFields | null }) => {
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
+          margin: 10,
         }}
       >
         <ContentRowImage size={40} content={nextContent} />
 
-        <View style={{ flex: 1, marginLeft: 10 }}>
+        <View style={{ flex: 1, marginLeft: 20 }}>
           <Text
             numberOfLines={1}
             style={{

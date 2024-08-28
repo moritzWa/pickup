@@ -12,6 +12,7 @@
     "graphql:codegen": "./node_modules/.bin/graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "@animatereactnative/marquee": "^0.2.0",
     "@apollo/client": "^3.10.8",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo/react-native-action-sheet": "^4.1.0",

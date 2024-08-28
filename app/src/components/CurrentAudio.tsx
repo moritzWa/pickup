@@ -1,3 +1,4 @@
+import { Marquee } from "@animatereactnative/marquee";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   faHeadphonesAlt,
@@ -7,7 +8,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { AppContext } from "context";
-import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -241,12 +241,13 @@ export const CurrentAudio = () => {
         <TouchableOpacity
           onPress={openContent}
           style={{
-            paddingHorizontal: 5,
+            paddingHorizontal: 12,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             width: "100%",
             flexDirection: "row",
+            gap: 10,
           }}
           activeOpacity={1}
         >
@@ -254,12 +255,53 @@ export const CurrentAudio = () => {
 
           <View
             style={{
-              marginLeft: 5,
               flex: 1,
               alignItems: "flex-start",
+              width: "100%",
             }}
           >
-            <MarqueeText title={title || ""} />
+            {title && title.length > 30 ? (
+              <Marquee spacing={20} speed={1}>
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      color: theme.header,
+                    },
+                  ]}
+                >
+                  {title}
+                </Text>
+              </Marquee>
+            ) : (
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    color: theme.header,
+                  },
+                ]}
+              >
+                {title || ""}
+              </Text>
+            )}
+            {title && title.length > 30 && (
+              <LinearGradient
+                // colors={["transparent", bg]}
+                // colors={["transparent", theme.background]}
+                colors={["transparent", theme.bgPrimaryLight]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 2, y: 0 }}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  width: 10, // Adjust the width as needed
+                  height: "100%",
+                }}
+              />
+            )}
+
+            {/* <MarqueeText title={title || ""} /> */}
 
             <View
               style={{
@@ -273,7 +315,7 @@ export const CurrentAudio = () => {
                 icon={faHeadphonesAlt}
                 color={theme.text}
                 size={12}
-                style={{ marginRight: 5 }}
+                style={{ marginRight: 10 }}
               />
 
               <Text
@@ -299,7 +341,7 @@ export const CurrentAudio = () => {
           >
             <Animated.View
               style={{
-                marginLeft: 15,
+                // marginLeft: -5,
                 width: 35,
                 height: 35,
                 flexDirection: "row",
@@ -354,6 +396,7 @@ export const CurrentAudio = () => {
 
 const screenWidth = Dimensions.get("window").width;
 
+// not working
 const MarqueeText = ({ title }: { title: string }) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
   const [textWidth, setTextWidth] = useState(0);

@@ -15,6 +15,11 @@
     "@jridgewell/gen-mapping" "^0.3.5"
     "@jridgewell/trace-mapping" "^0.3.24"
 
+"@animatereactnative/marquee@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@animatereactnative/marquee/-/marquee-0.2.0.tgz#a5f2a6b44e61cb375fc37264d00d900ccc9b594d"
+  integrity sha512-pwdKnBr+0JzaKZ4eNmfiALQxNCxN0XkDyW0h+h90x5tSYaMAn/0H9lpF7nNum2JR7LYDgp0hfEl7Y1uVRRKdjA==
+
 "@apollo/client@^3.10.8":
   version "3.10.8"
   resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.10.8.tgz#96b1548818e45fac752ec2bd318e5466d9ca26b5"
@@ -7640,11 +7645,6 @@ open@^8.0.4, open@^8.3.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-opencollective-postinstall@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/opencollective-postinstall/-/opencollective-postinstall-2.0.3.tgz#7a0fff978f6dbfa4d006238fbac98ed4198c3259"
-  integrity sha512-8AV/sCtuzUeTo8gQK5qDZzARrulB3egtLzFgteqB2tcT4Mw7B8Kt7JcDHmltjz6FOAHsvTevk70gZEbhM4ZS9Q==
-
 optimism@^0.18.0:
   version "0.18.0"
   resolved "https://registry.yarnpkg.com/optimism/-/optimism-0.18.0.tgz#e7bb38b24715f3fdad8a9a7fc18e999144bbfa63"
@@ -8227,14 +8227,6 @@ react-native-in-app-review@^4.3.3:
   version "4.3.3"
   resolved "https://registry.yarnpkg.com/react-native-in-app-review/-/react-native-in-app-review-4.3.3.tgz#61f09f110de18f0a470a9bb55b9f49600390085f"
   integrity sha512-Q9sXBtK8tCBYFPCGmMgeMlkxXC5e6vAyPZK26OC1oOKUuKUd0QORnryk/qbwnuN4fLshHQN8UKlLgyHLGRuK3A==
-
-react-native-inappbrowser-reborn@^3.7.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/react-native-inappbrowser-reborn/-/react-native-inappbrowser-reborn-3.7.0.tgz#849a43c3c7da22b65147649fe596836bcb494083"
-  integrity sha512-Ia53jYNtFcbNaX5W3QfOmN25I7bcvuDiQmSY5zABXjy4+WI20bPc9ua09li55F8yDCjv3C99jX6vKms68mBV7g==
-  dependencies:
-    invariant "^2.2.4"
-    opencollective-postinstall "^2.0.3"
 
 react-native-iphone-x-helper@^1.0.3:
   version "1.3.1"
