@@ -1,11 +1,11 @@
 import { useMutation } from "@apollo/client";
 import {
   faArchive,
+  faHeart,
   faPodcast,
   faThumbsDown,
 } from "@fortawesome/pro-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faHeart } from "@fortawesome/sharp-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -448,7 +448,7 @@ export const ContentRow = ({
                   >
                     <FontAwesomeIcon
                       icon={faThumbsDown}
-                      color={theme.text}
+                      color={theme.textTertiary}
                       size={25}
                     />
                   </TouchableOpacity>
@@ -651,7 +651,7 @@ const ContentFriends = ({
   friends: ContentUserFollowingProfile[];
 }) => {
   const theme = useTheme();
-  const friendsToShow = (friends ?? []).slice(0, 3);
+  let friendsToShow = (friends ?? []).slice(0, 3);
   const extraFriends = friends.length - friendsToShow.length;
   const navigation = useNavigation<NavigationProps>();
 
@@ -682,9 +682,7 @@ const ContentFriends = ({
           onPress={() => onPressUser(f)}
           size={25}
           style={{
-            // negative left
-            left: i === 0 ? 0 : -7,
-            position: "relative",
+            marginRight: i < friendsToShow.length - 1 ? -10 : 0,
             borderColor: theme.border,
             borderWidth: 1,
           }}

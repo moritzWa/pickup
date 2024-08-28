@@ -15,6 +15,10 @@ export const ContentMetaData = ({
 }) => {
   const theme = useTheme();
 
+  const hasContentSessionProgress =
+    content.contentSession?.percentFinished &&
+    content.contentSession?.percentFinished > 0;
+
   return (
     <View
       style={{
@@ -39,8 +43,8 @@ export const ContentMetaData = ({
         {content.authorName && (
           <>
             {truncate(content.authorName || "", {
-              length: 15,
-              omission: "...",
+              length: 18,
+              omission: "…",
             })}
             <Separator />
           </>
@@ -52,11 +56,10 @@ export const ContentMetaData = ({
           </>
         )}
         {content.lengthFormatted}
-        {content.lengthFormatted && <Separator />}
-        {content.contentSession?.percentFinished &&
-          content.contentSession?.percentFinished > 0 && (
-            <>{content.contentSession?.percentFinished}%</>
-          )}
+        {hasContentSessionProgress && <Separator />}
+        {hasContentSessionProgress && (
+          <>{content.contentSession?.percentFinished}%</>
+        )}
       </Text>
     </View>
   );
