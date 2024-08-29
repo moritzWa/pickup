@@ -1,18 +1,17 @@
+import { User } from "src/core/infra/postgres/entities/User";
 import { Maybe } from "src/core/logic";
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
+    CreateDateColumn,
+    Entity,
     Index,
-    OneToMany,
-    ManyToOne,
     JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn,
     Relation,
     Unique,
-    CreateDateColumn,
     UpdateDateColumn,
 } from "typeorm";
-import { User } from "src/core/infra/postgres/entities/User";
 import { Content } from "./Content";
 
 export enum ContentFeedFilterEnum {
@@ -22,6 +21,7 @@ export enum ContentFeedFilterEnum {
     Unread = "unread",
     Queue = "queue",
     Archived = "archived",
+    Disliked = "disliked",
     Friends = "friends",
 }
 
@@ -72,6 +72,14 @@ export class FeedItem {
         default: false,
     })
     isArchived!: boolean;
+
+    @Column({
+        nullable: false,
+        name: "is_disliked",
+        type: "boolean",
+        default: false,
+    })
+    isDisliked!: boolean;
 
     @Column({
         nullable: false,

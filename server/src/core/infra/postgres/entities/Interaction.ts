@@ -15,6 +15,8 @@ import { User } from "./User";
 
 export enum InteractionType {
     Likes = "likes",
+    Disliked = "disliked",
+    Undisliked = "undisliked",
     Bookmarked = "bookmarked",
     Unbookmarked = "unbookmarked",
     Queued = "queued",

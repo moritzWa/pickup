@@ -34,8 +34,8 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   ActivityFilter: "new" | "unread"
-  ContentFeedFilter: "archived" | "for_you" | "friends" | "new" | "popular" | "queue" | "unread"
-  InteractionTypeEnum: "bookmarked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "queued" | "scrolled_past" | "skipped" | "started_listening" | "unbookmarked"
+  ContentFeedFilter: "archived" | "disliked" | "for_you" | "friends" | "new" | "popular" | "queue" | "unread"
+  InteractionTypeEnum: "bookmarked" | "disliked" | "finished" | "left_in_progress" | "likes" | "listened_to_beginning" | "queued" | "scrolled_past" | "skipped" | "started_listening" | "unbookmarked" | "undisliked"
   UserAuthProviderEnum: "firebase"
 }
 
@@ -233,9 +233,11 @@ export interface NexusGenFieldTypes {
     contentId: string; // String!
     createdAt: NexusGenScalars['Date']; // Date!
     currentMs: number | null; // Float
+    dislikedAt: NexusGenScalars['Date'] | null; // Date
     durationMs: number | null; // Float
     id: string; // String!
     isBookmarked: boolean | null; // Boolean
+    isDisliked: boolean | null; // Boolean
     notes: string | null; // String
     percentFinished: number | null; // Float
     timestampCursor: number | null; // Float
@@ -314,6 +316,7 @@ export interface NexusGenFieldTypes {
     createContentFromUrl: NexusGenRootTypes['Content']; // Content!
     createUser: NexusGenRootTypes['CreateUserResponse']; // CreateUserResponse!
     deleteMe: string; // String!
+    dislikeContent: NexusGenRootTypes['ContentSession']; // ContentSession!
     followProfile: string; // String!
     getAuthToken: string; // String!
     readNotifications: string; // String!
@@ -510,9 +513,11 @@ export interface NexusGenFieldTypeNames {
     contentId: 'String'
     createdAt: 'Date'
     currentMs: 'Float'
+    dislikedAt: 'Date'
     durationMs: 'Float'
     id: 'String'
     isBookmarked: 'Boolean'
+    isDisliked: 'Boolean'
     notes: 'String'
     percentFinished: 'Float'
     timestampCursor: 'Float'
@@ -591,6 +596,7 @@ export interface NexusGenFieldTypeNames {
     createContentFromUrl: 'Content'
     createUser: 'CreateUserResponse'
     deleteMe: 'String'
+    dislikeContent: 'ContentSession'
     followProfile: 'String'
     getAuthToken: 'String'
     readNotifications: 'String'
@@ -763,6 +769,10 @@ export interface NexusGenArgTypes {
       password?: string | null; // String
       referralCode?: string | null; // String
       username?: string | null; // String
+    }
+    dislikeContent: { // args
+      authProviderId?: string | null; // String
+      contentId: string; // ID!
     }
     followProfile: { // args
       username: string; // String!

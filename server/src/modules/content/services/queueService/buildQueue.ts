@@ -125,6 +125,7 @@ const buildQueueFromContent = async (
                 isQueued: false,
                 insertionId,
                 isArchived: false,
+                isDisliked: false,
                 queuedAt: null,
                 userId: user.id,
                 contentId: c.id,

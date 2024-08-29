@@ -4,6 +4,7 @@ export * from "./archiveContent";
 export * from "./bookmarkContent";
 export * from "./clearQueue";
 export * from "./createContentFromUrl";
+export * from "./dislikeConent";
 export * from "./recordInteraction";
 export * from "./removeFromQueue";
 export * from "./respondToContent";

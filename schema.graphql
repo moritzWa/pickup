@@ -55,6 +55,7 @@ type Content {
 
 enum ContentFeedFilter {
   Archived
+  Disliked
   ForYou
   Friends
   New
@@ -74,9 +75,11 @@ type ContentSession {
   contentId: String!
   createdAt: Date!
   currentMs: Float
+  dislikedAt: Date
   durationMs: Float
   id: String!
   isBookmarked: Boolean
+  isDisliked: Boolean
   notes: String
   percentFinished: Float
   timestampCursor: Float
@@ -148,6 +151,7 @@ type Interaction {
 
 enum InteractionTypeEnum {
   Bookmarked
+  Disliked
   Finished
   LeftInProgress
   Likes
@@ -157,6 +161,7 @@ enum InteractionTypeEnum {
   Skipped
   StartedListening
   Unbookmarked
+  Undisliked
 }
 
 type Metadata {
@@ -182,6 +187,7 @@ type Mutation {
   createContentFromUrl(authProviderId: String, url: String!): Content!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
+  dislikeContent(authProviderId: String, contentId: ID!): ContentSession!
   followProfile(username: String!): String!
   getAuthToken: String!
   readNotifications(notificationIds: [ID!]!): String!

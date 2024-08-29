@@ -1,17 +1,9 @@
-import { ApolloError } from "apollo-server-errors";
-import { StatusCodes } from "http-status-codes";
-import { booleanArg, idArg, mutationField, nonNull, stringArg } from "nexus";
-import {
-    throwIfError,
-    throwIfErrorAndDatadog,
-} from "src/core/surfaces/graphql/common";
-import { FirebaseProvider } from "src/shared/authorization/firebaseProvider";
-import { loops } from "src/utils/loops";
-import { auth } from "firebase-admin";
+import { mutationField, nonNull } from "nexus";
+import { throwIfError } from "src/core/surfaces/graphql/common";
 import { throwIfNotAuthenticated } from "src/core/surfaces/graphql/context";
+import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { v4 as uuidv4 } from "uuid";
 import { contentRepo, contentSessionRepo } from "../../infra";
-import { pgUserRepo } from "src/modules/users/infra/postgres";
 
 export const startListening = mutationField("startListening", {
     type: nonNull("ContentSession"),
@@ -50,6 +42,7 @@ export const startListening = mutationField("startListening", {
             id: uuidv4(),
             isBookmarked: false,
             isLiked: false,
+            isDisliked: false,
             contentId: content.id,
             userId: user.id,
             currentMs: 0,
@@ -57,6 +50,7 @@ export const startListening = mutationField("startListening", {
             createdAt: new Date(),
             lastListenedAt: new Date(),
             bookmarkedAt: null,
+            dislikedAt: null,
             notes: null,
             updatedAt: new Date(),
             percentFinished: null,

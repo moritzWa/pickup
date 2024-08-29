@@ -27,6 +27,8 @@ export const ContentSession = objectType({
         });
         t.nullable.boolean("isBookmarked");
         t.nullable.date("bookmarkedAt");
+        t.nullable.boolean("isDisliked");
+        t.nullable.date("dislikedAt");
         t.nonNull.date("createdAt");
         t.nonNull.date("updatedAt");
         t.field("content", {

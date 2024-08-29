@@ -1,19 +1,17 @@
-import { Content, FeedItem, User } from "src/core/infra/postgres/entities";
-import { contentRepo, contentSessionRepo, feedRepo } from "../infra";
+import { keyBy } from "lodash";
+import { Content, User } from "src/core/infra/postgres/entities";
+import { ContentFeedFilterEnum } from "src/core/infra/postgres/entities/FeedItem";
 import {
     DefaultErrors,
     failure,
     FailureOrSuccess,
-    hasValue,
     success,
 } from "src/core/logic";
-import { In, IsNull, MoreThan, Not } from "typeorm";
-import { groupBy, keyBy, uniqBy } from "lodash";
-import { pgUserRepo, relationshipRepo } from "src/modules/users/infra/postgres";
+import { relationshipRepo } from "src/modules/users/infra/postgres";
+import { Logger } from "src/utils";
+import { In, IsNull, Not } from "typeorm";
+import { contentRepo, contentSessionRepo, feedRepo } from "../infra";
 import { ContentService } from "./contentService";
-import { ContentFeedFilterEnum } from "src/core/infra/postgres/entities/FeedItem";
-import { ContentWithDistance } from "../infra/contentRepo";
-import moment from "moment";
 
 const getFriendFeedForUser = async (
     user: User,
@@ -117,7 +115,10 @@ const getFeed = async (
 
     const [feedResponse] = await Promise.all([
         feedRepo.findForUser(user.id, {
-            where: { isArchived: false },
+            where: {
+                isArchived: false,
+                isDisliked: false,
+            },
             take: limit ?? 0,
             skip: page * limit,
             order: {
@@ -158,6 +159,7 @@ const getFeed = async (
         where: {
             userId: user.id,
             contentId: In(contentIds),
+            isDisliked: false,
         },
     });
 
@@ -175,6 +177,14 @@ const getFeed = async (
     const content = feedResponse.value.map((c) => {
         const session = sessionByContentId[c.contentId];
         const content = contentByContentId[c.contentId];
+
+        if (session && session.isDisliked) {
+            Logger.info("Debugging: DISLIKED CONTENT IN FEED", {
+                title: content.title,
+                id: content.id,
+                userId: user.id,
+            });
+        }
 
         return {
             ...content,

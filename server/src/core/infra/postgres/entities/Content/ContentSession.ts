@@ -1,15 +1,14 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
-    Index,
-    ManyToOne,
-    JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn,
     DeleteDateColumn,
-    Unique,
+    Entity,
+    Index,
+    JoinColumn,
+    ManyToOne,
+    PrimaryGeneratedColumn,
     Relation,
+    UpdateDateColumn,
 } from "typeorm";
 import { User } from "../User";
 import { Content } from "./Content";
@@ -48,6 +47,15 @@ export class ContentSession {
     })
     isBookmarked!: boolean;
 
+    // is disliked
+    @Column({
+        nullable: false,
+        name: "is_disliked",
+        type: "boolean",
+        default: false,
+    })
+    isDisliked!: boolean;
+
     // bookmarked at
     @Column({
         nullable: true,
@@ -55,6 +63,13 @@ export class ContentSession {
         type: "timestamp",
     })
     bookmarkedAt!: Date | null;
+
+    @Column({
+        nullable: true,
+        name: "disliked_at",
+        type: "timestamp",
+    })
+    dislikedAt!: Date | null;
 
     @Column({
         nullable: true,
