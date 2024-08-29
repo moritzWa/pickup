@@ -16,8 +16,10 @@ export const ContentMetaData = ({
   const theme = useTheme();
 
   const hasContentSessionProgress =
-    content.contentSession?.percentFinished &&
-    content.contentSession?.percentFinished > 0;
+    (content.contentSession &&
+      !!content.contentSession?.percentFinished &&
+      content.contentSession?.percentFinished > 0) ??
+    false;
 
   return (
     <View

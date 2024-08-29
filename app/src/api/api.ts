@@ -305,6 +305,17 @@ const Bookmark = gql`
   }
 `;
 
+// now dislike
+
+const Dislike = gql`
+  mutation dislikeContent($contentId: ID!) {
+    dislikeContent(contentId: $contentId) {
+      id
+      isDisliked
+    }
+  }
+`;
+
 const CreateContentFromUrl = gql`
   ${BaseContentFields}
   mutation CreateContentFromUrl($url: String!, $authProviderId: String) {
@@ -404,6 +415,7 @@ const UpdateContentSession = gql`
     $isLiked: Boolean
     $currentMs: Int
     $lastListenedAt: Date
+    $isDisliked: Boolean
   ) {
     updateContentSession(
       contentSessionId: $contentSessionId
@@ -411,6 +423,7 @@ const UpdateContentSession = gql`
       isLiked: $isLiked
       currentMs: $currentMs
       lastListenedAt: $lastListenedAt
+      isDisliked: $isDisliked
     ) {
       ...BaseContentSessionFields
     }
@@ -514,6 +527,7 @@ export const api = {
     getIsBookmarked: GetIsBookmarked,
     archived: GetArchived,
     bookmark: Bookmark,
+    dislike: Dislike,
     createFromUrl: CreateContentFromUrl,
     addToQueue: AddToQueue,
     removeFromQueue: RemoveFromQueue,

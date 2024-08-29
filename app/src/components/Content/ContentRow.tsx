@@ -92,6 +92,10 @@ export const ContentRow = ({
     api.content.bookmark
   );
 
+  const [dislike] = useMutation<Pick<Mutation, "dislikeContent">>(
+    api.content.dislike
+  );
+
   const [archiveContent] = useMutation<Pick<Mutation, "archiveContent">>(
     api.content.archive
   );
@@ -135,6 +139,8 @@ export const ContentRow = ({
   };
 
   const bookmarkContent = async () => {
+    console.log("bookmarkContent()", c.id);
+
     try {
       const response = await bookmark({
         variables: {
@@ -149,18 +155,28 @@ export const ContentRow = ({
 
       const data = response.data?.bookmarkContent;
 
-      swipeableRef.current?.close();
+      console.log("bookmarked content", JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
+  };
 
-      // Toast.show({
-      //   type: "success",
-      //   text1: `${data?.isBookmarked ? "Liked" : "Unliked"} ${c.title.slice(
-      //     0,
-      //     24
-      //   )}`,
-      //   position: "bottom",
-      // });
-      // console.log(response.data);
-      console.log(JSON.stringify(data, null, 2));
+  const dislikeContent = async () => {
+    try {
+      const response = await dislike({
+        variables: {
+          contentId: c?.id || "",
+        },
+        refetchQueries: [
+          api.content.get,
+          api.content.bookmarks,
+          api.content.feed,
+        ],
+      });
+
+      const data = response.data?.dislikeContent;
+
+      console.log("disliked content", JSON.stringify(data, null, 2));
     } catch (err) {
       console.log(JSON.stringify(err, null, 2));
     }
@@ -436,9 +452,7 @@ export const ContentRow = ({
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => {
-                      Alert.alert("Todo");
-                    }} // Todo
+                    onPress={dislikeContent}
                     activeOpacity={0.9}
                     style={{
                       justifyContent: "center",
@@ -449,7 +463,11 @@ export const ContentRow = ({
                   >
                     <FontAwesomeIcon
                       icon={faThumbsDown}
-                      color={theme.textTertiary}
+                      color={
+                        c.contentSession?.isDisliked
+                          ? colors.primary
+                          : theme.textTertiary
+                      }
                       size={25}
                     />
                   </TouchableOpacity>

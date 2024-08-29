@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { Maybe } from "src/core";
 import {
   Content,
   ContentSession,
@@ -7,7 +8,6 @@ import {
   Notification,
   User,
 } from "./generated/types";
-import { Maybe } from "src/core";
 
 export type BaseUserFields = Pick<
   User,
@@ -94,6 +94,7 @@ export type BaseContentFields = Pick<
     | "durationMs"
     | "percentFinished"
     | "isBookmarked"
+    | "isDisliked"
     | "bookmarkedAt"
     | "createdAt"
     | "updatedAt"
@@ -136,6 +137,7 @@ export const BaseContentFields = gql`
       userId
       percentFinished
       isBookmarked
+      isDisliked
       bookmarkedAt
       createdAt
       updatedAt
@@ -158,6 +160,7 @@ export const BaseContentSessionFields = gql`
     userId
     percentFinished
     isBookmarked
+    isDisliked
     bookmarkedAt
     createdAt
     updatedAt
