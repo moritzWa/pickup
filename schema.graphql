@@ -184,7 +184,7 @@ type Mutation {
   bookmarkContent(authProviderId: String, contentId: ID!): ContentSession!
   clearQueue: String!
   createAuthor(imageUrl: String, name: String!): Author
-  createContentFromUrl(authProviderId: String, url: String!): Content!
+  createContentFromUrl(url: String!): Content!
   createUser(email: String!, name: String, password: String, referralCode: String, username: String): CreateUserResponse!
   deleteMe: String!
   dislikeContent(authProviderId: String, contentId: ID!): ContentSession!
@@ -260,7 +260,7 @@ type Query {
   getFollows(username: String!): FollowersResponse!
   getFriends: [FriendProfile!]!
   getIntercomMobileToken(platform: String): String!
-  getIsBookmarked(authProviderId: String, url: String!): Boolean!
+  getIsBookmarked(url: String!): Boolean!
   getLikes(limit: Int, page: Int): [ContentSession!]!
   getMobileUpdate: GetMobileUpdateResponse!
   getNextContent(afterContentId: ID!, currentMs: Int): FeedItem

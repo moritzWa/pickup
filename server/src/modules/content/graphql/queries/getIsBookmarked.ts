@@ -2,7 +2,6 @@ import { arg, nonNull, queryField, stringArg } from "nexus";
 import { User } from "src/core/infra/postgres/entities";
 import { throwIfError } from "src/core/surfaces/graphql/common";
 import { Context } from "src/core/surfaces/graphql/context";
-import { pgUserRepo } from "src/modules/users/infra/postgres";
 import { Logger } from "src/utils";
 import { contentRepo } from "../../infra";
 import { ContentSessionService } from "../../services/contentSessionService";
@@ -11,25 +10,19 @@ export const getIsBookmarked = queryField("getIsBookmarked", {
     type: nonNull("Boolean"),
     args: {
         url: nonNull(stringArg()),
-        authProviderId: arg({ type: "String" }),
     },
     resolve: async (_parent, args, ctx: Context) => {
-        const { url, authProviderId } = args;
+        const { url } = args;
 
         Logger.info(
-            `getIsBookmarked: Checking if URL ${url} is bookmarked, authProviderId: ${authProviderId}`
+            `getIsBookmarked: Checking if URL ${url} is bookmarked for user ${ctx.me?.email}`
         );
 
         if (!url) {
             throw new Error("URL is required");
         }
 
-        let user = await getUserFromContextOrAuthProviderId(
-            ctx,
-            authProviderId
-        );
-
-        if (!user) {
+        if (!ctx.me) {
             throw new Error("User not authenticated");
         }
 
@@ -45,7 +38,7 @@ export const getIsBookmarked = queryField("getIsBookmarked", {
 
         const sessionResponse = await ContentSessionService.findOrCreate(
             content,
-            user
+            ctx.me
         );
         throwIfError(sessionResponse);
 
@@ -54,32 +47,9 @@ export const getIsBookmarked = queryField("getIsBookmarked", {
                 sessionResponse.value?.isBookmarked
                     ? "bookmarked"
                     : "unbookmarked"
-            } by user ${user.email}`
+            } by user ${ctx.me.email}`
         );
 
         return sessionResponse.value?.isBookmarked ?? false;
     },
 });
-
-async function getUserFromContextOrAuthProviderId(
-    ctx: Context,
-    authProviderId?: string | null
-): Promise<User | null> {
-    if (ctx.me) {
-        return ctx.me;
-    }
-    if (authProviderId) {
-        const userResponse = await pgUserRepo.findOne({
-            where: { authProviderId },
-        });
-
-        if (userResponse.isSuccess() && userResponse.value) {
-            Logger.info(
-                `getUserFromContextOrAuthProviderId: Found user ${userResponse.value?.email} with authProviderId ${authProviderId}`
-            );
-
-            return userResponse.value;
-        }
-    }
-    return null;
-}

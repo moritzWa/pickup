@@ -40,6 +40,8 @@ Run the following command from the root directory:
 docker compose -f deployments/pickup/docker-compose.yml up
 ```
 
+This will run the postgres server with pgvector extension AND the redis server.
+
 If you want to stop and remove the containers:
 
 ```console

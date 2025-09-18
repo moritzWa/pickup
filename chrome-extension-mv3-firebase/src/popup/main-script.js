@@ -3,6 +3,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithCredential,
+  signOut,
 } from "firebase/auth";
 import { firebaseApp } from "./firebase_config";
 
@@ -10,12 +11,22 @@ const auth = getAuth(firebaseApp);
 
 console.log("popup main!");
 
+const apiUrl = process.env.API_URL;
+console.log(`API URL: ${apiUrl}`);
+
+const isDevelopment =
+  apiUrl.includes("localhost") || apiUrl.includes("127.0.0.1");
+
 function handleAuthStateChange(user) {
   if (user) {
     console.log("logged in!");
     console.log("current user:", user);
     document.getElementById("likeContent").style.display = "block";
     saveCurrentLink();
+
+    if (isDevelopment) {
+      document.getElementById("signOutContainer").style.display = "block";
+    }
   } else {
     console.log("No user");
     window.location.replace("./popup.html");
@@ -42,27 +53,32 @@ function checkForExistingToken() {
   });
 }
 
-const apiUrl = process.env.API_URL;
-console.log(`API URL: ${apiUrl}`);
-
 async function saveCurrentLink() {
   const messageDiv = document.getElementById("message");
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
     const user = auth.currentUser;
-    const authProviderId = user ? user.uid : null;
+
+    if (!user) {
+      console.error("No user logged in");
+      messageDiv.textContent = "Please log in to save links.";
+      return;
+    }
 
     console.log("saving link using api url:", apiUrl);
 
     try {
+      const idToken = await user.getIdToken();
+
       const response = await fetch(`${apiUrl}/graphql`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          query: `mutation($url: String!, $authProviderId: String) {
-            createContentFromUrl(url: $url, authProviderId: $authProviderId) {
+          query: `mutation($url: String!) {
+            createContentFromUrl(url: $url) {
               id
               title
               websiteUrl
@@ -73,7 +89,6 @@ async function saveCurrentLink() {
           }`,
           variables: {
             url: tab.url,
-            authProviderId,
           },
         }),
       });
@@ -111,21 +126,28 @@ async function checkBookmarkStatus() {
     const tab = tabs[0];
     const url = tab.url;
     const user = auth.currentUser;
-    const authProviderId = user ? user.uid : null;
+
+    if (!user) {
+      console.error("No user logged in");
+      messageDiv.textContent = "Please log in to check bookmark status.";
+      return;
+    }
 
     try {
+      const idToken = await user.getIdToken();
+
       const response = await fetch(`${apiUrl}/graphql`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          query: `query($url: String!, $authProviderId: String) {
-            getIsBookmarked(url: $url, authProviderId: $authProviderId)
+          query: `query($url: String!) {
+            getIsBookmarked(url: $url)
           }`,
           variables: {
             url,
-            authProviderId,
           },
         }),
       });
@@ -169,24 +191,31 @@ async function toggleBookmark() {
     }
 
     const user = auth.currentUser;
-    const authProviderId = user ? user.uid : null;
+
+    if (!user) {
+      console.error("No user logged in");
+      messageDiv.textContent = "Please log in to toggle bookmark.";
+      return;
+    }
 
     try {
+      const idToken = await user.getIdToken();
+
       const response = await fetch(`${apiUrl}/graphql`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          query: `mutation($contentId: ID!, $authProviderId: String) {
-            bookmarkContent(contentId: $contentId, authProviderId: $authProviderId) {
+          query: `mutation($contentId: ID!) {
+            bookmarkContent(contentId: $contentId) {
               id
               isBookmarked
             }
           }`,
           variables: {
             contentId: contentId,
-            authProviderId,
           },
         }),
       });
@@ -217,8 +246,29 @@ async function toggleBookmark() {
   });
 }
 
+console.log("isDevelopment", isDevelopment);
+
+function signOutUser() {
+  console.log("signing out user now");
+
+  signOut(auth)
+    .then(() => {
+      console.log("User signed out successfully");
+      window.location.replace("./popup.html");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+}
+
 document
   .getElementById("likeContent")
   .addEventListener("click", toggleBookmark);
+
+if (isDevelopment) {
+  document
+    .getElementById("signOutButton")
+    .addEventListener("click", signOutUser);
+}
 
 onAuthStateChanged(auth, handleAuthStateChange);

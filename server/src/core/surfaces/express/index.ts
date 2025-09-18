@@ -1,22 +1,19 @@
-import http from "http";
-import express from "express";
 import cors from "cors";
+import express from "express";
+import http from "http";
 
-import { startApolloServer } from "../graphql";
+import * as Sentry from "@sentry/node";
+import helmet from "helmet";
+import { serve } from "inngest/express";
+import RedisClient from "ioredis";
+import { omit } from "lodash/fp";
+import { config } from "src/config";
 import { Exception } from "src/core/logic";
 import ApiResponse from "src/core/logic/ApiResponse";
-import { config } from "src/config";
-import { omit } from "lodash/fp";
-import { initSentry } from "src/utils/sentry";
-import * as Sentry from "@sentry/node";
-import { serve } from "inngest/express";
 import { cronInngestFunctions, inngestFunctions } from "src/jobs/inngest";
-import { inngest, cronsInngest } from "src/jobs/inngest/clients";
-import { RedisStore } from "rate-limit-redis";
-import RedisClient from "ioredis";
-import helmet from "helmet";
-
-import { rateLimit } from "express-rate-limit";
+import { inngest } from "src/jobs/inngest/clients";
+import { initSentry } from "src/utils/sentry";
+import { startApolloServer } from "../graphql";
 
 const port = normalizePort(config.port);
 const app = express();
@@ -57,7 +54,28 @@ const startInngest = async () => {
 
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json({ limit: "50mb" }));
-    app.use(cors());
+    app.use(
+        cors({
+            origin: (origin, callback) => {
+                const allowedOrigins = [
+                    "http://localhost:3000",
+                    "https://talkpickup.com",
+                ];
+                if (
+                    !origin ||
+                    allowedOrigins.includes(origin) ||
+                    origin.startsWith("chrome-extension://")
+                ) {
+                    callback(null, true);
+                } else {
+                    callback(new Error("Not allowed by CORS"));
+                }
+            },
+            methods: ["GET", "POST", "OPTIONS"],
+            allowedHeaders: ["Content-Type", "Authorization"],
+            credentials: true,
+        })
+    );
     app.use(
         helmet({
             contentSecurityPolicy:
@@ -223,4 +241,4 @@ async function exceptionHandler(err, req, res, next) {
     }
 }
 
-export { startServer, startInngest };
+export { startInngest, startServer };

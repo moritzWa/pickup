@@ -1,4 +1,4 @@
-import { arg, mutationField, nonNull, stringArg } from "nexus";
+import { mutationField, nonNull, stringArg } from "nexus";
 import {
     Content as ContentEntity,
     User,
@@ -31,23 +31,24 @@ curl -X POST http://localhost:8888/graphql \
   }'
 */
 
+const generateAudioImmediately = false;
+
 export const createContentFromUrl = mutationField("createContentFromUrl", {
     type: nonNull(Content),
     args: {
         url: nonNull(stringArg()),
-        authProviderId: arg({ type: "String" }),
     },
     resolve: async (_parent, args, ctx: Context, _info) => {
-        const { url, authProviderId } = args;
-        Logger.info(
-            `createContentFromUrl called with url: ${url}, authProviderId: ${authProviderId}`
-        );
+        const { url } = args;
+        Logger.info(`createContentFromUrl called with url: ${url}`);
+        // logg ctx.me
+        console.log("ctx", ctx);
+
+        if (!ctx.me) {
+            throw new Error("User not authenticated");
+        }
 
         let content: ContentEntity;
-        let user = await getUserFromContextOrAuthProviderId(
-            ctx,
-            authProviderId
-        );
 
         // Check if content with the given URL already exists
         const existingContentResponse = await contentRepo.findOne({
@@ -64,7 +65,8 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
             content = existingContentResponse.value;
         } else {
             const contentResponse = await ContentFromUrlService.createFromUrl(
-                url
+                url,
+                generateAudioImmediately
             );
             if (contentResponse.isFailure()) {
                 throw contentResponse.error;
@@ -73,12 +75,8 @@ export const createContentFromUrl = mutationField("createContentFromUrl", {
             Logger.info(`New content created for url: ${url}`);
         }
 
-        if (user) {
-            await addContentToUserQueue(user, content);
-            Logger.info(`Content added to queue for user: ${user.id}`);
-        } else {
-            Logger.info(`No user found to add content to queue`);
-        }
+        await addContentToUserQueue(ctx.me, content);
+        Logger.info(`Content added to queue for user: ${ctx.me.id}`);
 
         return content;
     },
